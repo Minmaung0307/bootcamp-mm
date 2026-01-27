@@ -2,26 +2,61 @@
 const db = firebase.firestore();
 const auth = firebase.auth();
 
-// User State
-let currentUser = {
+// Global User State
+let currentUser = JSON.parse(localStorage.getItem('currentUser')) || {
+    isLoggedIn: false,
     name: "Mg Mg",
     photo: "https://placehold.co/100x100/003087/white?text=User",
     role: "Student",
-    skills: ["HTML", "CSS", "JS"],
-    github: "github.com/mgmg",
-    portfolio: "mgmg.dev",
-    notes: "လေ့လာစရာများ စုစည်းရန်...",
-    isLoggedIn: false
+    skills: ["HTML", "CSS"],
+    github: "github.com/student",
+    isPaid: true,
+    notes: ""
 };
 
 function handleLogin() {
     currentUser.isLoggedIn = true;
-    document.getElementById('login-page').style.display = 'none';
-    document.getElementById('app-wrapper').style.display = 'flex';
-    showSection('dashboard');
+    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    location.reload(); 
 }
 
-window.onload = () => { if(!currentUser.isLoggedIn) document.getElementById('login-page').style.display = 'flex'; };
+function handleLogout() {
+    if (confirm("Logout ထွက်မှာ သေချာပါသလား?")) {
+        currentUser.isLoggedIn = false;
+        localStorage.removeItem('currentUser');
+        location.reload();
+    }
+}
+
+// Sidebar Footer Render (User Info & Logout)
+function renderAuthFooter() {
+    const authDiv = document.getElementById('auth-section');
+    if (!authDiv) return;
+    authDiv.innerHTML = `
+        <div class="sidebar-user-info">
+            <img src="${currentUser.photo}" alt="user" class="sidebar-avatar" onclick="showSection('profile')">
+            <div class="user-details" onclick="showSection('profile')">
+                <p class="u-name">${currentUser.name}</p>
+                <small class="u-role">${currentUser.role}</small>
+            </div>
+            <button class="logout-mini-btn" onclick="handleLogout()" title="Logout">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
+        </div>
+    `;
+}
+
+// window.onload = () => { if(!currentUser.isLoggedIn) document.getElementById('login-page').style.display = 'flex'; };
+
+window.onload = () => {
+    if (currentUser.isLoggedIn) {
+        document.getElementById('login-page').style.display = 'none';
+        document.getElementById('app-wrapper').style.display = 'flex';
+        showSection('dashboard');
+    } else {
+        document.getElementById('login-page').style.display = 'flex';
+    }
+};
 
 function closeAnnouncement() {
     document.getElementById('announcement-bar').style.display = 'none';
@@ -31,7 +66,7 @@ function showSection(section, filterCat = null) {
     const title = document.getElementById('page-title');
     const body = document.getElementById('dynamic-body');
     
-    // --- ပြင်ဆင်ချက်: Menu တစ်ခုခုကို နှိပ်လိုက်ရင် Sidebar Pane ကို ပိတ်လိုက်မည် ---
+    // Sidebar ပွင့်နေရင် ပြန်ပိတ်မယ် (Mobile/Desktop အားလုံးအတွက်)
     const sidebar = document.getElementById('sidebar');
     if (sidebar.classList.contains('open')) {
         toggleNav();
@@ -40,63 +75,76 @@ function showSection(section, filterCat = null) {
     if (section === 'dashboard') {
         title.innerText = "Dashboard";
         body.innerHTML = `
+            <div class="welcome-banner">
+                <h2>မင်္ဂလာပါ ${currentUser.name}! <span class="wave">👋</span></h2>
+                <p>ယနေ့ သင်ခန်းစာသစ်များကို ဆက်လက်လေ့လာလိုက်ပါ။</p>
+            </div>
             <div class="dashboard-grid">
-                <div class="topic-card" onclick="showSection('courses', 'Foundation')"><i class="fas fa-layer-group"></i><h3>Foundations</h3><p>အခြေခံ HTML, CSS, Git</p></div>
-                <div class="topic-card" onclick="showSection('courses', 'Technical')"><i class="fas fa-laptop-code"></i><h3>Technical</h3><p>JS, Algorithms</p></div>
-                <div class="topic-card" onclick="showSection('courses', 'Full-Stack')"><i class="fas fa-server"></i><h3>Full-Stack</h3><p>Backend & Database</p></div>
+                <div class="topic-card" onclick="showSection('courses', 'Foundations')">
+                    <div class="card-icon"><i class="fas fa-cubes"></i></div>
+                    <h3>Foundations</h3>
+                    <p>အခြေခံ HTML, CSS, Git</p>
+                </div>
+                <div class="topic-card" onclick="showSection('courses', 'Technical')">
+                    <div class="card-icon"><i class="fas fa-code"></i></div>
+                    <h3>Technical</h3>
+                    <p>JavaScript, Algorithms</p>
+                </div>
+                <div class="topic-card" onclick="showSection('courses', 'Full-Stack')">
+                    <div class="card-icon"><i class="fas fa-server"></i></div>
+                    <h3>Full-Stack</h3>
+                    <p>Node.js, Express, Firebase</p>
+                </div>
             </div>
         `;
     } else if (section === 'courses') {
         title.innerText = filterCat ? `${filterCat} သင်ခန်းစာများ` : "သင်ခန်းစာများအားလုံး";
         renderCourseTree(filterCat);
     } else if (section === 'profile') {
+        title.innerText = "User Profile";
         renderProfile();
     }
-    renderAuthSection();
+    renderAuthFooter(); // Sidebar အောက်ခြေက data ကို update လုပ်မယ်
 }
 
 // Course Tree with Filtering
 function renderCourseTree(filterCat) {
     const body = document.getElementById('dynamic-body');
-    body.innerHTML = '<div id="course-outline" class="course-tree-container"></div>';
+    body.innerHTML = '<div id="course-outline"></div>';
     const container = document.getElementById('course-outline');
+    const filteredData = filterCat ? courseData.filter(c => c.category.toLowerCase() === filterCat.toLowerCase()) : courseData;
 
-    const filteredData = filterCat ? courseData.filter(c => c.category === filterCat) : courseData;
+    if (filteredData.length === 0) {
+        container.innerHTML = `<div class="empty-msg">ဤကဏ္ဍတွင် သင်ခန်းစာများ မရှိသေးပါ။</div>`;
+        return;
+    }
 
     filteredData.forEach((cat, catIdx) => {
-        const catHeader = document.createElement('div');
-        catHeader.className = 'category-header';
-        catHeader.innerHTML = `<i class="fas fa-folder-open"></i> ${cat.category}`;
-        container.appendChild(catHeader);
+        const catH = document.createElement('div');
+        catH.className = 'category-header';
+        catH.innerHTML = `<i class="fas fa-folder"></i> ${cat.category}`;
+        container.appendChild(catH);
 
         cat.modules.forEach((mod, modIdx) => {
-            const modGroup = document.createElement('div');
-            modGroup.className = 'module-group';
-            
-            const modId = `mod-content-${catIdx}-${modIdx}`;
-            
-            // --- ပြင်ဆင်ချက်: Module Title ကို နှိပ်ရင် အောက်က သင်ခန်းစာများ မြုတ်ဝင်/ပေါ်ထွက် လုပ်မည် ---
-            modGroup.innerHTML = `
+            const modId = `mod-${catIdx}-${modIdx}`;
+            const group = document.createElement('div');
+            group.className = 'module-group';
+            group.innerHTML = `
                 <div class="module-title-header" onclick="toggleModuleAccordion(this, '${modId}')">
                     <span><i class="fas fa-chevron-right"></i> ${mod.moduleTitle}</span>
                 </div>
                 <div id="${modId}" class="lessons-list"></div>
             `;
-            container.appendChild(modGroup);
+            container.appendChild(group);
 
-            const lessonsList = document.getElementById(modId);
+            const list = document.getElementById(modId);
             mod.lessons.forEach((les, lesIdx) => {
                 const item = document.createElement('div');
                 item.className = 'lesson-item';
                 item.innerHTML = `<i class="far fa-file-alt"></i> ${les.title}`;
-                
-                // မူရင်း category index ကို ရှာရန် (pagination အတွက်)
                 const originalCatIdx = courseData.findIndex(c => c.category === cat.category);
-                item.onclick = (e) => {
-                    e.stopPropagation(); // module click နဲ့ မရောအောင်
-                    renderLessonContent(originalCatIdx, modIdx, lesIdx);
-                };
-                lessonsList.appendChild(item);
+                item.onclick = () => renderLessonContent(originalCatIdx, modIdx, lesIdx);
+                list.appendChild(item);
             });
         });
     });
@@ -109,53 +157,117 @@ function toggleModuleAccordion(header, targetId) {
     content.classList.toggle('show');
 }
 
+// ဆရာမှ သတ်မှတ်ပေးမည့် ပြင်လို့မရသော အချက်အလက်များ (Database မှ လာမည်)
+let academicInfo = {
+    examDate: "ဖေဖော်ဝါရီ ၁၅၊ ၂၀၂၄",
+    attendance: "92%",
+    overallGrade: "A-",
+    batchName: "Batch-05 (Night Class)",
+    startDate: "ဇန်နဝါရီ ၁၊ ၂၀၂၄"
+};
 
-// Profile Rendering with Edit Functionality
+// Profile ပြသခြင်း (View Mode & Academic Info)
 function renderProfile() {
     const body = document.getElementById('dynamic-body');
     body.innerHTML = `
-        <div class="profile-container">
-            <div class="profile-header">
-                <div class="profile-img-container">
-                    <img src="${currentUser.photo}" class="profile-img" id="prof-img">
+        <div class="profile-card-pro">
+            <div class="profile-cover"></div>
+            <div class="profile-header-main">
+                <img src="${currentUser.photo}" class="profile-large-avatar">
+                <div class="profile-info-text">
+                    <h2>${currentUser.name} <span class="badge-verify"><i class="fas fa-check-circle"></i></span></h2>
+                    <button class="menu-btn" onclick="renderEditProfile()"><i class="fas fa-edit"></i> Edit Profile</button>
                 </div>
             </div>
-            <div class="profile-body">
-                <div id="profile-view">
-                    <h2>${currentUser.name} <button class="menu-btn" onclick="toggleEditMode(true)">Edit Profile</button></h2>
-                    <p>${currentUser.github} | ${currentUser.portfolio}</p>
-                    <div class="dashboard-grid">
-                        <div class="card"><h4>Skills</h4>${currentUser.skills.map(s => `<span class="skill-tag">${s}</span>`).join('')}</div>
-                        <div class="card"><h4>Learning Notes</h4><p>${currentUser.notes}</p></div>
+            
+            <div class="profile-content-grid">
+                <!-- ကျောင်းသားပြင်လို့ရသော အပိုင်း -->
+                <div class="profile-side-info">
+                    <div class="content-card">
+                        <h4>ကိုယ်ရေးအချက်အလက်</h4>
+                        <p><i class="fab fa-github"></i> ${currentUser.github || "မရှိသေးပါ"}</p>
+                        <p><i class="fas fa-link"></i> ${currentUser.portfolio || "Portfolio လင့်ခ်"}</p>
+                        <div class="skills-flex" style="margin-top:10px;">
+                            ${currentUser.skills.map(s => `<span class="s-tag">${s}</span>`).join('')}
+                        </div>
                     </div>
                 </div>
-                <div id="profile-edit" style="display:none;">
-                    <h3>Edit Profile</h3>
-                    <input type="text" id="edit-name" class="edit-input" value="${currentUser.name}" placeholder="အမည်">
-                    <input type="text" id="edit-github" class="edit-input" value="${currentUser.github}" placeholder="GitHub URL">
-                    <input type="text" id="edit-skills" class="edit-input" value="${currentUser.skills.join(',')}" placeholder="Skills (comma နဲ့ ခြားပါ)">
-                    <textarea id="edit-notes" class="edit-input" rows="4">${currentUser.notes}</textarea>
-                    <br><br>
-                    <button class="save-btn" onclick="saveProfile()">Save Changes</button>
-                    <button class="menu-btn" style="background:grey;" onclick="toggleEditMode(false)">Cancel</button>
+
+                <!-- ဆရာပဲပြင်လို့ရသော အပိုင်း (Read-Only) -->
+                <div class="profile-main-data">
+                    <div class="content-card">
+                        <h4 style="color: #e11d48;"><i class="fas fa-university"></i> Academic Status (Read-Only)</h4>
+                        <div class="academic-box">
+                            <div class="academic-item"><span class="label-grey">စာမေးပွဲရက်:</span> <span class="value-blue">${academicInfo.examDate}</span></div>
+                            <div class="academic-item"><span class="label-grey">တက်ရောက်မှု:</span> <span class="value-blue">${academicInfo.attendance}</span></div>
+                            <div class="academic-item"><span class="label-grey">စုစုပေါင်းရမှတ်:</span> <span class="value-blue">${academicInfo.overallGrade}</span></div>
+                            <div class="academic-item"><span class="label-grey">သင်တန်းစတင်ရက်:</span> <span class="value-blue">${academicInfo.startDate}</span></div>
+                            <div class="academic-item"><span class="label-grey">Batch:</span> <span class="value-blue">${academicInfo.batchName}</span></div>
+                        </div>
+                        <p style="font-size: 0.8rem; color: #94a3b8; margin-top: 10px;">* ဤအချက်အလက်များကို ပြင်ဆင်လိုပါက သင်တန်းဌာနသို့ ဆက်သွယ်ပါ။</p>
+                    </div>
+
+                    <div class="content-card">
+                        <h4>ကိုယ့်ကိုယ်ကိုယ် မိတ်ဆက်ခြင်း / မှတ်စု</h4>
+                        <p>${currentUser.notes || "မှတ်စုများ မရှိသေးပါ။"}</p>
+                    </div>
                 </div>
             </div>
         </div>
     `;
 }
 
-function toggleEditMode(isEdit) {
-    document.getElementById('profile-view').style.display = isEdit ? 'none' : 'block';
-    document.getElementById('profile-edit').style.display = isEdit ? 'block' : 'none';
+// ကျောင်းသားအတွက် Profile ပြင်ဆင်သည့် Form (Edit Mode)
+function renderEditProfile() {
+    const body = document.getElementById('dynamic-body');
+    body.innerHTML = `
+        <div class="content-card" style="max-width: 600px; margin: 0 auto;">
+            <h3>Edit Your Profile</h3>
+            <p style="color: #64748b; margin-bottom: 20px;">ကျောင်းသားများမှ ပြင်ဆင်နိုင်သော အချက်အလက်များ</p>
+            
+            <div class="form-group">
+                <label>အမည်</label>
+                <input type="text" id="edit-name" class="edit-input" value="${currentUser.name}">
+            </div>
+            <div class="form-group">
+                <label>GitHub URL</label>
+                <input type="text" id="edit-github" class="edit-input" value="${currentUser.github}">
+            </div>
+            <div class="form-group">
+                <label>Skills (ကော်မာလေးများခြားပြီး ရေးပါ)</label>
+                <input type="text" id="edit-skills" class="edit-input" value="${currentUser.skills.join(', ')}">
+            </div>
+            <div class="form-group">
+                <label>ကိုယ်ရေးမှတ်စု / Portfolio Description</label>
+                <textarea id="edit-notes" class="edit-input" rows="4">${currentUser.notes || ""}</textarea>
+            </div>
+            
+            <div style="margin-top: 20px; display: flex; gap: 10px;">
+                <button class="save-btn" onclick="saveProfile()">Save Changes</button>
+                <button class="menu-btn" style="background: #94a3b8;" onclick="renderProfile()">Cancel</button>
+            </div>
+        </div>
+    `;
 }
 
+// အချက်အလက်များကို သိမ်းဆည်းခြင်း
 function saveProfile() {
     currentUser.name = document.getElementById('edit-name').value;
     currentUser.github = document.getElementById('edit-github').value;
-    currentUser.skills = document.getElementById('edit-skills').value.split(',');
     currentUser.notes = document.getElementById('edit-notes').value;
+    currentUser.skills = document.getElementById('edit-skills').value.split(',').map(s => s.trim());
+
+    // LocalStorage မှာသိမ်းမယ် (နောင်တွင် Firebase Firestore တွင်သိမ်းရန်)
+    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    
+    alert("Profile အောင်မြင်စွာ ပြင်ဆင်ပြီးပါပြီ။");
     renderProfile();
-    renderAuthSection();
+    renderAuthFooter();
+}
+
+function toggleEditMode(isEdit) {
+    document.getElementById('profile-view').style.display = isEdit ? 'none' : 'block';
+    document.getElementById('profile-edit').style.display = isEdit ? 'block' : 'none';
 }
 
 function renderAuthSection() {
@@ -272,4 +384,59 @@ function goToLesson(catIdx, modIdx, lesIdx) {
     if (lesIdx >= 0 && lesIdx < courseData[catIdx].modules[modIdx].lessons.length) {
         renderLessonContent(catIdx, modIdx, lesIdx);
     }
+}
+
+async function renderLessonContent(catIdx, modIdx, lesIdx) {
+    const body = document.getElementById('dynamic-body');
+    const cat = courseData[catIdx];
+    const mod = cat.modules[modIdx];
+    const lesson = mod.lessons[lesIdx];
+    
+    document.getElementById('page-title').innerText = lesson.title;
+    body.innerHTML = '<div class="loader">သင်ခန်းစာကို ဖတ်နေသည်...</div>';
+
+    const breadcrumbs = `
+        <div class="breadcrumbs">
+            <span onclick="showSection('dashboard')">Home</span> / 
+            <span onclick="showSection('courses', '${cat.category}')">${cat.category}</span> / 
+            <span onclick="showSection('courses', '${cat.category}')">${mod.moduleTitle}</span>
+        </div>
+    `;
+
+    try {
+        const response = await fetch(lesson.path);
+        if (!response.ok) throw new Error('File not found');
+        const htmlContent = await response.text();
+
+        body.innerHTML = `
+            ${breadcrumbs}
+            <article class="article-content">
+                <div class="lesson-body">${htmlContent}</div>
+                <div class="pagination">
+                    <button class="menu-btn" onclick="goToLesson(${catIdx}, ${modIdx}, ${lesIdx - 1})" ${lesIdx === 0 ? 'disabled' : ''}>Prev</button>
+                    <button class="menu-btn" onclick="goToLesson(${catIdx}, ${modIdx}, ${lesIdx + 1})" ${lesIdx === mod.lessons.length - 1 ? 'disabled' : ''}>Next</button>
+                </div>
+            </article>
+        `;
+    } catch (error) {
+        body.innerHTML = `${breadcrumbs} <div class="error-msg">Error: ဖိုင်ကို ရှာမတွေ့ပါ။ (${lesson.path})</div>`;
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Quiz Engine နမူနာ
+function renderQuiz(data) {
+    let quizHtml = '<h3>Module Quiz</h3>';
+    data.questions.forEach((item, index) => {
+        quizHtml += `
+            <div class="quiz-card">
+                <p><strong>Q${index+1}: ${item.q}</strong></p>
+                ${item.options.map((opt, i) => `
+                    <label><input type="radio" name="q${index}" value="${i}"> ${opt}</label><br>
+                `).join('')}
+            </div>
+        `;
+    });
+    quizHtml += '<br><button class="menu-btn" onclick="checkQuiz()">အဖြေစစ်မည်</button>';
+    document.getElementById('dynamic-body').innerHTML = quizHtml;
 }
