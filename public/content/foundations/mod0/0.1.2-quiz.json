@@ -1,14 +1,17 @@
 {
+    "id": "quiz_m0_1",
+    "title": "Basic HTML Quiz",
     "questions": [
-        {
-            "q": "HTML ရဲ့ အရှည်က ဘာလဲ?",
-            "options": ["Hyper Text Markup Language", "High Tech Multi Language"],
-            "correct": 0
+        { 
+            "type": "single", 
+            "q": "HTML ရဲ့ အရှည်က ဘာလဲ?", 
+            "options": ["Hyper Text Markup Language", "High Tech Language"], 
+            "correct": 0 
         },
-        {
-            "q": "CSS ကို ဘာအတွက် သုံးသလဲ?",
-            "options": ["Structure", "Styling", "Database"],
-            "correct": 1
+        { 
+            "type": "short", 
+            "q": "Website ရဲ့ အရိုးစုကို ဘာနဲ့တည်ဆောက်သလဲ?", 
+            "correct": "HTML" 
         }
     ]
 }
