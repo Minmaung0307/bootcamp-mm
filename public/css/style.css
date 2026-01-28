@@ -3,9 +3,57 @@
     --sidebar-bg: #1e293b;
     --main-bg: #f8fafc;
     --text-light: #f1f5f9;
+    --card-bg: #ffffff;
+    --text-color: #1e293b;
+    --border-color: #e2e8f0;
+}
+
+/* Dark Theme Variables */
+body.dark-theme {
+    --primary: #60a5fa;
+    --sidebar-bg: #0f172a;
+    --main-bg: #020617;
+    --card-bg: #1e293b;
+    --text-color: #f1f5f9;
+    --border-color: #334155;
+    --input-bg: #0f172a;
+}
+
+/* Dark Mode Toggle Button အလှဆင်ခြင်း */
+.theme-toggle-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #94a3b8;
+    padding: 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    margin: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: 0.3s;
+    font-size: 0.9rem;
+}
+
+.theme-toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+body.dark-theme .content-card {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-theme .welcome-banner {
+    background: linear-gradient(135deg, #1e3a8a, #1e40af);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+
+body { background: var(--main-bg); color: var(--text-color); transition: 0.3s; }
+
+.content-card, .topic-card, .top-nav, .module-group { background: var(--card-bg); border-color: var(--border-color); color: var(--text-color); }
 
 .wrapper { display: flex; transition: all 0.3s ease; background: var(--main-bg); height: 100vh; }
 
@@ -249,8 +297,23 @@
 .skills-flex { display: flex; flex-wrap: wrap; gap: 8px; }
 .s-tag { background: #003087; color: white; padding: 5px 12px; border-radius: 20px; font-size: 0.75rem; }
 
-.progress-container { background: #e2e8f0; border-radius: 20px; height: 25px; overflow: hidden; }
-.progress-bar { background: #22c55e; height: 100%; color: white; text-align: center; font-size: 0.8rem; line-height: 25px; }
+.progress-container {
+    background: #e2e8f0;
+    border-radius: 10px;
+    height: 8px;
+    margin: 10px 0;
+    overflow: hidden;
+}
+.progress-bar { background: #22c55e; height: 100%; color: white; text-align: center; font-size: 0.8rem; line-height: 25px; transition: 0.5s ease-in-out;}
+
+/* Comment Box Style */
+.comment-bubble {
+    background: var(--main-bg);
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    border: 1px solid var(--border-color);
+}
 
 @media (max-width: 768px) {
     .profile-content-grid { grid-template-columns: 1fr; }

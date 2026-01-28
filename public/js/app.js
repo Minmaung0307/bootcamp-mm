@@ -44,6 +44,26 @@ let academicInfo = {
 let activeChatId = "Batch-05"; // Default ကို Group Chat ထားမယ်
 let activeChatName = "Group: Batch-05";
 
+// ၁။ Dark Mode (ညဘက်လေ့လာသူများအတွက်)
+function toggleDarkMode() {
+    document.body.classList.toggle('dark-theme');
+    const isDark = document.body.classList.contains('dark-theme');
+    localStorage.setItem('dark-mode', isDark);
+    renderAuthFooter(); // ခလုတ် icon ပြောင်းဖို့ ပြန် render မည်
+}
+
+// ၂။ Firestore Sync (Cloud Backup)
+async function syncProgressToCloud() {
+    if (!currentUser.uid) return;
+    try {
+        await db.collection('users').doc(currentUser.uid).update({
+            completedLessons: currentUser.completedLessons,
+            quizAttempts: currentUser.quizAttempts,
+            lastLesson: currentUser.lastLesson || null
+        });
+    } catch (e) { console.error("Cloud sync failed", e); }
+}
+
 // ==========================================
 // ၂။ Sidebar & Navigation Logic
 // ==========================================
@@ -86,33 +106,160 @@ function showSection(section, filterCat = null) {
 // ==========================================
 
 function renderDashboard() {
-  const body = document.getElementById("dynamic-body");
-  body.innerHTML = `
-        <div class="welcome-banner">
-            <h2>မင်္ဂလာပါ ${currentUser.name}! <span class="wave">👋</span></h2>
-            <p>ယနေ့ သင်ခန်းစာသစ်များကို ဆက်လက်လေ့လာလိုက်ပါ။</p>
+    const body = document.getElementById('dynamic-body');
+    
+    // Progress % တွက်ရန် Helper
+    const getPercent = (catName) => {
+        // အရင်က ဆောက်ခဲ့တဲ့ courseData ထဲက စုစုပေါင်း သင်ခန်းစာအရေအတွက်ကို တွက်မယ်
+        const categoryData = courseData.find(c => c.category.toLowerCase() === catName.toLowerCase());
+        if (!categoryData) return 0;
+        
+        let totalLessons = 0;
+        categoryData.modules.forEach(m => totalLessons += m.lessons.length);
+        
+        const doneLessons = currentUser.completedLessons.filter(l => {
+            // ကျောင်းသားပြီးထားတဲ့ သင်ခန်းစာက ဒီ category ထဲမှာရှိမရှိ စစ်မယ်
+            return categoryData.modules.some(m => m.lessons.some(les => les.title === l));
+        }).length;
+
+        return Math.round((doneLessons / totalLessons) * 100) || 0;
+    };
+
+    body.innerHTML = `
+        <div class="welcome-banner fade-in">
+            <h2>မင်္ဂလာပါ ${currentUser.name}! 👋</h2>
+            <p>ယနေ့ သင်ယူမှုခရီးစဉ်ကို ဆက်လက်လျှောက်လှမ်းလိုက်ပါ။</p>
         </div>
+
         <div class="dashboard-grid">
             <div class="topic-card animate-up" onclick="showSection('courses', 'Foundations')">
                 <div class="card-icon"><i class="fas fa-cubes"></i></div>
                 <h3>Foundations</h3>
-                <p>အခြေခံ HTML, CSS, Git</p>
-                <span class="explore-btn">လေ့လာမည် <i class="fas fa-arrow-right"></i></span>
+                <div class="progress-container"><div class="progress-bar" style="width:${getPercent('Foundations')}%"></div></div>
+                <small>${getPercent('Foundations')}% Completed</small>
             </div>
+
             <div class="topic-card animate-up" onclick="showSection('courses', 'Technical')">
                 <div class="card-icon"><i class="fas fa-code"></i></div>
                 <h3>Technical</h3>
-                <p>JavaScript, Algorithms</p>
-                <span class="explore-btn">လေ့လာမည် <i class="fas fa-arrow-right"></i></span>
+                <div class="progress-container"><div class="progress-bar" style="width:${getPercent('Technical')}%"></div></div>
+                <small>${getPercent('Technical')}% Completed</small>
             </div>
+
             <div class="topic-card animate-up" onclick="showSection('courses', 'Full-Stack')">
                 <div class="card-icon"><i class="fas fa-server"></i></div>
                 <h3>Full-Stack</h3>
-                <p>Node.js, Express, Firebase</p>
-                <span class="explore-btn">လေ့လာမည် <i class="fas fa-arrow-right"></i></span>
+                <div class="progress-container"><div class="progress-bar" style="width:${getPercent('Full-Stack')}%"></div></div>
+                <small>${getPercent('Full-Stack')}% Completed</small>
+            </div>
+
+            <!-- Leaderboard (Top Students) -->
+            <div class="content-card animate-up" style="grid-column: span 1;">
+                <h4><i class="fas fa-trophy" style="color:gold"></i> Top Students</h4>
+                <div id="leaderboard-content" style="margin-top:10px;">
+                    <p>1. Aung Aung - 950 pts</p>
+                    <p>2. Su Su - 920 pts</p>
+                </div>
             </div>
         </div>
     `;
+}
+
+// Lesson Discussion (အမေးအဖြေကဏ္ဍ)
+async function renderDiscussion(lessonId) {
+    const area = document.getElementById('discussion-area');
+    area.innerHTML = `
+        <div class="content-card" style="margin-top:40px;">
+            <h4><i class="fas fa-comments"></i> သင်ခန်းစာ အမေးအဖြေ (Q&A)</h4>
+            <div id="comments-list" style="margin:20px 0; max-height:400px; overflow-y:auto;"></div>
+            <div class="chat-input-box">
+                <input type="text" id="comment-input" placeholder="မရှင်းတာရှိရင် ဒီမှာမေးမြန်းနိုင်ပါတယ်...">
+                <button onclick="postComment('${lessonId}')"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    `;
+    loadComments(lessonId);
+}
+
+function postComment(lessonId) {
+    const text = document.getElementById('comment-input').value;
+    if(!text) return;
+    db.collection('discussions').add({
+        lessonId: lessonId,
+        userName: currentUser.name,
+        text: text,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    document.getElementById('comment-input').value = '';
+}
+
+function loadComments(lessonId) {
+    db.collection('discussions')
+      .where('lessonId', '==', lessonId)
+      .orderBy('timestamp', 'asc')
+      .onSnapshot(snap => {
+        const list = document.getElementById('comments-list');
+        list.innerHTML = '';
+        snap.forEach(doc => {
+            const c = doc.data();
+            list.innerHTML += `
+                <div class="comment-bubble">
+                    <small><strong>${c.userName}</strong></small>
+                    <p>${c.text}</p>
+                </div>`;
+        });
+    });
+}
+
+// Teacher's Grade Review Panel (ဆရာအတွက် စာစစ်ရန်)
+async function viewSubmissionDetail(id) {
+    const doc = await db.collection('submissions').doc(id).get();
+    const data = doc.data();
+    const body = document.getElementById('dynamic-body');
+
+    body.innerHTML = `
+        <div class="content-card animate-up">
+            <h3>Grading: ${data.studentName}</h3>
+            <p>Lesson: ${data.lessonTitle}</p>
+            <hr>
+            <div style="background:#f8fafc; padding:20px; margin:20px 0; border-radius:10px;">${data.content}</div>
+            
+            <label>ပေးမည့်အမှတ် (Score)</label>
+            <input type="number" id="grade-input" class="edit-input" placeholder="0-100">
+            <button class="save-btn" onclick="submitFinalGrade('${data.studentId}', '${id}')">Submit Grade</button>
+        </div>
+    `;
+}
+
+async function submitFinalGrade(studentId, subId) {
+    const score = parseInt(document.getElementById('grade-input').value);
+    // ၁။ ကျောင်းသားရဲ့ grades ထဲမှာ သွားပေါင်းထည့်မယ်
+    await db.collection('users').doc(studentId).set({
+        grades: { [new Date().getTime()]: score } // ဘာသာရပ်အလိုက် ပြင်ဆင်ရန်
+    }, { merge: true });
+
+    // ၂။ Submission status ကို 'graded' ပြောင်းမယ်
+    await db.collection('submissions').doc(subId).update({ status: 'graded' });
+    alert("အမှတ်ပေးပြီးပါပြီ။");
+    renderAdminPanel();
+}
+
+// Gamification (Badges)
+function checkBadges() {
+    const doneCount = currentUser.completedLessons.length;
+    if (doneCount >= 1 && !currentUser.badges?.includes('First Step')) {
+        awardBadge('First Step');
+    }
+    if (doneCount >= 10 && !currentUser.badges?.includes('HTML Ninja')) {
+        awardBadge('HTML Ninja');
+    }
+}
+
+async function awardBadge(name) {
+    if(!currentUser.badges) currentUser.badges = [];
+    currentUser.badges.push(name);
+    alert(`🎊 ဂုဏ်ယူပါတယ်! သင် "${name}" Badge ရရှိသွားပါပြီ။`);
+    await db.collection('users').doc(currentUser.uid).update({ badges: currentUser.badges });
 }
 
 // ==========================================
@@ -210,6 +357,14 @@ async function renderLessonContent(catIdx, modIdx, lesIdx) {
                     <button class="menu-btn" onclick="goToLesson(${catIdx}, ${modIdx}, ${lesIdx + 1})" ${lesIdx === mod.lessons.length - 1 ? "disabled" : ""}>Next</button>
                 </div></article>`;
     }
+
+    if (lesson.type === 'article') {
+        const discussionDiv = document.createElement('div');
+        discussionDiv.id = "discussion-area";
+        body.appendChild(discussionDiv);
+        renderDiscussion(lesson.title); // Comment တွေပြမယ့် function
+    }
+
   } catch (e) {
     console.error("Fetch Error:", e);
     body.innerHTML = `${bc} <div class="error-msg">
@@ -792,18 +947,21 @@ function saveProfile() {
 
 // Sidebar Footer Render (User Info & Logout)
 function renderAuthFooter() {
-  const authDiv = document.getElementById("auth-section");
+  const authDiv = document.getElementById('auth-section');
+    const isDark = document.body.classList.contains('dark-theme');
   if (!authDiv) return;
   authDiv.innerHTML = `
+        <button onclick="toggleDarkMode()" class="theme-toggle-btn">
+            <i class="fas ${isDark ? 'fa-sun' : 'fa-moon'}"></i> 
+            <span>${isDark ? 'Light Mode' : 'Dark Mode'}</span>
+        </button>
         <div class="sidebar-user-info">
-            <img src="${currentUser.photo}" alt="user" class="sidebar-avatar" onclick="showSection('profile')">
+            <img src="${currentUser.photo}" class="sidebar-avatar" onclick="showSection('profile')">
             <div class="user-details" onclick="showSection('profile')">
                 <p class="u-name">${currentUser.name}</p>
                 <small class="u-role">${currentUser.role}</small>
             </div>
-            <button class="logout-mini-btn" onclick="handleLogout()" title="Logout">
-                <i class="fas fa-sign-out-alt"></i>
-            </button>
+            <button class="logout-mini-btn" onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i></button>
         </div>
     `;
 }
@@ -948,6 +1106,18 @@ function renderAdminPanel() {
                         <option value="Batch-06">Batch-06</option>
                     </select>
                 </div>
+            </div>
+
+            <div class="content-card">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h3>Admin Panel</h3>
+                    <button class="save-btn" onclick="renderSubmissions()"><i class="fas fa-file-signature"></i> Review Assignments</button>
+                </div>
+                <hr><br>
+                <table class="admin-table">
+                    <thead><tr><th>Student Name</th><th>Batch</th><th>Actions</th></tr></thead>
+                    <tbody id="admin-list"></tbody>
+                </table>
             </div>
 
             <div class="content-card">
@@ -1319,36 +1489,69 @@ function goToNextLesson(catIdx, modIdx, lesIdx) {
 
 // --- ဆရာအတွက်: ကျောင်းသားများ တင်ထားသော Assignment များကို ဖတ်ရန် ---
 async function renderSubmissions() {
-  const body = document.getElementById("dynamic-body");
-  body.innerHTML =
-    '<h3>ကျောင်းသားများ တင်ထားသော Assignment များ</h3><div id="sub-list" class="loader">Loading...</div>';
+    const body = document.getElementById('dynamic-body');
+    body.innerHTML = `<h3><i class="fas fa-file-signature"></i> Reviewing Submissions</h3><div class="loader">Loading...</div>`;
+    
+    try {
+        const snap = await db.collection('submissions').where('status', '==', 'pending').get();
+        let html = '<div class="dashboard-grid">';
+        
+        if (snap.empty) {
+            body.innerHTML = `<h3>Reviewing Submissions</h3><div class="content-card">စစ်ဆေးရန် ကျန်ရှိသော Assignment များ မရှိသေးပါ။</div><br><button class="menu-btn" onclick="renderAdminPanel()">Back</button>`;
+            return;
+        }
 
-  try {
-    const snapshot = await db
-      .collection("submissions")
-      .orderBy("timestamp", "desc")
-      .get();
-    let html = '<div class="dashboard-grid">';
+        snap.forEach(doc => {
+            const s = doc.data();
+            // content သို့မဟုတ် githubLink မရှိရင် error မတက်အောင် empty string ထားမည်
+            const previewText = (s.content || s.githubLink || "");
+            const typeLabel = s.content ? "Assignment" : "Project";
 
-    snapshot.forEach((doc) => {
-      const data = doc.data();
-      html += `
-                <div class="content-card">
-                    <div style="display:flex; justify-content:space-between;">
-                        <strong>${data.studentName}</strong>
-                        <small>${data.status}</small>
+            html += `
+                <div class="content-card animate-up">
+                    <div style="display:flex; justify-content:space-between; align-items:start;">
+                        <h5>${s.studentName}</h5>
+                        <span class="badge-type">${typeLabel}</span>
                     </div>
-                    <p style="font-size:0.8rem; color:grey;">${data.lessonTitle}</p>
-                    <hr><br>
-                    <p style="font-size:0.9rem;">${data.content.substring(0, 100)}...</p>
-                    <br>
-                    <button class="menu-btn" onclick="viewSubmissionDetail('${doc.id}')">အသေးစိတ်ဖတ်ပြီး အမှတ်ပေးရန်</button>
-                </div>
-            `;
-    });
+                    <small style="color:var(--primary)">${s.lessonTitle}</small>
+                    <p style="margin:10px 0; font-size:0.9rem; color:var(--text-color); opacity:0.8;">
+                        ${previewText.substring(0, 50)}...
+                    </p>
+                    <button class="save-btn" style="width:100%;" onclick="gradeThisSubmission('${doc.id}')">View & Grade</button>
+                </div>`;
+        });
+        body.innerHTML = html + '</div><br><button class="menu-btn" onclick="renderAdminPanel()">Back</button>';
+    } catch (err) {
+        console.error("Grading Error:", err);
+        body.innerHTML = "Error loading submissions.";
+    }
+}
 
-    body.innerHTML = html + "</div>";
-  } catch (e) {
-    body.innerHTML = "Error loading submissions.";
-  }
+// တစ်ခုချင်းစီကို အမှတ်ပေးရန် UI
+async function gradeThisSubmission(docId) {
+    const doc = await db.collection('submissions').doc(docId).get();
+    const s = doc.data();
+    const body = document.getElementById('dynamic-body');
+
+    body.innerHTML = `
+        <div class="content-card animate-up" style="max-width:700px; margin:auto;">
+            <h3>Grading: ${s.studentName}</h3>
+            <p>Module: ${s.lessonTitle}</p>
+            <hr><br>
+            <div class="academic-box" style="white-space: pre-wrap; font-family:inherit;">
+                ${s.content ? s.content : `GitHub Link: <a href="${s.githubLink}" target="_blank">${s.githubLink}</a>`}
+            </div>
+            <br>
+            <label>ပေးမည့်အမှတ် (Score out of 100)</label>
+            <input type="number" id="grade-score" class="edit-input" placeholder="အမှတ်ရိုက်ထည့်ပါ">
+            <br>
+            <label>ဆရာ့မှတ်ချက် (Optional)</label>
+            <textarea id="teacher-feedback" class="edit-input" rows="2" placeholder="အကြံပြုချက်ရေးပါ"></textarea>
+            
+            <div style="margin-top:20px; display:flex; gap:10px;">
+                <button class="save-btn" onclick="confirmGrade('${docId}', '${s.studentId}', '${s.lessonTitle}')">Submit Grade</button>
+                <button class="menu-btn" onclick="renderSubmissions()">Cancel</button>
+            </div>
+        </div>
+    `;
 }
