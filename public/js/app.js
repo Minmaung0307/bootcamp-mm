@@ -166,8 +166,7 @@ function renderCourseTree(filterCat) {
         const originalCatIdx = courseData.findIndex(
           (c) => c.category === cat.category,
         );
-        item.onclick = () =>
-          renderLessonContent(catIdx, modIdx, lesIdx);
+        item.onclick = () => renderLessonContent(catIdx, modIdx, lesIdx);
         list.appendChild(item);
       });
     });
@@ -175,48 +174,51 @@ function renderCourseTree(filterCat) {
 }
 
 async function renderLessonContent(catIdx, modIdx, lesIdx) {
-    const body = document.getElementById('dynamic-body');
-    const cat = courseData[catIdx], mod = cat.modules[modIdx], lesson = mod.lessons[lesIdx];
-    document.getElementById('page-title').innerText = lesson.title;
-    body.innerHTML = '<div class="loader">Loading content...</div>';
+  const body = document.getElementById("dynamic-body");
+  const cat = courseData[catIdx],
+    mod = cat.modules[modIdx],
+    lesson = mod.lessons[lesIdx];
+  document.getElementById("page-title").innerText = lesson.title;
+  body.innerHTML = '<div class="loader">Loading content...</div>';
 
-    const bc = `<div class="breadcrumbs"><span onclick="showSection('dashboard')">Home</span> / <span onclick="showSection('courses', '${cat.category}')">${cat.category}</span> / <span>${mod.moduleTitle}</span></div>`;
+  const bc = `<div class="breadcrumbs"><span onclick="showSection('dashboard')">Home</span> / <span onclick="showSection('courses', '${cat.category}')">${cat.category}</span> / <span>${mod.moduleTitle}</span></div>`;
 
-    try {
-        // အရေးကြီးသည်- lesson.path ကို တိုက်ရိုက် သုံးပါမည်
-        const res = await fetch(lesson.path);
-        
-        console.log("Fetching Path:", lesson.path); // Debug စစ်ရန်
-        console.log("Response Status:", res.status); 
+  try {
+    // အရေးကြီးသည်- lesson.path ကို တိုက်ရိုက် သုံးပါမည်
+    const res = await fetch(lesson.path);
 
-        if (!res.ok) {
-            throw new Error(`File not found (Status: ${res.status})`);
-        }
+    console.log("Fetching Path:", lesson.path); // Debug စစ်ရန်
+    console.log("Response Status:", res.status);
 
-        if (lesson.type === 'quiz') {
-            const quizData = await res.json();
-            renderQuizUI(quizData, bc, catIdx, modIdx, lesIdx);
-        } else if (lesson.type === 'assignment') {
-            renderAssignmentUI(lesson, bc);
-        } else if (lesson.type === 'project') {
-            renderProjectUI(lesson, bc);
-        } else {
-            const html = await res.text();
-            body.innerHTML = `${bc}<article class="content-card animate-up"><div class="lesson-body">${html}</div>
+    if (!res.ok) {
+      throw new Error(`File not found (Status: ${res.status})`);
+    }
+
+    if (lesson.type === "quiz") {
+      const res = await fetch(lesson.path);
+      const quizData = await res.json();
+      renderQuizUI(quizData, bc, catIdx, modIdx, lesIdx);
+    } else if (lesson.type === "assignment") {
+      renderAssignmentUI(catIdx, modIdx, lesIdx, bc);
+    } else if (lesson.type === "project") {
+      renderProjectUI(catIdx, modIdx, lesIdx, bc);
+    } else {
+      const html = await res.text();
+      body.innerHTML = `${bc}<article class="content-card animate-up"><div class="lesson-body">${html}</div>
                 <div class="pagination">
-                    <button class="menu-btn" onclick="goToLesson(${catIdx}, ${modIdx}, ${lesIdx-1})" ${lesIdx===0?'disabled':''}>Prev</button>
-                    <button class="menu-btn" onclick="goToLesson(${catIdx}, ${modIdx}, ${lesIdx+1})" ${lesIdx===mod.lessons.length-1?'disabled':''}>Next</button>
+                    <button class="menu-btn" onclick="goToLesson(${catIdx}, ${modIdx}, ${lesIdx - 1})" ${lesIdx === 0 ? "disabled" : ""}>Prev</button>
+                    <button class="menu-btn" onclick="goToLesson(${catIdx}, ${modIdx}, ${lesIdx + 1})" ${lesIdx === mod.lessons.length - 1 ? "disabled" : ""}>Next</button>
                 </div></article>`;
-        }
-    } catch (e) { 
-        console.error("Fetch Error:", e);
-        body.innerHTML = `${bc} <div class="error-msg">
+    }
+  } catch (e) {
+    console.error("Fetch Error:", e);
+    body.innerHTML = `${bc} <div class="error-msg">
             <h4>သင်ခန်းစာဖိုင်ကို ရှာမတွေ့ပါ။</h4>
             <p>လမ်းကြောင်း: <code>${lesson.path}</code></p>
             <p>အကြောင်းရင်း: Folder အမည် သို့မဟုတ် ဖိုင်အမည် မှားယွင်းနေနိုင်ပါသည်။</p>
-        </div>`; 
-    }
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+        </div>`;
+  }
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 // Pagination အတွက် ကူညီပေးမည့် function
@@ -241,26 +243,26 @@ function toggleModuleAccordion(header, targetId) {
 // ==========================================
 
 function renderQuizUI(data, bc, c, m, l) {
-    // Safety check: currentUser ထဲမှာ quizAttempts မရှိသေးရင် အသစ်ဆောက်မယ်
-    if (!currentUser.quizAttempts) {
-        currentUser.quizAttempts = {};
-    }
+  // Safety check: currentUser ထဲမှာ quizAttempts မရှိသေးရင် အသစ်ဆောက်မယ်
+  if (!currentUser.quizAttempts) {
+    currentUser.quizAttempts = {};
+  }
 
-    // Attempt ကို ဖတ်မယ် (မရှိရင် ၀ လို့ သတ်မှတ်မယ်)
-    const attempts = currentUser.quizAttempts[data.id] || 0;
-    
-    if (attempts >= 3 && currentUser.role !== 'Teacher') {
-        document.getElementById('dynamic-body').innerHTML = `
+  // Attempt ကို ဖတ်မယ် (မရှိရင် ၀ လို့ သတ်မှတ်မယ်)
+  const attempts = currentUser.quizAttempts[data.id] || 0;
+
+  if (attempts >= 3 && currentUser.role !== "Teacher") {
+    document.getElementById("dynamic-body").innerHTML = `
             ${bc}
             <div class="content-card error-msg animate-up">
                 <h3><i class="fas fa-lock"></i> Quiz ပိတ်သွားပါပြီ</h3>
                 <p>သင်သည် ဤ Quiz ကို ၃ ကြိမ်ဖြေဆိုပြီး ဖြစ်သောကြောင့် ထပ်မံဖြေဆိုခွင့် မရှိတော့ပါ။</p>
                 <button class="menu-btn" style="margin-top:15px" onclick="showSection('courses')">သင်ခန်းစာများသို့ ပြန်သွားရန်</button>
             </div>`;
-        return;
-    }
+    return;
+  }
 
-    let html = `${bc}
+  let html = `${bc}
         <div class="content-card animate-up">
             <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid #eee; padding-bottom:15px; margin-bottom:20px;">
                 <h3 style="margin:0;">${data.title}</h3>
@@ -268,126 +270,236 @@ function renderQuizUI(data, bc, c, m, l) {
             </div>
             <form id="quiz-form">`;
 
-    data.questions.forEach((q, i) => {
-        html += `
+  data.questions.forEach((q, i) => {
+    html += `
             <div class="quiz-question-box" id="q-box-${i}">
-                <p><strong>${i+1}. ${q.q}</strong></p>
+                <p><strong>${i + 1}. ${q.q}</strong></p>
                 <div class="options-area">`;
-        
-        if (q.type === 'single') {
-            q.options.forEach((opt, oi) => {
-                html += `<label class="quiz-opt"><input type="radio" name="q${i}" value="${oi}"> ${opt}</label>`;
-            });
-        } else if (q.type === 'short') {
-            html += `<input type="text" name="q${i}" class="edit-input" placeholder="အဖြေရိုက်ပါ" style="margin-top:10px; width:100%;">`;
-        }
 
-        html += `</div>
+    if (q.type === "single") {
+      q.options.forEach((opt, oi) => {
+        html += `<label class="quiz-opt"><input type="radio" name="q${i}" value="${oi}"> ${opt}</label>`;
+      });
+    } else if (q.type === "short") {
+      html += `<input type="text" name="q${i}" class="edit-input" placeholder="အဖြေရိုက်ပါ" style="margin-top:10px; width:100%;">`;
+    }
+
+    html += `</div>
                 <div id="f-${i}" class="feedback-area" style="margin-top:10px; font-weight:bold;"></div>
             </div>`;
-    });
+  });
 
-    html += `</form>
+  html += `</form>
             <div style="margin-top:20px;">
-                <button class="save-btn" onclick="checkQuizResult('${data.id}', ${JSON.stringify(data).replace(/"/g, '&quot;')}, ${c}, ${m}, ${l})">
+                <button class="save-btn" onclick="checkQuizResult('${data.id}', ${JSON.stringify(data).replace(/"/g, "&quot;")}, ${c}, ${m}, ${l})">
                     <i class="fas fa-check-circle"></i> Submit Quiz
                 </button>
             </div>
         </div>`;
-    document.getElementById('dynamic-body').innerHTML = html;
+  document.getElementById("dynamic-body").innerHTML = html;
 }
 
 function checkQuizResult(quizId, quizData, c, m, l) {
     let score = 0;
     const questions = quizData.questions;
-    
+
     // ၁။ Safety Checks: currentUser ထဲမှာ လိုအပ်တဲ့ field တွေ မရှိရင် အသစ်ဆောက်မယ်
     if (!currentUser.quizAttempts) currentUser.quizAttempts = {};
     if (!currentUser.completedLessons) currentUser.completedLessons = [];
 
     const currentAttempt = (currentUser.quizAttempts[quizId] || 0) + 1;
 
-    // ၂။ အဖြေစစ်ဆေးခြင်း
+    // ၂။ အဖြေစစ်ဆေးခြင်း (UI ပေါ်မှာ အမှားအမှန်အရောင်ပြခြင်း)
     questions.forEach((q, i) => {
         const feedbackEl = document.getElementById(`f-${i}`);
         const qBox = document.getElementById(`q-box-${i}`);
         const input = document.getElementsByName(`q${i}`);
         let isCorrect = false;
 
-        if (q.type === 'single') {
-            const sel = Array.from(input).find(r => r.checked);
+        if (q.type === "single") {
+            const sel = Array.from(input).find((r) => r.checked);
             if (sel && parseInt(sel.value) === q.correct) isCorrect = true;
-        } else if (q.type === 'short') {
-            if (input[0].value.trim().toLowerCase() === q.correct.toLowerCase()) isCorrect = true;
+        } else if (q.type === "short") {
+            if (input[0].value.trim().toLowerCase() === q.correct.toLowerCase())
+                isCorrect = true;
         }
 
         if (isCorrect) {
             score++;
             feedbackEl.innerHTML = '<span class="text-success"><i class="fas fa-check"></i> Correct</span>';
-            if (qBox) qBox.style.borderColor = "#22c55e";
+            if (qBox) qBox.style.borderColor = "#22c55e"; // မှန်ရင် အစိမ်းရောင်
         } else {
             feedbackEl.innerHTML = '<span class="text-danger"><i class="fas fa-times"></i> Wrong</span>';
-            if (qBox) qBox.style.borderColor = "#ef4444";
+            if (qBox) qBox.style.borderColor = "#ef4444"; // မှားရင် အနီရောင်
         }
     });
 
-    // ၃။ Attempt တိုးခြင်း
+    // ၃။ Attempt (အကြိမ်ရေ) ကို Update လုပ်ပြီး သိမ်းမည်
     currentUser.quizAttempts[quizId] = currentAttempt;
-    
+
     // ၄။ သင်ခန်းစာ ပြီးမြောက်မှု မှတ်သားခြင်း
-    // courseData ရှိမရှိ အရင်စစ်ပါမယ်
-    if (courseData[c] && courseData[c].modules[m] && courseData[c].modules[m].lessons[l]) {
-        const lessonTitle = courseData[c].modules[m].lessons[l].title;
-        
-        // အမှတ်ပြည့်ရရင် သို့မဟုတ် ၃ ကြိမ်ပြည့်ရင် Completed စာရင်းထဲ ထည့်မယ်
-        if (score === questions.length || currentAttempt >= 3) {
-            if (!currentUser.completedLessons.includes(lessonTitle)) {
-                currentUser.completedLessons.push(lessonTitle);
-            }
+    const lessonTitle = courseData[c].modules[m].lessons[l].title;
+    // အမှတ်ပြည့်ရရင် သို့မဟုတ် ၃ ကြိမ်ပြည့်ရင် Completed စာရင်းထဲထည့်မယ်
+    if (score === questions.length || currentAttempt >= 3) {
+        if (!currentUser.completedLessons.includes(lessonTitle)) {
+            currentUser.completedLessons.push(lessonTitle);
         }
     }
     
-    // ၅။ LocalStorage တွင် သိမ်းဆည်းခြင်း
+    // LocalStorage မှာ အကုန်ပြန်သိမ်းမယ်
     localStorage.setItem('currentUser', JSON.stringify(currentUser));
 
-    // ၆။ အသိပေးချက် ပြသခြင်း
+    // ၅။ ရလဒ်အလိုက် အသိပေးချက်ပြသပြီး နောက်သင်ခန်းစာသို့ သွားခြင်း
     setTimeout(() => {
         if (score === questions.length) {
             alert(`ဂုဏ်ယူပါတယ်! အမှတ်ပြည့် (${score}/${questions.length}) ရရှိပါတယ်။`);
-            showSection('courses');
+            goToNextLesson(c, m, l); // နောက်သင်ခန်းစာသို့ တန်းသွားမည်
         } else if (currentAttempt >= 3) {
-            alert(`၃ ကြိမ်ဖြေဆိုမှု ပြီးဆုံးပါပြီ။ သင်၏နောက်ဆုံးရမှတ်မှာ (${score}/${questions.length}) ဖြစ်ပါသည်။`);
-            showSection('courses');
+            alert(`သင်သည် ၃ ကြိမ်မြောက်ဖြေဆိုပြီးပါပြီ။ သင်၏နောက်ဆုံးရမှတ်မှာ (${score}/${questions.length}) ဖြစ်ပါသည်။`);
+            goToNextLesson(c, m, l); // ၃ ကြိမ်ပြည့်ရင်လည်း နောက်သင်ခန်းစာကို လွှတ်လိုက်မည်
         } else {
-            if (confirm(`ရမှတ်: ${score}/${questions.length} ဖြစ်ပါသည်။ အကြိမ်ရေ ${3 - currentAttempt} ကြိမ် ကျန်ပါသေးသည်။ ထပ်ဖြေမလား?`)) {
-                renderLessonContent(c, m, l);
+            const retry = confirm(`သင့်ရမှတ်မှာ (${score}/${questions.length}) ဖြစ်ပါသည်။ အကြိမ်ရေ ${(3 - currentAttempt)} ကြိမ် ကျန်ပါသေးသည်။ ထပ်မံဖြေဆိုလိုပါသလား?`);
+            if (retry) {
+                renderLessonContent(c, m, l); // Quiz ကို Refresh လုပ်ပြီး ပြန်ဖြေခိုင်းမည်
             } else {
-                showSection('courses');
+                goToNextLesson(c, m, l); // မဖြေချင်တော့ရင်လည်း နောက်သင်ခန်းစာကို သွားခွင့်ပေးမည်
             }
         }
-    }, 500);
+    }, 500); // 0.5 စက္ကန့် စောင့်ပြီးမှ alert ပြမည် (ဒါမှ ကျောင်းသားက UI မှာ အစိမ်း/အနီ အရောင်တွေကို အရင်မြင်ရမှာပါ)
+
+  // ၃။ Attempt တိုးခြင်း
+  currentUser.quizAttempts[quizId] = currentAttempt;
+
+  // ၄။ သင်ခန်းစာ ပြီးမြောက်မှု မှတ်သားခြင်း
+  // courseData ရှိမရှိ အရင်စစ်ပါမယ်
+  if (
+    courseData[c] &&
+    courseData[c].modules[m] &&
+    courseData[c].modules[m].lessons[l]
+  ) {
+    const lessonTitle = courseData[c].modules[m].lessons[l].title;
+
+    // အမှတ်ပြည့်ရရင် သို့မဟုတ် ၃ ကြိမ်ပြည့်ရင် Completed စာရင်းထဲ ထည့်မယ်
+    if (score === questions.length || currentAttempt >= 3) {
+      if (!currentUser.completedLessons.includes(lessonTitle)) {
+        currentUser.completedLessons.push(lessonTitle);
+      }
+    }
+  }
+
+  // ၅။ LocalStorage တွင် သိမ်းဆည်းခြင်း
+  localStorage.setItem("currentUser", JSON.stringify(currentUser));
+
+  // ၆။ အသိပေးချက် ပြသခြင်း
+  setTimeout(() => {
+    if (score === questions.length) {
+      alert(
+        `ဂုဏ်ယူပါတယ်! အမှတ်ပြည့် (${score}/${questions.length}) ရရှိပါတယ်။`,
+      );
+      showSection("courses");
+    } else if (currentAttempt >= 3) {
+      alert(
+        `၃ ကြိမ်ဖြေဆိုမှု ပြီးဆုံးပါပြီ။ သင်၏နောက်ဆုံးရမှတ်မှာ (${score}/${questions.length}) ဖြစ်ပါသည်။`,
+      );
+      showSection("courses");
+    } else {
+      if (
+        confirm(
+          `ရမှတ်: ${score}/${questions.length} ဖြစ်ပါသည်။ အကြိမ်ရေ ${3 - currentAttempt} ကြိမ် ကျန်ပါသေးသည်။ ထပ်ဖြေမလား?`,
+        )
+      ) {
+        renderLessonContent(c, m, l);
+      } else {
+        showSection("courses");
+      }
+    }
+  }, 500);
 }
 
-function renderAssignmentUI(les, breadcrumbs) {
+function renderAssignmentUI(catIdx, modIdx, lesIdx, bc) {
+  const lesson = courseData[catIdx].modules[modIdx].lessons[lesIdx];
   document.getElementById("dynamic-body").innerHTML = `
-        ${breadcrumbs}
-        <div class="content-card">
-            <h3>Assignment: ${les.title}</h3>
-            <p class="academic-box">စာလုံးရေ ၅၀ ကျော်အောင် ရေးပါ။ Copy/Paste လက်မခံပါ။</p>
-            <textarea id="atxt" class="edit-input" rows="10" onpaste="alert('No Paste!'); return false;"></textarea>
-            <button class="save-btn" style="margin-top:10px" onclick="alert('Submitted!')">Submit</button>
+        ${bc}
+        <div class="content-card animate-up">
+            <h3>Assignment: ${lesson.title}</h3>
+            <p class="academic-box">စာလုံးရေ ၅၀ ကျော်အောင် ကိုယ်တိုင်ရေးသားပေးပါ။ Copy/Paste လုပ်ခြင်းကို ခွင့်မပြုပါ။</p>
+            <textarea id="atxt" class="edit-input" rows="10" onpaste="alert('ကူးယူခြင်းကို ခွင့်မပြုပါ!'); return false;" placeholder="ဤနေရာတွင် စတင်ရေးသားပါ..."></textarea>
+            <div style="text-align:right; margin-bottom:10px;"><small id="word-count">0 words</small></div>
+            
+            <!-- Submit ခလုတ်မှာ catIdx, modIdx, lesIdx တွေကို သေချာထည့်ပေးထားပါတယ် -->
+            <button class="save-btn" onclick="submitAssignmentDB(${catIdx}, ${modIdx}, ${lesIdx})">
+                <i class="fas fa-paper-plane"></i> Submit Assignment
+            </button>
+        </div>`;
+
+  // စာလုံးရေတွက်သည့် Logic
+  document.getElementById("atxt").addEventListener("input", (e) => {
+    const words = e.target.value
+      .trim()
+      .split(/\s+/)
+      .filter((w) => w.length > 0).length;
+    document.getElementById("word-count").innerText = words + " words";
+  });
+}
+
+function renderProjectUI(catIdx, modIdx, lesIdx, bc) {
+  const lesson = courseData[catIdx].modules[modIdx].lessons[lesIdx];
+  document.getElementById("dynamic-body").innerHTML = `
+        ${bc}
+        <div class="content-card project-card animate-up">
+            <h3><i class="fas fa-tasks"></i> Project Submission</h3>
+            <p style="color:grey; margin-bottom:15px;">${lesson.title}</p>
+            <label>GitHub Repository Link</label>
+            <input type="url" id="plink" class="edit-input" placeholder="https://github.com/user/repo">
+            <label style="margin-top:15px; display:block;">Team Members (Names & UIDs)</label>
+            <textarea id="pmembers" class="edit-input" rows="2" placeholder="Mg Mg (st001), Aye Aye (st002)"></textarea>
+            
+            <button class="save-btn" style="margin-top:20px" onclick="submitProjectDB(${catIdx}, ${modIdx}, ${lesIdx})">
+                <i class="fas fa-upload"></i> Submit Project
+            </button>
         </div>`;
 }
 
-function renderProjectUI(les, breadcrumbs) {
-  document.getElementById("dynamic-body").innerHTML = `
-        ${breadcrumbs}
-        <div class="content-card">
-            <h3>Project: ${les.title}</h3>
-            <label>GitHub Link</label>
-            <input type="url" id="plink" class="edit-input" placeholder="https://github.com/...">
-            <button class="save-btn" style="margin-top:10px" onclick="alert('Project Sent!')">Submit Project</button>
-        </div>`;
+// --- Project Submit Logic (GitHub Link တင်ရန်) ---
+async function submitProjectDB(catIdx, modIdx, lesIdx) {
+  const link = document.getElementById("plink").value.trim();
+  const members = document.getElementById("pmembers").value.trim();
+  const lesson = courseData[catIdx].modules[modIdx].lessons[lesIdx];
+
+  // Validation: GitHub Link ဟုတ်မဟုတ် စစ်ဆေးခြင်း
+  if (!link.includes("github.com")) {
+    return alert(
+      "ကျေးဇူးပြု၍ မှန်ကန်သော GitHub Repository Link ကို ထည့်ပေးပါ။",
+    );
+  }
+
+  try {
+    // ၁။ Firestore: 'submissions' collection ထဲသို့ ပို့မည်
+    await db.collection("submissions").add({
+      type: "project",
+      studentId: currentUser.uid,
+      studentName: currentUser.name,
+      lessonTitle: lesson.title,
+      category: courseData[catIdx].category,
+      githubLink: link,
+      teamMembers: members,
+      status: "pending",
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+
+    // ၂။ ပြီးမြောက်ကြောင်း မှတ်သားမည်
+    if (!currentUser.completedLessons.includes(lesson.title)) {
+      currentUser.completedLessons.push(lesson.title);
+      localStorage.setItem("currentUser", JSON.stringify(currentUser));
+    }
+
+    alert("Project ကို အောင်မြင်စွာ ပေးပို့ပြီးပါပြီ။");
+
+    // ၃။ နောက်စာမျက်နှာကို တန်းသွားမည်
+    goToNextLesson(catIdx, modIdx, lesIdx);
+  } catch (error) {
+    alert("Error submitting project: " + error.message);
+  }
 }
 
 // ==========================================
@@ -538,15 +650,15 @@ async function deleteMsg(id) {
 
 // Profile ပြသခြင်း (View Mode & Academic Info)
 function renderProfile() {
-    const body = document.getElementById("dynamic-body");
+  const body = document.getElementById("dynamic-body");
 
-    // Role အလိုက် Badge အရောင်ခွဲခြားခြင်း
-    const isTeacher = currentUser.role === "Teacher";
-    const roleBadgeStyle = isTeacher 
-        ? "background:#ef4444; color:white;" 
-        : "background:#e2e8f0; color:black;";
+  // Role အလိုက် Badge အရောင်ခွဲခြားခြင်း
+  const isTeacher = currentUser.role === "Teacher";
+  const roleBadgeStyle = isTeacher
+    ? "background:#ef4444; color:white;"
+    : "background:#e2e8f0; color:black;";
 
-    body.innerHTML = `
+  body.innerHTML = `
         <div class="profile-card-pro fade-in">
             <div class="profile-cover"></div>
             <div class="profile-header-main">
@@ -607,8 +719,8 @@ function renderProfile() {
 
 // ကျောင်းသားအတွက် Profile ပြင်ဆင်သည့် Form (Edit Mode)
 function renderEditProfile() {
-    const body = document.getElementById("dynamic-body");
-    body.innerHTML = `
+  const body = document.getElementById("dynamic-body");
+  body.innerHTML = `
         <div class="content-card animate-up" style="max-width: 800px; margin: 0 auto;">
             <h3 style="margin-bottom:20px;"><i class="fas fa-id-card"></i> Profile ပြင်ဆင်ခြင်း</h3>
             
@@ -652,31 +764,31 @@ function renderEditProfile() {
 
 // သိမ်းဆည်းရန် Function တစ်ခုတည်းသာ ထားပါမည်
 function saveProfile() {
-    // Input များမှ တန်ဖိုးများကို ယူခြင်း
-    currentUser.name = document.getElementById("edit-name").value;
-    currentUser.photo = document.getElementById("edit-photo").value;
-    currentUser.portfolio = document.getElementById("edit-portfolio").value;
-    currentUser.linkedin = document.getElementById("edit-linkedin").value;
-    currentUser.facebook = document.getElementById("edit-facebook").value;
-    currentUser.youtube = document.getElementById("edit-youtube").value;
-    currentUser.tiktok = document.getElementById("edit-tiktok").value;
-    currentUser.instagram = document.getElementById("edit-instagram").value;
-    currentUser.email = document.getElementById("edit-email").value;
-    currentUser.github = document.getElementById("edit-github").value;
-    currentUser.notes = document.getElementById("edit-notes").value;
-    currentUser.skills = document.getElementById("edit-skills").value
-        .split(",")
-        .map((s) => s.trim())
-        .filter(s => s !== ""); // အလွတ်တွေကို ဖယ်ထုတ်မည်
+  // Input များမှ တန်ဖိုးများကို ယူခြင်း
+  currentUser.name = document.getElementById("edit-name").value;
+  currentUser.photo = document.getElementById("edit-photo").value;
+  currentUser.portfolio = document.getElementById("edit-portfolio").value;
+  currentUser.linkedin = document.getElementById("edit-linkedin").value;
+  currentUser.facebook = document.getElementById("edit-facebook").value;
+  currentUser.youtube = document.getElementById("edit-youtube").value;
+  currentUser.tiktok = document.getElementById("edit-tiktok").value;
+  currentUser.instagram = document.getElementById("edit-instagram").value;
+  currentUser.email = document.getElementById("edit-email").value;
+  currentUser.github = document.getElementById("edit-github").value;
+  currentUser.notes = document.getElementById("edit-notes").value;
+  currentUser.skills = document
+    .getElementById("edit-skills")
+    .value.split(",")
+    .map((s) => s.trim())
+    .filter((s) => s !== ""); // အလွတ်တွေကို ဖယ်ထုတ်မည်
 
-    // LocalStorage တွင် သိမ်းမည်
-    localStorage.setItem("currentUser", JSON.stringify(currentUser));
+  // LocalStorage တွင် သိမ်းမည်
+  localStorage.setItem("currentUser", JSON.stringify(currentUser));
 
-    alert("Profile အောင်မြင်စွာ ပြင်ဆင်ပြီးပါပြီ။");
-    renderProfile();     // Profile စာမျက်နှာကို ပြန်ပြမည်
-    renderAuthFooter();  // Sidebar အောက်ခြေက ပုံနဲ့ နာမည်ကို update လုပ်မည်
+  alert("Profile အောင်မြင်စွာ ပြင်ဆင်ပြီးပါပြီ။");
+  renderProfile(); // Profile စာမျက်နှာကို ပြန်ပြမည်
+  renderAuthFooter(); // Sidebar အောက်ခြေက ပုံနဲ့ နာမည်ကို update လုပ်မည်
 }
-
 
 // Sidebar Footer Render (User Info & Logout)
 function renderAuthFooter() {
@@ -1151,4 +1263,92 @@ function renderQuiz(data) {
   quizHtml +=
     '<br><button class="menu-btn" onclick="checkQuiz()">အဖြေစစ်မည်</button>';
   document.getElementById("dynamic-body").innerHTML = quizHtml;
+}
+
+// --- Assignment Submit Logic ---
+async function submitAssignmentDB(catIdx, modIdx, lesIdx) {
+  const text = document.getElementById("atxt").value.trim();
+  const lesson = courseData[catIdx].modules[modIdx].lessons[lesIdx];
+
+  if (text.split(/\s+/).length < 50) {
+    return alert("စာလုံးရေ အနည်းဆုံး ၅၀ ပြည့်အောင် ရေးပေးပါ။");
+  }
+
+  try {
+    // ၁။ Firestore: 'submissions' collection ထဲသို့ ပို့မည်
+    await db.collection("submissions").add({
+      studentId: currentUser.uid,
+      studentName: currentUser.name,
+      lessonTitle: lesson.title,
+      category: courseData[catIdx].category,
+      content: text,
+      status: "pending", // ဆရာမစစ်ရသေးခင် status
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+
+    // ၂။ ပြီးမြောက်ကြောင်း မှတ်သားမည်
+    if (!currentUser.completedLessons.includes(lesson.title)) {
+      currentUser.completedLessons.push(lesson.title);
+      localStorage.setItem("currentUser", JSON.stringify(currentUser));
+    }
+
+    alert("အောင်မြင်စွာ ပေးပို့ပြီးပါပြီ။");
+
+    // ၃။ နောက်စာမျက်နှာကို တန်းသွားမည်
+    goToNextLesson(catIdx, modIdx, lesIdx);
+  } catch (error) {
+    alert("Error submitting: " + error.message);
+  }
+}
+
+// --- နောက်သင်ခန်းစာသို့ သွားရန် (Helper) ---
+function goToNextLesson(catIdx, modIdx, lesIdx) {
+  const currentModule = courseData[catIdx].modules[modIdx];
+
+  if (lesIdx + 1 < currentModule.lessons.length) {
+    // Module တစ်ခုတည်းမှာပဲ နောက်သင်ခန်းစာ ရှိနေသေးလျှင်
+    renderLessonContent(catIdx, modIdx, lesIdx + 1);
+  } else {
+    // Module ပြီးသွားလျှင် သင်ခန်းစာမာတိကာသို့ ပြန်သွားမည်
+    alert(
+      "ဂုဏ်ယူပါတယ်။ သင်သည် ဤ Module ရှိ သင်ခန်းစာအားလုံးကို ပြီးမြောက်သွားပါပြီ။",
+    );
+    showSection("courses");
+  }
+}
+
+// --- ဆရာအတွက်: ကျောင်းသားများ တင်ထားသော Assignment များကို ဖတ်ရန် ---
+async function renderSubmissions() {
+  const body = document.getElementById("dynamic-body");
+  body.innerHTML =
+    '<h3>ကျောင်းသားများ တင်ထားသော Assignment များ</h3><div id="sub-list" class="loader">Loading...</div>';
+
+  try {
+    const snapshot = await db
+      .collection("submissions")
+      .orderBy("timestamp", "desc")
+      .get();
+    let html = '<div class="dashboard-grid">';
+
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+      html += `
+                <div class="content-card">
+                    <div style="display:flex; justify-content:space-between;">
+                        <strong>${data.studentName}</strong>
+                        <small>${data.status}</small>
+                    </div>
+                    <p style="font-size:0.8rem; color:grey;">${data.lessonTitle}</p>
+                    <hr><br>
+                    <p style="font-size:0.9rem;">${data.content.substring(0, 100)}...</p>
+                    <br>
+                    <button class="menu-btn" onclick="viewSubmissionDetail('${doc.id}')">အသေးစိတ်ဖတ်ပြီး အမှတ်ပေးရန်</button>
+                </div>
+            `;
+    });
+
+    body.innerHTML = html + "</div>";
+  } catch (e) {
+    body.innerHTML = "Error loading submissions.";
+  }
 }
