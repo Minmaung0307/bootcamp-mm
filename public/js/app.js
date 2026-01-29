@@ -47,9 +47,9 @@ let activeChatName = "Group: Batch-05";
 // ၁။ Dark Mode (ညဘက်လေ့လာသူများအတွက်)
 function toggleDarkMode() {
     document.body.classList.toggle('dark-theme');
-    const isDark = document.body.classList.contains('dark-theme');
-    localStorage.setItem('dark-mode', isDark);
-    renderAuthFooter(); // ခလုတ် icon ပြောင်းဖို့ ပြန် render မည်
+    const isDarkNow = document.body.classList.contains('dark-theme');
+    localStorage.setItem('dark-mode', isDarkNow); // Browser မှာ မှတ်ထားမည်
+    renderAuthFooter(); // Sidebar ခလုတ် icon ပြောင်းရန်
 }
 
 // ၂။ Firestore Sync (Cloud Backup)
@@ -186,6 +186,7 @@ function postComment(lessonId) {
     if(!text) return;
     db.collection('discussions').add({
         lessonId: lessonId,
+        userId: currentUser.uid, // <--- ဒါလေး ပါရပါမယ်
         userName: currentUser.name,
         text: text,
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
@@ -1040,13 +1041,21 @@ function viewCertificate(uid) {
 // ==========================================
 
 window.onload = () => {
-  if (currentUser.isLoggedIn) {
-    document.getElementById("login-page").style.display = "none";
-    document.getElementById("app-wrapper").style.display = "flex";
-    showSection("dashboard");
-  } else {
-    document.getElementById("login-page").style.display = "flex";
-  }
+    // ၁။ Dark Mode အဟောင်းရှိမရှိ စစ်ဆေးပြီး ပြန်ဖွင့်ပေးခြင်း
+    const isDark = localStorage.getItem('dark-mode') === 'true';
+    if (isDark) {
+        document.body.classList.add('dark-theme');
+    }
+
+    // ၂။ Login Status စစ်ဆေးခြင်း
+    if (currentUser.isLoggedIn) {
+        document.getElementById('app-wrapper').style.display = 'flex';
+        document.getElementById('login-page').style.display = 'none';
+        showSection('dashboard');
+    } else {
+        document.getElementById('login-page').style.display = 'flex';
+        document.getElementById('app-wrapper').style.display = 'none';
+    }
 };
 
 // Global Helpers

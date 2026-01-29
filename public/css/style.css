@@ -1,9 +1,13 @@
 :root {
     --primary: #003087;
     --sidebar-bg: #1e293b;
-    --main-bg: #f8fafc;
+    --main-bg: #f1f5f9;      /* Light Mode နောက်ခံ */
+    --card-bg: #ffffff;      /* Light Mode Card */
+    --text-main: #1e293b;    /* Light Mode စာသားအနက် */
+    --text-muted: #64748b;
+    --border-color: #e2e8f0;
+    --nav-bg: #1e293b;
     --text-light: #f1f5f9;
-    --card-bg: #ffffff;
     --text-color: #1e293b;
     --border-color: #e2e8f0;
 }
@@ -12,11 +16,84 @@
 body.dark-theme {
     --primary: #60a5fa;
     --sidebar-bg: #0f172a;
-    --main-bg: #020617;
-    --card-bg: #1e293b;
-    --text-color: #f1f5f9;
+    --main-bg: #020617;      /* Dark Mode နောက်ခံအမှောင် */
+    --card-bg: #1e293b;      /* Dark Mode Card အမှောင် */
+    --text-main: #f1f5f9;    /* Dark Mode စာသားအဖြူ */
+    --text-muted: #94a3b8;
     --border-color: #334155;
+    --nav-bg: #020617;
+    --text-color: #f1f5f9;
     --input-bg: #0f172a;
+    --academic-bg: #0f172a; /* Academic box အတွက် သီးသန့် အမှောင်ရောင် */
+}
+
+/* ၁။ သင်ခန်းစာစာရင်း (Module List) Fix */
+body.dark-theme .category-header {
+    background: #334155 !important; /* Category ခေါင်းစဉ် (Foundations စသည်) */
+    color: #f1f5f9 !important;
+}
+
+body.dark-theme .module-group {
+    background: var(--card-bg) !important;
+    border-color: var(--border-color) !important;
+}
+
+body.dark-theme .module-title-header {
+    background: var(--card-bg) !important;
+    color: var(--text-main) !important;
+    border-bottom: 1px solid var(--border-color) !important;
+}
+
+body.dark-theme .lesson-item {
+    color: var(--text-muted) !important;
+    border-bottom: 1px solid var(--border-color) !important;
+}
+
+body.dark-theme .lesson-item:hover {
+    background: #334155 !important;
+    color: #fff !important;
+}
+
+/* ၂။ Academic Status Card Fix (အဖြူရောင်ကြီး ဖြစ်မနေစေရန်) */
+body.dark-theme .academic-card {
+    background: var(--card-bg) !important;
+}
+
+body.dark-theme .academic-box {
+    background: var(--academic-bg) !important; /* အတွင်းက box အမှောင်ရောင်ပြောင်းမည် */
+    border: 1px solid var(--border-color) !important;
+}
+
+body.dark-theme .academic-item {
+    border-bottom: 1px solid var(--border-color) !important;
+    color: var(--text-main) !important;
+}
+
+body.dark-theme .academic-item span:first-child {
+    color: var(--text-muted) !important; /* ဘယ်ဘက်က စာသားအဖျော့ */
+}
+
+body.dark-theme .academic-item strong, 
+body.dark-theme .academic-item .value-blue {
+    color: var(--primary) !important; /* ညာဘက်က တန်ဖိုး (92%, A- စသည်) */
+}
+
+/* ၃။ Profile အောက်ခြေ Personal Notes Fix */
+body.dark-theme .content-card h4 {
+    color: var(--text-main) !important;
+    border-bottom: 2px solid var(--border-color);
+}
+
+body.dark-theme .content-card p {
+    color: var(--text-main) !important;
+}
+
+/* ၄။ Breadcrumbs (Home / Foundations...) စာသားအရောင် Fix */
+body.dark-theme .breadcrumbs {
+    color: var(--text-muted) !important;
+}
+body.dark-theme .breadcrumbs span {
+    color: var(--primary) !important;
 }
 
 /* Dark Mode Toggle Button အလှဆင်ခြင်း */
@@ -51,9 +128,28 @@ body.dark-theme .welcome-banner {
 
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
 
-body { background: var(--main-bg); color: var(--text-color); transition: 0.3s; }
+/* --- ၃။ Global Styles (Variables များကို နေရာအနှံ့ အသုံးချခြင်း) --- */
+body {
+    background-color: var(--main-bg);
+    color: var(--text-main);
+    transition: background-color 0.3s, color 0.3s;
+}
 
-.content-card, .topic-card, .top-nav, .module-group { background: var(--card-bg); border-color: var(--border-color); color: var(--text-color); }
+/* Cards & Containers များ (ပုံသေ 'white' မသုံးဘဲ variable သုံးရပါမည်) */
+.content-card, .topic-card, .module-group, .top-nav, .sidebar-header {
+    background-color: var(--card-bg) !important;
+    color: var(--text-main) !important;
+    border-color: var(--border-color) !important;
+}
+
+/* Dashboard Cards များ စာဖတ်ရ ရှင်းလင်းစေရန် */
+.topic-card h3, .topic-card p {
+    color: var(--text-main);
+}
+
+.topic-card p {
+    color: var(--text-muted);
+}
 
 .wrapper { display: flex; transition: all 0.3s ease; background: var(--main-bg); height: 100vh; }
 
@@ -265,8 +361,16 @@ body { background: var(--main-bg); color: var(--text-color); transition: 0.3s; }
 
 /* Sidebar User Info */
 .sidebar-user-info {
+    background: var(--nav-bg);
+    border: 1px solid var(--border-color);
     display: flex; align-items: center; gap: 10px;
-    padding: 10px; background: #0f172a; border-radius: 10px; margin: 0 10px;
+    padding: 10px; border-radius: 10px; margin: 0 10px;
+}
+/* Form Inputs များ (Dark mode မှာ ဖြူမနေအောင်) */
+.edit-input, #chat-input, #comment-input {
+    background-color: var(--main-bg);
+    color: var(--text-main);
+    border: 1px solid var(--border-color);
 }
 .sidebar-avatar { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--primary); cursor: pointer; }
 .user-details { flex: 1; color: white; cursor: pointer; overflow: hidden; font-size: 0.85rem; }
