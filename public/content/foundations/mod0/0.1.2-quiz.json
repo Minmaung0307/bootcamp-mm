@@ -12,6 +12,19 @@
             "type": "short", 
             "q": "Website ရဲ့ အရိုးစုကို ဘာနဲ့တည်ဆောက်သလဲ?", 
             "correct": "HTML" 
+        },
+        {
+            "type": "multiple",
+            "q": "အောက်ပါတို့အနက် programming languages များမှာ အဘယ်နည်း? (အဖြေ ၂ ခု ရွေးပါ)",
+            "options": ["HTML", "JavaScript", "Python", "CSS"],
+            "correct": [1, 2]
+        },
+        {
+            "type": "single",
+            "q": "ပုံထဲတွင် မြင်ရသော အရာမှာ အဘယ်နည်း?",
+            "image": "/assets/img/sample-code.png",
+            "options": ["Function", "Variable", "Loop"],
+            "correct": 0
         }
     ]
 }

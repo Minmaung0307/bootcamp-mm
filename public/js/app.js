@@ -117,12 +117,14 @@ function renderDashboard() {
         let totalLessons = 0;
         categoryData.modules.forEach(m => totalLessons += m.lessons.length);
         
-        const doneLessons = currentUser.completedLessons.filter(l => {
-            // ကျောင်းသားပြီးထားတဲ့ သင်ခန်းစာက ဒီ category ထဲမှာရှိမရှိ စစ်မယ်
+        // Safety check: completedLessons ရှိမရှိ အရင်စစ်မည်
+        const doneList = currentUser.completedLessons || []; 
+        
+        const doneLessonsCount = doneList.filter(l => {
             return categoryData.modules.some(m => m.lessons.some(les => les.title === l));
         }).length;
 
-        return Math.round((doneLessons / totalLessons) * 100) || 0;
+        return Math.round((doneLessonsCount / totalLessons) * 100) || 0;
     };
 
     body.innerHTML = `
@@ -399,26 +401,22 @@ function toggleModuleAccordion(header, targetId) {
 // ==========================================
 
 function renderQuizUI(data, bc, c, m, l) {
-  // Safety check: currentUser ထဲမှာ quizAttempts မရှိသေးရင် အသစ်ဆောက်မယ်
-  if (!currentUser.quizAttempts) {
-    currentUser.quizAttempts = {};
-  }
-
-  // Attempt ကို ဖတ်မယ် (မရှိရင် ၀ လို့ သတ်မှတ်မယ်)
-  const attempts = currentUser.quizAttempts[data.id] || 0;
-
-  if (attempts >= 3 && currentUser.role !== "Teacher") {
-    document.getElementById("dynamic-body").innerHTML = `
+    if (!currentUser.quizAttempts) currentUser.quizAttempts = {};
+    const attempts = currentUser.quizAttempts[data.id] || 0;
+    
+    // အကြိမ်ရေ ၃ ကြိမ်ပြည့်/မပြည့် စစ်ဆေးခြင်း
+    if(attempts >= 3 && currentUser.role !== 'Teacher') {
+        document.getElementById('dynamic-body').innerHTML = `
             ${bc}
             <div class="content-card error-msg animate-up">
                 <h3><i class="fas fa-lock"></i> Quiz ပိတ်သွားပါပြီ</h3>
                 <p>သင်သည် ဤ Quiz ကို ၃ ကြိမ်ဖြေဆိုပြီး ဖြစ်သောကြောင့် ထပ်မံဖြေဆိုခွင့် မရှိတော့ပါ။</p>
                 <button class="menu-btn" style="margin-top:15px" onclick="showSection('courses')">သင်ခန်းစာများသို့ ပြန်သွားရန်</button>
             </div>`;
-    return;
-  }
+        return;
+    }
 
-  let html = `${bc}
+    let html = `${bc}
         <div class="content-card animate-up">
             <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid #eee; padding-bottom:15px; margin-bottom:20px;">
                 <h3 style="margin:0;">${data.title}</h3>
@@ -426,150 +424,112 @@ function renderQuizUI(data, bc, c, m, l) {
             </div>
             <form id="quiz-form">`;
 
-  data.questions.forEach((q, i) => {
-    html += `
+    data.questions.forEach((q, i) => {
+        html += `
             <div class="quiz-question-box" id="q-box-${i}">
-                <p><strong>${i + 1}. ${q.q}</strong></p>
-                <div class="options-area">`;
+                <p><strong>${i + 1}. ${q.q}</strong></p>`;
+        
+        // --- ၁။ ပုံပါဝင်လျှင် ပြသရန် ---
+        if (q.image) {
+            html += `<div class="quiz-image-container"><img src="${q.image}" class="quiz-img"></div>`;
+        }
 
-    if (q.type === "single") {
-      q.options.forEach((opt, oi) => {
-        html += `<label class="quiz-opt"><input type="radio" name="q${i}" value="${oi}"> ${opt}</label>`;
-      });
-    } else if (q.type === "short") {
-      html += `<input type="text" name="q${i}" class="edit-input" placeholder="အဖြေရိုက်ပါ" style="margin-top:10px; width:100%;">`;
-    }
+        html += `<div class="options-area">`;
+        
+        if (q.type === 'single') {
+            q.options.forEach((opt, oi) => {
+                html += `<label class="quiz-opt"><input type="radio" name="q${i}" value="${oi}"> ${opt}</label>`;
+            });
+        } else if (q.type === 'multiple') {
+            // --- ၂။ Multiple Choice (Checkboxes) ---
+            q.options.forEach((opt, oi) => {
+                html += `<label class="quiz-opt"><input type="checkbox" name="q${i}" value="${oi}"> ${opt}</label>`;
+            });
+        } else if (q.type === 'short') {
+            html += `<input type="text" name="q${i}" class="edit-input" placeholder="အဖြေရိုက်ပါ" style="margin-top:10px; width:100%;">`;
+        }
 
-    html += `</div>
+        html += `</div>
                 <div id="f-${i}" class="feedback-area" style="margin-top:10px; font-weight:bold;"></div>
             </div>`;
-  });
+    });
 
-  html += `</form>
+    html += `</form>
             <div style="margin-top:20px;">
-                <button class="save-btn" onclick="checkQuizResult('${data.id}', ${JSON.stringify(data).replace(/"/g, "&quot;")}, ${c}, ${m}, ${l})">
+                <button class="save-btn" onclick="checkQuizResult('${data.id}', ${JSON.stringify(data).replace(/"/g, '&quot;')}, ${c}, ${m}, ${l})">
                     <i class="fas fa-check-circle"></i> Submit Quiz
                 </button>
             </div>
         </div>`;
-  document.getElementById("dynamic-body").innerHTML = html;
+    document.getElementById('dynamic-body').innerHTML = html;
 }
 
 function checkQuizResult(quizId, quizData, c, m, l) {
     let score = 0;
     const questions = quizData.questions;
 
-    // ၁။ Safety Checks: currentUser ထဲမှာ လိုအပ်တဲ့ field တွေ မရှိရင် အသစ်ဆောက်မယ်
     if (!currentUser.quizAttempts) currentUser.quizAttempts = {};
     if (!currentUser.completedLessons) currentUser.completedLessons = [];
 
     const currentAttempt = (currentUser.quizAttempts[quizId] || 0) + 1;
 
-    // ၂။ အဖြေစစ်ဆေးခြင်း (UI ပေါ်မှာ အမှားအမှန်အရောင်ပြခြင်း)
+    // အဖြေစစ်ဆေးခြင်း
     questions.forEach((q, i) => {
         const feedbackEl = document.getElementById(`f-${i}`);
         const qBox = document.getElementById(`q-box-${i}`);
-        const input = document.getElementsByName(`q${i}`);
+        const inputs = document.getElementsByName(`q${i}`);
         let isCorrect = false;
 
-        if (q.type === "single") {
-            const sel = Array.from(input).find((r) => r.checked);
+        if (q.type === 'single') {
+            const sel = Array.from(inputs).find(r => r.checked);
             if (sel && parseInt(sel.value) === q.correct) isCorrect = true;
-        } else if (q.type === "short") {
-            if (input[0].value.trim().toLowerCase() === q.correct.toLowerCase())
-                isCorrect = true;
+        } else if (q.type === 'multiple') {
+            // Multiple Choice စစ်ဆေးခြင်း (Array တိုက်စစ်သည်)
+            const selected = Array.from(inputs).filter(cb => cb.checked).map(cb => parseInt(cb.value));
+            const correctAnswers = q.correct.sort().toString();
+            if (selected.sort().toString() === correctAnswers) isCorrect = true;
+        } else if (q.type === 'short') {
+            if (inputs[0].value.trim().toLowerCase() === q.correct.toLowerCase()) isCorrect = true;
         }
 
         if (isCorrect) {
             score++;
             feedbackEl.innerHTML = '<span class="text-success"><i class="fas fa-check"></i> Correct</span>';
-            if (qBox) qBox.style.borderColor = "#22c55e"; // မှန်ရင် အစိမ်းရောင်
+            if (qBox) qBox.style.borderColor = "#22c55e";
         } else {
             feedbackEl.innerHTML = '<span class="text-danger"><i class="fas fa-times"></i> Wrong</span>';
-            if (qBox) qBox.style.borderColor = "#ef4444"; // မှားရင် အနီရောင်
+            if (qBox) qBox.style.borderColor = "#ef4444";
         }
     });
 
-    // ၃။ Attempt (အကြိမ်ရေ) ကို Update လုပ်ပြီး သိမ်းမည်
+    // ဒေတာ သိမ်းဆည်းခြင်း
     currentUser.quizAttempts[quizId] = currentAttempt;
-
-    // ၄။ သင်ခန်းစာ ပြီးမြောက်မှု မှတ်သားခြင်း
     const lessonTitle = courseData[c].modules[m].lessons[l].title;
-    // အမှတ်ပြည့်ရရင် သို့မဟုတ် ၃ ကြိမ်ပြည့်ရင် Completed စာရင်းထဲထည့်မယ်
+    
     if (score === questions.length || currentAttempt >= 3) {
         if (!currentUser.completedLessons.includes(lessonTitle)) {
             currentUser.completedLessons.push(lessonTitle);
         }
     }
-    
-    // LocalStorage မှာ အကုန်ပြန်သိမ်းမယ်
     localStorage.setItem('currentUser', JSON.stringify(currentUser));
 
-    // ၅။ ရလဒ်အလိုက် အသိပေးချက်ပြသပြီး နောက်သင်ခန်းစာသို့ သွားခြင်း
+    // အသိပေးချက်နှင့် Redirection
     setTimeout(() => {
-        if (score === questions.length) {
-            alert(`ဂုဏ်ယူပါတယ်! အမှတ်ပြည့် (${score}/${questions.length}) ရရှိပါတယ်။`);
-            goToNextLesson(c, m, l); // နောက်သင်ခန်းစာသို့ တန်းသွားမည်
+        const total = questions.length;
+        if (score === total) {
+            alert(`ဂုဏ်ယူပါတယ်! အမှတ်ပြည့် (${score}/${total}) ရရှိပါတယ်။`);
+            goToNextLesson(c, m, l);
         } else if (currentAttempt >= 3) {
-            alert(`သင်သည် ၃ ကြိမ်မြောက်ဖြေဆိုပြီးပါပြီ။ သင်၏နောက်ဆုံးရမှတ်မှာ (${score}/${questions.length}) ဖြစ်ပါသည်။`);
-            goToNextLesson(c, m, l); // ၃ ကြိမ်ပြည့်ရင်လည်း နောက်သင်ခန်းစာကို လွှတ်လိုက်မည်
+            alert(`၃ ကြိမ်ဖြေဆိုမှု ပြီးဆုံးပါပြီ။ သင်၏နောက်ဆုံးရမှတ်မှာ (${score}/${total}) ဖြစ်ပါသည်။`);
+            goToNextLesson(c, m, l);
         } else {
-            const retry = confirm(`သင့်ရမှတ်မှာ (${score}/${questions.length}) ဖြစ်ပါသည်။ အကြိမ်ရေ ${(3 - currentAttempt)} ကြိမ် ကျန်ပါသေးသည်။ ထပ်မံဖြေဆိုလိုပါသလား?`);
-            if (retry) {
-                renderLessonContent(c, m, l); // Quiz ကို Refresh လုပ်ပြီး ပြန်ဖြေခိုင်းမည်
+            if (confirm(`ရမှတ်: ${score}/${total} ဖြစ်ပါသည်။ အကြိမ်ရေ ${3 - currentAttempt} ကြိမ် ကျန်ပါသေးသည်။ ထပ်ဖြေမလား?`)) {
+                renderLessonContent(c, m, l);
             } else {
-                goToNextLesson(c, m, l); // မဖြေချင်တော့ရင်လည်း နောက်သင်ခန်းစာကို သွားခွင့်ပေးမည်
+                goToNextLesson(c, m, l);
             }
         }
-    }, 500); // 0.5 စက္ကန့် စောင့်ပြီးမှ alert ပြမည် (ဒါမှ ကျောင်းသားက UI မှာ အစိမ်း/အနီ အရောင်တွေကို အရင်မြင်ရမှာပါ)
-
-  // ၃။ Attempt တိုးခြင်း
-  currentUser.quizAttempts[quizId] = currentAttempt;
-
-  // ၄။ သင်ခန်းစာ ပြီးမြောက်မှု မှတ်သားခြင်း
-  // courseData ရှိမရှိ အရင်စစ်ပါမယ်
-  if (
-    courseData[c] &&
-    courseData[c].modules[m] &&
-    courseData[c].modules[m].lessons[l]
-  ) {
-    const lessonTitle = courseData[c].modules[m].lessons[l].title;
-
-    // အမှတ်ပြည့်ရရင် သို့မဟုတ် ၃ ကြိမ်ပြည့်ရင် Completed စာရင်းထဲ ထည့်မယ်
-    if (score === questions.length || currentAttempt >= 3) {
-      if (!currentUser.completedLessons.includes(lessonTitle)) {
-        currentUser.completedLessons.push(lessonTitle);
-      }
-    }
-  }
-
-  // ၅။ LocalStorage တွင် သိမ်းဆည်းခြင်း
-  localStorage.setItem("currentUser", JSON.stringify(currentUser));
-
-  // ၆။ အသိပေးချက် ပြသခြင်း
-  setTimeout(() => {
-    if (score === questions.length) {
-      alert(
-        `ဂုဏ်ယူပါတယ်! အမှတ်ပြည့် (${score}/${questions.length}) ရရှိပါတယ်။`,
-      );
-      showSection("courses");
-    } else if (currentAttempt >= 3) {
-      alert(
-        `၃ ကြိမ်ဖြေဆိုမှု ပြီးဆုံးပါပြီ။ သင်၏နောက်ဆုံးရမှတ်မှာ (${score}/${questions.length}) ဖြစ်ပါသည်။`,
-      );
-      showSection("courses");
-    } else {
-      if (
-        confirm(
-          `ရမှတ်: ${score}/${questions.length} ဖြစ်ပါသည်။ အကြိမ်ရေ ${3 - currentAttempt} ကြိမ် ကျန်ပါသေးသည်။ ထပ်ဖြေမလား?`,
-        )
-      ) {
-        renderLessonContent(c, m, l);
-      } else {
-        showSection("courses");
-      }
-    }
-  }, 500);
+    }, 500);
 }
 
 function renderAssignmentUI(catIdx, modIdx, lesIdx, bc) {
@@ -809,23 +769,22 @@ function renderProfile() {
   const body = document.getElementById("dynamic-body");
 
   // Role အလိုက် Badge အရောင်ခွဲခြားခြင်း
-  const isTeacher = currentUser.role === "Teacher";
-  const roleBadgeStyle = isTeacher
-    ? "background:#ef4444; color:white;"
-    : "background:#e2e8f0; color:black;";
+  const roleBadgeStyle = currentUser.role === "Teacher" ? "background:#ef4444; color:white;" : "background:#e2e8f0; color:black;";
+    const userImgLarge = currentUser.photo || "https://placehold.co/150x150/003087/white?text=User";
 
   body.innerHTML = `
         <div class="profile-card-pro fade-in">
             <div class="profile-cover"></div>
             <div class="profile-header-main">
-                <img src="${currentUser.photo}" class="profile-large-avatar">
+                <!-- ပုံကြီးနေရာတွင် currentUser.photo ကို သုံးထားပါသည် -->
+                <img src="${userImgLarge}" class="profile-large-avatar" 
+                     onerror="this.src='https://placehold.co/150x150/003087/white?text=User'">
                 <div class="profile-info-text">
-                    <h2>${currentUser.name} <span class="badge-verify"><i class="fas fa-check-circle"></i></span></h2>
+                    <h2 id="p-name-display">${currentUser.name} <span class="badge-verify"><i class="fas fa-check-circle"></i></span></h2>
                     <span class="u-role-tag" style="${roleBadgeStyle}">${currentUser.role}</span>
-                    
                     <div style="margin-top:15px; display:flex; gap:10px; flex-wrap:wrap;">
                         <button class="save-btn" onclick="renderEditProfile()"><i class="fas fa-user-edit"></i> Profile ပြင်ဆင်မည်</button>
-                        ${isTeacher ? `<button class="menu-btn" style="background:#000; color:white;" onclick="renderAdminPanel()"><i class="fas fa-user-shield"></i> Admin Panel (ကျောင်းသားစာရင်းစစ်ရန်)</button>` : ""}
+                        ${currentUser.role === "Teacher" ? `<button class="menu-btn" style="background:#000; color:white;" onclick="renderAdminPanel()"><i class="fas fa-user-shield"></i> Admin Panel</button>` : ""}
                     </div>
                 </div>
             </div>
@@ -948,16 +907,21 @@ function saveProfile() {
 
 // Sidebar Footer Render (User Info & Logout)
 function renderAuthFooter() {
-  const authDiv = document.getElementById('auth-section');
+    const authDiv = document.getElementById('auth-section');
     const isDark = document.body.classList.contains('dark-theme');
-  if (!authDiv) return;
-  authDiv.innerHTML = `
+    
+    // ပုံမရှိခဲ့ရင် ပြပေးမယ့် default icon တစ်ခု ထားပေးထားပါတယ်
+    const userImg = currentUser.photo || "https://placehold.co/100x100/003087/white?text=User";
+
+    authDiv.innerHTML = `
         <button onclick="toggleDarkMode()" class="theme-toggle-btn">
             <i class="fas ${isDark ? 'fa-sun' : 'fa-moon'}"></i> 
             <span>${isDark ? 'Light Mode' : 'Dark Mode'}</span>
         </button>
         <div class="sidebar-user-info">
-            <img src="${currentUser.photo}" class="sidebar-avatar" onclick="showSection('profile')">
+            <!-- <img> tag ထဲမှာ currentUser.photo ကို ထည့်လိုက်ပါပြီ -->
+            <img src="${userImg}" class="sidebar-avatar" onclick="showSection('profile')" 
+                 onerror="this.src='https://placehold.co/100x100/003087/white?text=User'">
             <div class="user-details" onclick="showSection('profile')">
                 <p class="u-name">${currentUser.name}</p>
                 <small class="u-role">${currentUser.role}</small>

@@ -96,6 +96,67 @@ body.dark-theme .breadcrumbs span {
     color: var(--primary) !important;
 }
 
+body.dark-theme .quiz-image-container {
+    background: #0f172a;
+}
+
+body.dark-theme .quiz-question-box {
+    background-color: var(--card-bg);
+    border-color: var(--border-color);
+    color: var(--text-main);
+}
+
+body.dark-theme .quiz-question-box p, 
+body.dark-theme .quiz-question-box strong {
+    color: var(--text-main) !important; /* မေးခွန်းစာသားများကို အဖြူရောင်ပြောင်းရန် */
+}
+
+body.dark-theme .quiz-opt {
+    background-color: #334155; /* Darker shade for options */
+    color: #f1f5f9 !important; /* Options စာသားများကို အဖြူဖျော့ရောင်ပြောင်းရန် */
+    border: 1px solid var(--border-color);
+}
+
+body.dark-theme .quiz-opt:hover {
+    background-color: #475569;
+    color: #ffffff !important;
+}
+
+body.dark-theme .edit-input {
+    background-color: #0f172a;
+    color: #ffffff;
+    border: 1px solid #475569;
+}
+
+/* Placeholder စာသားအရောင် (Short Answer box အတွက်) */
+body.dark-theme .edit-input::placeholder {
+    color: #94a3b8;
+}
+
+/* Badge Layout Fix */
+body.dark-theme .badge-type {
+    background-color: #334155;
+    color: #ffffff;
+}
+
+body.dark-theme .profile-large-avatar {
+    border-color: var(--card-bg);
+}
+
+.quiz-image-container {
+    margin: 15px 0;
+    text-align: center;
+    background: #f8fafc;
+    border-radius: 10px;
+    padding: 10px;
+}
+.quiz-img {
+    max-width: 100%;
+    max-height: 300px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
 /* Dark Mode Toggle Button အလှဆင်ခြင်း */
 .theme-toggle-btn {
     background: rgba(255, 255, 255, 0.05);
@@ -296,18 +357,30 @@ body {
 
 /* Login Container */
 .login-container {
-    height: 100vh; display: flex; justify-content: center; align-items: center; background: #f1f5f9;
+    height: 100vh; display: flex; justify-content: center; align-items: center; background-color: var(--main-bg) !important;
 }
 .login-box {
-    background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    background-color: var(--card-bg) !important;
+    color: var(--text-main) !important;
+    border: 1px solid var(--border-color); padding: 40px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);
     width: 100%; max-width: 400px; text-align: center;
 }
+.login-box h2, .login-box p {
+    color: var(--text-main) !important;
+}
 .login-box input {
-    width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px;
+    background-color: var(--main-bg) !important;
+    color: var(--text-main) !important;
+    border: 1px solid var(--border-color) !important;
+    width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px;
 }
 .login-btn {
     width: 100%; padding: 12px; background: #003087; color: white; border: none; 
     border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px;
+}
+/* Login box အနောက်က စာသားအဖြူရောင်ကို ပြင်ရန် */
+.login-footer {
+    color: var(--text-muted);
 }
 
 /* Edit Mode Styles */
@@ -372,7 +445,7 @@ body {
     color: var(--text-main);
     border: 1px solid var(--border-color);
 }
-.sidebar-avatar { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--primary); cursor: pointer; }
+.sidebar-avatar { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--primary); cursor: pointer; object-fit: cover; /* ပုံကွဲမသွားအောင် ထိန်းပေးသည် */ background-color: #fff;}
 .user-details { flex: 1; color: white; cursor: pointer; overflow: hidden; font-size: 0.85rem; }
 .u-name { font-weight: bold; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
 .u-role { font-size: 0.75rem; color: #94a3b8; }
@@ -391,7 +464,7 @@ body {
 .profile-card-pro { background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
 .profile-cover { height: 150px; background: linear-gradient(45deg, #1e293b, #334155); }
 .profile-header-main { display: flex; align-items: flex-end; padding: 0 30px; margin-top: -60px; gap: 20px; }
-.profile-large-avatar { width: 120px; height: 120px; border-radius: 20px; border: 5px solid white; background: #eee; object-fit: cover; }
+.profile-large-avatar { width: 130px; height: 130px; border-radius: 20px; border: 5px solid white; background: #eee; object-fit: cover; box-shadow: 0 10px 25px rgba(0,0,0,0.1);}
 .profile-info-text h2 { margin-bottom: 5px; color: #1e293b; }
 .badge-verify { color: #3b82f6; font-size: 1.2rem; }
 
