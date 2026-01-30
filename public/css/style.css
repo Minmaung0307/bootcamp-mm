@@ -616,10 +616,27 @@ body {
 
 /* Certificate Design */
 .certificate-frame {
-    background: #fff; padding: 40px; text-align: center; border: 15px solid #1e293b;
-    max-width: 850px; margin: 20px auto; font-family: 'Georgia', serif; box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    background: white;
+    width: 10.5in; /* US Letter Landscape Width */
+    height: 8in;   /* US Letter Landscape Height */
+    padding: 25px; /* အပြင်ဘောင်အမည်းနှင့် အဝါရောင်လိုင်းကြား အကွာအဝေး */
+    border: 20px solid #1e293b; /* အပြင်ဘောင်အမည်း */
+    box-sizing: border-box;
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    margin: 20px auto;
 }
-.cert-border { border: 3px double var(--primary); padding: 40px; }
+.cert-border { 
+    border: 5px solid #d4af37; /* အလယ်က အဝါရောင်ဘောင် */
+    height: 100%;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    text-align: center;
+}
 .cert-title { font-size: 3rem; color: var(--primary); }
 .student-name { font-size: 2.5rem; margin: 20px 0; border-bottom: 2px solid #333; display: inline-block; padding: 0 50px; }
 .cert-footer { display: flex; justify-content: space-around; margin-top: 50px; }
@@ -727,13 +744,13 @@ body {
 
 .certificate-frame {
     background: white;
-    padding: 40px;
-    border: 15px solid #1e293b;
-    max-width: 900px;
-    margin: 20px auto;
-    text-align: center;
-    position: relative;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    width: 10.5in;
+    height: 8in;
+    padding: 25px;
+    border: 20px solid #1e293b;
+    box-sizing: border-box;
+    box-shadow: 0 15px 50px rgba(0,0,0,0.15);
+    flex-shrink: 0; /* ပုံစံမပျက်စေရန် */
 }
 
 .cert-border {
@@ -749,13 +766,110 @@ body {
     margin: 0;
 }
 
+/* --- Certificate Base Style --- */
+.certificate-container {
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.certificate-page-wrapper {
+    display: flex;
+    flex-direction: column; /* အပေါ်အောက် စီမည် */
+    align-items: center;    /* အလယ်တည့်တည့် ညှိမည် */
+    padding: 40px 20px;
+    width: 100%;
+}
+
+.cert-action-buttons {
+    margin-top: 30px;
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    width: 100%;
+}
+
+.cert-action-buttons button {
+    height: auto !important; /* ဆွဲဆန့်မခံရစေရန် */
+    padding: 12px 30px !important;
+    min-width: 180px;
+}
+
+/* --- 🔥 အရေးကြီးဆုံး Print Setting 🔥 --- */
 @media print {
-    /* Print ထုတ်တဲ့အခါ ခလုတ်တွေကို ဖျောက်ထားမယ် */
-    .sidebar, .top-nav, .menu-btn, .save-btn { display: none !important; }
-    .menu-btn, .save-btn, .sidebar, .top-nav { display: none !important; }
-    .main-content { margin: 0 !important; width: 100% !important; }
-    .certificate-frame { border: none; box-shadow: none; margin: 0; }
-    .app-footer { display: none !important; }
+    /* ၁။ Browser ကို Landscape mode အဖြစ် သတ်မှတ်ခြင်း */
+    @page {
+        size: letter landscape;
+        margin: 0; /* စာရွက်ဘောင်များကို ဖယ်ထုတ်မည် */
+    }
+
+    /* ၂။ မလိုအပ်သော UI အစိတ်အပိုင်းများ အားလုံးကို ဖျောက်ခြင်း */
+    #sidebar, 
+    .top-nav, 
+    #announcement-bar, 
+    .app-footer, 
+    .no-print, 
+    .breadcrumbs,
+    #back-to-top {
+        display: none !important;
+    }
+
+    /* ၃။ Body နှင့် Wrapper များကို Print အတွက် နေရာပြန်ညှိခြင်း */
+    body, html {
+        background-color: white !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        height: 100%;
+        overflow: visible !important;
+    }
+
+    .main-content {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        display: block !important;
+    }
+
+    .body-container {
+        padding: 0 !important;
+        margin: 0 !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        height: 100vh; /* စာရွက်အလယ်တည့်တည့် ရောက်စေရန် */
+    }
+
+    /* ၄။ Certificate Frame ကို စာရွက်နှင့် ကွက်တိဖြစ်အောင် ညှိခြင်း */
+    .certificate-frame {
+        width: 10.5in !important;
+        height: 8in !important;
+        margin: 0 !important;
+        border: 20px solid #1e293b !important;
+        box-shadow: none !important;
+        position: relative !important;
+        top: 0 !important;
+        left: 0 !important;
+        page-break-after: always;
+    }
+
+    /* ပုံထဲမှာ မြင်ရတဲ့ Blue bar ကြီး မပါစေရန် */
+    .certificate-container {
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .certificate-page-wrapper {
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    .cert-action-buttons {
+        display: none !important; /* Print ထုတ်လျှင် ခလုတ်များ ဖျောက်ထားမည် */
+    }
 }
 
 .completed { color: #22c55e; opacity: 0.7;}
@@ -904,3 +1018,55 @@ body.focus-mode #announcement-bar,
 body.focus-mode .app-footer { display: none !important; }
 body.focus-mode .main-content { margin-left: 0 !important; width: 100% !important; }
 body.focus-mode .body-container { max-width: 800px; padding: 50px 20px; }
+
+/* --- အစ Tooltip Visibility Fix --- */
+.tooltip {
+    position: relative;
+    display: inline-block;
+    color: #003087; /* အပြာရောင် */
+    font-weight: bold;
+    border-bottom: 2px dotted #003087;
+    cursor: help;
+    z-index: 10; /* စာသားထက် အနည်းငယ်မြင့်ရန် */
+}
+
+.tooltip .tooltiptext {
+    visibility: hidden;
+    width: 240px;
+    background-color: #1e293b; /* အမည်းရောင်နောက်ခံ */
+    color: #fff;
+    text-align: center;
+    border-radius: 8px;
+    padding: 12px;
+    position: absolute;
+    z-index: 9999; /* အရာအားလုံးရဲ့ အပေါ်ဆုံးမှာ ပေါ်ရန် (အရေးကြီးသည်) */
+    bottom: 140%; /* စာသားအပေါ်မှာ အကွာအဝေးတစ်ခု ချန်ထားရန် */
+    left: 50%;
+    margin-left: -120px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+    font-size: 0.9rem;
+    font-weight: normal;
+    line-height: 1.5;
+    pointer-events: none; /* Mouse နဲ့ တိုက်ရိုက် မထိစေရန် */
+}
+
+/* Mouse တင်လိုက်ရင် ပွင့်လာစေရန် */
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Tooltip အောက်ခြေက မြှားချွန်လေး ထည့်ရန် (Optional) */
+.tooltip .tooltiptext::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -8px;
+    border-width: 8px;
+    border-style: solid;
+    border-color: #1e293b transparent transparent transparent;
+}
+/* --- အဆုံး Tooltip Visibility Fix --- */

@@ -9,35 +9,22 @@ const auth = firebase.auth();
 // let currentZoomLink = "https://zoom.us/j/your_meeting_id"; // ဒီမှာ ကိုယ့် Link ထည့်ပါ
 let currentZoomLink = ""; // ပုံသေမထားတော့ဘဲ Database မှယူမည်
 let nextClassTime = null;
-
-// Database မှ Zoom Link နှင့် အတန်းချိန်ကို အမြဲစောင့်ကြည့်နေမည့် function
-function syncZoomConfig() {
-    db.collection('settings').doc('zoom_config').onSnapshot(doc => {
-        if (doc.exists) {
-            const data = doc.data();
-            currentZoomLink = data.url;
-            // Firebase Timestamp ကို JS Date အဖြစ်ပြောင်းခြင်း
-            if (data.startTime) {
-                nextClassTime = data.startTime.toDate();
-            }
-            console.log("Zoom Link Updated from Cloud:", currentZoomLink);
-        }
-    });
-}
+let activeChatId = "Batch-05"; // Default ကို Group Chat ထားမယ်
+let activeChatName = "Group: Batch-05";
 
 // Global User State
 let currentUser = JSON.parse(localStorage.getItem('currentUser')) || {
     isLoggedIn: false, 
-    uid: "student-123", 
-    name: "Mg Mg (Sample)", 
+    uid: "", 
+    name: "Guest Student", 
     role: "Student",
     photo: "https://placehold.co/150x150/003087/white?text=User",
-    skills: ["HTML", "CSS", "JavaScript", "React"], 
-    notes: "Bootcamp မှ သင်ခန်းစာများကို အောင်မြင်စွာ လေ့လာပြီးပါပြီ။", 
+    skills: ["HTML", "CSS", "JavaScript"], 
+    notes: "", 
     isPaid: true,
-    github: "https://github.com/mgmg", 
-    portfolio: "https://mgmg.dev", 
-    linkedin: "", facebook: "", youtube: "", tiktok: "", instagram: "", email: "mgmg@example.com",
+    github: "", 
+    portfolio: "", 
+    linkedin: "", facebook: "", youtube: "", tiktok: "", instagram: "", email: "",
     quizAttempts: {}, 
     
     // ပြီးမြောက်ထားသော သင်ခန်းစာ ၅ ခု (Certificate ပွင့်ရန် လိုအပ်ချက်)
@@ -69,11 +56,6 @@ let academicInfo = {
   uid: "st-001",
 };
 
-// --- Messaging Section ---
-// လက်ရှိ ဘယ်သူနဲ့ Chat နေသလဲ ဆိုတာ သိမ်းရန်
-let activeChatId = "Batch-05"; // Default ကို Group Chat ထားမယ်
-let activeChatName = "Group: Batch-05";
-
 // ၁။ Dark Mode (ညဘက်လေ့လာသူများအတွက်)
 function toggleDarkMode() {
     document.body.classList.toggle('dark-theme');
@@ -92,6 +74,21 @@ async function syncProgressToCloud() {
             lastLesson: currentUser.lastLesson || null
         });
     } catch (e) { console.error("Cloud sync failed", e); }
+}
+
+// Database မှ Zoom Link နှင့် အတန်းချိန်ကို အမြဲစောင့်ကြည့်နေမည့် function
+function syncZoomConfig() {
+    db.collection('settings').doc('zoom_config').onSnapshot(doc => {
+        if (doc.exists) {
+            const data = doc.data();
+            currentZoomLink = data.url;
+            // Firebase Timestamp ကို JS Date အဖြစ်ပြောင်းခြင်း
+            if (data.startTime) {
+                nextClassTime = data.startTime.toDate();
+            }
+            console.log("Zoom Link Updated from Cloud:", currentZoomLink);
+        }
+    });
 }
 
 // ==========================================
@@ -125,26 +122,21 @@ function showSection(section, filterCat = null) {
   if (section === "dashboard") {
     title.innerText = "Dashboard";
     renderDashboard(); // <--- အပေါ်မှာ သတ်မှတ်ထားတဲ့ function ကို ခေါ်လိုက်တာပါ
-  } // အသစ်ထည့်ရမည့် အပိုင်း
-    else if (section === 'about') {
-        title.innerText = "About Us";
+  } else if (section === 'courses') {
+        title.innerText = filterCat ? `${filterCat} သင်ခန်းစာများ` : "သင်ခန်းစာများအားလုံး";
+        renderCourseTree(filterCat);
+    } else if (section === 'messages') {
+        title.innerText = "Messages";
+        showMessages();
+    } else if (section === 'profile') {
+        title.innerText = "My Profile";
+        renderProfile();
+    } else if (section === 'about') {
         renderAbout();
     } else if (section === 'privacy') {
-        title.innerText = "Privacy Policy";
         renderPrivacy();
-    } else if (section === "courses") {
-    title.innerText = filterCat
-      ? `${filterCat} သင်ခန်းစာများ`
-      : "သင်ခန်းစာများအားလုံး";
-    renderCourseTree(filterCat);
-  } else if (section === "messages") {
-    title.innerText = "စာတိုပေးပို့ခြင်း";
-    showMessages();
-  } else if (section === "profile") {
-    title.innerText = "ကျောင်းသား Profile";
-    renderProfile();
-  }
-  renderAuthFooter();
+    }
+    renderAuthFooter();
 }
 
 // ==========================================
@@ -1000,6 +992,7 @@ function saveProfile() {
 // Sidebar Footer Render (User Info & Logout)
 function renderAuthFooter() {
     const authDiv = document.getElementById('auth-section');
+    if(!authDiv) return;
     const isDark = document.body.classList.contains('dark-theme');
     
     // ပုံမရှိခဲ့ရင် ပြပေးမယ့် default icon တစ်ခု ထားပေးထားပါတယ်
@@ -1087,79 +1080,316 @@ function handleLogout() {
 
 // --- Transcript ပြသခြင်း ---
 function viewTranscript(uid, isAdminPreview = false) {
-    // ကျောင်းသားကို ရှာမည်
+    // ၁။ ကျောင်းသားကို ရှာဖွေခြင်း
     const student = (uid === currentUser.uid) ? currentUser : studentsList.find(s => s.uid === uid);
     if (!student) return alert("Student not found!");
 
     const body = document.getElementById('dynamic-body');
-    // Admin ကြည့်တာဆိုရင် Admin Preview ဆီပြန်သွားမယ်၊ ကျောင်းသားဆိုရင် Profile ဆီပြန်သွားမယ်
-    const backFunc = isAdminPreview ? `previewStudentAchievements('${uid}')` : "renderProfile()";
+    // Admin Preview ဖြစ်လျှင် Admin ဆီပြန်သွားမည်၊ မဟုတ်လျှင် Profile ဆီပြန်သွားမည်
+    const backFunc = isAdminPreview ? `previewStudentAchievements('${uid}')` : "showSection('profile')";
     
     const grades = student.grades || {};
-    let rows = Object.entries(grades).map(([sub, score]) => `
-        <tr>
-            <td style="text-transform:uppercase;">${sub}</td>
-            <td>${score}</td>
-            <td>${score >= 50 ? '<span class="text-success">Pass</span>' : '<span class="text-danger">Fail</span>'}</td>
-        </tr>
-    `).join('');
+    let totalScore = 0;
+    let subjectCount = 0;
+
+    // ၂။ ဘာသာရပ်တစ်ခုချင်းစီအတွက် Row များ ထုတ်ယူခြင်း
+    let rows = lmsSettings.subjects.map(sub => {
+        const score = grades[sub.toLowerCase()] || 0;
+        totalScore += score;
+        subjectCount++;
+        
+        // ရလဒ်အရောင် သတ်မှတ်ခြင်း
+        const status = score >= 50 
+            ? '<span class="text-success" style="font-weight:bold;">Pass</span>' 
+            : '<span class="text-danger" style="font-weight:bold;">Fail</span>';
+
+        return `
+            <tr>
+                <td style="text-transform:uppercase; font-weight:500;">${sub}</td>
+                <td>${score}</td>
+                <td>${status}</td>
+            </tr>
+        `;
+    }).join('');
+
+    // ၃။ GPA နှင့် ရက်စွဲ တွက်ချက်ခြင်း
+    const gpa = subjectCount > 0 ? (totalScore / subjectCount).toFixed(2) : 0;
+    const issueDate = new Date().toLocaleDateString('en-GB');
 
     body.innerHTML = `
-        <div class="content-card animate-up">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                <h3><i class="fas fa-file-invoice"></i> Official Transcript ${isAdminPreview ? '(Demo)' : ''}</h3>
+        <div class="content-card animate-up transcript-area">
+            <!-- Header Section (No-Print) -->
+            <div class="no-print" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h3><i class="fas fa-file-invoice"></i> Official Academic Transcript ${isAdminPreview ? '(Demo)' : ''}</h3>
                 <button class="menu-btn" onclick="${backFunc}"><i class="fas fa-arrow-left"></i> Back</button>
             </div>
-            <hr><br>
-            <div class="academic-box">
-                <p><strong>Student Name:</strong> ${student.name}</p>
-                <p><strong>Batch:</strong> ${student.batchId || academicInfo.batchName}</p>
+
+            <!-- Transcript Header -->
+            <div class="transcript-header" style="text-align:center; margin-bottom:30px;">
+                <h2 style="color:var(--primary); margin:0; letter-spacing:1px; text-transform:uppercase;">Myanmar Full-Stack Bootcamp</h2>
+                <p style="margin:5px 0; color:var(--text-muted); font-size:0.9rem;">OFFICIAL STUDENT RECORD</p>
             </div>
-            <br>
-            <table class="admin-table">
-                <thead><tr><th>Subject</th><th>Score</th><th>Status</th></tr></thead>
-                <tbody>${rows || '<tr><td colspan="3">အမှတ်စာရင်း မရှိသေးပါ။</td></tr>'}</tbody>
+
+            <!-- Student Info Section -->
+            <div class="academic-box" style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; padding:20px; border-radius:10px; background:var(--main-bg); margin-bottom:25px;">
+                <div>
+                    <p style="margin:5px 0;"><strong>Student Name:</strong> ${student.name}</p>
+                    <p style="margin:5px 0;"><strong>Student ID:</strong> ${student.uid.substring(0, 8).toUpperCase()}</p>
+                    <p style="margin:5px 0;"><strong>Batch:</strong> ${student.batchId || academicInfo.batchName}</p>
+                </div>
+                <div style="text-align:right;">
+                    <p style="margin:5px 0;"><strong>Course Title:</strong> ${lmsSettings.courseTitle}</p>
+                    <p style="margin:5px 0;"><strong>Date Issued:</strong> ${issueDate}</p>
+                    <p style="margin:5px 0;"><strong>Average GPA:</strong> <span style="color:var(--primary); font-weight:bold; font-size:1.1rem;">${gpa}</span></p>
+                </div>
+            </div>
+
+            <!-- Grades Table -->
+            <table class="admin-table" style="width:100%; border-collapse:collapse; margin-top:10px;">
+                <thead>
+                    <tr style="background:var(--primary); color:white;">
+                        <th style="padding:12px; text-align:left;">Subject / Module</th>
+                        <th style="padding:12px; text-align:center;">Score</th>
+                        <th style="padding:12px; text-align:center;">Result</th>
+                    </tr>
+                </thead>
+                <tbody style="text-align:center;">
+                    ${rows || '<tr><td colspan="3" style="padding:20px;">ဘာသာရပ်များ သတ်မှတ်ထားခြင်း မရှိသေးပါ။</td></tr>'}
+                </tbody>
             </table>
-            <br>
-            <button class="save-btn" onclick="window.print()"><i class="fas fa-print"></i> Print Transcript</button>
-        </div>`;
+
+            <!-- Footer Section -->
+            <div class="transcript-footer" style="margin-top:60px; display:flex; justify-content:space-between; align-items:flex-end;">
+                <div style="font-size:0.8rem; color:grey; max-width:300px;">
+                    * This is a computer-generated official transcript.<br>
+                    * Minimum passing score for each module is 50.
+                </div>
+                <div style="text-align:center; width:220px;">
+                    <div style="border-bottom:1px solid #333; height:40px; font-family:'Dancing Script', cursive; font-size:1.3rem; display:flex; align-items:center; justify-content:center;">
+                        ${lmsSettings.instructorName}
+                    </div>
+                    <p style="margin-top:8px; font-weight:bold; font-size:0.9rem; text-transform:uppercase;">Registrar Office</p>
+                </div>
+            </div>
+
+            <!-- Print Actions (No-Print) -->
+            <div class="no-print" style="margin-top:40px; text-align:center; display:flex; justify-content:center; gap:15px;">
+                <button class="save-btn" onclick="window.print()" style="padding:12px 30px;">
+                    <i class="fas fa-print"></i> Print Transcript
+                </button>
+            </div>
+        </div>
+    `;
 }
 
-// --- Certificate ပြသခြင်း ---
+// --- ၁။ Global Settings Variables ---
+let lmsSettings = {
+    courseTitle: "Full-Stack Web Development",
+    instructorName: "Loading...",
+    announcement: "Loading...",
+    subjects: [] // ဘာသာရပ်များကို ဤနေရာတွင် စီမံမည်
+};
+
+// Database မှ Settings များကို Sync လုပ်ခြင်း
+function syncLMSSettings() {
+    console.log("Syncing settings from Firebase...");
+    
+    // ၁။ Announcement Sync
+    db.collection('settings').doc('announcement').onSnapshot(doc => {
+        if (doc.exists) {
+            const data = doc.data();
+            lmsSettings.announcement = data.text;
+            
+            // HTML ထဲက id="announcement-text" ဆီကို စာသားပို့မည်
+            const annoEl = document.getElementById('announcement-text');
+            if (annoEl) {
+                annoEl.innerText = data.text;
+            }
+        }
+    }, err => console.error("Announcement Sync Error:", err));
+
+    // ၂။ Course Info Sync
+    db.collection('settings').doc('course_info').onSnapshot(doc => {
+        if (doc.exists) {
+            const data = doc.data();
+            lmsSettings.courseTitle = data.courseTitle || lmsSettings.courseTitle;
+            lmsSettings.instructorName = data.instructorName || "Teacher";
+            lmsSettings.subjects = data.subjects || [];
+            console.log("Instructor Updated to:", lmsSettings.instructorName);
+            
+            // Profile သို့မဟုတ် Header ကို Update ဖြစ်စေရန်
+            renderAuthFooter();
+            if (document.getElementById('p-instructor-display')) {
+                document.getElementById('p-instructor-display').innerText = lmsSettings.instructorName;
+            }
+        }
+    });
+
+    // ၃။ Zoom Config Sync
+    db.collection('settings').doc('zoom_config').onSnapshot(doc => {
+        if (doc.exists) {
+            const data = doc.data();
+            currentZoomLink = data.url;
+            if (data.startTime) nextClassTime = data.startTime.toDate();
+        }
+    });
+}
+
+// --- ၂။ Admin Panel: Announcement & Course Settings ပြင်သည့် UI ---
+function renderLMSEditor() {
+    const body = document.getElementById('dynamic-body');
+    
+    // Zoom Time ကို input format ပြောင်းရန်
+    const dateStr = nextClassTime ? nextClassTime.toISOString().slice(0, 16) : "";
+
+    body.innerHTML = `
+        <div class="content-card animate-up" style="max-width: 800px; margin: auto;">
+            <h3><i class="fas fa-cogs"></i> LMS စနစ် အလုံးစုံ စီမံခန့်ခွဲမှု</h3>
+            <p style="color:var(--text-muted)">ဤနေရာတွင် Announcement၊ Zoom Link နှင့် ဘာသာရပ်များကို ပြင်ဆင်နိုင်သည်။</p>
+            <hr><br>
+            
+            <!-- ၁။ Announcement Section -->
+            <label>📢 Announcement (အပေါ်ဆုံးတွင် ပြသမည့်စာသား)</label>
+            <textarea id="adm-anno" class="edit-input" rows="2">${lmsSettings.announcement}</textarea>
+            
+            <div class="edit-grid" style="margin-top:20px;">
+                <!-- ၂။ Course Info Section -->
+                <div>
+                    <label>🎓 သင်တန်းဘွဲ့အမည် (Certificate Title)</label>
+                    <input type="text" id="adm-course" class="edit-input" value="${lmsSettings.courseTitle}">
+                    
+                    <label style="margin-top:15px; display:block;">✍️ သင်တန်းဆရာအမည် (Instructor)</label>
+                    <input type="text" id="adm-instructor" class="edit-input" value="${lmsSettings.instructorName}">
+                </div>
+
+                <!-- ၃။ Zoom Config Section -->
+                <div>
+                    <label>📹 Zoom / Meet Meeting Link</label>
+                    <input type="url" id="adm-zoom-url" class="edit-input" value="${currentZoomLink}" placeholder="https://...">
+                    
+                    <label style="margin-top:15px; display:block;">⏰ နောက်လာမည့် အတန်းချိန်</label>
+                    <input type="datetime-local" id="adm-zoom-time" class="edit-input" value="${dateStr}">
+                </div>
+            </div>
+
+            <!-- ၄။ Subjects Section -->
+            <label style="margin-top:20px; display:block;">📚 Transcript ဘာသာရပ်စာရင်း (comma ခြား၍ ရေးပါ)</label>
+            <input type="text" id="adm-subjects" class="edit-input" value="${lmsSettings.subjects.join(', ')}">
+            
+            <div style="margin-top:30px; display:flex; gap:10px;">
+                <button class="save-btn" onclick="saveLMSSettings()">
+                    <i class="fas fa-save"></i> Save All Changes
+                </button>
+                <button class="menu-btn" onclick="renderAdminPanel()">Back</button>
+            </div>
+        </div>
+    `;
+}
+
+// Settings အားလုံးကို Database ထဲသို့ တစ်ပြိုင်နက် သိမ်းဆည်းခြင်း
+async function saveLMSSettings() {
+    const anno = document.getElementById('adm-anno').value;
+    const course = document.getElementById('adm-course').value;
+    const instructor = document.getElementById('adm-instructor').value;
+    const zoomUrl = document.getElementById('adm-zoom-url').value;
+    const zoomTime = document.getElementById('adm-zoom-time').value;
+    const subjects = document.getElementById('adm-subjects').value.split(',').map(s => s.trim().toLowerCase()).filter(s => s !== "");
+
+    try {
+        // အဆင့် ၁ - Firestore ထဲ သွားသိမ်းမည်
+        await db.collection('settings').doc('announcement').set({ text: anno });
+        await db.collection('settings').doc('course_info').set({
+            courseTitle: course,
+            instructorName: instructor,
+            subjects: subjects
+        });
+        await db.collection('settings').doc('zoom_config').set({
+            url: zoomUrl,
+            startTime: firebase.firestore.Timestamp.fromDate(new Date(zoomTime))
+        });
+
+        // အဆင့် ၂ - Local Variable များကိုပါ ချက်ချင်း Update လုပ်မည်
+        lmsSettings.announcement = anno;
+        lmsSettings.instructorName = instructor;
+        lmsSettings.courseTitle = course;
+        lmsSettings.subjects = subjects;
+        currentZoomLink = zoomUrl;
+        nextClassTime = new Date(zoomTime);
+
+        alert("အောင်မြင်စွာ Update လုပ်ပြီးပါပြီ။");
+        
+        // အဆင့် ၃ - Dashboard သို့ ပြန်သွားပြီး UI အားလုံးကို Update ဖြစ်စေမည်
+        showSection('dashboard');
+
+    } catch (error) {
+        console.error("Save Error:", error);
+        alert("Error: " + error.message);
+    }
+}
+
+// --- ၃။ Dynamic Certificate (ID နှင့် Date ပါဝင်ခြင်း) ---
 function viewCertificate(uid, isAdminPreview = false) {
     const student = (uid === currentUser.uid) ? currentUser : studentsList.find(s => s.uid === uid);
     if (!student) return alert("Student not found!");
 
     const body = document.getElementById('dynamic-body');
-    const backFunc = isAdminPreview ? `previewStudentAchievements('${uid}')` : "renderProfile()";
+    const backFunc = isAdminPreview ? `previewStudentAchievements('${uid}')` : "showSection('profile')";
     
+    const issueDate = new Date().toLocaleDateString('en-GB');
+    const certId = `CERT-2026-${student.uid.substring(0, 5).toUpperCase()}`;
+    const instructor = lmsSettings.instructorName || "Ashin";
+
     body.innerHTML = `
-        <div class="certificate-frame animate-up">
-            <div class="cert-border">
-                <div class="cert-content">
-                    <h1 class="cert-title">CERTIFICATE</h1>
-                    <p style="letter-spacing: 5px; margin-top:10px;">OF COMPLETION</p>
-                    <div style="margin: 40px 0;">
-                        <p>This is to certify that</p>
-                        <h2 class="student-name" style="font-family:serif; font-size:2.5rem; border-bottom:2px solid #333; display:inline-block; padding:0 30px; margin: 15px 0;">
+        <!-- အပြင်ဘက်ဆုံး Container ကို column direction ပေးပါမည် -->
+        <div class="certificate-page-wrapper animate-up">
+            
+            <div class="certificate-frame shadow-lg">
+                <div class="cert-border">
+                    <div style="position: relative; z-index: 1;">
+                        <h1 style="font-family: 'Times New Roman', serif; font-size: 3.5rem; color: #1e293b; margin: 0;">CERTIFICATE</h1>
+                        <p style="letter-spacing: 8px; font-weight: bold; color: #64748b; margin-bottom: 30px;">OF COMPLETION</p>
+                        
+                        <p style="font-size: 1.2rem; color: #334155;">This is to certify that</p>
+                        <h2 style="font-family: 'Georgia', serif; font-size: 3rem; color: #003087; border-bottom: 2px solid #e2e8f0; display: inline-block; padding: 0 40px; margin: 15px 0;">
                             ${student.name}
                         </h2>
-                        <p style="margin-top:15px;">has successfully completed the Professional Bootcamp in</p>
-                        <h3 style="color:#003087; margin: 10px 0;">Full-Stack Web Development</h3>
-                        <p>issued on ${new Date().toLocaleDateString()}</p>
-                    </div>
-                    <div style="display:flex; justify-content:space-around; margin-top:50px;">
-                        <div><p>________________</p><p>Lead Instructor</p></div>
-                        <div><p>________________</p><p>Date</p></div>
+                        
+                        <p style="font-size: 1.1rem; color: #334155; margin-top: 20px;">
+                            has successfully completed the Professional Bootcamp in
+                        </p>
+                        <h3 style="color: #003087; font-size: 1.8rem; margin: 15px 0; text-transform: uppercase;">
+                            ${lmsSettings.courseTitle || "Full-Stack Web Development"}
+                        </h3>
+                        <p style="color: #64748b; font-size: 1rem;">Given under our seal on this day, <strong>${issueDate}</strong></p>
+
+                        <div style="display: flex; justify-content: space-around; align-items: flex-end; margin-top: 60px;">
+                            <div style="text-align: center;">
+                                <p style="font-family: 'Dancing Script', cursive; font-size: 1.8rem; color: #1e293b; margin-bottom: 5px;">
+                                    ${instructor}
+                                </p>
+                                <div style="border-top: 2px solid #334155; width: 200px; padding-top: 5px; font-weight: bold; font-size: 0.8rem;">LEAD INSTRUCTOR</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <p style="font-weight: bold; font-size: 1.1rem; color: #1e293b; margin-bottom: 12px;">${certId}</p>
+                                <div style="border-top: 2px solid #334155; width: 200px; padding-top: 5px; font-weight: bold; font-size: 0.8rem;">CERTIFICATE ID</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <br>
-            <div class="no-print" style="display:flex; justify-content:center; gap:10px;">
-                <button class="menu-btn" onclick="${backFunc}"><i class="fas fa-arrow-left"></i> Back</button>
-                <button class="save-btn" onclick="window.print()"><i class="fas fa-download"></i> Save as PDF</button>
+
+            <!-- ခလုတ်များကို အောက်ခြေတွင် ထားရှိပါမည် -->
+            <div class="no-print cert-action-buttons">
+                <button class="save-btn" onclick="window.print()">
+                    <i class="fas fa-print"></i> Print Official Certificate
+                </button>
+                <button class="menu-btn" style="background:#64748b; color:white;" onclick="${backFunc}">
+                    <i class="fas fa-arrow-left"></i> Back
+                </button>
             </div>
-        </div>`;
+            
+        </div>
+    `;
 }
 
 // ==========================================
@@ -1167,25 +1397,25 @@ function viewCertificate(uid, isAdminPreview = false) {
 // ==========================================
 
 window.onload = () => {
-    // ၁။ အခြေခံ Settings များ (Year, Dark Mode)
+    // ၁။ Sync Cloud Data ချက်ချင်းစတင်မည်
+    syncLMSSettings();
+    syncZoomConfig();
+
+    // ၂။ Footer Year
     const yearEl = document.getElementById('current-year');
     if(yearEl) yearEl.innerText = new Date().getFullYear();
 
-    const isDark = localStorage.getItem('dark-mode') === 'true';
-    if (isDark) document.body.classList.add('dark-theme');
+    // ၃။ Dark Mode
+    if (localStorage.getItem('dark-mode') === 'true') document.body.classList.add('dark-theme');
 
-    // ၂။ Zoom Config ကို စတင်နားထောင်ခြင်း
-    syncZoomConfig(); 
-
-    // ၃။ Login Status စစ်ဆေးခြင်း
+    // ၄။ Login Check
     if (currentUser.isLoggedIn) {
-        document.getElementById('app-wrapper').style.display = 'flex';
         document.getElementById('login-page').style.display = 'none';
-        
+        document.getElementById('app-wrapper').style.display = 'flex';
         setTimeout(() => {
             showSection('dashboard');
-            startLiveCountdown(); // အပေါ်မှာ တစ်ခါခေါ်ပြီးသားမို့ ဒီမှာပဲ ထားပါမယ်
-            initNotifications();  
+            startLiveCountdown();
+            initNotifications();
         }, 100);
     } else {
         document.getElementById('login-page').style.display = 'flex';
@@ -1226,7 +1456,7 @@ let studentsList = [
     name: "Aung Aung",
     batchId: "Batch-05",
     attendance: "90%",
-    grades: { html: 85, css: 80, javascript: 75, react: 78, nodejs: 82 },
+    grades: { html: 85, css: 80, javascript: 75, react: 70 },
     grade: "B+", // 80% ဝန်းကျင်
     isPaid: true,
   },
@@ -1235,7 +1465,7 @@ let studentsList = [
     name: "Su Su",
     batchId: "Batch-05",
     attendance: "95%",
-    grades: { html: 95, css: 90, javascript: 88, react: 85, nodejs: 90 },
+    grades: { html: 95, css: 90, javascript: 88, react: 85 },
     grade: "A", // 90% ဝန်းကျင်
     isPaid: true,
   },
@@ -1245,7 +1475,7 @@ let studentsList = [
     batchId: "Batch-06",
     attendance: "80%",
     // အမှတ်နည်းတဲ့သူအတွက် နမူနာ (စမ်းသပ်ရန်)
-    grades: { html: 45, css: 55, javascript: 50, react: 40, nodejs: 48 }, 
+    grades: { html: 45, css: 55, javascript: 50, react: 40 }, 
     grade: "C", // 50% အောက်ဆိုရင် Fail ဖြစ်နိုင်သလို C ဆိုရင်တော့ အောင်ရုံပဲရှိမယ်
     isPaid: false, // ပိုက်ဆံမသွင်းရသေးတဲ့သူ
   },
@@ -1261,15 +1491,26 @@ function renderAdminPanel() {
         <div class="admin-container fade-in">
             <!-- အပေါ်ဆုံး ခေါင်းစီးနှင့် အဓိက ခလုတ်များ -->
             <div class="admin-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:15px;">
+
                 <h3 style="margin:0;"><i class="fas fa-user-shield"></i> Admin Control Panel</h3>
                 <div style="display:flex; gap:10px;">
+                    <!-- 🔥 ဒီခလုတ်က အရေးကြီးဆုံးပါ၊ Editor ဆီသွားပါမယ် -->
+                    <button class="menu-btn" style="background:#f59e0b; color:white;" onclick="renderLMSEditor()">
+                        <i class="fas fa-cog"></i> System Settings
+                    </button>
+
+                    <button class="menu-btn" style="background:#0ea5e9; color:white;" onclick="renderContentEditor()">
+                        <i class="fas fa-plus"></i> Add Content
+                    </button>
+
                     <button class="menu-btn" style="background:#f59e0b" onclick="renderZoomEditor()">
                         <i class="fas fa-video"></i> Manage Zoom
                     </button>
-                    <button class="menu-btn" style="background:#0ea5e9" onclick="renderContentEditor()"><i class="fas fa-plus"></i> Add Content</button>
+
                     <button class="menu-btn" style="background:#4b5563; color:white;" onclick="renderLMSGuide()">
                         <i class="fas fa-book"></i> User Guide
                     </button>
+
                     <button class="save-btn" onclick="renderSubmissions()">
                         <i class="fas fa-file-signature"></i> Review Assignments
                     </button>
