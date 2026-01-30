@@ -6,6 +6,25 @@
 const db = firebase.firestore();
 const auth = firebase.auth();
 
+// let currentZoomLink = "https://zoom.us/j/your_meeting_id"; // ဒီမှာ ကိုယ့် Link ထည့်ပါ
+let currentZoomLink = ""; // ပုံသေမထားတော့ဘဲ Database မှယူမည်
+let nextClassTime = null;
+
+// Database မှ Zoom Link နှင့် အတန်းချိန်ကို အမြဲစောင့်ကြည့်နေမည့် function
+function syncZoomConfig() {
+    db.collection('settings').doc('zoom_config').onSnapshot(doc => {
+        if (doc.exists) {
+            const data = doc.data();
+            currentZoomLink = data.url;
+            // Firebase Timestamp ကို JS Date အဖြစ်ပြောင်းခြင်း
+            if (data.startTime) {
+                nextClassTime = data.startTime.toDate();
+            }
+            console.log("Zoom Link Updated from Cloud:", currentZoomLink);
+        }
+    });
+}
+
 // Global User State
 let currentUser = JSON.parse(localStorage.getItem('currentUser')) || {
     isLoggedIn: false, 
@@ -88,6 +107,15 @@ function toggleNav() {
 
 function showSection(section, filterCat = null) {
   const title = document.getElementById("page-title");
+
+  const body = document.getElementById('dynamic-body');
+    
+    // 🔥 Safety Check: element မရှိရင် ဘာမှမလုပ်ဘဲ ပြန်ထွက်မည်
+    if (!title || !body) {
+        console.warn("Title or Body element not found! Current section:", section);
+        return; 
+    }
+
   // Sidebar ပိတ်မည် (Sidebar ပွင့်နေမှ ပိတ်မည်)
   const sidebar = document.getElementById("sidebar");
   if (sidebar && sidebar.classList.contains("open")) {
@@ -146,6 +174,15 @@ function renderDashboard() {
     };
 
     body.innerHTML = `
+        <div class="live-countdown">
+            <h4><i class="fas fa-video"></i> Next Live Class</h4>
+            <div class="timer-grid" id="live-timer">Loading...</div>
+            <button class="save-btn" style="margin-top:10px; background:#f59e0b;" 
+                    onclick="window.open('${currentZoomLink}', '_blank')">
+                <i class="fas fa-video"></i> Join via Zoom
+            </button>
+        </div>
+
         <div class="welcome-banner fade-in">
             <h2>မင်္ဂလာပါ ${currentUser.name}! 👋</h2>
             <p>ယနေ့ သင်ယူမှုခရီးစဉ်ကို ဆက်လက်လျှောက်လှမ်းလိုက်ပါ။</p>
@@ -252,17 +289,47 @@ async function viewSubmissionDetail(id) {
     `;
 }
 
-async function submitFinalGrade(studentId, subId) {
-    const score = parseInt(document.getElementById('grade-input').value);
-    // ၁။ ကျောင်းသားရဲ့ grades ထဲမှာ သွားပေါင်းထည့်မယ်
-    await db.collection('users').doc(studentId).set({
-        grades: { [new Date().getTime()]: score } // ဘာသာရပ်အလိုက် ပြင်ဆင်ရန်
-    }, { merge: true });
+async function submitFinalGrade(studentId, subId, subjectName) {
+    const scoreInput = document.getElementById('grade-input');
+    const score = parseInt(scoreInput.value);
+    const feedback = document.getElementById('teacher-feedback').value;
 
-    // ၂။ Submission status ကို 'graded' ပြောင်းမယ်
-    await db.collection('submissions').doc(subId).update({ status: 'graded' });
-    alert("အမှတ်ပေးပြီးပါပြီ။");
-    renderAdminPanel();
+    // Validation: အမှတ်မရိုက်ရသေးရင် တားမယ်
+    if (isNaN(score) || score < 0 || score > 100) {
+        return alert("ကျေးဇူးပြု၍ မှန်ကန်သော အမှတ် (၀ မှ ၁၀၀ ကြား) ရိုက်ထည့်ပါ။");
+    }
+
+    try {
+        // ၁။ ကျောင်းသားရဲ့ grades ထဲမှာ ဘာသာရပ်အမည်နဲ့ သွားသိမ်းမယ်
+        // subjectName က ဥပမာ - 'html', 'javascript' ဖြစ်ရပါမယ်
+        await db.collection('users').doc(studentId).set({
+            grades: { [subjectName.toLowerCase()]: score } 
+        }, { merge: true });
+
+        // ၂။ Submission status ကို 'graded' ပြောင်းပြီး မှတ်ချက်ပါ သိမ်းမယ်
+        await db.collection('submissions').doc(subId).update({ 
+            status: 'graded',
+            score: score,
+            teacherFeedback: feedback
+        });
+
+        // ၃။ ကျောင်းသားဆီကို System Noti (Direct Message) ပို့မယ်
+        await db.collection('messages').add({
+            text: `🔔 အသိပေးချက်: သင်၏ ${subjectName} assignment အတွက် အမှတ်ထွက်ပါပြီ။ (ရမှတ်: ${score})။ Transcript တွင် စစ်ဆေးနိုင်ပါသည်။`,
+            senderId: currentUser.uid,
+            senderName: "LMS System",
+            receiverId: studentId,
+            type: "direct",
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        alert("အမှတ်ပေးခြင်း အောင်မြင်ပါသည်။ ကျောင်းသားထံသို့ Noti ပို့ပြီးပါပြီ။");
+        renderAdminPanel(); // Panel သို့ ပြန်သွားမည်
+
+    } catch (error) {
+        console.error("Grading error:", error);
+        alert("အမှားတစ်ခု ဖြစ်သွားပါသည်- " + error.message);
+    }
 }
 
 // Gamification (Badges)
@@ -353,7 +420,7 @@ async function renderLessonContent(catIdx, modIdx, lesIdx) {
 
   try {
     // အရေးကြီးသည်- lesson.path ကို တိုက်ရိုက် သုံးပါမည်
-    const res = await fetch(lesson.path);
+    const res = await fetch(`${lesson.path}?t=${new Date().getTime()}`);
 
     console.log("Fetching Path:", lesson.path); // Debug စစ်ရန်
     console.log("Response Status:", res.status);
@@ -1100,21 +1167,26 @@ function viewCertificate(uid, isAdminPreview = false) {
 // ==========================================
 
 window.onload = () => {
-    // လက်ရှိနှစ်ကို Footer မှာပြရန်
+    // ၁။ အခြေခံ Settings များ (Year, Dark Mode)
     const yearEl = document.getElementById('current-year');
     if(yearEl) yearEl.innerText = new Date().getFullYear();
 
-    // ၁။ Dark Mode အဟောင်းရှိမရှိ စစ်ဆေးပြီး ပြန်ဖွင့်ပေးခြင်း
     const isDark = localStorage.getItem('dark-mode') === 'true';
-    if (isDark) {
-        document.body.classList.add('dark-theme');
-    }
+    if (isDark) document.body.classList.add('dark-theme');
 
-    // ၂။ Login Status စစ်ဆေးခြင်း
+    // ၂။ Zoom Config ကို စတင်နားထောင်ခြင်း
+    syncZoomConfig(); 
+
+    // ၃။ Login Status စစ်ဆေးခြင်း
     if (currentUser.isLoggedIn) {
         document.getElementById('app-wrapper').style.display = 'flex';
         document.getElementById('login-page').style.display = 'none';
-        showSection('dashboard');
+        
+        setTimeout(() => {
+            showSection('dashboard');
+            startLiveCountdown(); // အပေါ်မှာ တစ်ခါခေါ်ပြီးသားမို့ ဒီမှာပဲ ထားပါမယ်
+            initNotifications();  
+        }, 100);
     } else {
         document.getElementById('login-page').style.display = 'flex';
         document.getElementById('app-wrapper').style.display = 'none';
@@ -1191,6 +1263,10 @@ function renderAdminPanel() {
             <div class="admin-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:15px;">
                 <h3 style="margin:0;"><i class="fas fa-user-shield"></i> Admin Control Panel</h3>
                 <div style="display:flex; gap:10px;">
+                    <button class="menu-btn" style="background:#f59e0b" onclick="renderZoomEditor()">
+                        <i class="fas fa-video"></i> Manage Zoom
+                    </button>
+                    <button class="menu-btn" style="background:#0ea5e9" onclick="renderContentEditor()"><i class="fas fa-plus"></i> Add Content</button>
                     <button class="menu-btn" style="background:#4b5563; color:white;" onclick="renderLMSGuide()">
                         <i class="fas fa-book"></i> User Guide
                     </button>
@@ -1850,3 +1926,277 @@ function renderPrivacy() {
             <p style="font-size: 0.8rem; color: grey;">နောက်ဆုံးပြင်ဆင်သည့်ရက်စွဲ - ၂၉ ဇန်နဝါရီ၊ ၂၀၂၆</p>
         </div>`;
 }
+
+// --- ၁။ Real-time Notification Logic ---
+function initNotifications() {
+    if (!currentUser.uid) return;
+
+    db.collection('messages')
+      .where('timestamp', '>', new Date()) 
+      .onSnapshot(snap => {
+        snap.docChanges().forEach(change => {
+            if (change.type === "added") {
+                const msg = change.doc.data();
+                
+                // ၁။ မိမိက ပို့သူမဟုတ်ရပါ (ကိုယ့်စာကိုယ် noti မတက်စေရန်)
+                if (msg.senderId === currentUser.uid) return;
+
+                // ၂။ အကယ်၍ ဒါက Direct Message ဖြစ်ပြီး မိမိက လက်ခံသူ (Receiver) ဖြစ်လျှင်
+                const isMyDM = msg.receiverId === currentUser.uid;
+
+                // ၃။ အကယ်၍ ဒါက Group Message ဖြစ်ပြီး မိမိက ထို Batch ထဲတွင် ရှိနေလျှင်
+                const isMyGroupMsg = msg.batchId === currentUser.batchId;
+
+                if (isMyDM || isMyGroupMsg) {
+                    addNotification(`${msg.type === 'direct' ? 'DM' : 'Group'}: ${msg.senderName} ဆီမှ စာရောက်လာပါသည်။`);
+                    
+                    // ဖုန်းထဲမှာလို တကယ့် Notification သံလေး ထွက်ချင်ရင် (Optional)
+                    let audio = new Audio('assets/noti-sound.mp3');
+                    audio.play();
+                }
+            }
+        });
+    });
+}
+
+function addNotification(text) {
+    const list = document.getElementById('noti-list');
+    const badge = document.getElementById('noti-badge');
+    
+    // အသံဖိုင်ကို ဖွင့်ခြင်း
+    const audio = new Audio('assets/noti-sound.mp3');
+    audio.play().catch(e => console.log("Audio play blocked by browser. User interaction needed."));
+
+    const item = `<div class="noti-item">${text}</div>`;
+    list.innerHTML = item + list.innerHTML;
+    
+    badge.innerText = parseInt(badge.innerText) + 1;
+    badge.style.display = "block";
+}
+
+function toggleNotifications() {
+    const dropdown = document.getElementById('noti-dropdown');
+    dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+    document.getElementById('noti-badge').style.display = "none";
+    document.getElementById('noti-badge').innerText = "0";
+}
+
+// --- ၂။ Global Search Logic ---
+function handleSearch(query) {
+    const dropdown = document.getElementById('search-results');
+    if (!query) { dropdown.style.display = "none"; return; }
+    
+    let results = [];
+    courseData.forEach((cat, ci) => {
+        cat.modules.forEach((mod, mi) => {
+            mod.lessons.forEach((les, li) => {
+                if (les.title.toLowerCase().includes(query.toLowerCase())) {
+                    results.push({ title: les.title, ci, mi, li });
+                }
+            });
+        });
+    });
+
+    if (results.length > 0) {
+        dropdown.innerHTML = results.map(r => 
+            `<div class="noti-item" onclick="renderLessonContent(${r.ci}, ${r.mi}, ${r.li}); document.getElementById('search-results').style.display='none';">
+                <i class="far fa-file-alt"></i> ${r.title}
+            </div>`
+        ).join('');
+        dropdown.style.display = "block";
+    } else {
+        dropdown.innerHTML = '<div class="noti-item">ရှာမတွေ့ပါ။</div>';
+        dropdown.style.display = "block";
+    }
+}
+
+// --- ၃။ Live Class Countdown Logic ---
+function startLiveCountdown() {
+    setInterval(() => {
+        if (!nextClassTime) return;
+
+        const now = new Date().getTime();
+        const diff = nextClassTime - now;
+        
+        const timerEl = document.getElementById('live-timer');
+        if (!timerEl) return;
+
+        if (diff <= 0) {
+            timerEl.innerHTML = "<span style='color:#22c55e'>အတန်းချိန် ရောက်ရှိနေပါပြီ။</span>";
+            return;
+        }
+
+        const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const s = Math.floor((diff % (1000 * 60)) / 1000);
+
+        timerEl.innerHTML = `${h}h : ${m}m : ${s}s`;
+    }, 1000);
+}
+
+// --- ၄။ Admin Content Manager (Teacher Only) ---
+function renderContentEditor() {
+    const body = document.getElementById('dynamic-body');
+    body.innerHTML = `
+        <div class="content-card animate-up">
+            <h3><i class="fas fa-plus-circle"></i> သင်ခန်းစာ အသစ်ထည့်သွင်းရန်</h3>
+            <hr><br>
+            
+            <label>Category (Foundations, Technical, Full-Stack သို့မဟုတ် အသစ်ရိုက်ထည့်ပါ)</label>
+            <input type="text" id="new-cat" class="edit-input" list="cat-list" placeholder="Category အမည် ရွေးပါ သို့မဟုတ် ရိုက်ထည့်ပါ">
+            <datalist id="cat-list">
+                <option value="Foundations">
+                <option value="Technical">
+                <option value="Full-Stack">
+            </datalist>
+
+            <label>Module Name</label>
+            <input type="text" id="new-mod-name" class="edit-input" placeholder="ဥပမာ- Module 1: Introduction">
+
+            <label>Lesson Title</label>
+            <input type="text" id="new-les-title" class="edit-input" placeholder="ဥပမာ- 1.1.1: Hello World">
+
+            <label>File Path</label>
+            <input type="text" id="new-les-path" class="edit-input" placeholder="content/foundations/...">
+
+            <label>Type (article, quiz, assignment, project သို့မဟုတ် အသစ်ရိုက်ထည့်ပါ)</label>
+            <input type="text" id="new-type" class="edit-input" list="type-list" placeholder="Type ရွေးပါ သို့မဟုတ် ရိုက်ထည့်ပါ">
+            <datalist id="type-list">
+                <option value="article">
+                <option value="quiz">
+                <option value="assignment">
+                <option value="project">
+            </datalist>
+
+            <div style="margin-top:20px;">
+                <button class="save-btn" onclick="saveNewLessonToCloud()">Save to Database</button>
+                <button class="menu-btn" onclick="renderAdminPanel()">Back</button>
+            </div>
+        </div>`;
+}
+
+async function saveNewLessonToCloud() {
+    const data = {
+        category: document.getElementById('new-cat').value,
+        module: document.getElementById('new-mod-name').value,
+        title: document.getElementById('new-les-title').value,
+        path: document.getElementById('new-les-path').value,
+        type: document.getElementById('new-type').value
+    };
+    
+    // Firestore ရှိ 'course_structure' collection တွင် သိမ်းမည်
+    await db.collection('course_structure').add(data);
+    alert("သင်ခန်းစာ အသစ်ကို သိမ်းဆည်းပြီးပါပြီ။ (မာတိကာတွင် ပေါ်လာစေရန် Page ကို Refresh လုပ်ပါ)");
+    renderAdminPanel();
+}
+
+function renderZoomEditor() {
+    const body = document.getElementById('dynamic-body');
+    // လက်ရှိအချိန်ကို input format ပြောင်းရန်
+    const dateStr = nextClassTime ? nextClassTime.toISOString().slice(0, 16) : "";
+
+    body.innerHTML = `
+        <div class="content-card animate-up" style="max-width: 600px; margin: auto;">
+            <h3><i class="fas fa-video"></i> Live Class စီမံခန့်ခွဲမှု</h3>
+            <p>ဤနေရာတွင် ပြင်ဆင်လိုက်ပါက ကျောင်းသားအားလုံး၏ Dashboard တွင် ချက်ချင်းပြောင်းလဲသွားမည်။</p>
+            <hr><br>
+            
+            <label>Zoom / Meet Meeting Link</label>
+            <input type="url" id="zoom-url-input" class="edit-input" value="${currentZoomLink}" placeholder="https://zoom.us/j/...">
+            
+            <label style="margin-top:15px; display:block;">နောက်လာမည့် အတန်းချိန် (Class Time)</label>
+            <input type="datetime-local" id="zoom-time-input" class="edit-input" value="${dateStr}">
+            
+            <div style="margin-top:20px; display:flex; gap:10px;">
+                <button class="save-btn" onclick="updateZoomToFirebase()">Save Config</button>
+                <button class="menu-btn" onclick="renderAdminPanel()">Back</button>
+            </div>
+        </div>
+    `;
+}
+
+async function updateZoomToFirebase() {
+    const newUrl = document.getElementById('zoom-url-input').value;
+    const newTime = document.getElementById('zoom-time-input').value;
+
+    if (!newUrl) return alert("Link ထည့်ပေးပါ");
+
+    try {
+        await db.collection('settings').doc('zoom_config').set({
+            url: newUrl,
+            startTime: firebase.firestore.Timestamp.fromDate(new Date(newTime)),
+            updatedBy: currentUser.name
+        });
+        alert("Zoom Config ကို အောင်မြင်စွာ Update လုပ်ပြီးပါပြီ။");
+        renderAdminPanel();
+    } catch (e) {
+        alert("Error: " + e.message);
+    }
+}
+
+/*
+// --- ၁။ Text-to-Speech (စာဖတ်ပြသည့်စနစ်) ---
+let speechInstance = null;
+
+function speakLesson() {
+    // ၁။ အရင်ဖတ်နေတာရှိရင် ရပ်ပစ်မည်
+    window.speechSynthesis.cancel();
+
+    let textToRead = "";
+    
+    // ၂။ စာသားကို Select ပေးထားသလား စစ်ဆေးခြင်း
+    const selectedText = window.getSelection().toString();
+
+    if (selectedText && selectedText.trim().length > 0) {
+        // Highlight လုပ်ထားသော စာကို ဖတ်မည်
+        textToRead = selectedText;
+    } else {
+        // Highlight မရှိလျှင် သင်ခန်းစာ body ကို ရှာဖတ်မည်
+        // .article-content သို့မဟုတ် .lesson-body ထဲက စာကိုပဲ ယူမည် (Header/Nav များကို ကျော်မည်)
+        const lessonContent = document.querySelector('.article-content') || 
+                              document.querySelector('.lesson-body') || 
+                              document.getElementById('dynamic-body');
+        
+        if (lessonContent) {
+            // မလိုအပ်သော ခလုတ်စာသားများကို ဖယ်ထုတ်ရန် (innerText ၏ copy တစ်ခုယူသည်)
+            textToRead = lessonContent.innerText;
+        }
+    }
+
+    if (textToRead && textToRead.trim().length > 0) {
+        const msg = new SpeechSynthesisUtterance(textToRead);
+        
+        // ဘာသာစကား ရွေးချယ်ခြင်း (အင်္ဂလိပ်စာဆိုရင် en-US)
+        msg.lang = 'en-US'; 
+        msg.rate = 0.9;  // အနည်းငယ် နှေးနှေးဖတ်ပေးရန်
+        msg.pitch = 1;   // အသံနေအသံထား
+
+        window.speechSynthesis.speak(msg);
+        
+        // ဖတ်နေကြောင်း သိသာစေရန် Alert (Optional)
+        console.log("Reading starting...");
+    } else {
+        alert("ဖတ်စရာ စာသားကို အရင် Select ပေးပါ။");
+    }
+}
+
+function stopSpeaking() {
+    window.speechSynthesis.cancel();
+}
+
+// --- ၂။ Focus Mode (Immersive Reader) ---
+function toggleFocusMode() {
+    document.body.classList.toggle('focus-mode');
+    const isFocus = document.body.classList.contains('focus-mode');
+    const btn = document.getElementById('focus-btn');
+    
+    if (isFocus) {
+        btn.innerHTML = '<i class="fas fa-compress-arrows-alt"></i>';
+        btn.style.color = '#ef4444';
+        alert("Focus Mode ဖွင့်လိုက်ပါပြီ။ စာကိုပဲ အာရုံစိုက်ဖတ်ရှုနိုင်ပါတယ်။");
+    } else {
+        btn.innerHTML = '<i class="fas fa-expand-arrows-alt"></i>';
+        btn.style.color = '';
+    }
+}
+*/

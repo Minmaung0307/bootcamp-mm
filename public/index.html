@@ -40,9 +40,38 @@
 
         <main id="main-content" class="main-content">
             <header class="top-nav">
-                <button class="menu-btn" onclick="toggleNav()">☰ Menu</button>
-                <h2 id="page-title">Dashboard</h2>
-                <div class="user-status-top"><span class="badge paid">Paid Account</span></div>
+                <div class="nav-left">
+                    <button class="menu-btn" onclick="toggleNav()">☰ Menu</button>
+
+                    <!-- 🔥 ဒီနေရာမှာ page-title ရှိနေရပါမယ် -->
+                    <h2 id="page-title">Dashboard</h2> 
+
+                    <!-- Global Search -->
+                    <div class="search-box no-mobile">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="global-search" placeholder="သင်ခန်းစာ ရှာဖွေရန်..." oninput="handleSearch(this.value)">
+                        <div id="search-results" class="search-dropdown"></div>
+                    </div>
+                </div>
+                
+                <div class="nav-right">
+                    <!-- အသစ်ထည့်လိုက်သော Accessibility Buttons -->
+                    <!-- <div class="accessibility-tools">
+                        <button onclick="speakLesson()" title="စာဖတ်ပြရန်" class="tool-btn"><i class="fas fa-volume-up"></i></button>
+                        <button onclick="stopSpeaking()" title="ရပ်တန့်ရန်" class="tool-btn"><i class="fas fa-volume-mute"></i></button>
+                        <button onclick="toggleFocusMode()" id="focus-btn" title="Focus Mode" class="tool-btn"><i class="fas fa-expand-arrows-alt"></i></button>
+                    </div> -->
+                    <!-- Notification Bell -->
+                    <div class="notification-wrapper" onclick="toggleNotifications()">
+                        <i class="fas fa-bell"></i>
+                        <span id="noti-badge" class="badge-red" style="display:none;">0</span>
+                        <div id="noti-dropdown" class="noti-dropdown">
+                            <div class="noti-header">Noti-list</div>
+                            <div id="noti-list"></div>
+                        </div>
+                    </div>
+                    <span class="badge paid no-mobile">Paid Account</span>
+                </div>
             </header>
 
             <!-- သင်ခန်းစာများနှင့် Dashboard ပေါ်မည့်နေရာ -->

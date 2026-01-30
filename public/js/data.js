@@ -8,7 +8,7 @@ const courseData = [
                     { title: "0.1.1: Welcome Article", type: "article", path: "/content/foundations/mod0/0.1.1-welcome.html" },
                     { title: "0.1.2: Basic Quiz", type: "quiz", path: "/content/foundations/mod0/0.1.2-quiz.json" },
                     { title: "0.1.3: Assignment 1", type: "assignment", path: "/content/foundations/mod0/0.1.3-assignment.html" },
-                    { title: "Module 0 Project", type: "project", path: "content/foundations/mod0/0.1.4-project.html" },
+                    { title: "Module 0 Project", type: "project", path: "/content/foundations/mod0/0.1.4-project.html" },
                 ]
             }
         ]
