@@ -7,26 +7,37 @@ const db = firebase.firestore();
 const auth = firebase.auth();
 
 // Global User State
-let currentUser = JSON.parse(localStorage.getItem("currentUser")) || {
-  isLoggedIn: false,
-  uid: "",
-  name: "Guest",
-  role: "Student",
-  photo: "https://placehold.co/150x150/003087/white?text=User",
-  skills: ["HTML", "CSS"],
-  notes: "",
-  isPaid: true,
-  github: "",
-  portfolio: "",
-  linkedin: "",
-  facebook: "",
-  youtube: "",
-  tiktok: "",
-  instagram: "",
-  email: "",
-  quizAttempts: {},
-  completedLessons: [],
-  grades: {},
+let currentUser = JSON.parse(localStorage.getItem('currentUser')) || {
+    isLoggedIn: false, 
+    uid: "student-123", 
+    name: "Mg Mg (Sample)", 
+    role: "Student",
+    photo: "https://placehold.co/150x150/003087/white?text=User",
+    skills: ["HTML", "CSS", "JavaScript", "React"], 
+    notes: "Bootcamp မှ သင်ခန်းစာများကို အောင်မြင်စွာ လေ့လာပြီးပါပြီ။", 
+    isPaid: true,
+    github: "https://github.com/mgmg", 
+    portfolio: "https://mgmg.dev", 
+    linkedin: "", facebook: "", youtube: "", tiktok: "", instagram: "", email: "mgmg@example.com",
+    quizAttempts: {}, 
+    
+    // ပြီးမြောက်ထားသော သင်ခန်းစာ ၅ ခု (Certificate ပွင့်ရန် လိုအပ်ချက်)
+    completedLessons: [
+        "0.1.1: Welcome Article", 
+        "0.1.2: Basic Quiz", 
+        "0.1.3: Assignment 1", 
+        "Module 0 Project", 
+        "1.1.1: Flexbox Deep Dive"
+    ], 
+    
+    // ဘာသာရပ်အလိုက် အမှတ်စာရင်း (GPA 75 ကျော်စေရန်)
+    grades: {
+        "html": 85,
+        "css": 92,
+        "javascript": 88,
+        "react": 78,
+        "nodejs": 80
+    }
 };
 
 // ဆရာမှ သတ်မှတ်ပေးမည့် ပြင်လို့မရသော အချက်အလက်များ (Database မှ လာမည်)
@@ -86,7 +97,14 @@ function showSection(section, filterCat = null) {
   if (section === "dashboard") {
     title.innerText = "Dashboard";
     renderDashboard(); // <--- အပေါ်မှာ သတ်မှတ်ထားတဲ့ function ကို ခေါ်လိုက်တာပါ
-  } else if (section === "courses") {
+  } // အသစ်ထည့်ရမည့် အပိုင်း
+    else if (section === 'about') {
+        title.innerText = "About Us";
+        renderAbout();
+    } else if (section === 'privacy') {
+        title.innerText = "Privacy Policy";
+        renderPrivacy();
+    } else if (section === "courses") {
     title.innerText = filterCat
       ? `${filterCat} သင်ခန်းစာများ`
       : "သင်ခန်းစာများအားလုံး";
@@ -768,68 +786,75 @@ async function deleteMsg(id) {
 function renderProfile() {
   const body = document.getElementById("dynamic-body");
 
-  // Role အလိုက် Badge အရောင်ခွဲခြားခြင်း
+  // အမှတ်စာရင်း ရှိမရှိ စစ်ဆေးပြီး GPA တွက်မည်
+  const grades = currentUser.grades || {};
+  const completedCount = Object.keys(grades).length;
+  let totalScore = 0;
+  Object.values(grades).forEach(s => totalScore += s);
+  const gpa = completedCount > 0 ? (totalScore / completedCount).toFixed(2) : 0;
+
+  // အောင်လက်မှတ်ရရန် သတ်မှတ်ချက် (ဥပမာ - ဘာသာရပ် ၅ ခုပြီးရမည်၊ GPA ၇၅ ကျော်ရမည်)
+  const isEligible = completedCount >= 5 && gpa >= 75;
+
   const roleBadgeStyle = currentUser.role === "Teacher" ? "background:#ef4444; color:white;" : "background:#e2e8f0; color:black;";
-    const userImgLarge = currentUser.photo || "https://placehold.co/150x150/003087/white?text=User";
 
   body.innerHTML = `
-        <div class="profile-card-pro fade-in">
-            <div class="profile-cover"></div>
-            <div class="profile-header-main">
-                <!-- ပုံကြီးနေရာတွင် currentUser.photo ကို သုံးထားပါသည် -->
-                <img src="${userImgLarge}" class="profile-large-avatar" 
-                     onerror="this.src='https://placehold.co/150x150/003087/white?text=User'">
-                <div class="profile-info-text">
-                    <h2 id="p-name-display">${currentUser.name} <span class="badge-verify"><i class="fas fa-check-circle"></i></span></h2>
-                    <span class="u-role-tag" style="${roleBadgeStyle}">${currentUser.role}</span>
-                    <div style="margin-top:15px; display:flex; gap:10px; flex-wrap:wrap;">
-                        <button class="save-btn" onclick="renderEditProfile()"><i class="fas fa-user-edit"></i> Profile ပြင်ဆင်မည်</button>
-                        ${currentUser.role === "Teacher" ? `<button class="menu-btn" style="background:#000; color:white;" onclick="renderAdminPanel()"><i class="fas fa-user-shield"></i> Admin Panel</button>` : ""}
-                    </div>
-                </div>
-            </div>
-            
-            <div class="profile-content-grid">
-                <div class="profile-side-info">
-                    <div class="content-card">
-                        <h4><i class="fas fa-link"></i> Connect with me</h4>
-                        <div class="social-links-grid">
-                            ${currentUser.portfolio ? `<a href="${currentUser.portfolio}" target="_blank" title="Portfolio"><i class="fas fa-globe"></i></a>` : ""}
-                            ${currentUser.github ? `<a href="${currentUser.github}" target="_blank" title="GitHub"><i class="fab fa-github"></i></a>` : ""}
-                            ${currentUser.linkedin ? `<a href="${currentUser.linkedin}" target="_blank" title="LinkedIn"><i class="fab fa-linkedin"></i></a>` : ""}
-                            ${currentUser.facebook ? `<a href="${currentUser.facebook}" target="_blank" title="Facebook"><i class="fab fa-facebook"></i></a>` : ""}
-                            ${currentUser.youtube ? `<a href="${currentUser.youtube}" target="_blank" title="YouTube"><i class="fab fa-youtube"></i></a>` : ""}
-                            ${currentUser.tiktok ? `<a href="${currentUser.tiktok}" target="_blank" title="TikTok"><i class="fab fa-tiktok"></i></a>` : ""}
-                            ${currentUser.instagram ? `<a href="${currentUser.instagram}" target="_blank" title="Instagram"><i class="fab fa-instagram"></i></a>` : ""}
-                            ${currentUser.email ? `<a href="mailto:${currentUser.email}" title="Email"><i class="fas fa-envelope"></i></a>` : ""}
-                        </div>
-                    </div>
-                    <div class="content-card">
-                        <h4>Skills</h4>
-                        <div class="skills-flex">
-                            ${currentUser.skills.map((s) => `<span class="s-tag">${s}</span>`).join("")}
-                        </div>
-                    </div>
-                </div>
-
-                <div class="profile-main-data">
-                    <div class="content-card academic-card">
-                        <h4><i class="fas fa-university"></i> Academic Status</h4>
-                        <div class="academic-box">
-                            <div class="academic-item"><span>ကျောင်းဝင်မှတ်ပုံတင်:</span> <strong>${academicInfo.batchName}</strong></div>
-                            <div class="academic-item"><span>တက်ရောက်မှု:</span> <strong>${academicInfo.attendance}</strong></div>
-                            <div class="academic-item"><span>Grade:</span> <strong style="color:green">${academicInfo.overallGrade}</strong></div>
-                            <div class="academic-item"><span>စာမေးပွဲရက်:</span> <strong style="color:red">${academicInfo.examDate}</strong></div>
-                        </div>
-                    </div>
-                    <div class="content-card">
-                        <h4>Personal Notes / Bio</h4>
-                        <p>${currentUser.notes || "မှတ်စုများ မရှိသေးပါ။"}</p>
-                    </div>
+    <div class="profile-card-pro fade-in">
+        <div class="profile-cover"></div>
+        <div class="profile-header-main">
+            <img src="${currentUser.photo}" class="profile-large-avatar">
+            <div class="profile-info-text">
+                <h2>${currentUser.name} <span class="badge-verify"><i class="fas fa-check-circle"></i></span></h2>
+                <span class="u-role-tag" style="${roleBadgeStyle}">${currentUser.role}</span>
+                <div style="margin-top:15px; display:flex; gap:10px; flex-wrap:wrap;">
+                    <button class="save-btn" onclick="renderEditProfile()"><i class="fas fa-user-edit"></i> Edit Profile</button>
+                    ${currentUser.role === "Teacher" ? `<button class="menu-btn" style="background:#000; color:white;" onclick="renderAdminPanel()"><i class="fas fa-user-shield"></i> Admin Panel</button>` : ""}
                 </div>
             </div>
         </div>
-    `;
+        
+        <div class="profile-content-grid">
+            <div class="profile-side-info">
+                <div class="content-card">
+                    <h4>Connect with me</h4>
+                    <div class="social-links-grid">
+                        ${currentUser.portfolio ? `<a href="${currentUser.portfolio}" target="_blank"><i class="fas fa-globe"></i></a>` : ""}
+                        ${currentUser.github ? `<a href="${currentUser.github}" target="_blank"><i class="fab fa-github"></i></a>` : ""}
+                        ${currentUser.linkedin ? `<a href="${currentUser.linkedin}" target="_blank"><i class="fab fa-linkedin"></i></a>` : ""}
+                        ${currentUser.email ? `<a href="mailto:${currentUser.email}"><i class="fas fa-envelope"></i></a>` : ""}
+                    </div>
+                </div>
+            </div>
+
+            <div class="profile-main-data">
+                <!-- Academic Status (ခလုတ်များ ဤနေရာတွင် ရှိသည်) -->
+                <div class="content-card academic-card">
+                    <h4><i class="fas fa-university"></i> Academic Achievement</h4>
+                    <div class="academic-box">
+                        <div class="academic-item"><span>GPA:</span> <strong style="color:green">${gpa}</strong></div>
+                        <div class="academic-item"><span>Completed Modules:</span> <strong>${completedCount}</strong></div>
+                    </div>
+                    
+                    <div style="margin-top:20px; display:flex; gap:10px;">
+                        <button class="menu-btn" onclick="viewTranscript('${currentUser.uid}')">
+                            <i class="fas fa-file-invoice"></i> View Transcript
+                        </button>
+                        
+                        <!-- အောင်မြင်မှသာ ရွှေရောင်ခလုတ် ပွင့်မည် -->
+                        <button class="menu-btn ${isEligible ? 'cert-gold' : 'disabled-btn'}" 
+                                onclick="${isEligible ? `viewCertificate('${currentUser.uid}')` : "alert('သင်တန်းမပြီးသေးပါ သို့မဟုတ် ရမှတ်မလုံလောက်ပါ')"}">
+                            <i class="fas fa-award"></i> Certificate
+                        </button>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h4>Personal Notes / Bio</h4>
+                    <p>${currentUser.notes || "မှတ်စုများ မရှိသေးပါ။"}</p>
+                </div>
+            </div>
+        </div>
+    </div>`;
 }
 
 // ကျောင်းသားအတွက် Profile ပြင်ဆင်သည့် Form (Edit Mode)
@@ -993,11 +1018,81 @@ function handleLogout() {
   }
 }
 
-function viewTranscript(uid) {
-  alert("Transcript for " + uid);
+// --- Transcript ပြသခြင်း ---
+function viewTranscript(uid, isAdminPreview = false) {
+    // ကျောင်းသားကို ရှာမည်
+    const student = (uid === currentUser.uid) ? currentUser : studentsList.find(s => s.uid === uid);
+    if (!student) return alert("Student not found!");
+
+    const body = document.getElementById('dynamic-body');
+    // Admin ကြည့်တာဆိုရင် Admin Preview ဆီပြန်သွားမယ်၊ ကျောင်းသားဆိုရင် Profile ဆီပြန်သွားမယ်
+    const backFunc = isAdminPreview ? `previewStudentAchievements('${uid}')` : "renderProfile()";
+    
+    const grades = student.grades || {};
+    let rows = Object.entries(grades).map(([sub, score]) => `
+        <tr>
+            <td style="text-transform:uppercase;">${sub}</td>
+            <td>${score}</td>
+            <td>${score >= 50 ? '<span class="text-success">Pass</span>' : '<span class="text-danger">Fail</span>'}</td>
+        </tr>
+    `).join('');
+
+    body.innerHTML = `
+        <div class="content-card animate-up">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h3><i class="fas fa-file-invoice"></i> Official Transcript ${isAdminPreview ? '(Demo)' : ''}</h3>
+                <button class="menu-btn" onclick="${backFunc}"><i class="fas fa-arrow-left"></i> Back</button>
+            </div>
+            <hr><br>
+            <div class="academic-box">
+                <p><strong>Student Name:</strong> ${student.name}</p>
+                <p><strong>Batch:</strong> ${student.batchId || academicInfo.batchName}</p>
+            </div>
+            <br>
+            <table class="admin-table">
+                <thead><tr><th>Subject</th><th>Score</th><th>Status</th></tr></thead>
+                <tbody>${rows || '<tr><td colspan="3">အမှတ်စာရင်း မရှိသေးပါ။</td></tr>'}</tbody>
+            </table>
+            <br>
+            <button class="save-btn" onclick="window.print()"><i class="fas fa-print"></i> Print Transcript</button>
+        </div>`;
 }
-function viewCertificate(uid) {
-  alert("Certificate for " + uid);
+
+// --- Certificate ပြသခြင်း ---
+function viewCertificate(uid, isAdminPreview = false) {
+    const student = (uid === currentUser.uid) ? currentUser : studentsList.find(s => s.uid === uid);
+    if (!student) return alert("Student not found!");
+
+    const body = document.getElementById('dynamic-body');
+    const backFunc = isAdminPreview ? `previewStudentAchievements('${uid}')` : "renderProfile()";
+    
+    body.innerHTML = `
+        <div class="certificate-frame animate-up">
+            <div class="cert-border">
+                <div class="cert-content">
+                    <h1 class="cert-title">CERTIFICATE</h1>
+                    <p style="letter-spacing: 5px; margin-top:10px;">OF COMPLETION</p>
+                    <div style="margin: 40px 0;">
+                        <p>This is to certify that</p>
+                        <h2 class="student-name" style="font-family:serif; font-size:2.5rem; border-bottom:2px solid #333; display:inline-block; padding:0 30px; margin: 15px 0;">
+                            ${student.name}
+                        </h2>
+                        <p style="margin-top:15px;">has successfully completed the Professional Bootcamp in</p>
+                        <h3 style="color:#003087; margin: 10px 0;">Full-Stack Web Development</h3>
+                        <p>issued on ${new Date().toLocaleDateString()}</p>
+                    </div>
+                    <div style="display:flex; justify-content:space-around; margin-top:50px;">
+                        <div><p>________________</p><p>Lead Instructor</p></div>
+                        <div><p>________________</p><p>Date</p></div>
+                    </div>
+                </div>
+            </div>
+            <br>
+            <div class="no-print" style="display:flex; justify-content:center; gap:10px;">
+                <button class="menu-btn" onclick="${backFunc}"><i class="fas fa-arrow-left"></i> Back</button>
+                <button class="save-btn" onclick="window.print()"><i class="fas fa-download"></i> Save as PDF</button>
+            </div>
+        </div>`;
 }
 
 // ==========================================
@@ -1005,6 +1100,10 @@ function viewCertificate(uid) {
 // ==========================================
 
 window.onload = () => {
+    // လက်ရှိနှစ်ကို Footer မှာပြရန်
+    const yearEl = document.getElementById('current-year');
+    if(yearEl) yearEl.innerText = new Date().getFullYear();
+
     // ၁။ Dark Mode အဟောင်းရှိမရှိ စစ်ဆေးပြီး ပြန်ဖွင့်ပေးခြင်း
     const isDark = localStorage.getItem('dark-mode') === 'true';
     if (isDark) {
@@ -1019,6 +1118,19 @@ window.onload = () => {
     } else {
         document.getElementById('login-page').style.display = 'flex';
         document.getElementById('app-wrapper').style.display = 'none';
+    }
+};
+
+// စာမျက်နှာ အောက်ကို ၃၀၀ pixel ရောက်မှ ခလုတ်ပေါ်စေရန်
+window.onscroll = function() {
+    const btn = document.getElementById('back-to-top');
+    if (btn) {
+        // စာမျက်နှာကို အောက်ကို ၃၀၀ pixel ကျော် ဆွဲလိုက်သလား စစ်ဆေးခြင်း
+        if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+            btn.style.display = "block"; // ပေါ်လာစေရန်
+        } else {
+            btn.style.display = "none";  // ပြန်ပျောက်သွားစေရန်
+        }
     }
 };
 
@@ -1042,7 +1154,8 @@ let studentsList = [
     name: "Aung Aung",
     batchId: "Batch-05",
     attendance: "90%",
-    grade: "B+",
+    grades: { html: 85, css: 80, javascript: 75, react: 78, nodejs: 82 },
+    grade: "B+", // 80% ဝန်းကျင်
     isPaid: true,
   },
   {
@@ -1050,7 +1163,8 @@ let studentsList = [
     name: "Su Su",
     batchId: "Batch-05",
     attendance: "95%",
-    grade: "A",
+    grades: { html: 95, css: 90, javascript: 88, react: 85, nodejs: 90 },
+    grade: "A", // 90% ဝန်းကျင်
     isPaid: true,
   },
   {
@@ -1058,8 +1172,10 @@ let studentsList = [
     name: "Kyaw Kyaw",
     batchId: "Batch-06",
     attendance: "80%",
-    grade: "C",
-    isPaid: false,
+    // အမှတ်နည်းတဲ့သူအတွက် နမူနာ (စမ်းသပ်ရန်)
+    grades: { html: 45, css: 55, javascript: 50, react: 40, nodejs: 48 }, 
+    grade: "C", // 50% အောက်ဆိုရင် Fail ဖြစ်နိုင်သလို C ဆိုရင်တော့ အောင်ရုံပဲရှိမယ်
+    isPaid: false, // ပိုက်ဆံမသွင်းရသေးတဲ့သူ
   },
 ];
 
@@ -1067,13 +1183,28 @@ let studentsList = [
 // --- ဆရာအတွက် Admin Panel (Academic Status ပြင်ဆင်ရန်) ---
 function renderAdminPanel() {
   const body = document.getElementById("dynamic-body");
+  
+  // Header အပိုင်းမှာ ခလုတ်တွေကို စုစည်းထားပြီး Table ကို တစ်ခုတည်းပဲ ထားလိုက်ပါမယ်
   body.innerHTML = `
         <div class="admin-container fade-in">
-            <div class="admin-header">
-                <h3><i class="fas fa-tools"></i> ဆရာများအတွက် စီမံခန့်ခွဲမှုအပိုင်း</h3>
+            <!-- အပေါ်ဆုံး ခေါင်းစီးနှင့် အဓိက ခလုတ်များ -->
+            <div class="admin-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:15px;">
+                <h3 style="margin:0;"><i class="fas fa-user-shield"></i> Admin Control Panel</h3>
+                <div style="display:flex; gap:10px;">
+                    <button class="menu-btn" style="background:#4b5563; color:white;" onclick="renderLMSGuide()">
+                        <i class="fas fa-book"></i> User Guide
+                    </button>
+                    <button class="save-btn" onclick="renderSubmissions()">
+                        <i class="fas fa-file-signature"></i> Review Assignments
+                    </button>
+                </div>
+            </div>
+
+            <!-- Batch Filter အပိုင်း -->
+            <div class="content-card" style="margin-bottom:20px; padding:15px;">
                 <div class="batch-filter">
-                    <span>Batch ရွေးချယ်ရန်: </span>
-                    <select id="batch-select" onchange="filterStudentsByBatch(this.value)">
+                    <span><strong>Batch ရွေးချယ်ရန်: </strong></span>
+                    <select id="batch-select" class="edit-input" style="width:auto; display:inline-block; margin-left:10px;" onchange="filterStudentsByBatch(this.value)">
                         <option value="All">All Batches</option>
                         <option value="Batch-05">Batch-05</option>
                         <option value="Batch-06">Batch-06</option>
@@ -1081,20 +1212,9 @@ function renderAdminPanel() {
                 </div>
             </div>
 
+            <!-- ကျောင်းသားစာရင်း ဇယား (Table) -->
             <div class="content-card">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <h3>Admin Panel</h3>
-                    <button class="save-btn" onclick="renderSubmissions()"><i class="fas fa-file-signature"></i> Review Assignments</button>
-                </div>
-                <hr><br>
-                <table class="admin-table">
-                    <thead><tr><th>Student Name</th><th>Batch</th><th>Actions</th></tr></thead>
-                    <tbody id="admin-list"></tbody>
-                </table>
-            </div>
-
-            <div class="content-card">
-                <h4>ကျောင်းသားစာရင်း</h4>
+                <h4 style="margin-bottom:15px;"><i class="fas fa-users"></i> ကျောင်းသားစာရင်း</h4>
                 <div class="table-responsive">
                     <table class="admin-table">
                         <thead>
@@ -1107,14 +1227,140 @@ function renderAdminPanel() {
                             </tr>
                         </thead>
                         <tbody id="student-table-body">
-                            <!-- ကျောင်းသားစာရင်း ဤနေရာတွင် ပေါ်လာမည် -->
+                            <!-- filterStudentsByBatch() ကနေ ဒီမှာ လာဖြည့်ပေးပါလိမ့်မယ် -->
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
     `;
-  filterStudentsByBatch("All"); // စဖွင့်ချင်း အကုန်ပြမည်
+
+  // ဇယားထဲမှာ data တွေဝင်လာအောင် function ကို ပြန်ခေါ်ပေးရပါမယ်
+  filterStudentsByBatch("All"); 
+}
+
+function renderLMSGuide() {
+    const body = document.getElementById('dynamic-body');
+    body.innerHTML = `
+        <div class="content-card animate-up" style="max-width: 900px; margin: 0 auto;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h3><i class="fas fa-book"></i> LMS Admin User Guide</h3>
+                <button class="menu-btn" onclick="renderAdminPanel()"><i class="fas fa-arrow-left"></i> Back to Panel</button>
+            </div>
+            
+            <div class="guide-scroll-area" style="line-height:1.8; color:var(--text-main);">
+                <div class="academic-box">
+                    <h4 style="color:var(--primary)"><i class="fas fa-info-circle"></i> ၁။ စနစ်၏ တည်ဆောက်ပုံ</h4>
+                    <p>သင်ရိုးမာတိကာများကို <code>js/data.js</code> တွင် စီမံရမည်ဖြစ်ပြီး၊ သင်ခန်းစာဖိုင်များကို <code>public/content/</code> folder အောက်တွင် ခွဲခြားသိမ်းဆည်းရမည်။</p>
+                </div>
+
+                <ul>
+                    <li><strong>public/index.html: </strong>ပင်မစာမျက်နှာ။</li>
+                    <li><strong>public/js/data.js: </strong>သင်ရိုးမာတိကာ သိမ်းဆည်းရာ (နောင်တွင် သင်ခန်းစာအသစ်ထည့်ရန် ဤနေရာတွင် ပြင်ရမည်)။</li>
+                    <li><strong>public/content/: </strong>သင်ခန်းစာ HTML, JSON, Assignment ဖိုင်များ အစစ်အမှန်ရှိရာနေရာ။</li>
+                    <li><strong>firebase.json: </strong>Server rules နှင့် Hosting ဆိုင်ရာ သတ်မှတ်ချက်များ။</li>
+                </ul>
+
+                <h4 style="margin-top:20px;"><i class="fas fa-users-cog"></i> ၂။ ကျောင်းသား စီမံခန့်ခွဲခြင်း</h4>
+                <ul>
+                    <li><strong>အမှတ်သွင်းခြင်း:</strong> Edit (ခဲတံပုံ) ကိုနှိပ်၍ ဘာသာရပ်အလိုက် အမှတ်သွင်းနိုင်သည်။ ၎င်းသည် ကျောင်းသား၏ Transcript တွင် ချက်ချင်း Update ဖြစ်မည်။</li>
+                    <li><strong>Preview:</strong> မျက်လုံးပုံစံကိုနှိပ်၍ ကျောင်းသား၏ အောင်လက်မှတ်ထွက်လာမည့်ပုံစံကို Demo ကြည့်နိုင်သည်။</li>
+                </ul>
+
+                <ul>Admin Panel (Teacher Role ဖြင့်ဝင်မှ ပေါ်မည်) သည် စနစ်၏ နှလုံးသားဖြစ်သည်။
+                    <li><strong>(က) Batch အလိုက် စစ်ဆေးခြင်း</strong>
+                        <li>Admin Panel ရှိ "Batch ရွေးချယ်ရန်" Dropdown မှတစ်ဆင့် Batch တစ်ခုချင်းစီအလိုက် ကျောင်းသားစာရင်းကို စစ်ထုတ်ကြည့်ရှုနိုင်ပါသည်။</li>
+                        <li>ကျောင်းသား၏ အမည်၊ တက်ရောက်မှု (Attendance) နှင့် လက်ရှိ Grade ကို ဇယား (Table) ဖြင့် မြင်တွေ့ရမည်။</li>
+                    </li>
+                    <li><strong>(ခ) အမှတ်စာရင်း သွင်းခြင်း (Grading System)</strong>
+                        <li>ဇယားရှိ Edit (ခဲတံပုံ) ကိုနှိပ်ပါ။</li>
+                        <li>ဘာသာရပ်အလိုက် (HTML, CSS, JS စသည်) ရမှတ်များကို ရိုက်ထည့်ပြီး "Update Grades" ကို နှိပ်ပါ။</li>
+                        <li>ဤအမှတ်များသည် ကျောင်းသား၏ Transcript တွင် အလိုအလျောက် Update ဖြစ်သွားမည်။</li>
+                    </li>
+                </ul>
+
+                <h4 style="margin-top:20px;"><i class="fas fa-tasks"></i> ၃။ သင်ခန်းစာများနှင့် Assessment</h4>
+                <ul>
+                    <li><strong>Quizzes:</strong> ကျောင်းသားတစ်ဦးလျှင် ၃ ကြိမ်သာ ဖြေဆိုခွင့်ရှိသည်။</li>
+                    <li><strong>Assignments:</strong> ကျောင်းသားများ Copy/Paste လုပ်၍မရအောင် ပိတ်ထားပြီး စာလုံးရေ ၅၀ ပြည့်မှသာ လက်ခံသည်။</li>
+                    <li><strong>Projects:</strong> GitHub Link များကို လက်ခံစစ်ဆေးနိုင်သည်။</li>
+                </ul>
+
+                <ol>သင်ခန်းစာ အမျိုးအစား (၄) မျိုး ပါဝင်ပြီး တစ်ခုချင်းစီကို ဂရုစိုက်ရန် လိုအပ်သည်-
+                    <li><strong>Articles (HTML): </strong>ရိုးရိုးသင်ခန်းစာ စာဖတ်ရန်။</li>
+                    <li><strong>Quizzes (JSON): </strong>
+                        <li>ကျောင်းသားတစ်ဦးလျှင် ၃ ကြိမ်သာ ဖြေဆိုခွင့်ရှိသည်။</li>
+                        <li>အဖြေမှန်/မှားကို စနစ်မှ ချက်ချင်း ပြပေးမည်။</li>
+                    </li>
+                    <li><strong>Assignments (Long Form): </strong>
+                        <li>ကျောင်းသားများသည် အပြင်မှစာများကို Copy/Paste လုပ်ခွင့်မရှိ (ပိတ်ထားသည်)။</li>
+                        <li>အနည်းဆုံး စာလုံးရေ (၅၀) ပြည့်မှသာ Submit လုပ်၍ ရမည်။</li>
+                    </li>
+                    <li><strong>Module Projects (GitHub): </strong>အုပ်စုလိုက် ပြိုင်ပွဲများအတွက် ကျောင်းသားများက GitHub Link ပေးပို့ရမည်။</li>
+                </ol>
+
+                <h4 style="margin-top:20px;"><i class="fas fa-comments"></i> ၄။ စာတိုပေးပို့ခြင်း</h4>
+                <p>ကျောင်းသားတစ်ဦးချင်းစီကို <strong>Direct Message</strong> ပို့နိုင်သလို၊ <strong>Messages</strong> ကဏ္ဍမှတစ်ဆင့် <strong>Batch အလိုက် Group Message</strong> ပို့နိုင်သည်။ မဆီလျော်သော စာများကို Admin မှ Delete လုပ်နိုင်သည်။</p>
+
+                <ul>
+                    <li><strong>(က) Direct Message (DM)</strong>
+                        <li>Admin Table ရှိ Message (Comment icon) ကိုနှိပ်ခြင်းဖြင့် ကျောင်းသားတစ်ဦးချင်းစီကို တိုက်ရိုက်စာပို့နိုင်ပါသည်။</li>
+                        <li>Admin သည် ကျောင်းသားများ၏ မဆီလျော်သော စာတိုများကို Delete (ဖျက်ခြင်း) လုပ်ပိုင်ခွင့်ရှိသည်။</li>
+                    </li>
+                    <li><strong>(ခ) Group Message (GM)</strong>
+                        <li>Messages section ရှိ Batch-05 Group စသည်တို့ကို နှိပ်၍ တစ်တန်းလုံးကို ကြေညာချက်များ ပို့နိုင်ပါသည်။</li>
+                    </li>
+                    <li><strong>(ဂ) Lesson Discussions</strong>
+                        <li>သင်ခန်းစာတိုင်း၏ အောက်ခြေတွင် Discussion box ပါရှိသည်။ ကျောင်းသားများ မရှင်းလင်းသည်ကို မေးမြန်းလျှင် Admin မှ ဝင်ရောက်ဖြေကြားပေးရန် လိုအပ်သည်။</li>
+                    </li>
+                </ul>
+
+                <h4 style="margin-top:20px;"><i class="fas fa-award"></i> ၅။ အောင်လက်မှတ် သတ်မှတ်ချက်</h4>
+                <p>ကျောင်းသားတစ်ဦးသည် <strong>Module အားလုံးပြီးစီးပြီး GPA 75 အထက်</strong> ရရှိမှသာ Profile တွင် Certificate ခလုတ် ရွှေရောင်ပြောင်း၍ ပွင့်လာမည်ဖြစ်သည်။</p>
+
+                <ul>
+                    <li><strong>Transcript: အမှတ်စာရင်းကို ကျောင်းသားရော Admin ပါ အမြဲကြည့်နိုင်၊ Print ထုတ်နိုင်သည်။</strong>
+                    </li>
+                    <li><strong>Certificate: </strong>အောက်ပါအချက် (၂) ချက်နှင့် ကိုက်ညီမှသာ ရွှေရောင်ခလုတ် ပွင့်လာမည်။
+                        <li>Module အားလုံး ဖြေဆိုပြီးစီးခြင်း (completedLessons)။</li>
+                        <li>ပျမ်းမျှရမှတ် (GPA) ၇၅ မှတ်နှင့်အထက် ရရှိခြင်း။</li>
+                    </li>
+                    <li><strong>Admin သည် Preview (မျက်လုံးပုံစံ) </strong>ကိုနှိပ်၍ ကျောင်းသား၏ အောင်လက်မှတ်ပုံစံကို ကြိုတင်ကြည့်ရှုနိုင်ပါသည်။
+                    </li>
+                </ul>
+
+                <div class="error-msg" style="margin-top:30px; text-align:left; background:#fffbeb; border:1px solid #f59e0b; color:#92400e;">
+                    <strong>⚠️ အရေးကြီးသတိပေးချက်:</strong><br>
+                    - Folder/File အမည်များကို အမြဲတမ်း <strong>စာလုံးအသေး (lowercase)</strong> သုံးပါ။<br>
+                    - Chat မပေါ်ပါက Firebase Console တွင် <strong>Composite Indexes</strong> ဆောက်ထားခြင်း ရှိမရှိ စစ်ဆေးပါ။
+
+                    <ul>
+                    <li><strong>ဖိုင်ရှာမတွေ့ပါ Error: </strong>data.js ထဲက path နှင့် public/content/ ထဲက Folder/File အမည် စာလုံးပေါင်း အကြီးအသေး (Case Sensitive) မှားနေခြင်း ဖြစ်သည်။ အကုန်လုံးကို စာလုံးအသေး သုံးရန် အကြံပြုသည်။
+                    </li>
+                    <li><strong>ndex Required Error: </strong>Firebase Console ရှိ Firestore > Indexes တွင် messages နှင့် discussions အတွက် Composite Index များ "Enabled" ဖြစ်မဖြစ် စစ်ပါ။
+                    </li>
+                    <li><strong>403 Access Denied: </strong>content folder သည် project root တွင် ရှိမနေဘဲ public folder ၏ အတွင်းထဲ တွင် ရှိနေရပါမည်။
+                    </li>
+                </ul>
+                </div>
+
+                <ul><strong>Dashboard အသုံးဝင်ပုံ</strong>
+                    <li><strong>Progress Bar: </strong>ကျောင်းသားတစ်ဦးချင်းစီ၏ သင်ယူမှု ရာခိုင်နှုန်းကို ပြသသည်။
+                    </li>
+                    <li><strong>Resume Learning: </strong>ကျောင်းသား နောက်ဆုံးကြည့်ခဲ့သည့် သင်ခန်းစာကို ချက်ချင်းပြန်ဖွင့်ပေးသည်။
+                    </li>
+                    <li><strong>Leaderboard: </strong>အမှတ်အများဆုံး ကျောင်းသား (Top Students) ကို Dashboard တွင် ဂုဏ်ပြုဖော်ပြထားသဖြင့် ကျောင်းသားများကြားတွင် ယှဉ်ပြိုင်လိုစိတ်ကို မြှင့်တင်ပေးသည်။
+                    </li>
+                </ul>
+
+                <ul><strong>သင်တန်းကြေးနှင့် အကောင့်ဖွင့်ခြင်း (Access Control)</strong>
+                    <li><strong>isPaid: true: </strong>ပိုက်ဆံသွင်းပြီးသူများသာ Dashboard ပွင့်မည်။</li>
+                    <li><strong>isPaid: false: </strong>ပိုက်ဆံမသွင်းရသေးသူများကို Login ဝင်ခွင့်ပေးသော်လည်း သင်ခန်းစာများကို Lock (ပိတ်) ထားမည်။</li>
+                    <li><strong>Admin အနေဖြင့် </strong>Firebase Firestore ရှိ users collection ထဲတွင် ကျောင်းသား၏ isPaid ကို manually ပြောင်းပေးနိုင်ပါသည်။</li>
+                </ul>
+            </div>
+        </div>
+    `;
 }
 
 // Batch အလိုက် Filter လုပ်ပြီး Table ထုတ်ပေးခြင်း
@@ -1122,10 +1368,7 @@ function filterStudentsByBatch(batchId) {
   const tableBody = document.getElementById("student-table-body");
   tableBody.innerHTML = "";
 
-  const filtered =
-    batchId === "All"
-      ? studentsList
-      : studentsList.filter((s) => s.batchId === batchId);
+  const filtered = batchId === "All" ? studentsList : studentsList.filter((s) => s.batchId === batchId);
 
   filtered.forEach((student) => {
     const row = document.createElement("tr");
@@ -1133,14 +1376,57 @@ function filterStudentsByBatch(batchId) {
             <td><strong>${student.name}</strong></td>
             <td>${student.batchId}</td>
             <td>${student.attendance}</td>
-            <td><span class="s-tag">${student.grade}</span></td>
+            <td><span class="s-tag">${student.grade || 'A-'}</span></td>
             <td>
-                <button class="action-btn msg" onclick="openDirectMessage('${student.uid}')" title="Message ပို့ရန်"><i class="fas fa-comment"></i></button>
-                <button class="action-btn edit" onclick="openGradeModal('${student.uid}')" title="အမှတ်သွင်းရန်"><i class="fas fa-edit"></i></button>
+                <!-- Preview ခလုတ်အသစ် (မျက်လုံးပုံစံ) -->
+                <button class="action-btn preview" onclick="previewStudentAchievements('${student.uid}')" title="Demo ကြည့်ရန်">
+                    <i class="fas fa-eye"></i>
+                </button>
+                <button class="action-btn msg" onclick="openDirectMessage('${student.uid}')" title="Message ပို့ရန်">
+                    <i class="fas fa-comment"></i>
+                </button>
+                <button class="action-btn edit" onclick="openGradeModal('${student.uid}')" title="အမှတ်သွင်းရန်">
+                    <i class="fas fa-edit"></i>
+                </button>
             </td>
         `;
     tableBody.appendChild(row);
   });
+}
+
+// ဆရာမှ ကျောင်းသား၏ အောင်မြင်မှုများကို Demo ကြည့်ရန်
+function previewStudentAchievements(uid) {
+    const student = studentsList.find(s => s.uid === uid);
+    if (!student) return alert("ကျောင်းသား ရှာမတွေ့ပါ။");
+
+    const body = document.getElementById('dynamic-body');
+    body.innerHTML = `
+        <div class="content-card animate-up">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3><i class="fas fa-user-shield"></i> Admin Preview: ${student.name}</h3>
+                <button class="menu-btn" onclick="renderAdminPanel()"><i class="fas fa-arrow-left"></i> Back to Admin</button>
+            </div>
+            <p style="color:var(--text-muted); margin-top:10px;">ဤကျောင်းသားအတွက် Transcript နှင့် Certificate တို့ကို Demo အနေဖြင့် စစ်ဆေးကြည့်ရှုနိုင်ပါသည်။</p>
+            <hr style="margin:20px 0;">
+            
+            <div class="dashboard-grid">
+                <div class="content-card">
+                    <h4>Official Transcript</h4>
+                    <p>ဘာသာရပ်အလိုက် ရမှတ်များကို Demo ကြည့်ရန်။</p>
+                    <button class="save-btn" style="margin-top:15px; width:100%;" onclick="viewTranscript('${uid}', true)">
+                        <i class="fas fa-file-invoice"></i> View Transcript Demo
+                    </button>
+                </div>
+                <div class="content-card">
+                    <h4>Certificate</h4>
+                    <p>အောင်လက်မှတ် ထွက်လာမည့် ပုံစံကို Demo ကြည့်ရန်။</p>
+                    <button class="menu-btn cert-gold" style="margin-top:15px; width:100%;" onclick="viewCertificate('${uid}', true)">
+                        <i class="fas fa-award"></i> View Certificate Demo
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
 }
 
 // --- ကျောင်းသားတစ်ဦးချင်းစီကို အမှတ်သွင်းရန် Modal/Form ---
@@ -1354,12 +1640,6 @@ function toggleElement(id) {
   el.style.display = el.style.display === "none" ? "block" : "none";
 }
 
-window.onscroll = function () {
-  const btn = document.getElementById("back-to-top");
-  if (document.documentElement.scrollTop > 300) btn.style.display = "block";
-  else btn.style.display = "none";
-};
-
 // ကျောင်းသားသစ် အကောင့်ဖွင့်ပေးခြင်း (ဆရာသုံးရန်)
 async function createStudentAccount(email, password, name) {
   try {
@@ -1527,4 +1807,46 @@ async function gradeThisSubmission(docId) {
             </div>
         </div>
     `;
+}
+
+function renderAbout() {
+    document.getElementById('dynamic-body').innerHTML = `
+        <div class="content-card animate-up" style="max-width: 800px; margin: auto; line-height: 1.8;">
+            <h3><i class="fas fa-graduation-cap"></i> ကျွန်ုပ်တို့အကြောင်း (About Us)</h3>
+            <hr><br>
+            <p><strong>Myanmar Full-Stack Bootcamp (MM)</strong> သည် မြန်မာနိုင်ငံရှိ လူငယ်များ နိုင်ငံတကာအဆင့်မီ နည်းပညာရပ်များကို မိခင်ဘာသာစကားဖြင့် စနစ်တကျ သင်ယူနိုင်စေရန် ရည်ရွယ်တည်ထောင်ထားခြင်း ဖြစ်ပါသည်။</p>
+            <p>ကျွန်ုပ်တို့၏ သင်ရိုးညွှန်းတမ်းသည် ကမ္ဘာကျော် <strong>Columbia University Software Engineering</strong> သင်ကြားမှုစနစ်ကို အခြေခံထားပြီး၊ လက်တွေ့နယ်ပယ်တွင် အမှန်တကယ် အသုံးချနိုင်သော Foundations, Technical နှင့် Full-Stack ဘာသာရပ်များကို အပိုင်းလိုက် ခွဲခြားသင်ကြားပေးနေပါသည်။</p>
+            <div class="academic-box">
+                <h4>ကျွန်ုပ်တို့၏ ရည်မှန်းချက်</h4>
+                <ul>
+                    <li>မြန်မာ Developer ကောင်းများစွာ ပေါ်ထွက်လာစေရန်။</li>
+                    <li>အဆင့်မြင့် နည်းပညာများကို လွယ်ကူစွာ သင်ယူနိုင်သော Platform တစ်ခုဖြစ်စေရန်။</li>
+                    <li>ကျောင်းသားနှင့် ဆရာ တိုက်ရိုက် ဆက်သွယ်သင်ကြားနိုင်သော ဝန်းကျင်တစ်ခု ဖန်တီးရန်။</li>
+                </ul>
+            </div>
+        </div>`;
+}
+
+function renderPrivacy() {
+    document.getElementById('dynamic-body').innerHTML = `
+        <div class="content-card animate-up" style="max-width: 800px; margin: auto; line-height: 1.8;">
+            <h3><i class="fas fa-user-shield"></i> ကိုယ်ရေးအချက်အလက် မူဝါဒ (Privacy Policy)</h3>
+            <hr><br>
+            <p>ကျောင်းသားများ၏ ကိုယ်ရေးအချက်အလက်များကို ကျွန်ုပ်တို့ အလေးထား ကာကွယ်ပေးပါသည်။</p>
+            
+            <h4>၁။ ဒေတာ သိမ်းဆည်းခြင်း</h4>
+            <p>ကျောင်းသားများ၏ နာမည်၊ အီးမေးလ်၊ အမှတ်စာရင်းနှင့် သင်ယူမှု အခြေအနေများကို <strong>Google Firebase Cloud</strong> တွင် လုံခြုံစိတ်ချစွာ သိမ်းဆည်းထားပါသည်။</p>
+
+            <h4>၂။ အချက်အလက် အသုံးပြုမှု</h4>
+            <p>သင်၏ ဒေတာများကို သင်တန်းတိုးတက်မှု စစ်ဆေးရန်၊ Transcript နှင့် Certificate ထုတ်ပေးရန်နှင့် သင်တန်းနှင့်ပတ်သက်သော အသိပေးချက်များ ပို့ရန်အတွက်သာ အသုံးပြုပါသည်။</p>
+
+            <h4>၃။ တတိယအဖွဲ့အစည်းသို့ မျှဝေခြင်း</h4>
+            <p>ကျွန်ုပ်တို့သည် ကျောင်းသားများ၏ မည်သည့် အချက်အလက်ကိုမျှ တခြားသော ကုမ္ပဏီ သို့မဟုတ် တတိယအဖွဲ့အစည်းများထံသို့ ရောင်းချခြင်း၊ မျှဝေခြင်း လုံးဝပြုလုပ်မည် မဟုတ်ပါ။</p>
+
+            <div class="tip-box" style="background:#f0f9ff; border-left: 5px solid #0369a1; padding: 15px; border-radius: 5px;">
+                <p style="margin:0; font-size:0.9rem; color:#0369a1;"><strong>မှတ်ချက်:</strong> Dark Mode နှင့် Login အခြေအနေ မှတ်သားထားရန် Browser ၏ Local Storage ကို အသုံးပြုပါသည်။</p>
+            </div>
+            <br>
+            <p style="font-size: 0.8rem; color: grey;">နောက်ဆုံးပြင်ဆင်သည့်ရက်စွဲ - ၂၉ ဇန်နဝါရီ၊ ၂၀၂၆</p>
+        </div>`;
 }

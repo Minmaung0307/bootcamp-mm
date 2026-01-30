@@ -1,0 +1,232 @@
+/* --- Callout Boxes (Rewind, Nerd Note, Pro Tip) --- */
+.callout-box {
+    display: flex;
+    gap: 20px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 20px;
+    margin: 25px 0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    position: relative;
+}
+
+.callout-icon {
+    width: 50px; height: 50px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; color: white;
+    flex-shrink: 0;
+}
+
+/* အရောင်အမျိုးမျိုး ခွဲခြားခြင်း */
+.bg-rewind { background-color: #58a65c; } /* Green */
+.bg-nerd { background-color: #58a65c; }   /* Green with Glasses */
+.bg-pro-tip { background-color: #2b6cb0; } /* Blue with Diamond */
+.bg-important { border-left: 5px solid #e53e3e; background: #fff5f5; }
+
+.callout-content h4 {
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.9rem;
+}
+
+/* --- Hint & Deep Dive Accordions --- */
+.lms-accordion {
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 50px; /* Pill shape like Show Hint */
+    padding: 10px 25px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    cursor: pointer;
+    margin: 15px 0;
+    transition: 0.3s;
+}
+
+.lms-accordion:hover { background: #f8fafc; }
+
+.lms-accordion i {
+    background: var(--primary);
+    color: white;
+    width: 35px; height: 35px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+}
+
+.accordion-body {
+    display: none;
+    padding: 20px;
+    background: #f1f5f9;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+/* Deep Dive Button Style */
+.deep-dive-btn {
+    background: #004d85;
+    color: white;
+    width: 100%;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: bold;
+    cursor: pointer;
+    margin: 20px 0;
+}
+
+/* --- Code Block Styling --- */
+.code-window {
+    background: #2d3436;
+    color: #fab1a0;
+    padding: 20px;
+    border-radius: 12px;
+    font-family: 'Fira Code', monospace;
+    overflow-x: auto;
+    margin: 20px 0;
+    border-left: 5px solid #0984e3;
+}
+.code-tag { color: #ff7675; }
+.code-attr { color: #fdcb6e; }
+
+/* --- Virtual Class Downloads --- */
+.download-list {
+    list-style: none;
+    padding: 0;
+}
+.download-list li {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+.download-list a {
+    color: var(--primary);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.virtual-class-section h3 {
+    color: var(--primary);
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+}
+
+.download-links {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0;
+}
+
+.download-links li {
+    margin-bottom: 12px;
+}
+
+.download-links a {
+    color: #0056b3; /* Columbia Blue ပုံစံ */
+    text-decoration: none;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: 0.2s;
+}
+
+.download-links a:hover {
+    color: #003d7a;
+    text-decoration: underline;
+}
+
+/* အိုင်ကွန်လေးကို အနည်းငယ် သေးပေးခြင်း */
+.download-links a i {
+    font-size: 0.85rem;
+}
+
+/* --- Header Banner ဒီဇိုင်းထည့်ခြင်း --- */
+/* --- Lesson Header Banner Style --- */
+.lesson-banner {
+    position: relative;
+    width: 100%;
+    height: 200px;
+    background-color: #2b4c61; /* ပုံထဲကလို အပြာရင့်ရောင် */
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 30px;
+    display: flex;
+    align-items: flex-end; /* စာသား Bar ကို အောက်ခြေမှာ ကပ်ရန် */
+}
+
+/* နောက်ခံတွင် ပြန့်ကြဲနေသော Icon ဝိုင်းလေးများ */
+.banner-bg-icons {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    opacity: 0.5;
+}
+
+.icon-circle {
+    width: 80px;
+    height: 80px;
+    background: rgba(255, 255, 255, 0.2); /* အလင်းဖောက်သော အဝိုင်းလေးများ */
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1e293b;
+    font-size: 1.8rem;
+}
+
+/* အလယ်က Bar (Pill Shape) */
+.lesson-info-bar {
+    position: relative;
+    background-color: #ced4da; /* ခဲရောင်ဖျော့ */
+    height: 70px;
+    width: 90%;
+    border-top-right-radius: 50px;
+    border-bottom-right-radius: 50px;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    padding-left: 10px;
+    box-shadow: 5px 5px 15px rgba(0,0,0,0.1);
+}
+
+/* နံပါတ်ပြသော အပြာရောင်အဝိုင်း */
+.lesson-id-badge {
+    width: 90px;
+    height: 90px;
+    background-color: #0073b1; /* အပြာရောင်တောက်တောက် */
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    font-weight: bold;
+    border: 8px solid #ced4da; /* bar နဲ့ အရောင်တူ ဘောင်ခတ်ထားခြင်း */
+    position: absolute;
+    left: 0;
+    top: -10px;
+}
+
+/* သင်ခန်းစာ ခေါင်းစဉ်စာသား */
+.lesson-banner-title {
+    margin-left: 110px;
+    color: #003087;
+    font-size: 1.8rem;
+    font-weight: bold;
+}
+
+/* Dark mode မှာ banner အရောင်မပြောင်းစေရန် သို့မဟုတ် ချိန်ညှိရန် */
+body.dark-theme .lesson-info-bar {
+    background-color: #e2e8f0;
+}
+
+/* --- ပြီးပြီ Header Banner ဒီဇိုင်းထည့်ခြင်း --- */

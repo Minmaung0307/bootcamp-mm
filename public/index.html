@@ -38,14 +38,26 @@
             <div class="sidebar-footer" id="auth-section"></div>
         </aside>
 
-        <main class="main-content">
+        <main id="main-content" class="main-content">
             <header class="top-nav">
                 <button class="menu-btn" onclick="toggleNav()">☰ Menu</button>
                 <h2 id="page-title">Dashboard</h2>
                 <div class="user-status-top"><span class="badge paid">Paid Account</span></div>
             </header>
+
+            <!-- သင်ခန်းစာများနှင့် Dashboard ပေါ်မည့်နေရာ -->
             <div id="dynamic-body" class="body-container"></div>
+
             <button id="back-to-top" onclick="scrollToTop()"><i class="fas fa-arrow-up"></i></button>
+
+            <!-- Footer ကို ဒီနေရာမှာ ထားပါ -->
+            <footer class="app-footer no-print">
+                <div class="footer-links">
+                    <a href="javascript:void(0)" onclick="showSection('about')">About Us</a> | 
+                    <a href="javascript:void(0)" onclick="showSection('privacy')">Privacy Policy</a>
+                </div>
+                <p>Powered by <span class="brand-name">MM</span> <span id="current-year"></span></p>
+            </footer>
         </main>
     </div>
 
