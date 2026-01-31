@@ -543,9 +543,263 @@ body {
     border: 1px solid var(--border-color);
 }
 
+/* ==========================================
+   Mobile & Tablet Responsive Fixes
+   ========================================== */
+
 @media (max-width: 768px) {
-    .profile-content-grid { grid-template-columns: 1fr; }
-    .profile-header-main { flex-direction: column; align-items: center; text-align: center; }
+    /* ၁။ Sidebar ကို Drawer ပုံစံပြောင်းခြင်း */
+    .sidebar {
+        position: fixed;
+        left: -100%; /* ဖုန်းမှာ ပုန်းထားမည် */
+        top: 0;
+        height: 100%;
+        width: 280px;
+        z-index: 9999;
+        box-shadow: 10px 0 30px rgba(0,0,0,0.2);
+        transition: 0.3s ease-in-out;
+    }
+
+    .sidebar.open {
+        left: 0; /* Menu နှိပ်လျှင် ထွက်လာမည် */
+    }
+
+    /* ၂။ Main Content ကို နေရာချဲ့ခြင်း */
+    .main-content {
+        margin-left: 0 !important;
+        width: 100% !important;
+    }
+
+    /* ၃။ Top Nav ရှိ Search Bar နှင့် Badge များကို နေရာချွေတာခြင်း */
+    .no-mobile {
+        display: none !important; /* ဖုန်းမှာ မလိုအပ်သော အရာများ ဖျောက်ထားမည် */
+    }
+
+    .top-nav {
+        padding: 10px 15px;
+    }
+
+    .nav-left h2 {
+        font-size: 1.1rem; /* ခေါင်းစဉ်ကို သေးပေးခြင်း */
+    }
+
+    /* ၄။ Dashboard နှင့် Profile Grid များကို အပေါ်အောက် စီခြင်း */
+    .dashboard-grid, .profile-content-grid, .edit-grid {
+        grid-template-columns: 1fr !important; /* ၂ ခု ပြိုင်မပြဘဲ ၁ ခုစီပြမည် */
+        gap: 15px;
+    }
+
+    /* ၅။ Profile Photo နှင့် စာသားများကို အလယ်ညှိခြင်း */
+    .profile-header-main {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        margin-top: -50px;
+    }
+
+    .profile-large-avatar {
+        width: 100px;
+        height: 100px;
+    }
+
+    /* ၆။ Messaging Layout ကို Mobile အတွက် ညှိခြင်း */
+    .messaging-layout {
+        flex-direction: column; /* Sidebar နှင့် Chat window အပေါ်အောက်ထားမည် */
+        height: auto;
+    }
+
+    .chat-sidebar {
+        width: 100%;
+        max-height: 200px; /* စကားပြောဖော်စာရင်းကို အပေါ်မှာ ခဏပြမည် */
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    /* ၇။ Certificate Landscape ကို Mobile မှာ Scroll ဆွဲကြည့်ရအောင် လုပ်ခြင်း */
+    .certificate-page-wrapper {
+        overflow-x: auto; /* ဖုန်းမှာ ဘေးတိုက် scroll ဆွဲကြည့်နိုင်ရန် */
+        padding: 10px;
+    }
+
+    .certificate-frame {
+        width: 800px; /* မူရင်းအရွယ်အစားကို မလျှော့ဘဲ scroll ပဲပေးမည် */
+        transform: scale(0.4); /* မြင်ကွင်းထဲဝင်အောင် အနည်းငယ် သေးပြခြင်း (Optional) */
+        transform-origin: top left;
+    }
+
+    /* ၈။ Admin Table ကို Scroll ဆွဲနိုင်ရန် */
+    .table-responsive {
+        width: 100%;
+        overflow-x: auto;
+    }
+}
+
+/* Tablet (iPad) များအတွက် အနည်းငယ် ညှိခြင်း */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr 1fr !important;
+    }
+}
+
+/* ==========================================
+   Profile & Admin Panel Mobile Optimization
+   ========================================== */
+
+@media (max-width: 768px) {
+    /* ၁။ Profile Card အလှဆင်ခြင်း */
+    .profile-card-pro {
+        border-radius: 0; /* ဖုန်းမှာ ဘောင်အကွာအဝေး မထားတော့ဘဲ အပြည့်ယူမည် */
+    }
+    
+    .profile-header-main {
+        padding: 0 15px;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .profile-large-avatar {
+        width: 110px;
+        height: 110px;
+        margin-bottom: 15px;
+    }
+
+    .profile-info-text h2 {
+        font-size: 1.4rem;
+    }
+
+    /* ၂။ Social Links အစုံကို အလယ်ညှိပြီး ခွဲထုတ်ခြင်း */
+    .social-links-grid {
+        justify-content: center; /* အိုင်ကွန်များကို အလယ်ပို့မည် */
+        gap: 12px;
+    }
+
+    .profile-content-grid {
+        grid-template-columns: 1fr !important; /* Side info နှင့် Main data ကို အပေါ်အောက်ထားမည် */
+        padding: 15px;
+    }
+
+    /* ၃။ Admin Panel Header (ခလုတ်များကို စနစ်တကျ စီခြင်း) */
+    .admin-header {
+        flex-direction: column;
+        align-items: stretch !important;
+        gap: 10px;
+    }
+
+    .admin-header div {
+        display: grid;
+        grid-template-columns: 1fr 1fr; /* ခလုတ်များကို ၂ ခုစီ တွဲပြမည် */
+        gap: 8px;
+    }
+
+    .admin-header .menu-btn, .admin-header .save-btn {
+        width: 100%;
+        margin: 0;
+        font-size: 0.8rem;
+        padding: 10px 5px !important;
+    }
+
+    /* ၄။ ဇယား (Table) ကို ဖုန်းမှာကြည့်ရ အဆင်ပြေစေရန် */
+    .table-responsive {
+        display: block;
+        width: 100%;
+        overflow-x: auto; /* ဘေးတိုက် scroll ဆွဲနိုင်ရန် */
+        -webkit-overflow-scrolling: touch;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+    }
+
+    .admin-table {
+        min-width: 600px; /* ဇယားကို အရမ်းမကျုံ့စေဘဲ ပုံသေထားလိုက်မည် */
+    }
+
+    .admin-table th, .admin-table td {
+        padding: 10px;
+        font-size: 0.85rem;
+    }
+
+    /* ၅။ Edit Profile Form များကို ညှိခြင်း */
+    .edit-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .social-input-group input {
+        width: 100% !important; /* input box များကို အပြည့်ထားမည် */
+    }
+
+    /* ၆။ Academic Box ကို စာဖတ်ရလွယ်အောင် ပြင်ခြင်း */
+    .academic-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+        padding: 12px 0;
+    }
+    
+    .academic-item span:last-child {
+        font-weight: bold;
+        color: var(--primary);
+    }
+}
+
+/* ==========================================
+   LMS Mobile UI Final Polish
+   ========================================== */
+
+@media (max-width: 768px) {
+    /* ၁။ Profile ခလုတ်များကို စနစ်တကျစီခြင်း */
+    .profile-main-data .academic-card .action-buttons, 
+    .profile-main-data .academic-card div[style*="display:flex"] {
+        display: flex !important;
+        flex-direction: column !important; /* အပေါ်အောက် စီမည် */
+        gap: 10px !important;
+    }
+
+    .profile-main-data .academic-card button {
+        width: 100% !important; /* ခလုတ်များကို အပြည့်ချဲ့မည် */
+        margin: 0 !important;
+    }
+
+    /* ၂။ Transcript (အမှတ်စာရင်း) ဇယားကို ဘေးတိုက်ရွှေ့နိုင်အောင်လုပ်ခြင်း */
+    .transcript-area table, .admin-table {
+        display: block;
+        width: 100%;
+        overflow-x: auto; /* 🔥 ဘေးတိုက်ရွှေ့ကြည့်ရန် */
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* ၃။ My Submissions ကတ်ပြားများကို အပေါ်အောက်စီခြင်း */
+    .dashboard-grid {
+        grid-template-columns: 1fr !important;
+        padding: 0;
+    }
+
+    /* ၄။ Certificate (အောင်လက်မှတ်) ကို ဖုန်းမှာကြည့်ရ အဆင်ပြေစေရန် */
+    .certificate-page-wrapper {
+        padding: 10px;
+        display: block !important;
+        overflow-x: auto; /* 🔥 ဘေးတိုက်ရွှေ့ကြည့်ရန် */
+    }
+
+    .certificate-frame {
+        width: 900px !important; /* မူရင်း Landscape ပုံစံမပျက်အောင် အသေထားမည် */
+        height: auto !important;
+        min-height: 650px;
+        transform: scale(0.4); /* မြင်ကွင်းထဲဝင်အောင် အချိုးကျ သေးပြမည် */
+        transform-origin: top left;
+        margin-bottom: -350px; /* scale လုပ်လိုက်လို့ ဖြစ်လာတဲ့ နေရာလွတ်ကို ကာမိစေရန် */
+    }
+
+    /* ၅။ Transcript Header ကို ဖုန်းမှာ ညှိခြင်း */
+    .academic-box {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 10px;
+    }
+    
+    .academic-box div {
+        text-align: left !important;
+    }
 }
 
 /* Card Design - Main Area ထဲက စာတွေကို card လေးတွေနဲ့ ထည့်မယ် */
@@ -817,80 +1071,131 @@ body {
     min-width: 180px;
 }
 
-/* --- 🔥 အရေးကြီးဆုံး Print Setting 🔥 --- */
+/* ==========================================
+   OFFICIAL PRINT ENGINE (US-LETTER LANDSCAPE)
+   ========================================== */
+
 @media print {
-    /* ၁။ Browser ကို Landscape mode အဖြစ် သတ်မှတ်ခြင်း */
+    /* ၁။ စာရွက်ကို Landscape အတင်းပြောင်းပြီး ဘောင်များကို ဖယ်ထုတ်မည် */
     @page {
         size: letter landscape;
-        margin: 0; /* စာရွက်ဘောင်များကို ဖယ်ထုတ်မည် */
+        margin: 0;
     }
 
     /* ၂။ မလိုအပ်သော UI အစိတ်အပိုင်းများ အားလုံးကို ဖျောက်ခြင်း */
-    #sidebar, 
-    .top-nav, 
-    #announcement-bar, 
-    .app-footer, 
-    .no-print, 
-    .breadcrumbs,
-    #back-to-top {
+    #sidebar, .top-nav, #announcement-bar, .app-footer, .no-print, .breadcrumbs, #back-to-top {
         display: none !important;
     }
 
-    /* ၃။ Body နှင့် Wrapper များကို Print အတွက် နေရာပြန်ညှိခြင်း */
+    /* ၃။ Layout ကို Reset လုပ်ပြီး အဖြူရောင်ပြောင်းခြင်း */
     body, html {
-        background-color: white !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        height: 100%;
-        overflow: visible !important;
-    }
-
-    .main-content {
+        background: white !important;
         margin: 0 !important;
         padding: 0 !important;
         width: 100% !important;
-        display: block !important;
+        height: auto !important;
+        overflow: hidden !important; /* ဗလာစာရွက် မပါစေရန် */
     }
 
-    .body-container {
-        padding: 0 !important;
-        margin: 0 !important;
+    .wrapper, .main-content, .body-container {
         display: flex !important;
         justify-content: center !important;
         align-items: center !important;
-        height: 100vh; /* စာရွက်အလယ်တည့်တည့် ရောက်စေရန် */
-    }
-
-    /* ၄။ Certificate Frame ကို စာရွက်နှင့် ကွက်တိဖြစ်အောင် ညှိခြင်း */
-    .certificate-frame {
-        width: 10.5in !important;
-        height: 8in !important;
+        width: 100% !important;
+        height: 100vh !important;
         margin: 0 !important;
-        border: 20px solid #1e293b !important;
-        box-shadow: none !important;
-        position: relative !important;
-        top: 0 !important;
-        left: 0 !important;
-        page-break-after: always;
-    }
-
-    /* ပုံထဲမှာ မြင်ရတဲ့ Blue bar ကြီး မပါစေရန် */
-    .certificate-container {
         padding: 0 !important;
-        margin: 0 !important;
-        width: 100vw;
-        height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
+        background: white !important;
     }
 
+    /* ၄။ Certificate (ဘွဲ့လက်မှတ်) အတွက် US-Letter ကွက်တိညှိခြင်း */
     .certificate-page-wrapper {
-        padding: 0 !important;
-        margin: 0 !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        width: 100% !important;
+        height: 100% !important;
     }
-    .cert-action-buttons {
-        display: none !important; /* Print ထုတ်လျှင် ခလုတ်များ ဖျောက်ထားမည် */
+
+    /* 🔥 ဗလာစာရွက် ပျောက်စေရန် အထိရောက်ဆုံး နည်းလမ်း 🔥 */
+    .transcript-paper, .certificate-frame {
+        width: 10in !important; /* US Letter Width */
+        height: 7.5in !important; /* US Letter Height */
+        border: 15px solid #1e293b !important;
+        box-sizing: border-box !important;
+        padding: 0.4in !important;
+        box-shadow: none !important;
+        background: white !important;
+        page-break-inside: avoid;
+    }
+
+    .certificate-frame {
+        width: 9.8in !important; /* စာရွက်အနားသတ်ထက် အနည်းငယ်သေးအောင်ထားသည် */
+        height: 7.2in !important;
+        margin: 0 auto !important;
+        border: 15px solid #1e293b !important;
+        transform: none !important;
+        box-sizing: border-box !important;
+        /* page-break-before: avoid;
+        page-break-after: always; */
+    }
+
+    .cert-border {
+        border: 4px solid #d4af37 !important;
+        height: 100% !important;
+        padding: 30px !important;
+        box-sizing: border-box !important;
+    }
+
+    /* ၅။ Transcript (အမှတ်စာရင်း) အတွက် ဇယားပြန့်အောင်ညှိခြင်း */
+    .transcript-area {
+        width: 100% !important;
+        padding: 20px !important;
+        display: block !important;
+    }
+
+    .academic-box {
+        background-color: #f8fafc !important;
+        -webkit-print-color-adjust: exact;
+    }
+
+    .transcript-table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+    }
+
+    .academic-info-grid, .transcript-table th {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    /* ဇယားကွက်များ အပြည့်ပေါ်စေရန် */
+    .table-responsive {
+        overflow: visible !important; /* Scroll bar ပျောက်စေရန် */
+        width: 100% !important;
+    }
+
+    .admin-table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+    }
+
+    .admin-table th, .admin-table td {
+        border: 1px solid #ddd !important;
+        -webkit-print-color-adjust: exact;
+    }
+
+    .transcript-header, .academic-box, .admin-table th {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    /* Footer လက်မှတ်အပိုင်း */
+    .transcript-footer {
+        margin-top: 50px !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: flex-end !important;
     }
 }
 
@@ -1146,3 +1451,51 @@ body.focus-mode .body-container { max-width: 800px; padding: 50px 20px; }
     border-color: #1e293b transparent transparent transparent;
 }
 /* --- အဆုံး Tooltip Visibility Fix --- */
+
+/* --- ၁။ တစ်ကမ္ဘာလုံးဆိုင်ရာ စာသားထိန်းချုပ်မှု (အရေးကြီးဆုံး) --- */
+p, a, span, div, td, h1, h2, h3, h4 {
+    word-break: break-word;      /* စာကြောင်းအရှည်ကြီးဖြစ်လျှင် အလိုအလျောက် ဖြတ်မည် */
+    overflow-wrap: anywhere;     /* Link များ ဘေးထိုးမထွက်စေရန် */
+}
+
+/* --- ၂။ Body Overflow ကို ပိတ်ခြင်း --- */
+body, html {
+    overflow-x: hidden;          /* တစ်စာမျက်နှာလုံး ဘယ်ညာရွှေ့နေမှုကို လုံးဝပိတ်မည် */
+    width: 100%;
+    position: relative;
+}
+
+/* --- ၃။ Table & Transcript Fix --- */
+.transcript-area, .table-responsive {
+    width: 100% !important;
+    overflow-x: auto !important; /* ဇယားကွက်ကြီးလျှင် ၎င်းအကွက်ထဲမှာတင် scroll ဆွဲရန် */
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 20px;
+}
+
+.admin-table {
+    width: 100%;
+    min-width: 500px; /* ဇယားကို အရမ်းမကျုံ့စေရန် */
+}
+
+/* --- ၄။ Academic Box (Profile) Fix --- */
+.academic-box {
+    width: 100%;
+    box-sizing: border-box;
+    display: block !important; /* Grid ဖြစ်နေလျှင် Mobile တွင် ပြဿနာတက်နိုင်၍ block ပြောင်းသည် */
+}
+
+.academic-box div {
+    margin-bottom: 10px;
+    padding: 10px;
+    background: rgba(0,0,0,0.02); /* အကန့်လေးတွေ သိသာစေရန် */
+    border-radius: 5px;
+}
+
+/* --- ၅။ GitHub Link အရှည်ကြီးများကို အလှဆင်ခြင်း --- */
+.academic-box a, .content-card a {
+    color: var(--primary);
+    text-decoration: underline;
+    display: inline-block;
+    max-width: 100%; /* ဘောင်ထက် မကျော်စေရန် */
+}

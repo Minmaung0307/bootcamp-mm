@@ -142,6 +142,16 @@ function showSection(section, filterCat = null) {
     toggleNav();
   }
 
+  // 🔥 Mobile မှာ menu နှိပ်လိုက်ရင် sidebar ကို အလိုအလျောက် ပြန်ပိတ်ပေးမည်
+    if (window.innerWidth <= 768) {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        if (sidebar.classList.contains('open')) {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('show');
+        }
+    }
+
   if (section === "dashboard") {
     title.innerText = "Dashboard";
     renderDashboard(); // <--- အပေါ်မှာ သတ်မှတ်ထားတဲ့ function ကို ခေါ်လိုက်တာပါ
@@ -1220,103 +1230,84 @@ async function handleLogout() {
 
 // --- Transcript ပြသခြင်း ---
 function viewTranscript(uid, isAdminPreview = false) {
-    // ၁။ ကျောင်းသားကို ရှာဖွေခြင်း
     const student = (uid === currentUser.uid) ? currentUser : studentsList.find(s => s.uid === uid);
     if (!student) return alert("Student not found!");
 
     const body = document.getElementById('dynamic-body');
-    // Admin Preview ဖြစ်လျှင် Admin ဆီပြန်သွားမည်၊ မဟုတ်လျှင် Profile ဆီပြန်သွားမည်
     const backFunc = isAdminPreview ? `previewStudentAchievements('${uid}')` : "showSection('profile')";
     
     const grades = student.grades || {};
     let totalScore = 0;
-    let subjectCount = 0;
+    let subjectCount = lmsSettings.subjects.length;
 
-    // ၂။ ဘာသာရပ်တစ်ခုချင်းစီအတွက် Row များ ထုတ်ယူခြင်း
     let rows = lmsSettings.subjects.map(sub => {
         const score = grades[sub.toLowerCase()] || 0;
         totalScore += score;
-        subjectCount++;
-        
-        // ရလဒ်အရောင် သတ်မှတ်ခြင်း
-        const status = score >= 50 
-            ? '<span class="text-success" style="font-weight:bold;">Pass</span>' 
-            : '<span class="text-danger" style="font-weight:bold;">Fail</span>';
-
-        return `
-            <tr>
-                <td style="text-transform:uppercase; font-weight:500;">${sub}</td>
-                <td>${score}</td>
-                <td>${status}</td>
-            </tr>
-        `;
+        const status = score >= 50 ? '<span class="text-success" style="font-weight:bold;">Pass</span>' : '<span class="text-danger" style="font-weight:bold;">Fail</span>';
+        return `<tr><td style="text-transform:uppercase; text-align:left; padding:12px;">${sub}</td><td style="padding:12px;">${score}</td><td style="padding:12px;">${status}</td></tr>`;
     }).join('');
 
-    // ၃။ GPA နှင့် ရက်စွဲ တွက်ချက်ခြင်း
     const gpa = subjectCount > 0 ? (totalScore / subjectCount).toFixed(2) : 0;
     const issueDate = new Date().toLocaleDateString('en-GB');
 
     body.innerHTML = `
-        <div class="content-card animate-up transcript-area">
-            <!-- Header Section (No-Print) -->
-            <div class="no-print" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                <h3><i class="fas fa-file-invoice"></i> Official Academic Transcript ${isAdminPreview ? '(Demo)' : ''}</h3>
+        <div class="transcript-outer-container animate-up">
+            <div class="no-print" style="margin-bottom:20px;">
                 <button class="menu-btn" onclick="${backFunc}"><i class="fas fa-arrow-left"></i> Back</button>
             </div>
 
-            <!-- Transcript Header -->
-            <div class="transcript-header" style="text-align:center; margin-bottom:30px;">
-                <h2 style="color:var(--primary); margin:0; letter-spacing:1px; text-transform:uppercase;">Myanmar Full-Stack Bootcamp</h2>
-                <p style="margin:5px 0; color:var(--text-muted); font-size:0.9rem;">OFFICIAL STUDENT RECORD</p>
-            </div>
-
-            <!-- Student Info Section -->
-            <div class="academic-box" style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; padding:20px; border-radius:10px; background:var(--main-bg); margin-bottom:25px;">
-                <div>
-                    <p style="margin:5px 0;"><strong>Student Name:</strong> ${student.name}</p>
-                    <p style="margin:5px 0;"><strong>Student ID:</strong> ${student.uid.substring(0, 8).toUpperCase()}</p>
-                    <p style="margin:5px 0;"><strong>Batch:</strong> ${student.batchId || academicInfo.batchName}</p>
+            <div class="transcript-paper shadow-lg">
+                <div class="transcript-header" style="text-align:center; margin-bottom:30px;">
+                    <h2 style="color:#003087; text-transform:uppercase; margin:0; font-size: 2rem;">Myanmar Full-Stack Bootcamp</h2>
+                    <p style="color:#64748b; font-weight: bold; margin:5px 0;">OFFICIAL STUDENT RECORD</p>
                 </div>
-                <div style="text-align:right;">
-                    <p style="margin:5px 0;"><strong>Course Title:</strong> ${lmsSettings.courseTitle}</p>
-                    <p style="margin:5px 0;"><strong>Date Issued:</strong> ${issueDate}</p>
-                    <p style="margin:5px 0;"><strong>Average GPA:</strong> <span style="color:var(--primary); font-weight:bold; font-size:1.1rem;">${gpa}</span></p>
-                </div>
-            </div>
 
-            <!-- Grades Table -->
-            <table class="admin-table" style="width:100%; border-collapse:collapse; margin-top:10px;">
-                <thead>
-                    <tr style="background:var(--primary); color:white;">
-                        <th style="padding:12px; text-align:left;">Subject / Module</th>
-                        <th style="padding:12px; text-align:center;">Score</th>
-                        <th style="padding:12px; text-align:center;">Result</th>
-                    </tr>
-                </thead>
-                <tbody style="text-align:center;">
-                    ${rows || '<tr><td colspan="3" style="padding:20px;">ဘာသာရပ်များ သတ်မှတ်ထားခြင်း မရှိသေးပါ။</td></tr>'}
-                </tbody>
-            </table>
-
-            <!-- Footer Section -->
-            <div class="transcript-footer" style="margin-top:60px; display:flex; justify-content:space-between; align-items:flex-end;">
-                <div style="font-size:0.8rem; color:grey; max-width:300px;">
-                    * This is a computer-generated official transcript.<br>
-                    * Minimum passing score for each module is 50.
-                </div>
-                <div style="text-align:center; width:220px;">
-                    <div style="border-bottom:1px solid #333; height:40px; font-family:'Dancing Script', cursive; font-size:1.3rem; display:flex; align-items:center; justify-content:center;">
-                        ${lmsSettings.instructorName}
+                <!-- 🔥 ဘယ်/ညာ တိတိကျကျ ခွဲထားသော အချက်အလက်များ 🔥 -->
+                <div class="academic-info-grid" style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:25px; margin-bottom:30px; -webkit-print-color-adjust: exact;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                        <span><strong>Student Name:</strong> ${student.name}</span>
+                        <span><strong>Course Title:</strong> ${lmsSettings.courseTitle}</span>
                     </div>
-                    <p style="margin-top:8px; font-weight:bold; font-size:0.9rem; text-transform:uppercase;">Registrar Office</p>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                        <span><strong>Student ID:</strong> ${student.uid.substring(0, 8).toUpperCase()}</span>
+                        <span><strong>Date Issued:</strong> ${issueDate}</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between;">
+                        <span><strong>Batch:</strong> ${student.batchId || academicInfo.batchName}</span>
+                        <span><strong>Average GPA:</strong> <span style="color:#003087; font-weight:bold; font-size:1.2rem;">${gpa}</span></span>
+                    </div>
+                </div>
+
+                <!-- 🔥 ဇယားကို ညာဘက်အစွန်ထိ အပြည့်ချဲ့ခြင်း 🔥 -->
+                <table class="transcript-table" style="width:100%; border-collapse:collapse; border: 1px solid #ddd;">
+                    <thead>
+                        <tr style="background:#003087 !important; color:white !important; -webkit-print-color-adjust: exact;">
+                            <th style="padding:15px; text-align:left; border: 1px solid #ddd;">SUBJECT / MODULE</th>
+                            <th style="padding:15px; text-align:center; border: 1px solid #ddd; width:120px;">SCORE</th>
+                            <th style="padding:15px; text-align:center; border: 1px solid #ddd; width:120px;">RESULT</th>
+                        </tr>
+                    </thead>
+                    <tbody style="text-align:center;">
+                        ${rows || '<tr><td colspan="3" style="padding:30px;">အမှတ်စာရင်း မရှိသေးပါ။</td></tr>'}
+                    </tbody>
+                </table>
+
+                <div class="transcript-footer" style="margin-top:80px; display:flex; justify-content:space-between; align-items:flex-end;">
+                    <div style="font-size:0.85rem; color:#64748b; text-align:left; line-height:1.6;">
+                        * This is a computer-generated official transcript.<br>
+                        * Minimum passing score for each module is 50.
+                    </div>
+                    <div style="text-align:center; width:250px;">
+                        <div style="border-bottom:1.5px solid #333; height:45px; font-family:'Dancing Script', cursive; font-size:1.5rem; display:flex; align-items:center; justify-content:center; color:#000;">
+                            ${lmsSettings.instructorName}
+                        </div>
+                        <p style="margin-top:10px; font-weight:bold; font-size:0.9rem; text-transform:uppercase; color:#000;">Registrar Office</p>
+                    </div>
                 </div>
             </div>
 
-            <!-- Print Actions (No-Print) -->
-            <div class="no-print" style="margin-top:40px; text-align:center; display:flex; justify-content:center; gap:15px;">
-                <button class="save-btn" onclick="window.print()" style="padding:12px 30px;">
-                    <i class="fas fa-print"></i> Print Transcript
-                </button>
+            <div class="no-print" style="margin-top:40px; text-align:center;">
+                <button class="save-btn" onclick="window.print()" style="padding:12px 50px; font-size: 1.1rem;"><i class="fas fa-print"></i> Print Transcript</button>
             </div>
         </div>
     `;
@@ -1584,26 +1575,27 @@ async function renderAdminPanel() {
             <div class="admin-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:15px;">
 
                 <h3 style="margin:0;"><i class="fas fa-user-shield"></i> Admin Control Panel</h3>
-                <div style="display:flex; gap:10px;">
+
+                <div style="display:flex; gap:10px; flex-wrap:wrap; width:100%; justify-content: flex-end;" class="admin-btn-group">
                     <!-- 🔥 ဒီခလုတ်က အရေးကြီးဆုံးပါ၊ Editor ဆီသွားပါမယ် -->
                     <button class="menu-btn" style="background:#f59e0b; color:white;" onclick="renderLMSEditor()">
-                        <i class="fas fa-cog"></i> System Settings
+                        <i class="fas fa-cog"></i> Settings
                     </button>
 
                     <button class="menu-btn" style="background:#0ea5e9; color:white;" onclick="renderContentEditor()">
-                        <i class="fas fa-plus"></i> Add Content
+                        <i class="fas fa-plus"></i> Add
                     </button>
 
                     <button class="menu-btn" style="background:#f59e0b" onclick="renderZoomEditor()">
-                        <i class="fas fa-video"></i> Manage Zoom
+                        <i class="fas fa-video"></i> Zoom
                     </button>
 
                     <button class="menu-btn" style="background:#4b5563; color:white;" onclick="renderLMSGuide()">
-                        <i class="fas fa-book"></i> User Guide
+                        <i class="fas fa-book"></i> Guide
                     </button>
 
                     <button class="save-btn" onclick="renderSubmissions()">
-                        <i class="fas fa-file-signature"></i> Review Assignments
+                        <i class="fas fa-file-signature"></i> Review
                     </button>
                 </div>
             </div>
