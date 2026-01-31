@@ -387,58 +387,66 @@ async function awardBadge(name) {
 // ၄။ Course Tree & Content Engine
 // ==========================================
 
-// Course Tree with Filtering
-function renderCourseTree(filterCat) {
-  const body = document.getElementById("dynamic-body");
-  body.innerHTML = '<div id="course-outline"></div>';
-  const container = document.getElementById("course-outline");
+// --- သင်ခန်းစာမာတိကာကို Database ပါ ဖတ်နိုင်အောင် ပြင်ဆင်ခြင်း ---
+async function renderCourseTree(filterCat) {
+    const body = document.getElementById('dynamic-body');
+    body.innerHTML = '<div id="course-outline"></div>';
+    const container = document.getElementById('course-outline');
 
-  const filteredData = filterCat
-    ? courseData.filter(
-        (c) => c.category.toLowerCase() === filterCat.toLowerCase(),
-      )
-    : courseData;
+    // ၁။ အခြေခံ သင်ရိုးများ (Local data.js မှ)
+    let filteredData = filterCat ? courseData.filter(c => c.category.toLowerCase() === filterCat.toLowerCase()) : courseData;
 
-  if (filteredData.length === 0) {
-    container.innerHTML = `<div class="empty-msg">ဤကဏ္ဍတွင် သင်ခန်းစာများ မရှိသေးပါ။</div>`;
-    return;
-  }
+    // ၂။ Database ထဲမှ အသစ်တိုးထားသော သင်ခန်းစာများကို ဆွဲယူမည်
+    try {
+        const dynamicSnap = await db.collection('course_structure').get();
+        const dynamicLessons = [];
+        dynamicSnap.forEach(doc => dynamicLessons.push(doc.data()));
 
-  filteredData.forEach((cat, catIdx) => {
-    const catH = document.createElement("div");
-    catH.className = "category-header";
-    catH.innerHTML = `<i class="fas fa-folder"></i> ${cat.category}`;
-    container.appendChild(catH);
+        // Local data ထဲကို Dynamic data တွေ ပေါင်းထည့်မယ်
+        // (မှတ်ချက် - Category နဲ့ Module နာမည် တူရပါမယ်)
+        dynamicLessons.forEach(dl => {
+            let catIndex = filteredData.findIndex(c => c.category === dl.category);
+            if (catIndex !== -1) {
+                let modIndex = filteredData[catIndex].modules.findIndex(m => m.moduleTitle === dl.module);
+                if (modIndex !== -1) {
+                    // ရှိပြီးသား Module ထဲကို lesson အသစ် ထည့်မယ်
+                    filteredData[catIndex].modules[modIndex].lessons.push({
+                        title: dl.title, path: dl.path, type: dl.type
+                    });
+                }
+            }
+        });
+    } catch (e) { console.warn("Dynamic content load failed."); }
 
-    cat.modules.forEach((mod, modIdx) => {
-      const modId = `mod-${catIdx}-${modIdx}`;
-      const group = document.createElement("div");
-      group.className = "module-group animate-up";
-      group.innerHTML = `
+    // ၃။ Rendering Logic (ယခင်အတိုင်း ဆက်လက်လုပ်ဆောင်မည်)
+    filteredData.forEach((cat, catIdx) => {
+        const catH = document.createElement('div');
+        catH.className = 'category-header';
+        catH.innerHTML = `<i class="fas fa-folder"></i> ${cat.category}`;
+        container.appendChild(catH);
+
+        cat.modules.forEach((mod, modIdx) => {
+            const modId = `mod-${catIdx}-${modIdx}`;
+            const group = document.createElement('div');
+            group.className = 'module-group';
+            group.innerHTML = `
                 <div class="module-title-header" onclick="toggleModuleAccordion(this, '${modId}')">
                     <span><i class="fas fa-chevron-right"></i> ${mod.moduleTitle}</span>
                 </div>
                 <div id="${modId}" class="lessons-list"></div>
             `;
-      container.appendChild(group);
+            container.appendChild(group);
 
-      const list = document.getElementById(modId);
-      const userProgress = currentUser.completedLessons || [];
-      mod.lessons.forEach((les, lesIdx) => {
-        const isDone = userProgress.includes(les.title);
-        const item = document.createElement("div");
-        item.className = `lesson-item ${isDone ? "completed" : ""}`;
-        item.innerHTML = `<i class="${isDone ? "fas fa-check-circle text-success" : "far fa-file-alt"}"></i> 
-                                 ${les.title} <small class="type-tag">${les.type}</small>`;
-
-        const originalCatIdx = courseData.findIndex(
-          (c) => c.category === cat.category,
-        );
-        item.onclick = () => renderLessonContent(catIdx, modIdx, lesIdx);
-        list.appendChild(item);
-      });
+            const list = document.getElementById(modId);
+            mod.lessons.forEach((les, lesIdx) => {
+                const item = document.createElement('div');
+                item.className = 'lesson-item';
+                item.innerHTML = `<i class="far fa-file-alt"></i> ${les.title}`;
+                item.onclick = () => renderLessonContent(catIdx, modIdx, lesIdx);
+                list.appendChild(item);
+            });
+        });
     });
-  });
 }
 
 async function renderLessonContent(catIdx, modIdx, lesIdx) {
@@ -923,6 +931,10 @@ function renderProfile() {
                     <div style="margin-top:20px; display:flex; gap:10px;">
                         <button class="menu-btn" onclick="viewTranscript('${currentUser.uid}')">
                             <i class="fas fa-file-invoice"></i> View Transcript
+                        </button>
+
+                        <button class="menu-btn" style="background:#0ea5e9; color:white;" onclick="renderMySubmissions()">
+                            <i class="fas fa-folder-open"></i> My Submissions
                         </button>
                         
                         <!-- အောင်မြင်မှသာ ရွှေရောင်ခလုတ် ပွင့်မည် -->
@@ -2456,6 +2468,154 @@ async function updateZoomToFirebase() {
         renderAdminPanel();
     } catch (e) {
         alert("Error: " + e.message);
+    }
+}
+
+// --- ဆရာက အမှတ်ပေးခြင်းကို အတည်ပြုသည့် Function ---
+async function confirmGrade(docId, studentId, lessonTitle) {
+    const scoreInput = document.getElementById('grade-score');
+    const feedbackInput = document.getElementById('teacher-feedback');
+    
+    if (!scoreInput || !scoreInput.value) {
+        return alert("ကျေးဇူးပြု၍ အမှတ်အရင်ထည့်ပါ။");
+    }
+
+    const score = parseInt(scoreInput.value);
+    const feedback = feedbackInput ? feedbackInput.value : "";
+
+    try {
+        // ၁။ ကျောင်းသားရဲ့ Document ထဲမှာ အမှတ်သွားထည့်မယ်
+        // ဘာသာရပ်အမည်ကို သင်ခန်းစာခေါင်းစဉ်မှ ယူမည် (ဥပမာ- html, css)
+        const subjectKey = lessonTitle.toLowerCase().includes('html') ? 'html' : 
+                         lessonTitle.toLowerCase().includes('css') ? 'css' : 'javascript';
+
+        await db.collection('users').doc(studentId).set({
+            grades: { [subjectKey]: score }
+        }, { merge: true });
+
+        // ၂။ Submission status ကို 'graded' ပြောင်းမယ်
+        await db.collection('submissions').doc(docId).update({
+            status: "graded",
+            score: score,
+            teacherFeedback: feedback
+        });
+
+        // ၃။ ကျောင်းသားဆီ Noti ပို့မယ်
+        await db.collection('messages').add({
+            text: `🔔 သင်၏ ${lessonTitle} အတွက် အမှတ်ထွက်ပါပြီ။ (ရမှတ်: ${score})`,
+            senderId: currentUser.uid,
+            senderName: "System (Tutor)",
+            receiverId: studentId,
+            type: "direct",
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        alert("အမှတ်ပေးခြင်း အောင်မြင်ပါသည်။");
+        renderAdminPanel(); // Admin Panel သို့ ပြန်သွားမည်
+
+    } catch (error) {
+        console.error("Grading Error:", error);
+        alert("Error: " + error.message);
+    }
+}
+
+// ကျောင်းသားကိုယ်တိုင် တင်ထားသမျှ Assignment/Project စာရင်းနှင့် အမှတ်ကိုကြည့်ရန်
+async function renderMySubmissions() {
+    const body = document.getElementById('dynamic-body');
+    body.innerHTML = `<h3><i class="fas fa-file-upload"></i> ကျွန်ုပ်၏ ပေးပို့မှုများ</h3><div class="loader">Loading...</div>`;
+
+    try {
+        // Query စစ်ထုတ်ခြင်း
+        const snap = await db.collection('submissions')
+                             .where('studentId', '==', currentUser.uid)
+                             .orderBy('timestamp', 'desc')
+                             .get();
+
+        if (snap.empty) {
+            body.innerHTML = `<h3>ကျွန်ုပ်၏ ပေးပို့မှုများ</h3><div class="content-card">တင်ထားသော Assignment မရှိသေးပါ။</div>`;
+            return;
+        }
+
+        let html = '<div class="dashboard-grid">';
+        snap.forEach(doc => {
+            const s = doc.data();
+            const statusClass = s.status === 'graded' ? 'text-success' : 'text-warning';
+            
+            html += `
+                <div class="content-card animate-up">
+                    <div style="display:flex; justify-content:space-between; align-items:start;">
+                        <span class="badge-type" style="background:#e0f2fe; color:#0369a1;">${s.category}</span>
+                        <strong class="${statusClass}" style="font-size:0.8rem;">${s.status.toUpperCase()}</strong>
+                    </div>
+                    <h4 style="margin:10px 0;">${s.lessonTitle}</h4>
+                    <p style="font-size:0.8rem; color:var(--text-muted);">တင်သည့်ရက်: ${s.timestamp ? s.timestamp.toDate().toLocaleDateString() : 'N/A'}</p>
+                    <hr style="margin:10px 0; border:0; border-top:1px solid #eee;">
+                    
+                    ${s.status === 'graded' ? `
+                        <div class="academic-box" style="background:#f0fdf4; border-left:4px solid #22c55e; padding:10px; border-radius:5px;">
+                            <p><strong>ရမှတ်:</strong> <span style="font-size:1.1rem; color:#16a34a;">${s.score} / 100</span></p>
+                            <p style="font-size:0.85rem;"><strong>ဆရာ့မှတ်ချက်:</strong> ${s.teacherFeedback || "မှတ်ချက်မရှိပါ။"}</p>
+                        </div>
+                    ` : `<p style="color:#f59e0b; font-size:0.9rem;"><i class="fas fa-clock"></i> ဆရာမှ စစ်ဆေးနေဆဲဖြစ်ပါသည်။</p>`}
+                    
+                    <button class="menu-btn" style="margin-top:15px; width:100%; font-size:0.85rem;" onclick="viewMySubmissionDetail('${doc.id}')">
+                        မူရင်းစာသား ပြန်ဖတ်ရန်
+                    </button>
+                </div>`;
+        });
+        body.innerHTML = html + '</div>';
+    } catch (e) {
+        console.error("My Submissions Error:", e);
+        // 🔥 အရေးကြီးသည်- အကယ်၍ Index လိုအပ်နေလျှင် Console ထဲက Link ကို နှိပ်ရပါမည်
+        body.innerHTML = `<div class="error-msg">Error: ${e.message} <br> (Browser Console ကိုစစ်ဆေးပြီး Index Link ပါက နှိပ်ပေးပါ)</div>`;
+    }
+}
+
+// --- ကျောင်းသားကိုယ်တိုင် တင်ထားသော Assignment အသေးစိတ်ကို ပြန်ဖတ်ရန် ---
+async function viewMySubmissionDetail(docId) {
+    const body = document.getElementById('dynamic-body');
+    body.innerHTML = '<div class="loader">စာသားများကို ပြန်လည်ဖတ်ရှုနေသည်...</div>';
+
+    try {
+        // Firestore မှ သက်ဆိုင်ရာ Submission ကို ဆွဲယူမည်
+        const doc = await db.collection('submissions').doc(docId).get();
+        
+        if (!doc.exists) {
+            alert("ရှာမတွေ့ပါ။");
+            renderMySubmissions();
+            return;
+        }
+
+        const s = doc.data();
+
+        body.innerHTML = `
+            <div class="content-card animate-up" style="max-width:850px; margin:auto;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                    <h3><i class="fas fa-file-alt"></i> ${s.lessonTitle}</h3>
+                    <button class="menu-btn" onclick="renderMySubmissions()">
+                        <i class="fas fa-arrow-left"></i> Back to List
+                    </button>
+                </div>
+                <hr><br>
+                
+                <div class="academic-box" style="background:var(--main-bg); padding:25px; border-radius:12px; line-height:1.8; white-space:pre-wrap;">
+                    ${s.content ? s.content : `<strong>GitHub Project Link:</strong> <a href="${s.githubLink}" target="_blank">${s.githubLink}</a>`}
+                </div>
+
+                ${s.status === 'graded' ? `
+                    <div style="margin-top:30px; padding:20px; border:1px solid #22c55e; border-radius:12px; background:#f0fdf4;">
+                        <h4 style="color:#166534; margin-bottom:10px;">ဆရာ့ထံမှ တုံ့ပြန်ချက် (Feedback)</h4>
+                        <p><strong>ရမှတ်:</strong> ${s.score} / 100</p>
+                        <p><strong>မှတ်ချက်:</strong> ${s.teacherFeedback || "မှတ်ချက်မရှိပါ။"}</p>
+                    </div>
+                ` : ''}
+            </div>
+        `;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (error) {
+        console.error("Error loading submission detail:", error);
+        alert("ဖတ်မရပါ- " + error.message);
+        renderMySubmissions();
     }
 }
 
