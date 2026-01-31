@@ -661,8 +661,23 @@ body {
 
 .chat-sidebar { width: 260px; border-right: 1px solid #eee; background: #f8fafc; }
 .chat-list-header { padding: 20px; font-weight: bold; background: #f1f5f9; }
-.chat-item { padding: 15px 20px; cursor: pointer; border-bottom: 1px solid #eee; transition: 0.2s; }
-.chat-item.active { background: #e0f2fe; border-left: 4px solid var(--primary); color: var(--primary); }
+.chat-item {
+    padding: 15px 20px;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: 0.2s;
+    color: var(--text-main);
+}
+
+.chat-item.active {
+    background-color: rgba(0, 48, 135, 0.1); /* Columbia Blue အဖျော့ */
+    border-left: 4px solid var(--primary);
+    color: var(--primary);
+    font-weight: bold;
+}
 
 .chat-window { flex: 1; display: flex; flex-direction: column; }
 .chat-window-header { padding: 15px 25px; background: white; border-bottom: 1px solid #eee; font-weight: bold; }
@@ -689,10 +704,10 @@ body {
 }
 
 .msg-actions {
-    display: none; /* Mouse တင်မှ ပေါ်လာအောင် လုပ်မည် */
+    display: flex;
     gap: 8px;
-    font-size: 0.75rem;
-    opacity: 0.6;
+    opacity: 0.5;
+    font-size: 0.8rem;
 }
 
 .message-bubble:hover .msg-actions {
@@ -703,10 +718,13 @@ body {
     cursor: pointer;
     transition: 0.2s;
 }
-
 .msg-actions i:hover {
     opacity: 1;
-    color: #f87171; /* Delete icon အတွက် အနီရောင် */
+    color: var(--primary);
+}
+
+.fa-trash:hover {
+    color: #ef4444 !important; /* ဖျက်တဲ့ icon ကို အနီရောင်ပြမည် */
 }
 
 .message-bubble.me .msg-actions i:hover {
@@ -987,17 +1005,65 @@ body {
     display: none; z-index: 3000; max-height: 400px; overflow-y: auto;
 }
 
-.notification-wrapper { position: relative; cursor: pointer; font-size: 1.2rem; color: var(--text-main); margin-right: 15px; }
-.badge-red { 
-    position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; 
-    font-size: 0.6rem; padding: 2px 5px; border-radius: 50%; border: 2px solid var(--card-bg);
+#noti-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #ef4444; /* အနီရောင် */
+    color: white;
+    font-size: 0.65rem;
+    font-weight: bold;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: none; /* အစပိုင်းမှာ ဖျောက်ထားမည် */
+    justify-content: center;
+    align-items: center;
+    border: 2px solid var(--card-bg);
 }
 
-.noti-dropdown { 
-    position: absolute; top: 35px; right: 0; width: 280px; background: var(--card-bg); 
-    border: 1px solid var(--border-color); border-radius: 10px; display: none; z-index: 3000;
+.notification-wrapper {
+    position: relative;
+    padding: 5px;
+    cursor: pointer;
 }
-.noti-item { padding: 12px; border-bottom: 1px solid var(--border-color); font-size: 0.85rem; transition: 0.2s; }
+.badge-red {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    background: #ef4444; /* တောက်တောက်သော အနီရောင် */
+    color: white;
+    font-size: 0.7rem;
+    font-weight: bold;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--card-bg);
+    animation: pulse 1.5s infinite; /* ခုန်နေသော effect */
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+.noti-dropdown {
+    position: absolute; top: 40px; right: 0; width: 300px;
+    background: var(--card-bg); border: 1px solid var(--border-color);
+    border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    display: none; z-index: 5000;
+}
+.noti-header { padding: 10px; font-weight: bold; border-bottom: 1px solid var(--border-color); }
+.noti-item {
+    padding: 10px;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.85rem;
+    cursor: pointer;
+}
 .noti-item:hover { background: var(--main-bg); }
 
 /* Countdown Timer Style */

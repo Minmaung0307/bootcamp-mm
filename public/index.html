@@ -56,6 +56,17 @@
                         <div id="search-results" class="search-dropdown"></div>
                     </div>
                 </div>
+
+                <div class="notification-wrapper" onclick="toggleNotifications()">
+                    <i class="fas fa-bell"></i>
+                    <span id="noti-badge" class="badge-red" style="display:none;">0</span>
+                    <div id="noti-dropdown" class="noti-dropdown">
+                        <div class="noti-header">Notifications</div>
+                        <div id="noti-list">
+                            <!-- Noti များ ဤနေရာတွင် ပေါ်မည် -->
+                        </div>
+                    </div>
+                </div>
                 
                 <div class="nav-right">
                     <!-- အသစ်ထည့်လိုက်သော Accessibility Buttons -->
@@ -64,15 +75,6 @@
                         <button onclick="stopSpeaking()" title="ရပ်တန့်ရန်" class="tool-btn"><i class="fas fa-volume-mute"></i></button>
                         <button onclick="toggleFocusMode()" id="focus-btn" title="Focus Mode" class="tool-btn"><i class="fas fa-expand-arrows-alt"></i></button>
                     </div> -->
-                    <!-- Notification Bell -->
-                    <div class="notification-wrapper" onclick="toggleNotifications()">
-                        <i class="fas fa-bell"></i>
-                        <span id="noti-badge" class="badge-red" style="display:none;">0</span>
-                        <div id="noti-dropdown" class="noti-dropdown">
-                            <div class="noti-header">Noti-list</div>
-                            <div id="noti-list"></div>
-                        </div>
-                    </div>
                     <span class="badge paid no-mobile">Paid Account</span>
                 </div>
             </header>
