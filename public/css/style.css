@@ -149,6 +149,10 @@ body.dark-theme #back-to-top {
     box-shadow: 0 4px 15px rgba(0,0,0,0.5);
 }
 
+body.dark-theme .msg-actions i {
+    color: #f1f5f9;
+}
+
 .quiz-image-container {
     margin: 15px 0;
     text-align: center;
@@ -659,7 +663,7 @@ body {
     box-shadow: 0 5px 25px rgba(0,0,0,0.1); overflow: hidden;
 }
 
-.chat-sidebar { width: 260px; border-right: 1px solid #eee; background: #f8fafc; }
+.chat-sidebar { padding-left: 7px; width: 260px; border-right: 1px solid #eee; background: #f8fafc; }
 .chat-list-header { padding: 20px; font-weight: bold; background: #f1f5f9; }
 .chat-item {
     padding: 15px 20px;
@@ -1006,26 +1010,32 @@ body {
 }
 
 #noti-badge {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    background: #ef4444; /* အနီရောင် */
-    color: white;
-    font-size: 0.65rem;
-    font-weight: bold;
-    min-width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    display: none; /* အစပိုင်းမှာ ဖျောက်ထားမည် */
-    justify-content: center;
+    position: absolute !important;
+    top: 2px !important;
+    right: 2px !important;
+    background-color: #ef4444 !important;
+    color: white !important;
+    border-radius: 50% !important;
+    min-width: 18px !important;
+    height: 18px !important;
+    padding: 2px !important;
+    font-size: 10px !important;
+    font-weight: bold !important;
+    display: none; /* JS မှ 'flex' ပြောင်းပါမည် */
     align-items: center;
-    border: 2px solid var(--card-bg);
+    justify-content: center;
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+    pointer-events: none;
 }
 
 .notification-wrapper {
     position: relative;
-    padding: 5px;
-    cursor: pointer;
+    display: inline-flex !important; /* Safari မှာ နေရာမှန်စေရန် */
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    z-index: 5000;
 }
 .badge-red {
     position: absolute;

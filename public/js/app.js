@@ -56,6 +56,24 @@ let academicInfo = {
   uid: "st-001",
 };
 
+// app.js ရဲ့ variables တွေထားတဲ့ နေရာမှာ ထည့်ပါ
+let isAudioUnlocked = false;
+const notiSound = new Audio('assets/noti-sound.mp3');
+
+// Browser အားလုံးမှာ အသံဖွင့်ခွင့်ရအောင် user က ပထမဆုံး click တဲ့အချိန်မှာ unlock လုပ်မည်
+window.addEventListener('click', () => {
+    if (!isAudioUnlocked) {
+        // အသံတိတ် (mute) နဲ့ ခဏဖွင့်ပြီး ပြန်ရပ်လိုက်ခြင်းဖြင့် အသံစနစ်ကို ပွင့်သွားစေပါသည်
+        notiSound.muted = true;
+        notiSound.play().then(() => {
+            notiSound.pause();
+            notiSound.muted = false;
+            isAudioUnlocked = true;
+            console.log("Audio system unlocked for Safari/Firefox/Chrome");
+        });
+    }
+}, { once: true });
+
 // ၁။ Dark Mode (ညဘက်လေ့လာသူများအတွက်)
 function toggleDarkMode() {
     document.body.classList.toggle('dark-theme');
@@ -750,31 +768,69 @@ async function submitProjectDB(catIdx, modIdx, lesIdx) {
 // ==========================================
 
 // Messaging Section ပြသခြင်း
-function showMessages(targetUid = null, targetName = null) {
-    if (targetUid) { activeChatId = targetUid; activeChatName = "Direct: " + targetName; }
+async function showMessages(targetUid = null, targetName = null) {
+    if (targetUid) { 
+        activeChatId = targetUid; 
+        activeChatName = "Chat: " + targetName; 
+    }
     
+    // ၁။ နောက်ဆုံးရ ကျောင်းသား/ဆရာ စာရင်းကို Database မှ ဆွဲယူမည်
+    await fetchStudentsFromDB(); // ဤ function ထဲတွင် ဆရာများကိုပါ ဆွဲယူရန် အောက်တွင် ပြင်ပေးထားပါသည်
+
     const body = document.getElementById('dynamic-body');
     const isTeacher = currentUser.role === 'Teacher';
+
+    // ၂။ --- Groups Filtering ---
+    // ဆရာဆိုလျှင် ရှိသမျှ Batch အကုန်ပြမည်၊ ကျောင်းသားဆိုလျှင် မိမိ Batch တစ်ခုတည်းသာ ပြမည်
+    const allBatches = [...new Set(studentsList.map(s => s.batchId))].sort();
+    const myBatchList = isTeacher ? allBatches : [currentUser.batchId];
+
+    // ၃။ --- DM List Filtering ---
+    const visibleDMList = studentsList.filter(s => {
+        if (isTeacher) {
+            // ဆရာမြင်ကွင်း: မိမိမဟုတ်သော ကျောင်းသားအားလုံးကို ပြမည်
+            return s.role === 'Student';
+        } else {
+            // ကျောင်းသားမြင်ကွင်း: မိမိ Batch တူသူများကိုသာ ပြမည် (ကျော်ကျော်ကို Su Su မြင်ရတော့မည်မဟုတ်)
+            return s.batchId === currentUser.batchId && s.uid !== currentUser.uid;
+        }
+    });
+
+    // ၄။ --- ဆရာနှင့် စကားပြောရန် (ကျောင်းသားများအတွက်သာ) ---
+    const teachers = allUsersList.filter(u => u.role === 'Teacher' && u.uid !== currentUser.uid);
 
     body.innerHTML = `
         <div class="messaging-layout fade-in">
             <div class="chat-sidebar">
                 <div class="chat-list-header">Messenger</div>
-                <div class="chat-list" id="chat-users-list">
-                    <div class="chat-list-divider">Class Groups</div>
-                    <div class="chat-item ${activeChatId==='Batch-05'?'active':''}" onclick="switchChat('Batch-05', 'Batch-05 Group')"><i class="fas fa-users"></i> Batch-05</div>
-                    <div class="chat-item ${activeChatId==='Batch-06'?'active':''}" onclick="switchChat('Batch-06', 'Batch-06 Group')"><i class="fas fa-users"></i> Batch-06</div>
+                <div class="chat-list">
                     
-                    <div class="chat-list-divider">Direct Messages ${isTeacher ? '(All Students)' : ''}</div>
-                    ${studentsList.map(s => {
-                        // ကျောင်းသားဆိုရင် ကိုယ့် Batch တူမှပြမယ်၊ ဆရာဆိုရင် အကုန်ပြမယ်
-                        if (currentUser.role !== 'Teacher' && s.batchId !== currentUser.batchId) return '';
-                        if (s.uid === currentUser.uid) return '';
-                        
-                        return `<div class="chat-item ${activeChatId === s.uid ? 'active' : ''}" onclick="switchChat('${s.uid}', 'Chat with: ${s.name}')">
-                            <i class="fas fa-user-circle"></i> ${s.name} ${isTeacher ? `<small>(${s.batchId})</small>` : ''}
-                        </div>`;
-                    }).join('')}
+                    <div class="chat-list-divider">Class Groups</div>
+                    ${myBatchList.map(bid => `
+                        <div class="chat-item ${activeChatId === bid ? 'active' : ''}" onclick="switchChat('${bid}', 'Group: ${bid}')">
+                            <i class="fas fa-users"></i> ${bid}
+                        </div>
+                    `).join('')}
+
+                    ${!isTeacher ? `
+                        <div class="chat-list-divider">Contact Tutor</div>
+                        ${teachers.map(t => `
+                            <div class="chat-item ${activeChatId === t.uid ? 'active' : ''}" onclick="switchChat('${t.uid}', 'Tutor: ${t.name}')">
+                                <i class="fas fa-user-tie"></i> ${t.name} (Teacher)
+                            </div>
+                        `).join('')}
+                    ` : ''}
+
+                    <div class="chat-list-divider">Direct Messages</div>
+                    ${visibleDMList.length > 0 ? visibleDMList.map(s => `
+                        <div class="chat-item ${activeChatId === s.uid ? 'active' : ''}" onclick="switchChat('${s.uid}', 'Chat: ${s.name}')">
+                            <i class="fas fa-user-circle"></i> 
+                            <div style="display:flex; flex-direction:column;">
+                                <span>${s.name}</span>
+                                ${isTeacher ? `<small style="font-size:0.6rem; opacity:0.6;">${s.batchId}</small>` : ''}
+                            </div>
+                        </div>
+                    `).join('') : '<p style="padding:15px; font-size:0.8rem; color:grey;">စကားပြောရန် လူမရှိသေးပါ။</p>'}
                 </div>
             </div>
             
@@ -790,6 +846,7 @@ function showMessages(targetUid = null, targetName = null) {
     loadMessages();
 }
 
+
 // Chat ပြောင်းခြင်း (Group မှ DM သို့ သို့မဟုတ် အပြန်အလှန်)
 function switchChat(id, name) {
     activeChatId = id;
@@ -802,42 +859,41 @@ function switchChat(id, name) {
 // Firestore မှ Message များ Real-time ဖတ်ခြင်း
 function loadMessages() {
     const display = document.getElementById('chat-display');
-    if(!display) return;
+    if (!display) return;
     
+    const oneWeekAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
     let query;
+
     if (activeChatId.includes('Batch')) {
-        // --- Group Chat ---
-        query = db.collection('messages')
-                  .where('batchId', '==', activeChatId)
-                  .where('type', '==', 'group')
-                  .orderBy('timestamp', 'asc');
+        query = db.collection('messages').where('batchId', '==', activeChatId).where('type', '==', 'group').where('timestamp', '>=', oneWeekAgo).orderBy('timestamp', 'asc');
     } else {
-        // --- Direct Message ---
         const combinedId = [currentUser.uid, activeChatId].sort().join("_");
-        query = db.collection('messages')
-                  .where('convoId', '==', combinedId)
-                  .where('type', '==', 'direct')
-                  .orderBy('timestamp', 'asc');
+        query = db.collection('messages').where('convoId', '==', combinedId).where('type', '==', 'direct').where('timestamp', '>=', oneWeekAgo).orderBy('timestamp', 'asc');
     }
 
-    // Snapshot Listener မှာ Logic အမှားမရှိစေရန် error callback ထည့်ထားသည်
     query.onSnapshot(snap => {
         display.innerHTML = '';
         snap.forEach(doc => {
             const m = doc.data();
             const isMe = m.senderId === currentUser.uid;
+            // 🔥 ဆရာဖြစ်လျှင် သို့မဟုတ် မိမိပို့သောစာဖြစ်လျှင် ပြင်/ဖျက် ခွင့်ပေးမည်
+            const canManage = isMe || currentUser.role === 'Teacher';
+
             display.innerHTML += `
                 <div class="message-bubble ${isMe ? 'me' : 'other'}">
-                    <div class="msg-header"><span>${isMe ? 'You' : m.senderName}</span></div>
+                    <div class="msg-header" style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:0.7rem; opacity:0.8;">${isMe ? 'You' : m.senderName}</span>
+                        ${canManage ? `
+                            <div class="msg-actions" style="margin-left:10px; display:flex; gap:8px; font-size:0.7rem; opacity:0.5;">
+                                <i class="fas fa-edit" style="cursor:pointer;" onclick="editMsg('${doc.id}', '${m.text.replace(/'/g, "\\'")}')" title="ပြင်မည်"></i>
+                                <i class="fas fa-trash-alt" style="cursor:pointer;" onclick="deleteMsg('${doc.id}')" title="ဖျက်မည်"></i>
+                            </div>
+                        ` : ''}
+                    </div>
                     <div class="msg-text">${m.text}</div>
                 </div>`;
         });
         display.scrollTop = display.scrollHeight;
-    }, err => {
-        console.error("Chat Load Error:", err);
-        if (err.code === 'failed-precondition') {
-            display.innerHTML = `<div class="error-msg">Index လိုအပ်နေပါသည်။ Console ရှိ Link ကိုနှိပ်ပါ။</div>`;
-        }
     });
 }
 
@@ -845,7 +901,7 @@ function loadMessages() {
 function sendMessage() {
     const input = document.getElementById('chat-input');
     const text = input.value.trim();
-    if (!text) return;
+    if (!text || !currentUser.uid) return;
 
     const msgData = {
         text: text,
@@ -855,20 +911,44 @@ function sendMessage() {
     };
 
     if (activeChatId.includes('Batch')) {
-        msgData.batchId = activeChatId; // ဥပမာ Batch-05
+        // Group Chat
+        msgData.batchId = activeChatId;
         msgData.type = "group";
     } else {
-        msgData.receiverId = activeChatId; // ကျောင်းသား UID
+        // Direct Message
+        msgData.receiverId = activeChatId; // လက်ခံသူ UID
         msgData.type = "direct";
+        // convoId ကို UID ၂ ခုစီပြီး ဆက်မည်
         msgData.convoId = [currentUser.uid, activeChatId].sort().join("_");
     }
 
-    db.collection('messages').add(msgData);
+    db.collection('messages').add(msgData).then(() => {
+        console.log("Sent success!");
+    }).catch(e => alert("Error: " + e.message));
+
     input.value = '';
 }
 
 async function deleteMsg(id) {
-  if (confirm("Delete?")) await db.collection("messages").doc(id).delete();
+    if (confirm("ဤစာတိုကို အပြီးဖျက်ရန် သေချာပါသလား?")) {
+        try {
+            await db.collection('messages').doc(id).delete();
+        } catch (e) { alert("Error: " + e.message); }
+    }
+}
+
+// --- စာတို ပြင်ဆင်ရန် Function ---
+async function editMsg(id, oldText) {
+    const newText = prompt("စာသားကို ပြင်ဆင်ပါ:", oldText);
+    if (newText && newText.trim() !== "" && newText !== oldText) {
+        try {
+            await db.collection('messages').doc(id).update({
+                text: newText,
+                isEdited: true,
+                editedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        } catch (e) { alert("Error: " + e.message); }
+    }
 }
 
 // ==========================================
@@ -1125,12 +1205,17 @@ async function handleLogin() {
   }
 }
 
-function handleLogout() {
-  if (confirm("Logout ထွက်မှာ သေချာပါသလား?")) {
-    currentUser.isLoggedIn = false;
-    localStorage.removeItem("currentUser");
-    location.reload();
-  }
+async function handleLogout() {
+    if (confirm("Logout ထွက်မှာ သေချာပါသလား?")) {
+        try {
+            await auth.signOut(); // 🔥 Firebase Auth ကပါ SignOut လုပ်မည်
+            localStorage.removeItem('currentUser');
+            localStorage.removeItem('dark-mode');
+            location.reload(); 
+        } catch (e) {
+            console.error("Sign out error", e);
+        }
+    }
 }
 
 // --- Transcript ပြသခြင်း ---
@@ -1480,41 +1565,17 @@ function closeAnnouncement() {
 // ==========================================
 
 // အစမ်းသုံးရန် ကျောင်းသားစာရင်း Data (တကယ်တမ်းတွင် Firestore မှ ဆွဲယူမည်)
-let studentsList = [
-  {
-    uid: "yJ3IbvLTMtTtnwtGiIkfr65E9ml1",
-    name: "Aung Aung",
-    batchId: "Batch-05",
-    attendance: "90%",
-    grades: { html: 85, css: 80, javascript: 75, react: 70 },
-    grade: "B+", // 80% ဝန်းကျင်
-    isPaid: true,
-  },
-  {
-    uid: "3y9KXwo2ylT3Do42hFwjwXExtMg1",
-    name: "Su Su",
-    batchId: "Batch-05",
-    attendance: "95%",
-    grades: { html: 95, css: 90, javascript: 88, react: 85 },
-    grade: "A", // 90% ဝန်းကျင်
-    isPaid: true,
-  },
-  {
-    uid: "IK2GteXzbYNt1f3psQL9G7vYFwh2",
-    name: "Kyaw Kyaw",
-    batchId: "Batch-06",
-    attendance: "80%",
-    // အမှတ်နည်းတဲ့သူအတွက် နမူနာ (စမ်းသပ်ရန်)
-    grades: { html: 45, css: 55, javascript: 50, react: 40 }, 
-    grade: "C", // 50% အောက်ဆိုရင် Fail ဖြစ်နိုင်သလို C ဆိုရင်တော့ အောင်ရုံပဲရှိမယ်
-    isPaid: false, // ပိုက်ဆံမသွင်းရသေးတဲ့သူ
-  },
-];
+let studentsList = [];
 
 // --- Admin Panel (Teacher သာ ဝင်နိုင်မည်) ---
 // --- ဆရာအတွက် Admin Panel (Academic Status ပြင်ဆင်ရန်) ---
-function renderAdminPanel() {
+async function renderAdminPanel() {
+    await fetchStudentsFromDB(); // Database မှ အရင်ဆွဲမည်
+
   const body = document.getElementById("dynamic-body");
+
+  // ရှိသမျှ Batch များကို စုစည်းပြီး Dropdown ပြုလုပ်ခြင်း
+    const batchOptions = [...new Set(studentsList.map(s => s.batchId))].sort();
   
   // Header အပိုင်းမှာ ခလုတ်တွေကို စုစည်းထားပြီး Table ကို တစ်ခုတည်းပဲ ထားလိုက်ပါမယ်
   body.innerHTML = `
@@ -1553,8 +1614,7 @@ function renderAdminPanel() {
                     <span><strong>Batch ရွေးချယ်ရန်: </strong></span>
                     <select id="batch-select" class="edit-input" style="width:auto; display:inline-block; margin-left:10px;" onchange="filterStudentsByBatch(this.value)">
                         <option value="All">All Batches</option>
-                        <option value="Batch-05">Batch-05</option>
-                        <option value="Batch-06">Batch-06</option>
+                    ${batchOptions.map(b => `<option value="${b}">${b}</option>`).join('')}
                     </select>
                 </div>
             </div>
@@ -1584,6 +1644,31 @@ function renderAdminPanel() {
 
   // ဇယားထဲမှာ data တွေဝင်လာအောင် function ကို ပြန်ခေါ်ပေးရပါမယ်
   filterStudentsByBatch("All"); 
+}
+
+// --- Firestore ထဲက ကျောင်းသားအားလုံးကို ဆွဲယူပြီး studentsList ထဲ ထည့်ခြင်း ---
+let allUsersList = []; // Global variable အသစ်
+
+async function fetchStudentsFromDB() {
+    try {
+        const snapshot = await db.collection('users').get();
+        studentsList = [];
+        allUsersList = [];
+        
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            const userObj = {
+                uid: doc.id,
+                name: data.name || "No Name",
+                batchId: data.batchId || "General",
+                role: data.role || "Student",
+                photo: data.photo || "https://placehold.co/50"
+            };
+            
+            allUsersList.push(userObj);
+            if (data.role === 'Student') studentsList.push(userObj);
+        });
+    } catch (e) { console.error("Fetch Error:", e); }
 }
 
 function renderLMSGuide() {
@@ -2098,33 +2183,39 @@ async function renderSubmissions() {
         let html = '<div class="dashboard-grid">';
         
         if (snap.empty) {
-            body.innerHTML = `<h3>Reviewing Submissions</h3><div class="content-card">စစ်ဆေးရန် ကျန်ရှိသော Assignment များ မရှိသေးပါ။</div><br><button class="menu-btn" onclick="renderAdminPanel()">Back</button>`;
+            body.innerHTML = `<h3>Reviewing Submissions</h3><div class="content-card">စစ်ဆေးရန် မရှိသေးပါ။</div><br><button class="menu-btn" onclick="renderAdminPanel()">Back</button>`;
             return;
         }
 
         snap.forEach(doc => {
             const s = doc.data();
-            // content သို့မဟုတ် githubLink မရှိရင် error မတက်အောင် empty string ထားမည်
             const previewText = (s.content || s.githubLink || "");
-            const typeLabel = s.content ? "Assignment" : "Project";
 
             html += `
                 <div class="content-card animate-up">
                     <div style="display:flex; justify-content:space-between; align-items:start;">
                         <h5>${s.studentName}</h5>
-                        <span class="badge-type">${typeLabel}</span>
+                        <!-- 🔥 ဖျက်ရန် ခလုတ်လေး ဤနေရာတွင် ပါဝင်ရမည် -->
+                        <i class="fas fa-trash-alt" style="color:#ef4444; cursor:pointer; padding:5px;" 
+                           onclick="deleteSubmission('${doc.id}')" title="ဖျက်မည်"></i>
                     </div>
                     <small style="color:var(--primary)">${s.lessonTitle}</small>
-                    <p style="margin:10px 0; font-size:0.9rem; color:var(--text-color); opacity:0.8;">
-                        ${previewText.substring(0, 50)}...
-                    </p>
+                    <p style="margin:10px 0; font-size:0.9rem; opacity:0.8;">${previewText.substring(0, 40)}...</p>
                     <button class="save-btn" style="width:100%;" onclick="gradeThisSubmission('${doc.id}')">View & Grade</button>
                 </div>`;
         });
         body.innerHTML = html + '</div><br><button class="menu-btn" onclick="renderAdminPanel()">Back</button>';
-    } catch (err) {
-        console.error("Grading Error:", err);
-        body.innerHTML = "Error loading submissions.";
+    } catch (err) { console.error(err); }
+}
+
+// 🔥 ဖျက်သည့် Logic ပါဝင်ရမည်
+async function deleteSubmission(id) {
+    if (confirm("ဤပေးပို့မှုကို အပြီးဖျက်ရန် သေချာပါသလား?")) {
+        try {
+            await db.collection('submissions').doc(id).delete();
+            alert("ဖျက်ပြီးပါပြီ။");
+            renderSubmissions(); // စာရင်းပြန် Render လုပ်မည်
+        } catch (e) { alert(e.message); }
     }
 }
 
@@ -2202,47 +2293,70 @@ function renderPrivacy() {
 // --- ၁။ ခေါင်းလောင်း Noti စနစ် (အသေချာဆုံး Version) ---
 let unreadNotiCount = 0;
 
+const globalNotiSound = new Audio('assets/noti-sound.mp3');
+
 function initNotifications() {
     if (!currentUser.uid || !currentUser.isLoggedIn) return;
 
-    // အခုစဖွင့်တဲ့ အချိန်ကစပြီး တက်လာမည့် စာများကိုပဲ ယူမည်
-    const startTime = firebase.firestore.Timestamp.now();
+    // 🔥 အချိန်စစ်တဲ့နေရာမှာ Browser အားလုံးကို အလုပ်လုပ်စေဖို့ ၂ မိနစ် ကြိုစစ်ခိုင်းမည်
+    const startTime = new Date(Date.now() - 120000); 
 
-    // Messages Collection ကို နားထောင်မည်
+    // ၂။ Direct Messages Noti
     db.collection('messages')
-      .where('timestamp', '>', startTime)
-      .onSnapshot(snap => {
-        snap.docChanges().forEach(change => {
-            if (change.type === "added") {
-                const msg = change.doc.data();
-                
-                // မိမိပို့တဲ့စာ မဟုတ်ရပါ
-                if (msg.senderId === currentUser.uid) return;
-
-                // Noti ပြရမည့် အခြေအနေများ
-                const isForMe = (msg.receiverId === currentUser.uid) || // မိမိဆီလာသော DM
-                                (msg.batchId === currentUser.batchId) || // မိမိ Batch ထဲကစာ
-                                (currentUser.role === 'Teacher');        // ဆရာဆိုလျှင် အကုန်ပြမည်
-
-                if (isForMe) {
-                    unreadNotiCount++;
-                    updateNotiBadge();
-                    
-                    // Noti စာရင်းထဲ ထည့်မည်
-                    const notiText = `[${msg.type}] ${msg.senderName}: ${msg.text.substring(0, 15)}...`;
-                    addNotiToList(notiText);
-
-                    // အသံမြည်စေရန်
-                    const audio = new Audio('assets/noti-sound.mp3');
-                    audio.play().catch(() => console.log("Sound play interaction needed"));
-                }
+        .where('receiverId', '==', currentUser.uid)
+        .where('timestamp', '>', startTime)
+        .onSnapshot(snap => {
+            // Added ဖြစ်တဲ့စာအသစ်တွေကို စစ်မည်
+            let newDocs = snap.docChanges().filter(c => c.type === "added");
+            if (newDocs.length > 0) {
+                triggerNotiUI("DM စာတိုအသစ် ရောက်ရှိလာပါသည်");
             }
-        });
-    }, err => console.error("Noti Error:", err));
+        }, err => console.log("DM Noti Restricted"));
+
+    // ၃။ Group Messages Noti
+    if (currentUser.batchId) {
+        db.collection('messages')
+            .where('batchId', '==', currentUser.batchId)
+            .where('type', '==', 'group')
+            .where('timestamp', '>', startTime)
+            .onSnapshot(snap => {
+                let newDocs = snap.docChanges().filter(c => c.type === "added");
+                newDocs.forEach(change => {
+                    if (change.doc.data().senderId !== currentUser.uid) {
+                        triggerNotiUI("အုပ်စုစာတိုအသစ် ရောက်ရှိလာပါသည်");
+                    }
+                });
+            }, err => console.log("Group Noti Restricted"));
+    }
 }
 
-// Noti တက်လာလျှင် လုပ်ဆောင်မည့် function
-function processNotiChanges(snap, chatType) {
+function triggerNotiUI(text) {
+    unreadNotiCount++;
+    
+    // Badge ပြရန်
+    const badge = document.getElementById('noti-badge');
+    if (badge) {
+        badge.innerText = unreadNotiCount;
+        badge.style.setProperty('display', 'flex', 'important'); // Safari အတွက် Force display
+    }
+
+    // ခေါင်းလောင်း icon ကို အနီရောင်ပြောင်းရန်
+    const bell = document.querySelector('.notification-wrapper i');
+    if (bell) {
+        bell.style.color = "#ef4444";
+        bell.classList.add('fa-shake');
+    }
+
+    // List ထဲထည့်ရန်
+    addNotiToList(text);
+
+    // 🔥 အသံဖွင့်ရန် ကြိုးစားခြင်း
+    globalNotiSound.play().catch(e => {
+        console.log("Audio play blocked by browser policy. User must interact first.");
+    });
+}
+
+function processNotiAlert(snap, chatType) {
     snap.docChanges().forEach(change => {
         if (change.type === "added") {
             const msg = change.doc.data();
@@ -2252,9 +2366,51 @@ function processNotiChanges(snap, chatType) {
             updateNotiBadge();
             addNotiToList(`[${chatType}] ${msg.senderName}: ${msg.text.substring(0, 15)}...`);
             
-            // အသံဖွင့်ခြင်း
+            // 🔥 အသံမြည်စေရန် (Safari compatible logic)
+            if (isAudioUnlocked) {
+                notiSound.currentTime = 0; // အစကနေ ပြန်ဖွင့်ရန်
+                notiSound.play().catch(e => console.log("Sound play error:", e));
+            }
+        }
+    });
+}
+
+function handleNotiSnapshot(snap, type) {
+    snap.docChanges().forEach(change => {
+        if (change.type === "added") {
+            const msg = change.doc.data();
+            if (msg.senderId === currentUser.uid) return; // ကိုယ့်စာကိုယ် Noti မပေးပါ
+
+            unreadNotiCount++;
+            updateNotiBadge();
+            addNotiToList(`${msg.senderName}: ${msg.text.substring(0, 15)}...`);
+            
+            // အသံဖွင့်ရန်
             const audio = new Audio('assets/noti-sound.mp3');
             audio.play().catch(() => {});
+        }
+    });
+}
+
+// Noti တက်လာလျှင် လုပ်ဆောင်မည့် function
+function processNotiChanges(snap, type) {
+    snap.docChanges().forEach(change => {
+        if (change.type === "added") {
+            const msg = change.doc.data();
+            if (msg.senderId === currentUser.uid) return;
+
+            unreadNotiCount++;
+            updateNotiBadge();
+            addNotiToList(`[${type}] ${msg.senderName}: ${msg.text.substring(0, 15)}...`);
+            
+            // 🔥 Safari/Chrome Autoplay Fix:
+            const audio = new Audio('assets/noti-sound.mp3');
+            let playPromise = audio.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.log("Audio play blocked. Click anywhere to enable sound.");
+                });
+            }
         }
     });
 }
@@ -2266,11 +2422,17 @@ function updateNotiBadge() {
 
     if (unreadNotiCount > 0) {
         badge.innerText = unreadNotiCount;
-        badge.style.display = "flex";
-        if (bellIcon) bellIcon.style.color = "#ef4444"; // ခေါင်းလောင်းနီသွားမည်
+        badge.style.display = "flex"; // Safari အတွက် flex ကို သေချာပေးပါ
+        if (bellIcon) {
+            bellIcon.style.color = "#ef4444"; // ခေါင်းလောင်းနီသွားမည်
+            bellIcon.classList.add('fa-shake'); // အသံမြည်စဉ် ခေါင်းလောင်းတုန်ခါမည်
+        }
     } else {
         badge.style.display = "none";
-        if (bellIcon) bellIcon.style.color = "";
+        if (bellIcon) {
+            bellIcon.style.color = "";
+            bellIcon.classList.remove('fa-shake');
+        }
     }
 }
 
@@ -2284,32 +2446,48 @@ function addNotiToList(text) {
 function showNotiInBell(text) {
     const list = document.getElementById('noti-list');
     const badge = document.getElementById('noti-badge');
-    
-    // အသံဖွင့်ခြင်း (Physical path: assets/noti-sound.mp3)
-    const audio = new Audio('assets/noti-sound.mp3');
-    audio.play().catch(() => {}); // User interaction မရှိရင် browser က ပိတ်ထားတတ်လို့ catch ခံရပါမည်
+    const bellIcon = document.querySelector('.notification-wrapper i');
 
-    // Noti Item ထည့်ခြင်း
-    const item = `<div class="noti-item" onclick="showSection('messages')">${text}</div>`;
+    if (!list || !badge) return;
+
+    // ၁။ Noti အရေအတွက် တိုးမည်
+    unreadNotiCount++;
+    badge.innerText = unreadNotiCount;
+    badge.style.display = "flex"; // ပြသမည်
+    
+    // ၂။ ခေါင်းလောင်းကို အရောင်ပြောင်းပြီး တုန်ခါစေမည်
+    if (bellIcon) {
+        bellIcon.style.color = "#ef4444";
+        bellIcon.classList.add('fa-shake'); // FontAwesome shake effect
+    }
+
+    // ၃။ Noti List ထဲ ထည့်မည်
+    const item = `<div class="noti-item" onclick="toggleNotifications(); showSection('messages');">
+                    <i class="fas fa-comment"></i> ${text}
+                  </div>`;
     list.innerHTML = item + list.innerHTML;
 
-    // Badge အရေအတွက် တိုးခြင်း
-    let count = parseInt(badge.innerText) || 0;
-    badge.innerText = count + 1;
-    badge.style.display = "block";
+    // ၄။ အသံဖွင့်မည်
+    const audio = new Audio('assets/noti-sound.mp3');
+    audio.play().catch(e => console.log("Sound interaction needed"));
 }
 
 function toggleNotifications() {
     const dropdown = document.getElementById('noti-dropdown');
-    const isShowing = dropdown.style.display === "block";
-    
-    if (isShowing) {
+    const badge = document.getElementById('noti-badge');
+    const bellIcon = document.querySelector('.notification-wrapper i');
+
+    if (dropdown.style.display === "block") {
         dropdown.style.display = "none";
     } else {
         dropdown.style.display = "block";
-        // ဖွင့်ကြည့်ပြီးရင် Noti အရေအတွက်ကို reset လုပ်မည်
+        // Noti ဖွင့်ကြည့်ပြီးရင် Badge ကို reset လုပ်မယ်
         unreadNotiCount = 0;
-        updateNotiBadge();
+        if (badge) badge.style.display = "none";
+        if (bellIcon) {
+            bellIcon.style.color = "";
+            bellIcon.classList.remove('fa-shake');
+        }
     }
 }
 
