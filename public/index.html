@@ -34,6 +34,7 @@
             <nav class="nav-links">
                 <a href="javascript:void(0)" onclick="showSection('dashboard')"><i class="fas fa-th-large"></i> Dashboard</a>
                 <a href="javascript:void(0)" onclick="showSection('courses')"><i class="fas fa-book-open"></i> သင်ခန်းစာများ</a>
+                <a href="javascript:void(0)" onclick="showSection('resources')"><i class="fas fa-layer-group"></i> Resources</a>
                 <a href="javascript:void(0)" onclick="showSection('messages')"><i class="fas fa-comments"></i> စာတိုပေးပို့ခြင်း</a>
                 <a href="javascript:void(0)" onclick="showSection('profile')"><i class="fas fa-user-circle"></i> Profile</a>
             </nav>
@@ -75,6 +76,8 @@
                         <button onclick="stopSpeaking()" title="ရပ်တန့်ရန်" class="tool-btn"><i class="fas fa-volume-mute"></i></button>
                         <button onclick="toggleFocusMode()" id="focus-btn" title="Focus Mode" class="tool-btn"><i class="fas fa-expand-arrows-alt"></i></button>
                     </div> -->
+                    <button onclick="changeFontSize('plus')" title="စာလုံးကြီးရန်" class="tool-btn">A+</button>
+                    <button onclick="changeFontSize('reset')" title="ပုံမှန်အရွယ်အစား" class="tool-btn">A</button>
                     <span class="badge paid no-mobile">Paid Account</span>
                 </div>
             </header>

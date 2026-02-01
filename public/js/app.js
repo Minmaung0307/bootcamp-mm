@@ -91,14 +91,18 @@ function syncZoomConfig() {
     db.collection('settings').doc('zoom_config').onSnapshot(doc => {
         if (doc.exists) {
             const data = doc.data();
-            currentZoomLink = data.url;
-            // Firebase Timestamp ကို JS Date အဖြစ်ပြောင်းခြင်း
+            currentZoomLink = data.url || ""; // Link မရှိလျှင် empty string ထားမည်
             if (data.startTime) {
                 nextClassTime = data.startTime.toDate();
             }
-            console.log("Zoom Link Updated from Cloud:", currentZoomLink);
+            
+            // 🔥 အကယ်၍ အခုလက်ရှိ Dashboard ကို ကြည့်နေတာဆိုရင် ချက်ချင်း UI ပြန်ဆွဲခိုင်းမည်
+            const title = document.getElementById('page-title');
+            if (title && title.innerText === "Dashboard") {
+                renderDashboard();
+            }
         }
-    });
+    }, err => console.warn("Zoom config sync restricted"));
 }
 
 // ==========================================
@@ -151,6 +155,9 @@ function showSection(section, filterCat = null) {
     } else if (section === 'profile') {
         title.innerText = "My Profile";
         renderProfile();
+    } else if (section === 'resources') {
+        title.innerText = "Learning Resources";
+        renderResources();
     } else if (section === 'about') {
         renderAbout();
     } else if (section === 'privacy') {
@@ -159,14 +166,38 @@ function showSection(section, filterCat = null) {
     renderAuthFooter();
 }
 
+function renderResources() {
+    const body = document.getElementById('dynamic-body');
+    body.innerHTML = `
+        <div class="dashboard-grid animate-up">
+            <div class="content-card">
+                <h4><i class="fab fa-git-alt"></i> Git Cheat Sheet</h4>
+                <p>အသုံးများသော Git Commands များ</p>
+                <button class="save-btn" onclick="window.open('https://education.github.com/git-cheat-sheet-education.pdf', '_blank')">Download</button>
+            </div>
+            <div class="content-card">
+                <h4><i class="fab fa-html5"></i> HTML Reference</h4>
+                <p>MDN Web Docs - HTML Elements</p>
+                <button class="save-btn" onclick="window.open('https://developer.mozilla.org/en-US/docs/Web/HTML/Element', '_blank')">View Online</button>
+            </div>
+            <div class="content-card">
+                <h4><i class="fab fa-css3-alt"></i> CSS Grid Guide</h4>
+                <p>A Complete Guide to Grid</p>
+                <button class="save-btn" onclick="window.open('https://css-tricks.com/snippets/css/complete-guide-grid/', '_blank')">Read Guide</button>
+            </div>
+        </div>
+    `;
+}
+
 // ==========================================
 // ၃။ Dashboard Rendering
 // ==========================================
 
 function renderDashboard() {
     const body = document.getElementById('dynamic-body');
-    
-    // Progress % တွက်ရန် Helper
+    if (!body) return;
+
+    // ၁။ ပြီးစီးမှု ရာခိုင်နှုန်းတွက်ချက်သည့် Helper
     const getPercent = (catName) => {
         const categoryData = courseData.find(c => c.category.toLowerCase() === catName.toLowerCase());
         if (!categoryData) return 0;
@@ -175,27 +206,37 @@ function renderDashboard() {
         categoryData.modules.forEach(m => totalLessons += m.lessons.length);
         
         const doneList = currentUser.completedLessons || []; 
-        const doneLessonsCount = doneList.filter(l => {
+        const doneCount = doneList.filter(l => {
             return categoryData.modules.some(m => m.lessons.some(les => les.title === l));
         }).length;
 
-        return Math.round((doneLessonsCount / totalLessons) * 100) || 0;
+        return Math.round((doneCount / totalLessons) * 100) || 0;
     };
 
+    // ၂။ လိုအပ်သော ဒေတာများကို variable ထဲ ကြိုထည့်ထားခြင်း
     const fPercent = getPercent('Foundations');
     const tPercent = getPercent('Technical');
     const fsPercent = getPercent('Full-Stack');
+    const noteContent = currentUser.personalNote || ""; // 🔥 အခု ဒီမှာ ကြိုသတ်မှတ်လိုက်ပါပြီ
 
-    // --- HTML ကို variable တစ်ခုထဲမှာ အရင်စုတည်ဆောက်မည် ---
+    // ၃။ Live Class Card (Link ရှိမှ ပေါ်မည်)
+    let liveClassHtml = "";
+    if (currentZoomLink && currentZoomLink.trim() !== "") {
+        liveClassHtml = `
+            <div class="live-countdown animate-up">
+                <h4><i class="fas fa-video"></i> Next Live Class</h4>
+                <div class="timer-grid" id="live-timer">Loading...</div>
+                <button class="save-btn" style="margin-top:10px; background:#f59e0b;" 
+                        onclick="window.open('${currentZoomLink}', '_blank')">
+                    <i class="fas fa-video"></i> Join via Zoom
+                </button>
+            </div>
+        `;
+    }
+
+    // ၄။ Dashboard HTML စတင်တည်ဆောက်ခြင်း
     let dashboardHtml = `
-        <div class="live-countdown animate-up">
-            <h4><i class="fas fa-video"></i> Next Live Class</h4>
-            <div class="timer-grid" id="live-timer">Loading...</div>
-            <button class="save-btn" style="margin-top:10px; background:#f59e0b;" 
-                    onclick="window.open('${currentZoomLink}', '_blank')">
-                <i class="fas fa-video"></i> Join via Zoom
-            </button>
-        </div>
+        ${liveClassHtml}
 
         <div class="welcome-banner fade-in">
             <h2>မင်္ဂလာပါ ${currentUser.name}! 👋</h2>
@@ -225,27 +266,111 @@ function renderDashboard() {
             </div>
     `;
 
-    // 🔥 ဆရာဖြစ်မှသာ Leaderboard Card ကို string ထဲ ပေါင်းထည့်မည်
+    // ၅။ ဆရာဖြစ်မှသာ Leaderboard Card ကို ထည့်မည်
     if (currentUser.role === 'Teacher') {
         dashboardHtml += `
             <div class="content-card animate-up" style="grid-column: span 1;">
-                <h4><i class="fas fa-trophy" style="color:gold"></i> Top Students (Tutor View)</h4>
+                <h4><i class="fas fa-trophy" style="color:gold"></i> Top Students</h4>
                 <div id="leaderboard-content" style="margin-top:10px;">
-                    <div class="loader">Loading Leaderboard...</div>
+                    <div class="loader">Loading...</div>
                 </div>
             </div>
         `;
     }
 
-    dashboardHtml += `</div>`; // Grid closing div
-    
-    // နောက်ဆုံးမှ innerHTML ထဲ ထည့်မည်
+    // ၆။ Personal Notebook Section (စာလုံးရေ ၅၀၀၀ ကန့်သတ်ချက်ပါဝင်သည်)
+    dashboardHtml += `
+        <div class="content-card animate-up" style="grid-column: 1 / -1;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <h4><i class="fas fa-sticky-note"></i> My Personal Notebook</h4>
+                <small id="char-counter" style="color:var(--text-main)">${noteContent.length} / 10000 characters</small>
+            </div>
+            <textarea id="personal-note" class="edit-input" rows="6" 
+                      oninput="handleNoteInput()" 
+                      placeholder="ဒီနေ့ ဘာတွေသင်ယူခဲ့သလဲ? မှတ်သားထားပါ...">${noteContent}</textarea>
+            <div style="display:flex; justify-content:space-between; margin-top:5px;">
+                <small id="note-status" style="color:#22c55e">Auto-saved to cloud</small>
+                <button class="menu-btn" style="padding:4px 12px; font-size:0.75rem;" onclick="downloadNotes()">
+                    <i class="fas fa-download"></i> Download as Text
+                </button>
+            </div>
+        </div>
+    `;
+
+    dashboardHtml += `</div>`; // Grid ပိတ်မည်
     body.innerHTML = dashboardHtml;
 
-    // ဆရာဖြစ်ရင် Database ကနေ Data လှမ်းယူခိုင်းမည်
-    if (currentUser.role === 'Teacher') {
-        fetchLeaderboard();
+    // ၇။ Leaderboard ရှိလျှင် ဒေတာဆွဲထုတ်ခိုင်းမည်
+    if (currentUser.role === 'Teacher') fetchLeaderboard();
+}
+
+// Input ကို စစ်ဆေးပြီး Auto-save လုပ်မည့် function
+function handleNoteInput() {
+    const textarea = document.getElementById('personal-note');
+    const counter = document.getElementById('char-counter');
+    
+    if (!textarea || !counter) return;
+
+    const currentLength = textarea.value.length;
+
+    // စာလုံးရေကို UI မှာ ချက်ချင်း Update လုပ်ခြင်း
+    counter.innerText = `${currentLength} / 10000 characters`;
+
+    // ၅၀၀၀ ထက်ကျော်မကျော် စစ်ဆေးခြင်း
+    if (currentLength > 10000) {
+        // ၅၀၀၀ ထက်ပိုတဲ့စာတွေကို ဖြတ်ထုတ်မည်
+        textarea.value = textarea.value.substring(0, 10000);
+        counter.innerText = `10000 / 10000 characters`;
+        counter.style.color = "red";
+        alert("မှတ်စုကို စာလုံးရေ ၁၀၀၀၀ အထိသာ ကန့်သတ်ထားပါသည်။");
+    } else {
+        counter.style.color = "var(--text-main)";
+        saveNoteToCloud(); // Cloud ပေါ်သိမ်းမည့် function ကို ခေါ်မည်
     }
+}
+
+// ကျောင်းသားက သူ့မှတ်စုကို သူပြန်သိမ်းချင်ရင် (Computer ထဲသို့ ဒေါင်းလုဒ်ဆွဲခြင်း)
+function downloadNotes() {
+    const text = document.getElementById('personal-note').value;
+    const blob = new Blob([text], { type: 'text/plain' });
+    const anchor = document.createElement('a');
+    anchor.download = `my-bootcamp-notes.txt`;
+    anchor.href = window.URL.createObjectURL(blob);
+    anchor.click();
+}
+
+let noteTimeout;
+function saveNoteToCloud() {
+    const text = document.getElementById('personal-note').value;
+    // စာလုံးရေ ၅၀၀၀ ထက်ကျော်ရင် တားမြစ်ခြင်း
+    if (text.length > 5000) {
+        alert("မှတ်စုကို စာလုံးရေ ၅၀၀၀ အထိသာ ကန့်သတ်ထားပါသည်။");
+        return;
+    }
+
+    const status = document.getElementById('note-status');
+    status.innerText = "Saving...";
+
+    // ခဏခဏ save မနေစေရန် (Debouncing)
+    clearTimeout(noteTimeout);
+    noteTimeout = setTimeout(async () => {
+        currentUser.personalNote = text;
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        
+        if (currentUser.uid) {
+            await db.collection('users').doc(currentUser.uid).update({
+                personalNote: text
+            });
+        }
+        status.innerText = "All changes saved!";
+    }, 1000);
+}
+
+function changeFontSize(size) {
+    const body = document.getElementById('dynamic-body');
+    if (size === 'plus') body.style.fontSize = "1.2rem";
+    else if (size === 'minus') body.style.fontSize = "0.9rem";
+    else body.style.fontSize = "1rem";
 }
 
 async function fetchLeaderboard() {
@@ -920,22 +1045,46 @@ function loadMessages() {
     const display = document.getElementById('chat-display');
     if (!display) return;
     
-    const oneWeekAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    // 🔥 ၃ ရက်စာတွက်ချက်ခြင်း ( 3 days * 24 hours * 60 min * 60 sec * 1000 ms )
+    const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
+
+    // Safety Check: ID မရှိရင် Query မလုပ်ပါ
+    if (!activeChatId || !currentUser.uid) {
+        console.warn("Chat ID သို့မဟုတ် User ID မရှိသေးပါ။");
+        display.innerHTML = '<div class="empty-msg">စာတိုများ ဖတ်ရန် အရင်ရွေးချယ်ပါ။</div>';
+        return;
+    }
+    
     let query;
 
+    // Group Chat Query
     if (activeChatId.includes('Batch')) {
-        query = db.collection('messages').where('batchId', '==', activeChatId).where('type', '==', 'group').where('timestamp', '>=', oneWeekAgo).orderBy('timestamp', 'asc');
-    } else {
+        query = db.collection('messages')
+                  .where('batchId', '==', activeChatId)
+                  .where('type', '==', 'group')
+                  .where('timestamp', '>=', threeDaysAgo) // ၃ ရက်ထက် ပိုဟောင်းတာတွေကို မယူတော့ပါ
+                  .orderBy('timestamp', 'asc');
+    } 
+    // Direct Message Query
+    else {
         const combinedId = [currentUser.uid, activeChatId].sort().join("_");
-        query = db.collection('messages').where('convoId', '==', combinedId).where('type', '==', 'direct').where('timestamp', '>=', oneWeekAgo).orderBy('timestamp', 'asc');
+        query = db.collection('messages')
+                  .where('convoId', '==', combinedId)
+                  .where('type', '==', 'direct')
+                  .where('timestamp', '>=', threeDaysAgo) // ၃ ရက်ထက် ပိုဟောင်းတာတွေကို မယူတော့ပါ
+                  .orderBy('timestamp', 'asc');
     }
 
     query.onSnapshot(snap => {
         display.innerHTML = '';
+        if (snap.empty) {
+            display.innerHTML = '<div style="text-align:center; padding:20px; color:grey; font-size:0.8rem;">ယခင် ၃ ရက်အတွင်း ပေးပို့ထားသော စာများ မရှိပါ။</div>';
+            return;
+        }
+
         snap.forEach(doc => {
             const m = doc.data();
             const isMe = m.senderId === currentUser.uid;
-            // 🔥 ဆရာဖြစ်လျှင် သို့မဟုတ် မိမိပို့သောစာဖြစ်လျှင် ပြင်/ဖျက် ခွင့်ပေးမည်
             const canManage = isMe || currentUser.role === 'Teacher';
 
             display.innerHTML += `
@@ -953,6 +1102,12 @@ function loadMessages() {
                 </div>`;
         });
         display.scrollTop = display.scrollHeight;
+    }, error => {
+        // အကယ်၍ Index အသစ်ဆောက်ရန် လိုအပ်ပါက console မှာ link ပေါ်လာပါမည်
+        console.error("Snapshot error:", error);
+        if (error.code === 'failed-precondition') {
+            display.innerHTML = '<div class="error-msg">Firebase Console တွင် Index အသစ်တစ်ခု ဆောက်ရန် လိုအပ်နေပါသည်။ Console (F12) ရှိ Link ကို နှိပ်ပေးပါ။</div>';
+        }
     });
 }
 
@@ -1376,32 +1531,28 @@ let lmsSettings = {
 
 // Database မှ Settings များကို Sync လုပ်ခြင်း
 function syncLMSSettings() {
-    if (!currentUser.uid || !currentUser.isLoggedIn) return;
-
-    // ၁။ Announcement - အားလုံးအတွက်
+    // ၁။ Announcement Sync - စာသားရှိမှ Bar ကို ပြမည်
     db.collection('settings').doc('announcement').onSnapshot(doc => {
-        if (doc.exists) {
+        const bar = document.getElementById('announcement-bar');
+        if (doc.exists && doc.data().text && doc.data().text.trim() !== "") {
             lmsSettings.announcement = doc.data().text;
             const annoEl = document.getElementById('announcement-text');
             if (annoEl) annoEl.innerText = lmsSettings.announcement;
+            if (bar) bar.style.display = 'flex'; // စာသားရှိလျှင် ပြမည်
+        } else {
+            if (bar) bar.style.display = 'none'; // စာသားမရှိလျှင် တစ်ခုလုံး ဖျောက်မည်
         }
     }, err => console.warn("Announcement access restricted"));
 
-    // ၂။ Course Info & Zoom - Sync လုပ်ခြင်း
-    db.collection('settings').doc('course_info').onSnapshot(doc => {
-        if (doc.exists) {
-            lmsSettings = { ...lmsSettings, ...doc.data() };
-            renderAuthFooter(); // UI Refresh
-        }
-    }, err => console.warn("Settings access restricted"));
-
-    db.collection('settings').doc('zoom_config').onSnapshot(doc => {
-        if (doc.exists) {
-            const data = doc.data();
-            currentZoomLink = data.url;
-            if (data.startTime) nextClassTime = data.startTime.toDate();
-        }
-    }, err => console.warn("Zoom access restricted"));
+    // ၂။ Course Info Sync
+    if (currentUser.isLoggedIn) {
+        db.collection('settings').doc('course_info').onSnapshot(doc => {
+            if (doc.exists) {
+                lmsSettings = { ...lmsSettings, ...doc.data() };
+                renderAuthFooter(); 
+            }
+        }, err => console.warn("Settings access restricted"));
+    }
 }
 
 // --- ၂။ Admin Panel: Announcement & Course Settings ပြင်သည့် UI ---
@@ -1509,29 +1660,53 @@ function viewCertificate(uid, isAdminPreview = false) {
     const instructor = lmsSettings.instructorName || "Ashin";
 
     body.innerHTML = `
-        <!-- အပြင်ဘက်ဆုံး Container ကို column direction ပေးပါမည် -->
         <div class="certificate-page-wrapper animate-up">
-            
             <div class="certificate-frame shadow-lg">
                 <div class="cert-border">
-                    <div style="position: relative; z-index: 1;">
-                        <h1 style="font-family: 'Times New Roman', serif; font-size: 3.5rem; color: #1e293b; margin: 0;">CERTIFICATE</h1>
-                        <p style="letter-spacing: 8px; font-weight: bold; color: #64748b; margin-bottom: 30px;">OF COMPLETION</p>
+                    <div style="position: relative; z-index: 1; height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
                         
-                        <p style="font-size: 1.2rem; color: #334155;">This is to certify that</p>
-                        <h2 style="font-family: 'Georgia', serif; font-size: 3rem; color: #003087; border-bottom: 2px solid #e2e8f0; display: inline-block; padding: 0 40px; margin: 15px 0;">
-                            ${student.name}
-                        </h2>
-                        
-                        <p style="font-size: 1.1rem; color: #334155; margin-top: 20px;">
-                            has successfully completed the Professional Bootcamp in
-                        </p>
-                        <h3 style="color: #003087; font-size: 1.8rem; margin: 15px 0; text-transform: uppercase;">
-                            ${lmsSettings.courseTitle || "Full-Stack Web Development"}
-                        </h3>
-                        <p style="color: #64748b; font-size: 1rem;">Given under our seal on this day, <strong>${issueDate}</strong></p>
+                        <div>
+                            <h1 style="font-family: 'Times New Roman', serif; font-size: 3.5rem; color: #1e293b; margin: 0;">CERTIFICATE</h1>
+                            <p style="letter-spacing: 8px; font-weight: bold; color: #64748b; margin-bottom: 30px;">OF COMPLETION</p>
+                            
+                            <p style="font-size: 1.2rem; color: #334155;">This is to certify that</p>
+                            <h2 style="font-family: 'Georgia', serif; font-size: 3rem; color: #003087; border-bottom: 2px solid #e2e8f0; display: inline-block; padding: 0 40px; margin: 15px 0;">
+                                ${student.name}
+                            </h2>
+                            
+                            <p style="font-size: 1.1rem; color: #334155; margin-top: 20px;">
+                                has successfully completed the Professional Bootcamp in
+                            </p>
+                            <h3 style="color: #003087; font-size: 1.8rem; margin: 15px 0; text-transform: uppercase;">
+                                ${lmsSettings.courseTitle || "Full-Stack Web Development"}
+                            </h3>
+                            <p style="color: #64748b; font-size: 1rem;">Given under our seal on this day, <strong>${issueDate}</strong></p>
+                        </div>
 
-                        <div style="display: flex; justify-content: space-around; align-items: flex-end; margin-top: 60px;">
+                        <!-- 🔥 Gold Seal (ရွှေရောင်တံဆိပ်) -->
+                        <div class="cert-seal-wrapper">
+                            <div class="gold-seal">
+                                <!-- ဝိုင်းနေသော စာသား -->
+                                <svg class="seal-text-svg" viewBox="0 0 100 100">
+                                    <path id="circlePath" d="M 50, 50 m -37, 0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0" fill="transparent" />
+                                    <text class="seal-text-path">
+                                        <textPath xlink:href="#circlePath">
+                                            Myanmar Full-Stack Bootcamp • Official Seal •
+                                        </textPath>
+                                    </text>
+                                </svg>
+                                
+                                <!-- အလယ်က ဘွဲ့ဦးထုပ်နှင့် သပြေခက် အမှတ်အသား -->
+                                <div class="seal-icon-inner">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    <div style="font-size: 1rem; margin-top: -5px;">
+                                        <i class="fas fa-certificate"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-around; align-items: flex-end; margin-bottom: 20px;">
                             <div style="text-align: center;">
                                 <p style="font-family: 'Dancing Script', cursive; font-size: 1.8rem; color: #1e293b; margin-bottom: 5px;">
                                     ${instructor}
@@ -1543,11 +1718,11 @@ function viewCertificate(uid, isAdminPreview = false) {
                                 <div style="border-top: 2px solid #334155; width: 200px; padding-top: 5px; font-weight: bold; font-size: 0.8rem;">CERTIFICATE ID</div>
                             </div>
                         </div>
+
                     </div>
                 </div>
             </div>
 
-            <!-- ခလုတ်များကို အောက်ခြေတွင် ထားရှိပါမည် -->
             <div class="no-print cert-action-buttons">
                 <button class="save-btn" onclick="window.print()">
                     <i class="fas fa-print"></i> Print Official Certificate
@@ -1556,7 +1731,6 @@ function viewCertificate(uid, isAdminPreview = false) {
                     <i class="fas fa-arrow-left"></i> Back
                 </button>
             </div>
-            
         </div>
     `;
 }
@@ -1631,6 +1805,9 @@ async function renderAdminPanel() {
 
                 <div style="display:flex; gap:10px; flex-wrap:wrap; width:100%; justify-content: flex-end;" class="admin-btn-group">
                     <!-- 🔥 ဒီခလုတ်က အရေးကြီးဆုံးပါ၊ Editor ဆီသွားပါမယ် -->
+                    <button class="save-btn" onclick="renderSubmissions()">
+                        <i class="fas fa-file-signature"></i> Review
+                    </button>
                     <button class="menu-btn" style="background:#f59e0b; color:white;" onclick="renderLMSEditor()">
                         <i class="fas fa-cog"></i> Settings
                     </button>
@@ -1645,10 +1822,6 @@ async function renderAdminPanel() {
 
                     <button class="menu-btn" style="background:#4b5563; color:white;" onclick="renderLMSGuide()">
                         <i class="fas fa-book"></i> Guide
-                    </button>
-
-                    <button class="save-btn" onclick="renderSubmissions()">
-                        <i class="fas fa-file-signature"></i> Review
                     </button>
                 </div>
             </div>
@@ -2324,27 +2497,33 @@ async function gradeThisSubmission(docId) {
 function renderAbout() {
     document.getElementById('dynamic-body').innerHTML = `
         <div class="content-card animate-up" style="max-width: 800px; margin: auto; line-height: 1.8;">
-            <h3><i class="fas fa-graduation-cap"></i> ကျွန်ုပ်တို့အကြောင်း (About Us)</h3>
-            <hr><br>
-            <p><strong>Myanmar Full-Stack Bootcamp (MM)</strong> သည် မြန်မာနိုင်ငံရှိ လူငယ်များ နိုင်ငံတကာအဆင့်မီ နည်းပညာရပ်များကို မိခင်ဘာသာစကားဖြင့် စနစ်တကျ သင်ယူနိုင်စေရန် ရည်ရွယ်တည်ထောင်ထားခြင်း ဖြစ်ပါသည်။</p>
-            <p>ကျွန်ုပ်တို့၏ သင်ရိုးညွှန်းတမ်းသည် ကမ္ဘာကျော် <strong>Columbia University Software Engineering</strong> သင်ကြားမှုစနစ်ကို အခြေခံထားပြီး၊ လက်တွေ့နယ်ပယ်တွင် အမှန်တကယ် အသုံးချနိုင်သော Foundations, Technical နှင့် Full-Stack ဘာသာရပ်များကို အပိုင်းလိုက် ခွဲခြားသင်ကြားပေးနေပါသည်။</p>
-            <div class="academic-box">
-                <h4>ကျွန်ုပ်တို့၏ ရည်မှန်းချက်</h4>
-                <ul>
-                    <li>မြန်မာ Developer ကောင်းများစွာ ပေါ်ထွက်လာစေရန်။</li>
-                    <li>အဆင့်မြင့် နည်းပညာများကို လွယ်ကူစွာ သင်ယူနိုင်သော Platform တစ်ခုဖြစ်စေရန်။</li>
-                    <li>ကျောင်းသားနှင့် ဆရာ တိုက်ရိုက် ဆက်သွယ်သင်ကြားနိုင်သော ဝန်းကျင်တစ်ခု ဖန်တီးရန်။</li>
-                </ul>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h3><i class="fas fa-graduation-cap"></i> ကျွန်ုပ်တို့အကြောင်း (About Us)</h3>
+                <button class="menu-btn" onclick="showSection('dashboard')"><i class="fas fa-home"></i> Back to Home</button>
             </div>
+                <hr><br>
+                <p><strong>Myanmar Full-Stack Bootcamp (MM)</strong> သည် မြန်မာနိုင်ငံရှိ လူငယ်များ နိုင်ငံတကာအဆင့်မီ နည်းပညာရပ်များကို မိခင်ဘာသာစကားဖြင့် စနစ်တကျ သင်ယူနိုင်စေရန် ရည်ရွယ်တည်ထောင်ထားခြင်း ဖြစ်ပါသည်။</p>
+                <p>ကျွန်ုပ်တို့၏ သင်ရိုးညွှန်းတမ်းသည် ကမ္ဘာကျော် <strong>Columbia University Software Engineering</strong> သင်ကြားမှုစနစ်ကို အခြေခံထားပြီး၊ လက်တွေ့နယ်ပယ်တွင် အမှန်တကယ် အသုံးချနိုင်သော Foundations, Technical နှင့် Full-Stack ဘာသာရပ်များကို အပိုင်းလိုက် ခွဲခြားသင်ကြားပေးနေပါသည်။</p>
+                <div class="academic-box">
+                    <h4>ကျွန်ုပ်တို့၏ ရည်မှန်းချက်</h4>
+                    <ul>
+                        <li>မြန်မာ Developer ကောင်းများစွာ ပေါ်ထွက်လာစေရန်။</li>
+                        <li>အဆင့်မြင့် နည်းပညာများကို လွယ်ကူစွာ သင်ယူနိုင်သော Platform တစ်ခုဖြစ်စေရန်။</li>
+                        <li>ကျောင်းသားနှင့် ဆရာ တိုက်ရိုက် ဆက်သွယ်သင်ကြားနိုင်သော ဝန်းကျင်တစ်ခု ဖန်တီးရန်။</li>
+                    </ul>
+                </div>
         </div>`;
 }
 
 function renderPrivacy() {
     document.getElementById('dynamic-body').innerHTML = `
         <div class="content-card animate-up" style="max-width: 800px; margin: auto; line-height: 1.8;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
             <h3><i class="fas fa-user-shield"></i> ကိုယ်ရေးအချက်အလက် မူဝါဒ (Privacy Policy)</h3>
+            <button class="menu-btn" onclick="showSection('dashboard')"><i class="fas fa-home"></i> Back to Home</button>
+            </div>
             <hr><br>
-            <p>ကျောင်းသားများ၏ ကိုယ်ရေးအချက်အလက်များကို ကျွန်ုပ်တို့ အလေးထား ကာကွယ်ပေးပါသည်။</p>
+            <p>ကျောင်းသားများ၏ ကိုယ်ရေးအချက်အလက်များကို Google Firebase တွင် လုံခြုံစွာ သိမ်းဆည်းထားပါသည်။</p>
             
             <h4>၁။ ဒေတာ သိမ်းဆည်းခြင်း</h4>
             <p>ကျောင်းသားများ၏ နာမည်၊ အီးမေးလ်၊ အမှတ်စာရင်းနှင့် သင်ယူမှု အခြေအနေများကို <strong>Google Firebase Cloud</strong> တွင် လုံခြုံစိတ်ချစွာ သိမ်းဆည်းထားပါသည်။</p>
