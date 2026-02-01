@@ -1,0 +1,20 @@
+{
+  "name": "Myanmar Full-Stack Bootcamp",
+  "short_name": "Bootcamp MM",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#f1f5f9",
+  "theme_color": "#003087",
+  "icons": [
+    {
+      "src": "assets/logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
