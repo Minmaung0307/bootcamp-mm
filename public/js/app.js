@@ -16,10 +16,10 @@ let activeChatName = "Group: Batch-05";
 let currentUser = JSON.parse(localStorage.getItem('currentUser')) || {
     isLoggedIn: false, 
     uid: "", 
-    name: "Guest Student", 
+    name: "", 
     role: "Student",
     photo: "https://placehold.co/150x150/003087/white?text=User",
-    skills: ["HTML", "CSS", "JavaScript"], 
+    skills: [], 
     notes: "", 
     isPaid: true,
     github: "", 
@@ -28,32 +28,19 @@ let currentUser = JSON.parse(localStorage.getItem('currentUser')) || {
     quizAttempts: {}, 
     
     // ပြီးမြောက်ထားသော သင်ခန်းစာ ၅ ခု (Certificate ပွင့်ရန် လိုအပ်ချက်)
-    completedLessons: [
-        "0.1.1: Welcome Article", 
-        "0.1.2: Basic Quiz", 
-        "0.1.3: Assignment 1", 
-        "Module 0 Project", 
-        "1.1.1: Flexbox Deep Dive"
-    ], 
+    completedLessons: [], 
     
     // ဘာသာရပ်အလိုက် အမှတ်စာရင်း (GPA 75 ကျော်စေရန်)
-    grades: {
-        "html": 85,
-        "css": 92,
-        "javascript": 88,
-        "react": 78,
-        "nodejs": 80
-    }
+    grades: {},
 };
 
 // ဆရာမှ သတ်မှတ်ပေးမည့် ပြင်လို့မရသော အချက်အလက်များ (Database မှ လာမည်)
 let academicInfo = {
-  examDate: "ဖေဖော်ဝါရီ ၁၅၊ ၂၀၂၄",
-  attendance: "92%",
-  overallGrade: "A-",
-  batchName: "Batch-05 (Night Class)",
-  startDate: "ဇန်နဝါရီ ၁၊ ၂၀၂၄",
-  uid: "st-001",
+  examDate: "-",
+  attendance: "0%",
+  overallGrade: "-",
+  batchName: "-",
+  startDate: "-"
 };
 
 // app.js ရဲ့ variables တွေထားတဲ့ နေရာမှာ ထည့်ပါ
@@ -181,16 +168,13 @@ function renderDashboard() {
     
     // Progress % တွက်ရန် Helper
     const getPercent = (catName) => {
-        // အရင်က ဆောက်ခဲ့တဲ့ courseData ထဲက စုစုပေါင်း သင်ခန်းစာအရေအတွက်ကို တွက်မယ်
         const categoryData = courseData.find(c => c.category.toLowerCase() === catName.toLowerCase());
         if (!categoryData) return 0;
         
         let totalLessons = 0;
         categoryData.modules.forEach(m => totalLessons += m.lessons.length);
         
-        // Safety check: completedLessons ရှိမရှိ အရင်စစ်မည်
         const doneList = currentUser.completedLessons || []; 
-        
         const doneLessonsCount = doneList.filter(l => {
             return categoryData.modules.some(m => m.lessons.some(les => les.title === l));
         }).length;
@@ -198,8 +182,13 @@ function renderDashboard() {
         return Math.round((doneLessonsCount / totalLessons) * 100) || 0;
     };
 
-    body.innerHTML = `
-        <div class="live-countdown">
+    const fPercent = getPercent('Foundations');
+    const tPercent = getPercent('Technical');
+    const fsPercent = getPercent('Full-Stack');
+
+    // --- HTML ကို variable တစ်ခုထဲမှာ အရင်စုတည်ဆောက်မည် ---
+    let dashboardHtml = `
+        <div class="live-countdown animate-up">
             <h4><i class="fas fa-video"></i> Next Live Class</h4>
             <div class="timer-grid" id="live-timer">Loading...</div>
             <button class="save-btn" style="margin-top:10px; background:#f59e0b;" 
@@ -217,34 +206,78 @@ function renderDashboard() {
             <div class="topic-card animate-up" onclick="showSection('courses', 'Foundations')">
                 <div class="card-icon"><i class="fas fa-cubes"></i></div>
                 <h3>Foundations</h3>
-                <div class="progress-container"><div class="progress-bar" style="width:${getPercent('Foundations')}%"></div></div>
-                <small>${getPercent('Foundations')}% Completed</small>
+                <div class="progress-container"><div class="progress-bar" style="width:${fPercent}%"></div></div>
+                <small>${fPercent}% Completed</small>
             </div>
 
             <div class="topic-card animate-up" onclick="showSection('courses', 'Technical')">
                 <div class="card-icon"><i class="fas fa-code"></i></div>
                 <h3>Technical</h3>
-                <div class="progress-container"><div class="progress-bar" style="width:${getPercent('Technical')}%"></div></div>
-                <small>${getPercent('Technical')}% Completed</small>
+                <div class="progress-container"><div class="progress-bar" style="width:${tPercent}%"></div></div>
+                <small>${tPercent}% Completed</small>
             </div>
 
             <div class="topic-card animate-up" onclick="showSection('courses', 'Full-Stack')">
                 <div class="card-icon"><i class="fas fa-server"></i></div>
                 <h3>Full-Stack</h3>
-                <div class="progress-container"><div class="progress-bar" style="width:${getPercent('Full-Stack')}%"></div></div>
-                <small>${getPercent('Full-Stack')}% Completed</small>
+                <div class="progress-container"><div class="progress-bar" style="width:${fsPercent}%"></div></div>
+                <small>${fsPercent}% Completed</small>
             </div>
+    `;
 
-            <!-- Leaderboard (Top Students) -->
+    // 🔥 ဆရာဖြစ်မှသာ Leaderboard Card ကို string ထဲ ပေါင်းထည့်မည်
+    if (currentUser.role === 'Teacher') {
+        dashboardHtml += `
             <div class="content-card animate-up" style="grid-column: span 1;">
-                <h4><i class="fas fa-trophy" style="color:gold"></i> Top Students</h4>
+                <h4><i class="fas fa-trophy" style="color:gold"></i> Top Students (Tutor View)</h4>
                 <div id="leaderboard-content" style="margin-top:10px;">
-                    <p>1. Aung Aung - 950 pts</p>
-                    <p>2. Su Su - 920 pts</p>
+                    <div class="loader">Loading Leaderboard...</div>
                 </div>
             </div>
-        </div>
-    `;
+        `;
+    }
+
+    dashboardHtml += `</div>`; // Grid closing div
+    
+    // နောက်ဆုံးမှ innerHTML ထဲ ထည့်မည်
+    body.innerHTML = dashboardHtml;
+
+    // ဆရာဖြစ်ရင် Database ကနေ Data လှမ်းယူခိုင်းမည်
+    if (currentUser.role === 'Teacher') {
+        fetchLeaderboard();
+    }
+}
+
+async function fetchLeaderboard() {
+    const leaderboardDiv = document.getElementById('leaderboard-content');
+    if (!leaderboardDiv) return;
+
+    try {
+        // Firestore: အမှတ်အများဆုံး ကျောင်းသား ၅ ယောက်ကို ဆွဲယူမည်
+        const snapshot = await db.collection('users')
+            .where('role', '==', 'Student')
+            .orderBy('overallGrade', 'desc') // Grade အလိုက်စီမည်
+            .limit(5)
+            .get();
+
+        let html = '<ul style="list-style:none; padding:0;">';
+        let rank = 1;
+
+        snapshot.forEach(doc => {
+            const student = doc.data();
+            html += `<li style="padding:8px 0; border-bottom:1px solid #eee;">
+                        ${rank}. <strong>${student.name}</strong> - ${student.overallGrade || '0'} pts
+                     </li>`;
+            rank++;
+        });
+
+        html += '</ul>';
+        leaderboardDiv.innerHTML = snapshot.empty ? "ကျောင်းသားစာရင်း မရှိသေးပါ။" : html;
+
+    } catch (error) {
+        console.error("Leaderboard Error:", error);
+        leaderboardDiv.innerHTML = "Leaderboard ဖတ်လို့မရပါ။ Index လိုအပ်နိုင်ပါသည်။";
+    }
 }
 
 // Lesson Discussion (အမေးအဖြေကဏ္ဍ)
@@ -513,6 +546,8 @@ async function renderLessonContent(catIdx, modIdx, lesIdx) {
                     <button class="menu-btn" onclick="goToLesson(${catIdx}, ${modIdx}, ${lesIdx - 1})" ${lesIdx === 0 ? "disabled" : ""}>Prev</button>
                     <button class="menu-btn" onclick="goToLesson(${catIdx}, ${modIdx}, ${lesIdx + 1})" ${lesIdx === mod.lessons.length - 1 ? "disabled" : ""}>Next</button>
                 </div></article>`;
+        // 🔥 ARTICLE ဖြစ်မှသာ ဖွင့်ကြည့်ရုံနဲ့ Completed ထဲထည့်မည်
+        markLessonAsDone(lesson.title); 
     }
 
     if (lesson.type === 'article') {
@@ -531,6 +566,20 @@ async function renderLessonContent(catIdx, modIdx, lesIdx) {
         </div>`;
   }
   window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+// 🔥 ထပ်ခါတလဲလဲ မရေးရအောင် Helper function တစ်ခု ဆောက်လိုက်ပါ
+async function markLessonAsDone(lessonTitle) {
+    // Safety check: array မရှိသေးရင် အသစ်ဆောက်မယ်
+    if (!currentUser.completedLessons) currentUser.completedLessons = [];
+    
+    if (!currentUser.completedLessons.includes(lessonTitle)) {
+        currentUser.completedLessons.push(lessonTitle);
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        
+        // Cloud Sync လုပ်မယ်
+        await syncProgressToCloud();
+    }
 }
 
 // Pagination အတွက် ကူညီပေးမည့် function
@@ -1014,6 +1063,10 @@ function renderProfile() {
                 <div class="content-card academic-card">
                     <h4><i class="fas fa-university"></i> Academic Achievement</h4>
                     <div class="academic-box">
+                        <div class="academic-item"><span>ကျောင်းဝင်မှတ်ပုံတင်:</span> <strong>${currentUser.batchId || "-"}</strong></div>
+                        <div class="academic-item"><span>တက်ရောက်မှု:</span> <strong>${currentUser.attendance || "0%"}</strong></div>
+                        <div class="academic-item"><span>Grade:</span> <strong style="color:green">${currentUser.overallGrade || "-"}</strong></div>
+                        <div class="academic-item"><span>စာမေးပွဲရက်:</span> <strong style="color:red">${currentUser.examDate || "-"}</strong></div>
                         <div class="academic-item"><span>GPA:</span> <strong style="color:green">${gpa}</strong></div>
                         <div class="academic-item"><span>Completed Modules:</span> <strong>${completedCount}</strong></div>
                     </div>
@@ -1046,17 +1099,21 @@ function renderProfile() {
 
 // ကျောင်းသားအတွက် Profile ပြင်ဆင်သည့် Form (Edit Mode)
 function renderEditProfile() {
-  const body = document.getElementById("dynamic-body");
-  body.innerHTML = `
+    const body = document.getElementById("dynamic-body");
+    
+    // Safety check: currentUser ရှိမရှိ အရင်စစ်မည်
+    if (!currentUser) return alert("User not logged in!");
+
+    body.innerHTML = `
         <div class="content-card animate-up" style="max-width: 800px; margin: 0 auto;">
             <h3 style="margin-bottom:20px;"><i class="fas fa-id-card"></i> Profile ပြင်ဆင်ခြင်း</h3>
             
             <div class="edit-grid">
                 <div class="edit-section">
                     <label>Profile Photo URL</label>
-                    <input type="text" id="edit-photo" class="edit-input" value="${currentUser.photo}">
+                    <input type="text" id="edit-photo" class="edit-input" value="${currentUser.photo || ''}">
                     <label>အမည်</label>
-                    <input type="text" id="edit-name" class="edit-input" value="${currentUser.name}">
+                    <input type="text" id="edit-name" class="edit-input" value="${currentUser.name || ''}">
                     <label>Portfolio Website</label>
                     <input type="text" id="edit-portfolio" class="edit-input" value="${currentUser.portfolio || ""}">
                     <label>GitHub Link</label>
@@ -1077,7 +1134,7 @@ function renderEditProfile() {
             </div>
 
             <label>Skills (ကော်မာခြားပါ)</label>
-            <input type="text" id="edit-skills" class="edit-input" value="${currentUser.skills.join(", ")}">
+            <input type="text" id="edit-skills" class="edit-input" value="${(currentUser.skills || []).join(", ")}">
             <label>Bio / Notes</label>
             <textarea id="edit-notes" class="edit-input" rows="3">${currentUser.notes || ""}</textarea>
             
@@ -1091,7 +1148,6 @@ function renderEditProfile() {
 
 // သိမ်းဆည်းရန် Function တစ်ခုတည်းသာ ထားပါမည်
 async function saveProfile() {
-    // ၁။ Input များမှ တန်ဖိုးအသစ်များကို ယူခြင်း
     const updatedData = {
         name: document.getElementById("edit-name").value,
         photo: document.getElementById("edit-photo").value,
@@ -1104,32 +1160,29 @@ async function saveProfile() {
         email: document.getElementById("edit-email").value,
         github: document.getElementById("edit-github").value,
         notes: document.getElementById("edit-notes").value,
-        skills: document.getElementById("edit-skills").value
-            .split(",")
-            .map((s) => s.trim())
-            .filter(s => s !== "")
+        skills: document.getElementById("edit-skills").value.split(",").map(s => s.trim()).filter(s => s !== "")
     };
 
-    // ၂။ Local State ကို Update လုပ်ခြင်း
-    currentUser = { ...currentUser, ...updatedData };
-
     try {
-        // 🔥 အဓိကအချက်- Firebase Firestore ထဲသို့ သွားသိမ်းမည်
+        // ၁။ Firebase Cloud (Firestore) ထဲ သိမ်းမည်
         if (currentUser.uid) {
             await db.collection("users").doc(currentUser.uid).update(updatedData);
-            console.log("Profile updated in Firebase Cloud!");
+            console.log("Cloud Update Success!");
         }
 
-        // ၃။ LocalStorage တွင်လည်း သိမ်းမည် (Offline အသုံးပြုနိုင်ရန်)
+        // ၂။ လက်ရှိ App ထဲက variable ကို update လုပ်မည်
+        currentUser = { ...currentUser, ...updatedData };
+
+        // ၃။ LocalStorage ထဲ သိမ်းမည်
         localStorage.setItem("currentUser", JSON.stringify(currentUser));
 
-        alert("Profile အောင်မြင်စွာ ပြင်ဆင်ပြီးပါပြီ။");
+        alert("အောင်မြင်စွာ သိမ်းဆည်းပြီးပါပြီ။");
         renderProfile();
         renderAuthFooter();
 
     } catch (error) {
-        console.error("Save Profile Error:", error);
-        alert("Database သို့ သိမ်းဆည်းရာတွင် အမှားတက်နေပါသည်- " + error.message);
+        console.error("Save Error:", error);
+        alert("အချက်အလက်သိမ်းဆည်းရာတွင် အမှားတက်နေပါသည်- " + error.message);
     }
 }
 
@@ -2024,20 +2077,48 @@ function loadGroupChat() {
     });
 }
 
-// အမှတ်စာရင်းသိမ်းခြင်း (Firestore Logic နေရာ)
-function submitGrades(uid) {
-  alert("ကျောင်းသား " + uid + " အတွက် အချက်အလက်များ သိမ်းဆည်းပြီးပါပြီ။");
-  renderAdminPanel();
+async function submitGrades(uid) {
+    const gradeInput = document.getElementById('new-grade');
+    if (!gradeInput) return;
+    
+    const newGrade = parseInt(gradeInput.value); 
+    
+    if (isNaN(newGrade)) return alert("ကျေးဇူးပြု၍ အမှတ်ကို ဂဏန်းဖြင့် ရိုက်ထည့်ပါ။");
+
+    try {
+        await db.collection('users').doc(uid).update({
+            overallGrade: parseInt(newGrade) // String ကို Number အဖြစ် ပြောင်းပြီးမှ သိမ်းမည်
+        });
+        
+        alert("အမှတ်စာရင်း သိမ်းဆည်းပြီးပါပြီ။");
+        renderAdminPanel(); // Table ကို refresh လုပ်မည်
+    } catch (e) {
+        alert("Error: " + e.message);
+    }
 }
 
-function saveAcademicStatus() {
-  academicInfo.examDate = document.getElementById("adm-exam").value;
-  academicInfo.overallGrade = document.getElementById("adm-grade").value;
-  academicInfo.attendance = document.getElementById("adm-att").value;
-  academicInfo.batchName = document.getElementById("adm-batch").value;
+// 🔥 studentUid ကို parameter အဖြစ် လက်ခံခိုင်းပါ
+async function saveAcademicStatus(studentUid) { 
+  const newStatus = {
+        examDate: document.getElementById("adm-exam").value,
+        overallGrade: document.getElementById("adm-grade").value,
+        attendance: document.getElementById("adm-att").value,
+        batchId: document.getElementById("adm-batch").value
+    };
 
-  alert("ကျောင်းသား၏ Academic Status ကို ပြင်ဆင်ပြီးပါပြီ။");
-  renderProfile();
+    try {
+        // Firestore ထဲ တိုက်ရိုက် Update လုပ်မည်
+        await db.collection('users').doc(studentUid).update(newStatus);
+        
+        alert("ကျောင်းသား၏ Academic Status ကို Cloud ပေါ်တွင် သိမ်းဆည်းပြီးပါပြီ။");
+        
+        // Admin Panel (ကျောင်းသားစာရင်း) သို့ ပြန်သွားမည်
+        renderAdminPanel(); 
+        
+    } catch (e) {
+        console.error("Update Error:", e);
+        alert("Error: " + e.message);
+    }
 }
 
 function toggleEditMode(isEdit) {
