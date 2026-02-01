@@ -11,6 +11,8 @@
     <script src="/__/firebase/9.22.0/firebase-auth-compat.js"></script>
     <script src="/__/firebase/9.22.0/firebase-firestore-compat.js"></script>
     <script src="/__/firebase/init.js"></script>
+    <!-- Firebase Storage SDK (ဒါလေးမပါရင် ပုံတင်လို့မရပါ) -->
+    <script src="/__/firebase/9.22.0/firebase-storage-compat.js"></script>
 </head>
 <body>
     <!-- Announcement -->
@@ -100,11 +102,27 @@
 
     <!-- Login Page -->
     <div id="login-page" class="login-container" style="display: none;">
-        <div class="login-box">
-            <h2>Welcome Back</h2>
-            <input type="email" id="login-email" placeholder="Email">
-            <input type="password" id="login-password" placeholder="Password">
-            <button class="login-btn" onclick="handleLogin()">Login</button>
+        <div class="login-box animate-up">
+            <!-- ၁။ Login Form -->
+            <div id="login-form-area">
+                <h2>Welcome Back</h2>
+                <p>ကျေးဇူးပြု၍ Login အရင်ဝင်ပေးပါ</p>
+                <input type="email" id="login-email" placeholder="Email">
+                <input type="password" id="login-password" placeholder="Password">
+                <button class="login-btn" onclick="handleLogin()">Login</button>
+                <p class="auth-toggle">အကောင့်မရှိသေးပါက <a href="javascript:void(0)" onclick="toggleAuthMode('signup')">အသစ်ဖွင့်ရန်</a></p>
+            </div>
+
+            <!-- ၂။ Sign Up Form (အစပိုင်းတွင် ဖျောက်ထားမည်) -->
+            <div id="signup-form-area" style="display:none;">
+                <h2>Create Account</h2>
+                <p>Bootcamp သို့ စာရင်းသွင်းရန် အချက်အလက်ဖြည့်ပါ</p>
+                <input type="text" id="signup-name" placeholder="Full Name (အမည်ရင်း)">
+                <input type="email" id="signup-email" placeholder="Email">
+                <input type="password" id="signup-password" placeholder="Create Password">
+                <button class="login-btn" style="background:#166534;" onclick="handleSignUp()">Sign Up (အကောင့်ဖွင့်မည်)</button>
+                <p class="auth-toggle">အကောင့်ရှိပြီးသားဆိုလျှင် <a href="javascript:void(0)" onclick="toggleAuthMode('login')">ပြန်ဝင်ရန်</a></p>
+            </div>
         </div>
     </div>
 

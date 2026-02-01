@@ -5,6 +5,7 @@
 // Firebase initialize လုပ်ပြီးသားကို ခေါ်သုံးခြင်း
 const db = firebase.firestore();
 const auth = firebase.auth();
+const storage = firebase.storage();
 
 // let currentZoomLink = "https://zoom.us/j/your_meeting_id"; // ဒီမှာ ကိုယ့် Link ထည့်ပါ
 let currentZoomLink = ""; // ပုံသေမထားတော့ဘဲ Database မှယူမည်
@@ -117,36 +118,34 @@ function toggleNav() {
 }
 
 function showSection(section, filterCat = null) {
-  const title = document.getElementById("page-title");
+    const title = document.getElementById('page-title');
+    const body = document.getElementById('dynamic-body');
+    const sidebar = document.getElementById('sidebar');
 
-  const body = document.getElementById('dynamic-body');
-    
-    // 🔥 Safety Check: element မရှိရင် ဘာမှမလုပ်ဘဲ ပြန်ထွက်မည်
     if (!title || !body) {
-        console.warn("Title or Body element not found! Current section:", section);
+        console.warn("Title or Body element not found!");
         return; 
     }
 
-  // Sidebar ပိတ်မည် (Sidebar ပွင့်နေမှ ပိတ်မည်)
-  const sidebar = document.getElementById("sidebar");
-  if (sidebar && sidebar.classList.contains("open")) {
-    toggleNav();
-  }
-
-  // 🔥 Mobile မှာ menu နှိပ်လိုက်ရင် sidebar ကို အလိုအလျောက် ပြန်ပိတ်ပေးမည်
-    if (window.innerWidth <= 768) {
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('overlay');
-        if (sidebar.classList.contains('open')) {
-            sidebar.classList.remove('open');
-            overlay.classList.remove('show');
-        }
+    // ၁။ 🔥 ပိုက်ဆံမသွင်းရသေးသူများအတွက် Gatekeeper စစ်ဆေးခြင်း
+    const restrictedSections = ['courses', 'messages', 'resources'];
+    if (restrictedSections.includes(section) && !currentUser.isPaid && currentUser.role !== 'Teacher') {
+        alert("⚠️ ဤကဏ္ဍကို လေ့လာရန် သင်တန်းကြေး အရင်ပေးသွင်းရန် လိုအပ်ပါသည်။");
+        renderPaymentPage();
+        document.getElementById('page-title').innerText = "သင်တန်းအပ်နှံရန်";
+        return; 
     }
 
-  if (section === "dashboard") {
-    title.innerText = "Dashboard";
-    renderDashboard(); // <--- အပေါ်မှာ သတ်မှတ်ထားတဲ့ function ကို ခေါ်လိုက်တာပါ
-  } else if (section === 'courses') {
+    // ၂။ 🔥 Sidebar ကို Menu နှိပ်လိုက်တာနဲ့ အလိုအလျောက် ပိတ်စေခြင်း (Mobile ရော Desktop ပါ)
+    if (sidebar && sidebar.classList.contains('open')) {
+        toggleNav(); // Sidebar ပြန်ပိတ်သွားမည်
+    }
+
+    // ၃။ Section Rendering
+    if (section === 'dashboard') {
+        title.innerText = "Dashboard";
+        renderDashboard();
+    } else if (section === 'courses') {
         title.innerText = filterCat ? `${filterCat} သင်ခန်းစာများ` : "သင်ခန်းစာများအားလုံး";
         renderCourseTree(filterCat);
     } else if (section === 'messages') {
@@ -156,13 +155,14 @@ function showSection(section, filterCat = null) {
         title.innerText = "My Profile";
         renderProfile();
     } else if (section === 'resources') {
-        title.innerText = "Learning Resources";
+        title.innerText = "Resources";
         renderResources();
     } else if (section === 'about') {
         renderAbout();
     } else if (section === 'privacy') {
         renderPrivacy();
     }
+    
     renderAuthFooter();
 }
 
@@ -1173,23 +1173,33 @@ async function editMsg(id, oldText) {
 function renderProfile() {
   const body = document.getElementById("dynamic-body");
 
-  // အမှတ်စာရင်း ရှိမရှိ စစ်ဆေးပြီး GPA တွက်မည်
   const grades = currentUser.grades || {};
   const completedCount = Object.keys(grades).length;
   let totalScore = 0;
   Object.values(grades).forEach(s => totalScore += s);
   const gpa = completedCount > 0 ? (totalScore / completedCount).toFixed(2) : 0;
 
-  // အောင်လက်မှတ်ရရန် သတ်မှတ်ချက် (ဥပမာ - ဘာသာရပ် ၅ ခုပြီးရမည်၊ GPA ၇၅ ကျော်ရမည်)
   const isEligible = completedCount >= 5 && gpa >= 75;
-
   const roleBadgeStyle = currentUser.role === "Teacher" ? "background:#ef4444; color:white;" : "background:#e2e8f0; color:black;";
 
+  // 🔥 ပြင်ဆင်ချက်: Alert Box ကို Variable ထဲ အရင်ထည့်မည်
+  let unpaidAlert = "";
+  if (!currentUser.isPaid && currentUser.role !== 'Teacher') {
+    unpaidAlert = `
+        <div class="tip-box" style="background:#fffbeb; border:1px solid #f59e0b; color:#92400e; margin-bottom:20px; padding:15px; border-radius:8px;">
+            <i class="fas fa-info-circle"></i> သင်၏ Profile ကို ပြင်ဆင်နိုင်ပါသည်။ သင်ခန်းစာများ စတင်လေ့လာရန် သင်တန်းကြေးပေးသွင်းရန် လိုအပ်ပါသည်။ 
+            <button class="save-btn" style="padding:4px 12px; margin-left:10px; font-size:0.8rem;" onclick="renderPaymentPage()">သင်တန်းအပ်ရန်</button>
+        </div>
+    `;
+  }
+
+  // အားလုံးပေါင်းပြီး တစ်ခါတည်း innerHTML ထဲ ထည့်မည် (overwrite မဖြစ်တော့ပါ)
   body.innerHTML = `
+    ${unpaidAlert}
     <div class="profile-card-pro fade-in">
         <div class="profile-cover"></div>
         <div class="profile-header-main">
-            <img src="${currentUser.photo}" class="profile-large-avatar">
+            <img src="${currentUser.photo}" class="profile-large-avatar" onerror="this.src='https://placehold.co/150x150/003087/white?text=User'">
             <div class="profile-info-text">
                 <h2>${currentUser.name} <span class="badge-verify"><i class="fas fa-check-circle"></i></span></h2>
                 <span class="u-role-tag" style="${roleBadgeStyle}">${currentUser.role}</span>
@@ -1214,11 +1224,10 @@ function renderProfile() {
             </div>
 
             <div class="profile-main-data">
-                <!-- Academic Status (ခလုတ်များ ဤနေရာတွင် ရှိသည်) -->
                 <div class="content-card academic-card">
                     <h4><i class="fas fa-university"></i> Academic Achievement</h4>
                     <div class="academic-box">
-                        <div class="academic-item"><span>ကျောင်းဝင်မှတ်ပုံတင်:</span> <strong>${currentUser.batchId || "-"}</strong></div>
+                        <div class="academic-item"><span>Batch:</span> <strong>${currentUser.batchId || "-"}</strong></div>
                         <div class="academic-item"><span>တက်ရောက်မှု:</span> <strong>${currentUser.attendance || "0%"}</strong></div>
                         <div class="academic-item"><span>Grade:</span> <strong style="color:green">${currentUser.overallGrade || "-"}</strong></div>
                         <div class="academic-item"><span>စာမေးပွဲရက်:</span> <strong style="color:red">${currentUser.examDate || "-"}</strong></div>
@@ -1226,16 +1235,13 @@ function renderProfile() {
                         <div class="academic-item"><span>Completed Modules:</span> <strong>${completedCount}</strong></div>
                     </div>
                     
-                    <div style="margin-top:20px; display:flex; gap:10px;">
+                    <div style="margin-top:20px; display:flex; gap:10px; flex-wrap:wrap;">
                         <button class="menu-btn" onclick="viewTranscript('${currentUser.uid}')">
-                            <i class="fas fa-file-invoice"></i> View Transcript
+                            <i class="fas fa-file-invoice"></i> Transcript
                         </button>
-
                         <button class="menu-btn" style="background:#0ea5e9; color:white;" onclick="renderMySubmissions()">
-                            <i class="fas fa-folder-open"></i> My Submissions
+                            <i class="fas fa-folder-open"></i> Submissions
                         </button>
-                        
-                        <!-- အောင်မြင်မှသာ ရွှေရောင်ခလုတ် ပွင့်မည် -->
                         <button class="menu-btn ${isEligible ? 'cert-gold' : 'disabled-btn'}" 
                                 onclick="${isEligible ? `viewCertificate('${currentUser.uid}')` : "alert('သင်တန်းမပြီးသေးပါ သို့မဟုတ် ရမှတ်မလုံလောက်ပါ')"}">
                             <i class="fas fa-award"></i> Certificate
@@ -1370,57 +1376,59 @@ function renderAuthFooter() {
 
 // Firebase Auth Login Function
 async function handleLogin() {
-  const email = document.getElementById("login-email").value;
-  const password = document.getElementById("login-password").value;
+    const email = document.getElementById("login-email").value.trim();
+    const password = document.getElementById("login-password").value.trim();
 
-  if (!email || !password) {
-    alert("Email နှင့် Password ဖြည့်စွက်ပေးပါ။");
-    return;
-  }
+    if (!email || !password) return alert("Email နှင့် Password ဖြည့်စွက်ပေးပါ။");
 
-  try {
-    // ၁။ Firebase Auth ဖြင့် Login ဝင်ခြင်း
-    const userCredential = await auth.signInWithEmailAndPassword(email, password);
-    const user = userCredential.user;
+    try {
+        const userCredential = await auth.signInWithEmailAndPassword(email, password);
+        const user = userCredential.user;
 
-    // ၂။ Firestore ထဲက User Document ကို အကုန်ဆွဲယူခြင်း
-    const userDoc = await db.collection("users").doc(user.uid).get();
+        const userDoc = await db.collection("users").doc(user.uid).get();
 
-    if (userDoc.exists) {
-      const userData = userDoc.data();
+        if (userDoc.exists) {
+            const userData = userDoc.data();
 
-      // ၃။ 🔥 အဓိကပြင်ဆင်ချက်: Cloud ကလာတဲ့ Data အကုန်လုံးကို currentUser ထဲ ထည့်ပေါင်းမည်
-      // ၎င်းတွင် completedLessons, quizAttempts, grades, social links အားလုံး ပါဝင်သွားမည်
-      currentUser = {
-        ...currentUser,   // လက်ရှိ local ထဲက default values များ
-        ...userData,      // Cloud (Firebase) မှ လာသော values များ (အပေါ်ကဟာကို overwrite လုပ်မည်)
-        uid: user.uid,
-        isLoggedIn: true,
-        email: email
-      };
+            // Cloud ကလာတဲ့ Data အကုန်လုံးကို ပေါင်းစပ်မည်
+            currentUser = {
+                ...currentUser,   
+                ...userData,      
+                uid: user.uid,
+                isLoggedIn: true,
+                email: email
+            };
 
-      // ၄။ LocalStorage တွင် အသစ်ပြန်သိမ်းမည်
-      localStorage.setItem("currentUser", JSON.stringify(currentUser));
+            // ၁။ LocalStorage တွင် အရင်သိမ်းမည်
+            localStorage.setItem("currentUser", JSON.stringify(currentUser));
 
-      // ၅။ UI ပြောင်းလဲခြင်း
-      document.getElementById("login-page").style.display = "none";
-      document.getElementById("app-wrapper").style.display = "flex";
+            // ၂။ UI ကို အရင်ပြောင်းမည်
+            document.getElementById("login-page").style.display = "none";
+            document.getElementById("app-wrapper").style.display = "flex";
 
-      // ၆။ အရေးကြီးသော Settings များကို Cloud မှ ပြန်ဖတ်ခိုင်းမည်
-      syncLMSSettings();   // ကြေညာချက်နှင့် ဆရာ့နာမည်များအတွက်
-      startLiveCountdown(); // Zoom အချိန်အတွက်
+            // ၃။ သင်တန်းအခြေအနေအလိုက် လမ်းကြောင်းခွဲမည်
+            if (currentUser.isPaid || currentUser.role === 'Teacher') {
+                showSection("dashboard");
+                alert("မင်္ဂလာပါ " + currentUser.name);
+            } else {
+                renderPaymentPage();
+                document.getElementById('page-title').innerText = "သင်တန်းအပ်နှံရန်";
+            }
 
-      // ၇။ Dashboard ပြသမည်
-      showSection("dashboard");
-      
-      alert("မင်္ဂလာပါ " + currentUser.role + " " + currentUser.name);
-    } else {
-      alert("Database ထဲတွင် အချက်အလက် ရှာမတွေ့ပါ။ Admin ကို ဆက်သွယ်ပါ။");
+            // ၄။ Cloud Settings များကို Sync လုပ်မည်
+            syncLMSSettings();   
+            startLiveCountdown();
+
+            // ၅။ 🔥 Page ကို Reload လုပ်ချင်တယ်ဆိုရင် အားလုံးပြီးမှ လုပ်ရပါမယ် 
+            // (သို့မဟုတ်) Reload မလုပ်ဘဲ အပေါ်က UI ပြောင်းတဲ့အတိုင်းပဲ ထားတာက ပို smooth ဖြစ်ပါတယ်
+            // location.reload(); 
+
+        } else {
+            alert("Database ထဲတွင် အချက်အလက် ရှာမတွေ့ပါ။ Admin ကို ဆက်သွယ်ပါ။");
+        }
+    } catch (error) {
+        alert("Login မှားယွင်းနေပါသည်: " + error.message);
     }
-  } catch (error) {
-    console.error("Login Error:", error);
-    alert("Login မှားယွင်းနေပါသည်: " + error.message);
-  }
 }
 
 async function handleLogout() {
@@ -1740,19 +1748,45 @@ function viewCertificate(uid, isAdminPreview = false) {
 // ==========================================
 
 window.onload = () => {
+    // ၁။ အခြေခံ Sync လုပ်ငန်းစဉ်များ
     syncLMSSettings();
     syncZoomConfig();
-    const yearEl = document.getElementById('current-year'); if(yearEl) yearEl.innerText = new Date().getFullYear();
+    initNotifications();
+    startLiveCountdown();
+
+    // ၂။ Footer နှင့် Dark Mode
+    const yearEl = document.getElementById('current-year'); 
+    if(yearEl) yearEl.innerText = new Date().getFullYear();
     if (localStorage.getItem('dark-mode') === 'true') document.body.classList.add('dark-theme');
 
+    // ၃။ 🔥 အဓိကပြင်ဆင်လိုက်သော Auth Logic
     if (currentUser.isLoggedIn) {
+        // Login ဝင်ထားလျှင် App ကို ပြမည်
         document.getElementById('login-page').style.display = 'none';
         document.getElementById('app-wrapper').style.display = 'flex';
-        showSection('dashboard');
-        initNotifications();
-        startLiveCountdown();
+
+        // ပိုက်ဆံမသွင်းရသေးသော ကျောင်းသားဖြစ်လျှင် Menu များကို Lock လုပ်မည်
+        if (!currentUser.isPaid && currentUser.role !== 'Teacher') {
+            const links = document.querySelectorAll('.nav-links a');
+            links.forEach(link => {
+                const text = link.innerText.toLowerCase();
+                // သင်ခန်းစာ၊ စာတို နှင့် resources တို့ကို lock ချမည်
+                if (text.includes('သင်ခန်းစာ') || text.includes('စာတို') || text.includes('resources')) {
+                    link.classList.add('nav-locked');
+                }
+            });
+            
+            // Payment Page သို့ ပို့မည်
+            renderPaymentPage();
+            document.getElementById('page-title').innerText = "သင်တန်းအပ်နှံရန်";
+        } else {
+            // ပိုက်ဆံသွင်းပြီးသူ သို့မဟုတ် ဆရာဖြစ်လျှင် Dashboard ကို ပုံမှန်ပြမည်
+            showSection('dashboard');
+        }
     } else {
+        // Login မဝင်ရသေးလျှင် Login Page သာ ပြမည်
         document.getElementById('login-page').style.display = 'flex';
+        document.getElementById('app-wrapper').style.display = 'none';
     }
 };
 
@@ -1818,6 +1852,10 @@ async function renderAdminPanel() {
 
                     <button class="menu-btn" style="background:#f59e0b" onclick="renderZoomEditor()">
                         <i class="fas fa-video"></i> Zoom
+                    </button>
+
+                    <button class="menu-btn" style="background:#10b981" onclick="renderPaymentRequests()">
+                        <i class="fas fa-receipt"></i> ပိုက်ဆံသွင်းထားသူများ
                     </button>
 
                     <button class="menu-btn" style="background:#4b5563; color:white;" onclick="renderLMSGuide()">
@@ -1898,8 +1936,70 @@ function renderLMSGuide() {
                 <button class="menu-btn" onclick="renderAdminPanel()"><i class="fas fa-arrow-left"></i> Back to Panel</button>
             </div>
             
-            <div class="guide-scroll-area" style="line-height:1.8; color:var(--text-main);">
-                <div class="academic-box">
+            <div class="guide-scroll-area" style="line-height:1.8; color:var(--text-main); max-height:75vh; overflow-y:auto; padding-right:15px;">
+
+                <!-- ၁။ ငွေပေးချေမှု အတည်ပြုခြင်း -->
+                <div class="academic-box" style="border-left-color: #10b981;">
+                    <h4 style="color:#059669;"><i class="fas fa-receipt"></i> ၁။ ပိုက်ဆံသွင်းထားသူများ (Payment Requests)</h4>
+                    <p>ကျောင်းသားသစ်များ သင်တန်းအပ်နှံမှုအား ဤနေရာတွင် အဓိက စစ်ဆေးရမည်။</p>
+                    <ul>
+                        <li>ကျောင်းသားတင်ထားသော <strong>KPay/Wave Screenshot</strong> ကို သေချာစွာ စစ်ဆေးပါ။</li>
+                        <li>အချက်အလက်မှန်ကန်ပါက <strong>Approve</strong> ကို နှိပ်ပါ။ ၎င်းသည် ကျောင်းသား၏ <code>isPaid</code> status ကို အလိုအလျောက် <code>true</code> ပြောင်းပေးပြီး သင်ခန်းစာအားလုံးကို ပွင့်သွားစေမည်။</li>
+                        <li>Approve လုပ်ပြီးနောက် ကျောင်းသားထံသို့ "သင်တန်းဝင်ခွင့်ရပြီ" ဟူသော <strong>Real-time Notification</strong> အလိုအလျောက် ရောက်ရှိမည်။</li>
+                    </ul>
+                </div>
+
+                <!-- ၂။ အိမ်စာနှင့် ပရောဂျက် စစ်ဆေးခြင်း -->
+                <div class="academic-box" style="border-left-color: #3b82f6; margin-top:20px;">
+                    <h4 style="color:#2563eb;"><i class="fas fa-file-signature"></i> ၂။ Review Submissions (စာစစ်ခြင်း)</h4>
+                    <p>ကျောင်းသားများ ပေးပို့ထားသော Assignment နှင့် Project များကို စစ်ဆေးသည့်နေရာ ဖြစ်သည်။</p>
+                    <ul>
+                        <li>ကျောင်းသား၏ ရေးသားချက် သို့မဟုတ် <strong>GitHub Link</strong> ကို ဖတ်ရှုစစ်ဆေးပါ။</li>
+                        <li>ပေးလိုသော အမှတ် (Score 0-100) ကို ရိုက်ထည့်ပြီး <strong>Teacher Feedback</strong> (မှတ်ချက်) ပေးနိုင်ပါသည်။</li>
+                        <li>Submit Grade နှိပ်လိုက်သည်နှင့် ကျောင်းသား၏ <strong>Transcript</strong> တွင် အမှတ်စာရင်း အလိုအလျောက် ပေါင်းထည့်ပြီးသား ဖြစ်သွားမည်။</li>
+                    </ul>
+                </div>
+
+                <!-- ၃။ စနစ်တစ်ခုလုံး၏ Settings များ -->
+                <div class="academic-box" style="border-left-color: #f59e0b; margin-top:20px;">
+                    <h4 style="color:#d97706;"><i class="fas fa-cog"></i> ၃။ System Settings & Zoom (စနစ်ထိန်းချုပ်မှု)</h4>
+                    <p>LMS ၏ ပင်မအချက်အလက်များကို ကုဒ်ပြင်စရာမလိုဘဲ ဤနေရာတွင် ပြင်ဆင်နိုင်သည်။</p>
+                    <ul>
+                        <li><strong>Announcement:</strong> ကြေညာချက်စာသားကို ပြင်လိုက်သည်နှင့် ကျောင်းသားအားလုံး၏ အပေါ်ဘားတွင် ချက်ချင်း ပြောင်းလဲသွားမည်။</li>
+                        <li><strong>Zoom/Meet Link:</strong> Link ထည့်သွင်းထားမှသာ ကျောင်းသား Dashboard တွင် "Join via Zoom" ခလုတ် ပေါ်လာမည်။</li>
+                        <li><strong>Class Time:</strong> အချိန်သတ်မှတ်ပေးပါက Dashboard တွင် Countdown Timer (အချိန်ပြောင်းပြန်ရေတွက်မှု) အလိုအလျောက် ပေါ်နေမည်။</li>
+                        <li><strong>Course Title & Instructor:</strong> ဤနေရာတွင် ပြင်သမျှသည် <strong>Transcript နှင့် Certificate</strong> များတွင် တိုက်ရိုက် သက်ရောက်မည်။</li>
+                    </ul>
+                </div>
+
+                <!-- ၄။ သင်ခန်းစာအသစ်များ ထည့်သွင်းခြင်း -->
+                <div class="academic-box" style="border-left-color: #0ea5e9; margin-top:20px;">
+                    <h4 style="color:#0284c7;"><i class="fas fa-plus"></i> ၄။ Add Content (သင်ခန်းစာ တိုးချဲ့ခြင်း)</h4>
+                    <ul>
+                        <li>သင်ခန်းစာအသစ်များကို Database ထဲသို့ တိုက်ရိုက်ထည့်နိုင်သည်။</li>
+                        <li><strong>Category & Type:</strong> Foundations, Technical စသည်ဖြင့် ရွေးချယ်နိုင်သလို အသစ်လည်း ရိုက်ထည့်နိုင်သည်။</li>
+                        <li><strong>Path:</strong> <code>public/content/</code> ထဲတွင် သင်အရင် တည်ဆောက်ထားသော HTML/JSON ဖိုင်လမ်းကြောင်းကို တိကျစွာ ထည့်သွင်းပါ။</li>
+                    </ul>
+                </div>
+
+                <!-- ၅။ အောင်လက်မှတ်နှင့် အမှတ်စာရင်း -->
+                <div class="academic-box" style="border-left-color: #d4af37; margin-top:20px;">
+                    <h4 style="color:#b8860b;"><i class="fas fa-award"></i> ၅။ Transcript & Official Certificate</h4>
+                    <ul>
+                        <li><strong>Preview (မျက်လုံးပုံစံ):</strong> ကျောင်းသားအကောင့်သို့ ဝင်စရာမလိုဘဲ ၎င်း၏ Transcript နှင့် Certificate ထွက်လာမည့် ပုံစံကို Demo ကြည့်နိုင်သည်။</li>
+                        <li><strong>Gold Seal:</strong> GPA 75 ကျော်မှသာ ကျောင်းသား Profile တွင် အောင်လက်မှတ်ခလုတ် ပွင့်မည်ဖြစ်သော်လည်း ဆရာအနေဖြင့် အချိန်မရွေး Preview ကြည့်နိုင်သည်။</li>
+                    </ul>
+                </div>
+
+                <!-- အရေးကြီးသတိပေးချက် -->
+                <div class="error-msg" style="margin-top:30px; text-align:left; background:#fff1f2; border:1px solid #fda4af; color:#9f1239; padding:20px; border-radius:12px;">
+                    <h5 style="margin-bottom:10px;"><i class="fas fa-exclamation-triangle"></i> Maintenance Checklist (သတိပြုရန်)</h5>
+                    <p>၁။ <strong>Case Sensitivity:</strong> Folder အမည်များနှင့် File အမည်များကို အမြဲတမ်း <strong>စာလုံးအသေး (lowercase)</strong> သာ သုံးပါ။</p>
+                    <p>၂။ <strong>Real-time Messaging:</strong> Chat သို့မဟုတ် Comment မပေါ်ပါက Firebase Console တွင် <strong>Indexes</strong> များ 'Enabled' ဖြစ်မဖြစ် စစ်ဆေးပါ။</p>
+                    <p>၃။ <strong>Storage Limit:</strong> ကျောင်းသားတင်သော Screenshot ပုံများကို 2MB ထက် မကျော်စေရန် စနစ်မှ ကန့်သတ်ထားပါသည်။</p>
+                </div>
+
+                <div class="academic-box style="border-left-color: #10b981;">
                     <h4 style="color:var(--primary)"><i class="fas fa-info-circle"></i> ၁။ စနစ်၏ တည်ဆောက်ပုံ</h4>
                     <p>သင်ရိုးမာတိကာများကို <code>js/data.js</code> တွင် စီမံရမည်ဖြစ်ပြီး၊ သင်ခန်းစာဖိုင်များကို <code>public/content/</code> folder အောက်တွင် ခွဲခြားသိမ်းဆည်းရမည်။</p>
                 </div>
@@ -2952,17 +3052,27 @@ async function confirmGrade(docId, studentId, lessonTitle) {
 // ကျောင်းသားကိုယ်တိုင် တင်ထားသမျှ Assignment/Project စာရင်းနှင့် အမှတ်ကိုကြည့်ရန်
 async function renderMySubmissions() {
     const body = document.getElementById('dynamic-body');
-    body.innerHTML = `<h3><i class="fas fa-file-upload"></i> ကျွန်ုပ်၏ ပေးပို့မှုများ</h3><div class="loader">Loading...</div>`;
+    if (!currentUser.uid) return alert("ကျေးဇူးပြု၍ အရင် Login ဝင်ပါ။");
+
+    body.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h3><i class="fas fa-file-upload"></i> ကျွန်ုပ်၏ ပေးပို့မှုများ</h3>
+            <button class="menu-btn" onclick="showSection('profile')"><i class="fas fa-arrow-left"></i> Back</button>
+        </div>
+        <div id="sub-loading" class="loader">Loading...</div>
+    `;
 
     try {
-        // Query စစ်ထုတ်ခြင်း
         const snap = await db.collection('submissions')
                              .where('studentId', '==', currentUser.uid)
                              .orderBy('timestamp', 'desc')
                              .get();
 
+        const loadingDiv = document.getElementById('sub-loading');
+        if (loadingDiv) loadingDiv.remove();
+
         if (snap.empty) {
-            body.innerHTML = `<h3>ကျွန်ုပ်၏ ပေးပို့မှုများ</h3><div class="content-card">တင်ထားသော Assignment မရှိသေးပါ။</div>`;
+            body.innerHTML += `<div class="content-card">တင်ထားသော Assignment မရှိသေးပါ။</div>`;
             return;
         }
 
@@ -2970,15 +3080,16 @@ async function renderMySubmissions() {
         snap.forEach(doc => {
             const s = doc.data();
             const statusClass = s.status === 'graded' ? 'text-success' : 'text-warning';
+            const dateStr = s.timestamp ? s.timestamp.toDate().toLocaleDateString() : 'N/A';
             
             html += `
                 <div class="content-card animate-up">
                     <div style="display:flex; justify-content:space-between; align-items:start;">
-                        <span class="badge-type" style="background:#e0f2fe; color:#0369a1;">${s.category}</span>
+                        <span class="badge-type" style="background:#e0f2fe; color:#0369a1;">${s.category || 'General'}</span>
                         <strong class="${statusClass}" style="font-size:0.8rem;">${s.status.toUpperCase()}</strong>
                     </div>
                     <h4 style="margin:10px 0;">${s.lessonTitle}</h4>
-                    <p style="font-size:0.8rem; color:var(--text-muted);">တင်သည့်ရက်: ${s.timestamp ? s.timestamp.toDate().toLocaleDateString() : 'N/A'}</p>
+                    <p style="font-size:0.8rem; color:var(--text-muted);">တင်သည့်ရက်: ${dateStr}</p>
                     <hr style="margin:10px 0; border:0; border-top:1px solid #eee;">
                     
                     ${s.status === 'graded' ? `
@@ -2988,17 +3099,37 @@ async function renderMySubmissions() {
                         </div>
                     ` : `<p style="color:#f59e0b; font-size:0.9rem;"><i class="fas fa-clock"></i> ဆရာမှ စစ်ဆေးနေဆဲဖြစ်ပါသည်။</p>`}
                     
-                    <button class="menu-btn" style="margin-top:15px; width:100%; font-size:0.85rem;" onclick="viewMySubmissionDetail('${doc.id}')">
-                        မူရင်းစာသား ပြန်ဖတ်ရန်
+                    <button class="save-btn" style="margin-top:15px; width:100%; font-size:0.85rem;" onclick="viewMySubmissionDetail('${doc.id}')">
+                        <i class="fas fa-search-plus"></i> မူရင်းစာသား ပြန်ဖတ်ရန်
                     </button>
                 </div>`;
         });
-        body.innerHTML = html + '</div>';
+        body.innerHTML += html + '</div>';
     } catch (e) {
         console.error("My Submissions Error:", e);
-        // 🔥 အရေးကြီးသည်- အကယ်၍ Index လိုအပ်နေလျှင် Console ထဲက Link ကို နှိပ်ရပါမည်
-        body.innerHTML = `<div class="error-msg">Error: ${e.message} <br> (Browser Console ကိုစစ်ဆေးပြီး Index Link ပါက နှိပ်ပေးပါ)</div>`;
+        body.innerHTML += `<div class="error-msg">Error: ${e.message} <br> (Browser Console မှာ Index Link ပါက နှိပ်ပေးပါ)</div>`;
     }
+}
+
+// ခလုတ်နှိပ်ရင် အသေးစိတ်စာသား ပြန်ပြမည့် Function
+async function viewMySubmissionDetail(docId) {
+    const doc = await db.collection('submissions').doc(docId).get();
+    const s = doc.data();
+    const body = document.getElementById('dynamic-body');
+
+    body.innerHTML = `
+        <div class="content-card animate-up">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3>Submission Detail</h3>
+                <button class="menu-btn" onclick="renderMySubmissions()">Back</button>
+            </div>
+            <hr><br>
+            <p><strong>သင်ခန်းစာ:</strong> ${s.lessonTitle}</p>
+            <div class="academic-box" style="white-space: pre-wrap; background:#f8fafc;">
+                ${s.content || `GitHub Link: <a href="${s.githubLink}" target="_blank">${s.githubLink}</a>`}
+            </div>
+        </div>
+    `;
 }
 
 // --- ကျောင်းသားကိုယ်တိုင် တင်ထားသော Assignment အသေးစိတ်ကို ပြန်ဖတ်ရန် ---
@@ -3046,6 +3177,213 @@ async function viewMySubmissionDetail(docId) {
         console.error("Error loading submission detail:", error);
         alert("ဖတ်မရပါ- " + error.message);
         renderMySubmissions();
+    }
+}
+
+function renderPaymentPage() {
+    const body = document.getElementById('dynamic-body');
+    body.innerHTML = `
+        <div class="content-card animate-up" style="max-width: 700px; margin: auto;">
+            <h2 style="text-align:center; color:var(--primary);">သင်တန်းအပ်နှံရန်</h2>
+            <p style="text-align:center;">အောက်ပါ နည်းလမ်းများထဲမှ အဆင်ပြေရာဖြင့် ပေးချေနိုင်ပါသည်။</p>
+            <br>
+            
+            <div class="dashboard-grid">
+                <!-- Mobile Banking -->
+                <div class="content-card" style="border: 1px solid #e2e8f0;">
+                    <h4><i class="fas fa-mobile-alt"></i> Mobile Banking</h4>
+                    <p style="font-size:0.85rem;">Kpay / WavePay<br><strong>09 123 456 789</strong></p>
+                </div>
+                
+                <!-- Credit / Debit Card -->
+                <div class="content-card" style="border: 1px solid #e2e8f0;">
+                    <h4><i class="fas fa-credit-card"></i> Credit Card</h4>
+                    <p style="font-size:0.85rem;">Visa, Master, JCB<br>Online Payment</p>
+                </div>
+            </div>
+
+            <div class="academic-box" style="margin-top:20px;">
+                <label><strong>၁။ ငွေလွှဲပြီးကြောင်း Screenshot တင်ပါ (တိုက်ရိုက် Upload တင်ရန်)</strong></label>
+                <input type="file" id="payment-file" class="edit-input" accept="image/*" style="padding:10px;">
+                
+                <label style="margin-top:15px; display:block;"><strong>၂။ သို့မဟုတ် ပေးချေမှုလင့်ခ်ကို အသုံးပြုပါ</strong></label>
+                <button class="save-btn" style="background:#000; width:100%;" onclick="handleCardPayment()">
+                    <i class="fas fa-credit-card"></i> Pay with Card (Visa/Master/JCB)
+                </button>
+            </div>
+
+            <button class="save-btn" id="upload-btn" style="width: 100%; margin-top: 25px; height:50px; font-size:1.1rem;" onclick="handlePaymentUpload()">
+                <i class="fas fa-cloud-upload-alt"></i> စာရင်းသွင်းမှု အတည်ပြုခိုင်းမည်
+            </button>
+        </div>
+    `;
+}
+
+function handleCardPayment() {
+    // 🔥 ဒီနေရာမှာ သင့်ရဲ့ တကယ့် Payment Link (ဥပမာ Stripe သို့မဟုတ် တခြား Checkout link) ကို ထည့်ရပါမယ်
+    const paymentLink = "https://buy.stripe.com/test_abc123"; // နမူနာ Link
+    
+    if (paymentLink === "https://buy.stripe.com/test_abc123") {
+        alert("Card Payment စနစ်ကို ချိတ်ဆက်နေဆဲဖြစ်ပါသည်။ လက်ရှိတွင် KPay ဖြင့်သာ အရင်ပေးချေပေးပါရန်။");
+    } else {
+        window.open(paymentLink, '_blank');
+    }
+}
+
+
+async function submitPaymentRequest() {
+    const url = document.getElementById('payment-screenshot-url').value;
+    if (!url) return alert("Screenshot Link ထည့်ပေးပါ။");
+
+    try {
+        await db.collection('payments').add({
+            studentId: currentUser.uid,
+            studentName: currentUser.name,
+            screenshot: url,
+            status: "pending",
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        alert("စာရင်းသွင်းမှု တောင်းဆိုချက် ပို့ပြီးပါပြီ။ ဆရာမှ စစ်ဆေးပြီး ၁ နာရီအတွင်း သင်တန်း ဖွင့်လှစ်ပေးပါမည်။");
+        location.reload(); // Status ကို ပြန်စစ်ရန် reload လုပ်မည်
+    } catch (e) { alert(e.message); }
+}
+
+async function renderPaymentRequests() {
+    const body = document.getElementById('dynamic-body');
+    body.innerHTML = `<h3>သင်တန်းကြေး စစ်ဆေးရန်စာရင်း</h3><div class="loader">Loading...</div>`;
+
+    const snap = await db.collection('payments').where('status', '==', 'pending').get();
+    let html = '<div class="dashboard-grid">';
+    
+    if (snap.empty) {
+        body.innerHTML = `<h3>စစ်ဆေးရန် မရှိပါ။</h3><button class="menu-btn" onclick="renderAdminPanel()">Back</button>`;
+        return;
+    }
+
+    snap.forEach(doc => {
+        const p = doc.data();
+        html += `
+            <div class="content-card animate-up">
+                <h5>${p.studentName}</h5>
+                <img src="${p.screenshot}" style="width:100%; border-radius:10px; margin:10px 0; cursor:pointer;" onclick="window.open('${p.screenshot}')">
+                <div style="margin-top:15px; display:flex; gap:10px;">
+                    <button class="save-btn" onclick="approveStudent('${doc.id}', '${p.studentId}')">Approve</button>
+                    <button class="menu-btn" style="background:red" onclick="alert('Rejected')">Reject</button>
+                </div>
+            </div>
+        `;
+    });
+    body.innerHTML = html + '</div><br><button class="menu-btn" onclick="renderAdminPanel()">Back</button>';
+}
+
+async function approveStudent(payDocId, studentUid) {
+    try {
+        // ၁။ ကျောင်းသားကို သင်တန်းဝင်ခွင့်ပေးမည်
+        await db.collection('users').doc(studentUid).update({ isPaid: true });
+        
+        // ၂။ Payment status ကို အောင်မြင်ကြောင်း ပြောင်းမည်
+        await db.collection('payments').doc(payDocId).update({ status: 'approved' });
+
+        alert("ကျောင်းသားအား အောင်မြင်စွာ လက်ခံလိုက်ပါပြီ။ ကျောင်းသား Dashboard ပွင့်သွားပါပြီ။");
+        renderPaymentRequests();
+    } catch (e) { alert(e.message); }
+}
+
+async function handlePaymentUpload() {
+    const fileInput = document.getElementById('payment-file');
+    const btn = document.getElementById('upload-btn');
+    
+    if (!fileInput || fileInput.files.length === 0) return alert("ငွေလွှဲထားသော ပုံကို အရင်ရွေးချယ်ပေးပါ။");
+
+    const file = fileInput.files[0];
+    // ၂ မီဂါဘိုက် (2 * 1024 * 1024 bytes) ထက် ကြီးမကြီး စစ်ဆေးခြင်း
+    if (file.size > 2 * 1024 * 1024) {
+        return alert("ပုံဆိုဒ် အရမ်းကြီးနေပါတယ်။ ၂ မီဂါဘိုက် (2MB) အောက်ပဲ တင်ပေးပါ။");
+    }
+
+    try {
+        btn.disabled = true;
+        btn.innerText = "Uploading... Please wait";
+
+        // ၁။ ပုံကို Firebase Storage သို့ တင်ခြင်း
+        const storageRef = storage.ref('payments/' + currentUser.uid + '_' + Date.now());
+        const snapshot = await storageRef.put(file);
+        const downloadURL = await snapshot.ref.getDownloadURL();
+
+        // ၂။ Firestore (Database) ထဲတွင် မှတ်တမ်းသွင်းခြင်း
+        await db.collection('payments').add({
+            studentId: currentUser.uid,
+            studentName: currentUser.name,
+            screenshot: downloadURL, // တကယ့်ပုံရဲ့ URL ဖြစ်သွားပါပြီ
+            status: "pending",
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        alert("အောင်မြင်စွာ တင်ပြီးပါပြီ။ ဆရာမှ စစ်ဆေးပြီး ၁ နာရီအတွင်း သင်တန်း ဖွင့်လှစ်ပေးပါမည်။");
+        location.reload();
+
+    } catch (e) {
+        console.error("Upload Error:", e);
+        alert("Upload Error: " + e.message);
+        btn.disabled = false;
+        btn.innerText = "ပြန်လည်ကြိုးစားမည်";
+    }
+}
+
+// --- ၁။ Form အပြန်အလှန် ပြောင်းပေးမည့် function ---
+function toggleAuthMode(mode) {
+    const loginArea = document.getElementById('login-form-area');
+    const signupArea = document.getElementById('signup-form-area');
+    if (mode === 'signup') {
+        loginArea.style.display = 'none';
+        signupArea.style.display = 'block';
+    } else {
+        loginArea.style.display = 'block';
+        signupArea.style.display = 'none';
+    }
+}
+
+// --- ၂။ Sign Up (အကောင့်အသစ်ဖွင့်ခြင်း) Logic ---
+async function handleSignUp() {
+    const name = document.getElementById('signup-name').value.trim();
+    const email = document.getElementById('signup-email').value.trim();
+    const password = document.getElementById('signup-password').value.trim();
+
+    if (!name || !email || !password) return alert("အချက်အလက်အားလုံး ဖြည့်စွက်ပေးပါ။");
+    if (password.length < 6) return alert("Password သည် အနည်းဆုံး ၆ လုံး ရှိရပါမည်။");
+
+    try {
+        // 🔥 အရင်က ဒီနေရာမှာ ကုဒ်နှစ်ကြောင်း ထပ်နေပါတယ်၊ အခု တစ်ကြောင်းတည်းပဲ ထားလိုက်ပါပြီ
+        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+        const user = userCredential.user;
+
+        // Firestore Database ထဲတွင် ကျောင်းသား Profile အစစ်ကို သိမ်းခြင်း
+        await db.collection('users').doc(user.uid).set({
+            uid: user.uid,
+            name: name,
+            email: email,
+            role: "Student",   
+            isPaid: false,     
+            photo: "https://placehold.co/150x150/003087/white?text=" + name.charAt(0),
+            skills: [],
+            notes: "",
+            completedLessons: [],
+            quizAttempts: {},
+            grades: {},
+            batchId: "Batch-Waiting"
+        });
+
+        alert("အကောင့်ဖွင့်ခြင်း အောင်မြင်ပါသည်။ သင်တန်းကြေးပေးသွင်းရန် အဆင့်သို့ ဆက်သွားပါမည်။");
+        
+        // LocalStorage ကို Update လုပ်ပြီး Page ကို Refresh လုပ်မည်
+        currentUser = { uid: user.uid, name: name, role: "Student", isPaid: false, isLoggedIn: true };
+        localStorage.setItem("currentUser", JSON.stringify(currentUser));
+        
+        location.reload(); 
+
+    } catch (error) {
+        console.error("SignUp Error:", error);
+        alert("Error: " + error.message);
     }
 }
 

@@ -1576,3 +1576,31 @@ body, html {
 }
 .gold-seal::before { left: 20px; transform: rotate(25deg); }
 .gold-seal::after { right: 20px; transform: rotate(-25deg); }
+
+.auth-toggle {
+    margin-top: 20px;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+.auth-toggle a {
+    color: var(--primary);
+    font-weight: bold;
+    text-decoration: none;
+}
+.auth-toggle a:hover {
+    text-decoration: underline;
+}
+
+.nav-locked {
+    opacity: 0.6;
+    position: relative;
+}
+.nav-locked::after {
+    content: "\f023"; /* FontAwesome Lock icon */
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    position: absolute;
+    right: 20px;
+    font-size: 0.8rem;
+    color: #f87171;
+}
