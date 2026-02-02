@@ -19,10 +19,12 @@ let currentUser = JSON.parse(localStorage.getItem('currentUser')) || {
     uid: "", 
     name: "", 
     role: "Student",
+    enrolledCourses: [], // 🔥 ဥပမာ - ["web", "python"] (ပိုက်ဆံပေးပြီးသော ID များ)
+    selectedCourseId: "", // 🔥 လက်ရှိ ဝင်ရောက်ကြည့်ရှုနေသော သင်တန်း ID
     photo: "https://placehold.co/150x150/003087/white?text=User",
     skills: [], 
     notes: "", 
-    isPaid: true,
+    isPaid: false, // 🔥 အစပိုင်းမှာ false ဖြစ်ရပါမည်
     github: "", 
     portfolio: "", 
     linkedin: "", facebook: "", youtube: "", tiktok: "", instagram: "", email: "",
@@ -117,45 +119,42 @@ function toggleNav() {
   overlay.classList.toggle("show");
 }
 
+
 function showSection(section, filterCat = null) {
     const title = document.getElementById('page-title');
     const body = document.getElementById('dynamic-body');
     const sidebar = document.getElementById('sidebar');
 
-    if (!title || !body) {
-        console.warn("Title or Body element not found!");
+    if (!title || !body) return;
+
+    // ၁။ 🔥 ပိုက်ဆံမသွင်းရသေးသူ (သို့မဟုတ်) သင်တန်းမရှိသေးသူများကို တားဆီးရန် Logic
+    const restrictedSections = ['courses', 'messages', 'resources', 'profile'];
+    
+    // ကျောင်းသားဖြစ်ပြီး ဘယ်သင်တန်းမှ မဝယ်ရသေးရင် (enrolledCourses အလွတ်ဖြစ်နေရင်) တားပါမယ်
+    const hasNoCourse = !currentUser.enrolledCourses || currentUser.enrolledCourses.length === 0;
+
+    if (restrictedSections.includes(section) && currentUser.role !== 'Teacher' && hasNoCourse) {
+        alert("⚠️ ဤကဏ္ဍများကို အသုံးပြုရန် သင်တန်းအနည်းဆုံးတစ်ခု အရင်အပ်နှံရန် လိုအပ်ပါသည်။");
+        renderCourseSelection(); // သင်တန်းရွေးချယ်မှုစာမျက်နှာသို့ ပြန်ပို့မည်
         return; 
     }
 
-    // ၁။ 🔥 ပိုက်ဆံမသွင်းရသေးသူများအတွက် Gatekeeper စစ်ဆေးခြင်း
-    const restrictedSections = ['courses', 'messages', 'resources'];
-    if (restrictedSections.includes(section) && !currentUser.isPaid && currentUser.role !== 'Teacher') {
-        alert("⚠️ ဤကဏ္ဍကို လေ့လာရန် သင်တန်းကြေး အရင်ပေးသွင်းရန် လိုအပ်ပါသည်။");
-        renderPaymentPage();
-        document.getElementById('page-title').innerText = "သင်တန်းအပ်နှံရန်";
-        return; 
-    }
+    // Sidebar ပိတ်မည်
+    if (sidebar && sidebar.classList.contains('open')) toggleNav();
 
-    // ၂။ 🔥 Sidebar ကို Menu နှိပ်လိုက်တာနဲ့ အလိုအလျောက် ပိတ်စေခြင်း (Mobile ရော Desktop ပါ)
-    if (sidebar && sidebar.classList.contains('open')) {
-        toggleNav(); // Sidebar ပြန်ပိတ်သွားမည်
-    }
-
-    // ၃။ Section Rendering
+    // Section Switching logic များ (Dashboard, Courses, Profile စသည် - အရင်အတိုင်းထားပါ)
     if (section === 'dashboard') {
         title.innerText = "Dashboard";
         renderDashboard();
     } else if (section === 'courses') {
-        title.innerText = filterCat ? `${filterCat} သင်ခန်းစာများ` : "သင်ခန်းစာများအားလုံး";
         renderCourseTree(filterCat);
+    } else if (section === 'courses_all') {
+        renderCourseSelection();
     } else if (section === 'messages') {
-        title.innerText = "Messages";
         showMessages();
     } else if (section === 'profile') {
-        title.innerText = "My Profile";
         renderProfile();
     } else if (section === 'resources') {
-        title.innerText = "Resources";
         renderResources();
     } else if (section === 'about') {
         renderAbout();
@@ -165,6 +164,44 @@ function showSection(section, filterCat = null) {
     
     renderAuthFooter();
 }
+// function showSection(section, filterCat = null) {
+
+//     // 🔥 အရေးကြီးသည် - 'သင်တန်းများအားလုံး' ခလုတ်အတွက်
+//     if (section === 'courses_all') {
+//         title.innerText = "သင်တန်းများ ရွေးချယ်ရန်";
+//         renderCourseSelection();
+//         return;
+//     }
+
+//     // ၁။ Gatekeeper စစ်ဆေးခြင်း (သင်တန်းမရွေးရသေးဘဲ Dashboard/Lessons ဝင်ခိုင်းခြင်းကို တားဆီးရန်)
+//     if ((section === 'dashboard' || section === 'courses') && !currentUser.selectedCourseId && currentUser.role !== 'Teacher') {
+//         renderCourseSelection();
+//         return;
+//     }
+
+//     if (section === 'dashboard') {
+//         title.innerText = "Dashboard";
+//         renderDashboard();
+//     } else if (section === 'courses') {
+//         // 🔥 လက်ရှိရွေးထားတဲ့ သင်တန်းရှိမှ သင်ခန်းစာမာတိကာပြမည်
+//         if (currentUser.selectedCourseId) {
+//             title.innerText = filterCat ? `${filterCat} သင်ခန်းစာများ` : "သင်ခန်းစာများအားလုံး";
+//             renderCourseTree(filterCat);
+//         } else {
+//             renderCourseSelection();
+//         }
+//     } else if (section === 'messages') {
+//         title.innerText = "Messages";
+//         showMessages();
+//     } else if (section === 'profile') {
+//         title.innerText = "My Profile";
+//         renderProfile();
+//     } else if (section === 'resources') {
+//         renderResources();
+//     }
+    
+//     renderAuthFooter();
+// }
 
 function renderResources() {
     const body = document.getElementById('dynamic-body');
@@ -197,9 +234,16 @@ function renderDashboard() {
     const body = document.getElementById('dynamic-body');
     if (!body) return;
 
-    // ၁။ ပြီးစီးမှု ရာခိုင်နှုန်းတွက်ချက်သည့် Helper
+    // ၁။ လက်ရှိရွေးထားတဲ့ သင်တန်းရှိမရှိ စစ်ဆေးခြင်း
+    const currentCourse = allCourses[currentUser.selectedCourseId];
+    if (!currentCourse) {
+        renderCourseSelection(); // သင်တန်းမရွေးရသေးရင် ရွေးခိုင်းမည်
+        return;
+    }
+
+    // ၂။ ပြီးစီးမှု ရာခိုင်နှုန်းတွက်ချက်သည့် Helper
     const getPercent = (catName) => {
-        const categoryData = courseData.find(c => c.category.toLowerCase() === catName.toLowerCase());
+        const categoryData = currentCourse.data.find(c => c.category.toLowerCase() === catName.toLowerCase());
         if (!categoryData) return 0;
         
         let totalLessons = 0;
@@ -213,13 +257,7 @@ function renderDashboard() {
         return Math.round((doneCount / totalLessons) * 100) || 0;
     };
 
-    // ၂။ လိုအပ်သော ဒေတာများကို variable ထဲ ကြိုထည့်ထားခြင်း
-    const fPercent = getPercent('Foundations');
-    const tPercent = getPercent('Technical');
-    const fsPercent = getPercent('Full-Stack');
-    const noteContent = currentUser.personalNote || ""; // 🔥 အခု ဒီမှာ ကြိုသတ်မှတ်လိုက်ပါပြီ
-
-    // ၃။ Live Class Card (Link ရှိမှ ပေါ်မည်)
+    // ၃။ Live Class Card (Link ရှိမှ တည်ဆောက်မည်)
     let liveClassHtml = "";
     if (currentZoomLink && currentZoomLink.trim() !== "") {
         liveClassHtml = `
@@ -234,41 +272,24 @@ function renderDashboard() {
         `;
     }
 
-    // ၄။ Dashboard HTML စတင်တည်ဆောက်ခြင်း
-    let dashboardHtml = `
-        ${liveClassHtml}
-
-        <div class="welcome-banner fade-in">
-            <h2>မင်္ဂလာပါ ${currentUser.name}! 👋</h2>
-            <p>ယနေ့ သင်ယူမှုခရီးစဉ်ကို ဆက်လက်လျှောက်လှမ်းလိုက်ပါ။</p>
-        </div>
-
-        <div class="dashboard-grid">
-            <div class="topic-card animate-up" onclick="showSection('courses', 'Foundations')">
-                <div class="card-icon"><i class="fas fa-cubes"></i></div>
-                <h3>Foundations</h3>
-                <div class="progress-container"><div class="progress-bar" style="width:${fPercent}%"></div></div>
-                <small>${fPercent}% Completed</small>
+    // ၄။ သင်တန်းထဲမှာ ရှိသမျှ Category Cards များကို Dynamic ထုတ်ယူခြင်း
+    let categoryCardsHtml = "";
+    currentCourse.data.forEach(cat => {
+        const percent = getPercent(cat.category);
+        categoryCardsHtml += `
+            <div class="topic-card animate-up" onclick="showSection('courses', '${cat.category}')">
+                <div class="card-icon"><i class="fas fa-layer-group"></i></div>
+                <h3>${cat.category}</h3>
+                <div class="progress-container"><div class="progress-bar" style="width:${percent}%"></div></div>
+                <small>${percent}% Completed</small>
             </div>
+        `;
+    });
 
-            <div class="topic-card animate-up" onclick="showSection('courses', 'Technical')">
-                <div class="card-icon"><i class="fas fa-code"></i></div>
-                <h3>Technical</h3>
-                <div class="progress-container"><div class="progress-bar" style="width:${tPercent}%"></div></div>
-                <small>${tPercent}% Completed</small>
-            </div>
-
-            <div class="topic-card animate-up" onclick="showSection('courses', 'Full-Stack')">
-                <div class="card-icon"><i class="fas fa-server"></i></div>
-                <h3>Full-Stack</h3>
-                <div class="progress-container"><div class="progress-bar" style="width:${fsPercent}%"></div></div>
-                <small>${fsPercent}% Completed</small>
-            </div>
-    `;
-
-    // ၅။ ဆရာဖြစ်မှသာ Leaderboard Card ကို ထည့်မည်
+    // ၅။ ဆရာဖြစ်လျှင် Leaderboard ထည့်မည်
+    let leaderboardHtml = "";
     if (currentUser.role === 'Teacher') {
-        dashboardHtml += `
+        leaderboardHtml = `
             <div class="content-card animate-up" style="grid-column: span 1;">
                 <h4><i class="fas fa-trophy" style="color:gold"></i> Top Students</h4>
                 <div id="leaderboard-content" style="margin-top:10px;">
@@ -278,18 +299,39 @@ function renderDashboard() {
         `;
     }
 
-    // ၆။ Personal Notebook Section (စာလုံးရေ ၅၀၀၀ ကန့်သတ်ချက်ပါဝင်သည်)
-    dashboardHtml += `
-        <div class="content-card animate-up" style="grid-column: 1 / -1;">
+    // ၆။ အားလုံးကို စုစည်းပြီး တစ်ခါတည်း Render လုပ်ခြင်း
+    body.innerHTML = `
+        ${liveClassHtml}
+
+        <div class="welcome-banner fade-in">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px;">
+                <div>
+                    <h2>မင်္ဂလာပါ ${currentUser.name}! 👋</h2>
+                    <p>လက်ရှိသင်တန်း- <strong>${currentCourse.title}</strong></p>
+                </div>
+                <button class="menu-btn" style="background:rgba(255,255,255,0.2); border:1px solid white;" onclick="renderCourseSelection()">
+                    <i class="fas fa-exchange-alt"></i> သင်တန်းပြောင်းရန်
+                </button>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            ${categoryCardsHtml}
+            ${leaderboardHtml}
+        </div>
+
+        <div class="content-card animate-up" style="margin-top:25px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                 <h4><i class="fas fa-sticky-note"></i> My Personal Notebook</h4>
-                <small id="char-counter" style="color:var(--text-main)">${noteContent.length} / 10000 characters</small>
+                <small id="char-counter" style="color:var(--text-main)">
+                    ${(currentUser.personalNote || "").length} / 10000 characters
+                </small>
             </div>
             <textarea id="personal-note" class="edit-input" rows="6" 
                       oninput="handleNoteInput()" 
-                      placeholder="ဒီနေ့ ဘာတွေသင်ယူခဲ့သလဲ? မှတ်သားထားပါ...">${noteContent}</textarea>
+                      placeholder="ဒီနေ့ ဘာတွေသင်ယူခဲ့သလဲ? မှတ်သားထားပါ...">${currentUser.personalNote || ""}</textarea>
             <div style="display:flex; justify-content:space-between; margin-top:5px;">
-                <small id="note-status" style="color:#22c55e">Auto-saved to cloud</small>
+                <small id="note-status" style="color:#22c55e">Cloud auto-sync active</small>
                 <button class="menu-btn" style="padding:4px 12px; font-size:0.75rem;" onclick="downloadNotes()">
                     <i class="fas fa-download"></i> Download as Text
                 </button>
@@ -297,10 +339,7 @@ function renderDashboard() {
         </div>
     `;
 
-    dashboardHtml += `</div>`; // Grid ပိတ်မည်
-    body.innerHTML = dashboardHtml;
-
-    // ၇။ Leaderboard ရှိလျှင် ဒေတာဆွဲထုတ်ခိုင်းမည်
+    // ၇။ Logic ပြီးမှ Leaderboard ဆွဲခိုင်းမည်
     if (currentUser.role === 'Teacher') fetchLeaderboard();
 }
 
@@ -1748,47 +1787,47 @@ function viewCertificate(uid, isAdminPreview = false) {
 // ==========================================
 
 window.onload = () => {
-    // ၁။ အခြေခံ Sync လုပ်ငန်းစဉ်များ
     syncLMSSettings();
     syncZoomConfig();
     initNotifications();
     startLiveCountdown();
 
-    // ၂။ Footer နှင့် Dark Mode
     const yearEl = document.getElementById('current-year'); 
     if(yearEl) yearEl.innerText = new Date().getFullYear();
     if (localStorage.getItem('dark-mode') === 'true') document.body.classList.add('dark-theme');
 
-    // ၃။ 🔥 အဓိကပြင်ဆင်လိုက်သော Auth Logic
     if (currentUser.isLoggedIn) {
-        // Login ဝင်ထားလျှင် App ကို ပြမည်
         document.getElementById('login-page').style.display = 'none';
         document.getElementById('app-wrapper').style.display = 'flex';
 
-        // ပိုက်ဆံမသွင်းရသေးသော ကျောင်းသားဖြစ်လျှင် Menu များကို Lock လုပ်မည်
-        if (!currentUser.isPaid && currentUser.role !== 'Teacher') {
-            const links = document.querySelectorAll('.nav-links a');
-            links.forEach(link => {
-                const text = link.innerText.toLowerCase();
-                // သင်ခန်းစာ၊ စာတို နှင့် resources တို့ကို lock ချမည်
-                if (text.includes('သင်ခန်းစာ') || text.includes('စာတို') || text.includes('resources')) {
-                    link.classList.add('nav-locked');
-                }
-            });
-            
-            // Payment Page သို့ ပို့မည်
-            renderPaymentPage();
-            document.getElementById('page-title').innerText = "သင်တန်းအပ်နှံရန်";
-        } else {
-            // ပိုက်ဆံသွင်းပြီးသူ သို့မဟုတ် ဆရာဖြစ်လျှင် Dashboard ကို ပုံမှန်ပြမည်
+        const hasNoCourse = !currentUser.enrolledCourses || currentUser.enrolledCourses.length === 0;
+
+        if (currentUser.role !== 'Teacher' && hasNoCourse) {
+            // 🔥 ကျောင်းသားက သင်တန်းမရှိသေးရင် Menu တွေကို Lock လုပ်မယ်
+            lockMenus();
+            renderCourseSelection();
+        } else if (currentUser.selectedCourseId) {
+            // သင်တန်းရှိပြီးသားဆိုရင် Dashboard သို့သွားမယ်
             showSection('dashboard');
+        } else {
+            renderCourseSelection();
         }
     } else {
-        // Login မဝင်ရသေးလျှင် Login Page သာ ပြမည်
         document.getElementById('login-page').style.display = 'flex';
-        document.getElementById('app-wrapper').style.display = 'none';
     }
 };
+
+// Menu များကို Lock ချသည့် Function
+function lockMenus() {
+    const links = document.querySelectorAll('.nav-links a');
+    links.forEach(link => {
+        const text = link.innerText.toLowerCase();
+        // သင်ခန်းစာ၊ စာတို နှင့် resources တို့ကို lock class ထည့်မည်
+        if (text.includes('သင်ခန်းစာ') || text.includes('စာတို') || text.includes('resources') || text.includes('profile')) {
+            link.classList.add('nav-locked');
+        }
+    });
+}
 
 // စာမျက်နှာ အောက်ကို ၃၀၀ pixel ရောက်မှ ခလုတ်ပေါ်စေရန်
 window.onscroll = function() {
@@ -3276,25 +3315,28 @@ async function renderPaymentRequests() {
     body.innerHTML = html + '</div><br><button class="menu-btn" onclick="renderAdminPanel()">Back</button>';
 }
 
-async function approveStudent(payDocId, studentUid) {
+async function approveStudent(payDocId, studentUid, courseId) {
     try {
-        // ၁။ ကျောင်းသားကို သင်တန်းဝင်ခွင့်ပေးမည်
-        await db.collection('users').doc(studentUid).update({ isPaid: true });
+        // ၁။ ကျောင်းသား၏ User document တွင် enrolledCourses စာရင်းထဲသို့ ထည့်ပေါင်းမည်
+        await db.collection('users').doc(studentUid).update({
+            enrolledCourses: firebase.firestore.FieldValue.arrayUnion(courseId)
+        });
         
-        // ၂။ Payment status ကို အောင်မြင်ကြောင်း ပြောင်းမည်
+        // ၂။ Payment status ကို Approved ပြောင်းမည်
         await db.collection('payments').doc(payDocId).update({ status: 'approved' });
 
-        alert("ကျောင်းသားအား အောင်မြင်စွာ လက်ခံလိုက်ပါပြီ။ ကျောင်းသား Dashboard ပွင့်သွားပါပြီ။");
-        renderPaymentRequests();
-    } catch (e) { alert(e.message); }
+        alert("သင်တန်းဝင်ခွင့် ပေးလိုက်ပါပြီ။ ကျောင်းသားက အလိုအလျောက် စတင်လေ့လာနိုင်ပါပြီ။");
+        renderPaymentRequests(); // List ကို Update လုပ်မည်
+    } catch (e) {
+        alert("Approve Error: " + e.message);
+    }
 }
 
-async function handlePaymentUpload() {
+async function handlePaymentUpload(courseId) {
     const fileInput = document.getElementById('payment-file');
     const btn = document.getElementById('upload-btn');
     
-    if (!fileInput || fileInput.files.length === 0) return alert("ငွေလွှဲထားသော ပုံကို အရင်ရွေးချယ်ပေးပါ။");
-
+    if (fileInput.files.length === 0) return alert("ငွေလွှဲပုံ အရင်ရွေးပါ။");
     const file = fileInput.files[0];
     // ၂ မီဂါဘိုက် (2 * 1024 * 1024 bytes) ထက် ကြီးမကြီး စစ်ဆေးခြင်း
     if (file.size > 2 * 1024 * 1024) {
@@ -3303,30 +3345,29 @@ async function handlePaymentUpload() {
 
     try {
         btn.disabled = true;
-        btn.innerText = "Uploading... Please wait";
+        btn.innerText = "Uploading...";
 
-        // ၁။ ပုံကို Firebase Storage သို့ တင်ခြင်း
-        const storageRef = storage.ref('payments/' + currentUser.uid + '_' + Date.now());
+        const storageRef = firebase.storage().ref(`payments/${courseId}_${currentUser.uid}_${Date.now()}`);
         const snapshot = await storageRef.put(file);
         const downloadURL = await snapshot.ref.getDownloadURL();
 
-        // ၂။ Firestore (Database) ထဲတွင် မှတ်တမ်းသွင်းခြင်း
+        // Database ထဲသို့ ပေးချေမှုမှတ်တမ်းပို့မည်
         await db.collection('payments').add({
             studentId: currentUser.uid,
             studentName: currentUser.name,
-            screenshot: downloadURL, // တကယ့်ပုံရဲ့ URL ဖြစ်သွားပါပြီ
+            courseId: courseId, // 🔥 ဘယ်သင်တန်းအတွက်လဲ
+            courseTitle: allCourses[courseId].title,
+            screenshot: downloadURL,
             status: "pending",
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
 
-        alert("အောင်မြင်စွာ တင်ပြီးပါပြီ။ ဆရာမှ စစ်ဆေးပြီး ၁ နာရီအတွင်း သင်တန်း ဖွင့်လှစ်ပေးပါမည်။");
-        location.reload();
+        alert("ပေးချေမှု တင်ပြပြီးပါပြီ။ ဆရာမှ အတည်ပြုပေးသည်နှင့် သင်တန်းတက်ရောက်နိုင်ပါမည်။");
+        renderCourseSelection(); // ရွေးချယ်မှု စာမျက်နှာသို့ ပြန်သွားမည်
 
     } catch (e) {
-        console.error("Upload Error:", e);
-        alert("Upload Error: " + e.message);
+        alert("Error: " + e.message);
         btn.disabled = false;
-        btn.innerText = "ပြန်လည်ကြိုးစားမည်";
     }
 }
 
@@ -3384,6 +3425,68 @@ async function handleSignUp() {
     } catch (error) {
         console.error("SignUp Error:", error);
         alert("Error: " + error.message);
+    }
+}
+
+function renderCourseSelection() {
+    const body = document.getElementById('dynamic-body');
+    body.innerHTML = `
+        <div class="welcome-banner fade-in">
+            <h2>မင်္ဂလာပါ ${currentUser.name}! 👋</h2>
+            <p>သင်တက်ရောက်လိုသော သင်တန်းကို ရွေးချယ်ပါ။</p>
+        </div>
+        <div class="dashboard-grid animate-up" id="course-grid"></div>
+    `;
+
+    const grid = document.getElementById('course-grid');
+    
+    for (let id in allCourses) {
+        const course = allCourses[id];
+        const isEnrolled = currentUser.enrolledCourses?.includes(id);
+        const isTeacher = currentUser.role === 'Teacher';
+
+        const card = document.createElement('div');
+        card.className = 'topic-card course-selection-card';
+        card.onclick = () => selectCourse(id);
+        
+        card.innerHTML = `
+            <div class="card-icon"><i class="fas ${course.icon || 'fa-graduation-cap'}"></i></div>
+            <h3 style="margin-bottom:10px;">${course.title}</h3>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:15px;">${course.description}</p>
+            
+            <ul style="text-align:left; font-size:0.8rem; margin-bottom:15px; padding-left:20px; color:var(--text-main);">
+                ${course.benefits.map(b => `<li>${b}</li>`).join('')}
+            </ul>
+
+            <div style="font-weight:bold; color:var(--primary); margin-bottom:15px;">${course.price}</div>
+
+            <div class="enroll-status">
+                ${isEnrolled || isTeacher
+                    ? `<span class="badge" style="background:#22c55e; color:white; padding:8px 20px; border-radius:20px; width:100%; display:block;">တက်ရောက်နေဆဲ <i class="fas fa-check"></i></span>` 
+                    : `<span class="badge" style="background:#f59e0b; color:white; padding:8px 20px; border-radius:20px; width:100%; display:block;"><i class="fas fa-shopping-cart"></i> Enroll Now</span>`}
+            </div>
+        `;
+        grid.appendChild(card);
+    }
+}
+
+function selectCourse(id) {
+    // ပိုက်ဆံပေးပြီးသား သို့မဟုတ် ဆရာဖြစ်လျှင် Dashboard ပေးဝင်မည်
+    if (currentUser.enrolledCourses?.includes(id) || currentUser.role === 'Teacher') {
+        currentUser.selectedCourseId = id;
+        
+        // 🔥 အရေးကြီးဆုံးအချက် - ရွေးလိုက်တဲ့သင်တန်းရဲ့ data ကို ပင်မ courseData ထဲ ထည့်လိုက်ခြင်း
+        courseData = allCourses[id].data; 
+        
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        
+        // Lock များကို ဖြုတ်မည်
+        document.querySelectorAll('.nav-links a').forEach(l => l.classList.remove('nav-locked'));
+        
+        alert(`${allCourses[id].title} သို့ ဝင်ရောက်နေပါပြီ...`);
+        showSection('dashboard');
+    } else {
+        renderPaymentPage(id);
     }
 }
 

@@ -153,6 +153,10 @@ body.dark-theme .msg-actions i {
     color: #f1f5f9;
 }
 
+body.dark-theme .course-selection-card {
+    background: var(--card-bg);
+}
+
 .quiz-image-container {
     margin: 15px 0;
     text-align: center;
@@ -1603,4 +1607,16 @@ body, html {
     right: 20px;
     font-size: 0.8rem;
     color: #f87171;
+}
+
+.course-selection-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+}
+
+.course-selection-card ul li {
+    margin-bottom: 5px;
+    list-style-type: '✔️ ';
 }
