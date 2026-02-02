@@ -12,3 +12,138 @@
        ├── technical/
        │    └── mod1/
        └── fullstack/
+
+/public/js/
+  ├── data-web.js       (Web သင်တန်းအတွက်)
+  ├── data-python.js    (Python သင်န်းအတွက်)
+  ├── data-design.js    (Design သင်တန်းအတွက်)
+  ├── data-main.js      (သင်တန်းအားလုံးကို စုစည်းမည့်ဖိုင်)
+  └── app.js            (Logic ဖိုင်)
+
+// js/data-web.js
+const webCourseData = {
+    id: "web",
+    title: "Full-Stack Web Development",
+    description: "Front-end မှ Back-end အထိ Website တစ်ခုလုံးကို စနစ်တကျ တည်ဆောက်နည်း။",
+    benefits: ["React & Node.js Mastery", "Portfolio Project ၅ ခု", "Job Placement Support"],
+    price: "50,000 MMK",
+    icon: "fa-code",
+    data: [
+        {
+            category: "Foundations",
+            modules: [
+                {
+                    moduleTitle: "Module 0: Getting Started",
+                    lessons: [
+                        { title: "0.1.1: Welcome", type: "article", path: "/content/web/foundations/mod0/0.1.1-welcome.html" },
+                        { title: "0.1.2: Quiz", type: "quiz", path: "/content/web/foundations/mod0/0.1.2-quiz.json" }
+                        // ... ကျန်တဲ့ သင်ခန်းစာများ ...
+                    ]
+                }
+            ]
+        }
+    ]
+};
+
+// data-python.js
+const pythonCourseData = {
+    // ...
+    data: [
+        {
+            category: "Foundations",
+            modules: [
+                {
+                    moduleTitle: "Module 1: Intro",
+                    lessons: [
+                        // 🔥 လမ်းကြောင်းထဲတွင် /python/ ကို ထည့်လိုက်ပါပြီ
+                        { title: "1.1.1: Why Python?", type: "article", path: "/content/python/foundations/mod1/intro.html" }
+                    ]
+                }
+            ]
+        }
+    ]
+};
+
+// data-design.js
+const designCourseData = {
+    id: "design", 
+    title: "UI/UX Design Fundamentals", 
+    description: "User Interface နှင့် User Experience အခြေခံများကို လေ့လာပါမယ်။",
+    benefits: ["Design Thinking", "Prototyping Skills", "User Research"],
+    price: "50,000 MMK", 
+    icon: "fa-paint-brush",
+    data: [
+        {
+            category: "Technical",
+            modules: [
+                {
+                    moduleTitle: "Module 1: Intro",
+                    lessons: [
+                        // 🔥 လမ်းကြောင်းထဲတွင် /uiux/ ကို ထည့်လိုက်ပါပြီ
+                        { title: "1.1.1: Why UI/UX?", type: "article", path: "/content/uiux/technical/mod1/intro.html" }
+                    ]
+                }
+            ]
+        }
+    ]
+};
+
+// js/data-main.js
+const allCourses = {
+    "web": webCourseData,
+    "python": pythonCourseData,
+    "design": designCourseData
+};
+
+// လက်ရှိ ရွေးချယ်ထားသော သင်ခန်းစာစာရင်းကို သိမ်းမည့် variable
+let courseData = [];
+
+<!-- index.html ၏ အောက်ခြေတွင် ဤအတိုင်း အစဉ်လိုက် ထည့်ပါ -->
+
+<!-- ၁။ သင်တန်းတစ်ခုချင်းစီ၏ data ဖိုင်များ -->
+<script src="js/data-web.js"></script>
+<script src="js/data-python.js"></script>
+<script src="js/data-design.js"></script>
+
+<!-- ၂။ စုစည်းထားသော Main Data ဖိုင် -->
+<script src="js/data-main.js"></script>
+
+<!-- ၃။ ပင်မ Logic ဖိုင် -->
+<script src="js/app.js"></script>
+
+၅။ app.js မှာ ဘာတွေ ပြောင်းလဲသွားမလဲ?
+သင်တန်းတွေ ခွဲလိုက်ပေမယ့် app.js ထဲက Logic တွေကတော့ အရင်အတိုင်းပဲ ဆက်သုံးလို့ရပါတယ်။
+ကျောင်းသားက "Web" ကို ရွေးလိုက်ရင်: courseData = allCourses['web'].data; ဆိုပြီး variable ထဲက data တွေကို လှမ်းယူပါလိမ့်မယ်။
+သင်တန်းအသစ် (ဥပမာ- PHP) ထပ်တိုးချင်ရင်: data-php.js ဆိုတဲ့ ဖိုင်အသစ်တစ်ခု ထပ်ဆောက်၊ index.html မှာ script ချိတ်၊ data-main.js ရဲ့ allCourses ထဲမှာ php: phpCourseData လို့ တစ်ကြောင်းတိုးပေးလိုက်ရုံပါပဲ။
+ဘာကြောင့် ဒီလိုခွဲတာ ပိုကောင်းသလဲ?
+၁။ စီမံရလွယ်ကူခြင်း: Web သင်တန်းကို ပြင်ချင်ရင် data-web.js ကိုပဲ ဖွင့်ပြင်ရုံပါပဲ။ တခြားသင်တန်း ကုဒ်တွေကို သွားထိစရာ မလိုတော့ပါဘူး။
+၂။ Scalability: သင်တန်း ၁၀၀ ရှိလာရင်တောင် တစ်ဖိုင်ချင်းစီမှာ စနစ်တကျ ရှိနေမှာပါ။
+၃။ Deduplication: ကုဒ်တွေ အရှည်ကြီး ဖြစ်မနေတော့ဘဲ ဖတ်ရတာ ရှင်းလင်းသွားပါတယ်။
+ဒီနည်းလမ်းက တကယ့် လုပ်ငန်းခွင်မှာ Senior Developer တွေ သုံးလေ့ရှိတဲ့ Modular Structure ဖြစ်ပါတယ်ဗျာ။ အဆင်မပြေတာရှိရင် ထပ်မေးနိုင်ပါတယ်။
+
+
+/public/content/
+  ├── web/                 (Web Development သင်ခန်းစာများ)
+  │    ├── foundations/
+  │    ├── technical/
+  │    └── fullstack/
+  ├── python/              (Python သင်ခန်းစာများ)
+  │    └── foundations/
+  └── uiux/                (Design သင်ခန်းစာများ)
+       └── technical/
+
+၃။ app.js ထဲက Fetch Logic ကို စစ်ဆေးခြင်း
+ကျွန်တော်တို့ အရင်က ရေးခဲ့တဲ့ app.js ထဲက renderLessonContent function သည် lesson.path (လမ်းကြောင်း) ကိုပဲ ဖတ်တာဖြစ်လို့ ဘာမှ ပြင်စရာမလိုပါဘူး။ data.js ထဲက လမ်းကြောင်းမှန်ရင် အလိုအလျောက် ပွင့်လာပါလိမ့်မယ်။
+
+💡 ဒီလိုခွဲခြားခြင်းရဲ့ အကျိုးကျေးဇူးများ
+၁။ Deduplication: သင်တန်းအားလုံးမှာ Foundations ဆိုတဲ့ ခေါင်းစဉ် ပါနေနိုင်ပါတယ်။ အရင်ကဆိုရင် content/foundations တစ်ခုတည်းမှာ အကုန်ရောနေလို့ ဖိုင်နာမည်တွေ ထပ်မှာ စိုးရိမ်ရပါတယ်။ အခုတော့ web/foundations နဲ့ python/foundations ဆိုပြီး ကွဲပြားသွားလို့ စိတ်ချရပါပြီ။
+
+၂။ Asset Management: သင်ခန်းစာထဲမှာသုံးမယ့် ပုံ (Images) တွေကိုလည်း အခုလို ခွဲထားနိုင်ပါတယ်။
+/content/web/img/sample.png
+/content/python/img/sample.png
+
+၃။ Multi-Instructor: နောင်တစ်ချိန်မှာ ဆရာအမျိုးမျိုးက သင်တန်းတွေ လာတင်မယ်ဆိုရင်လည်း သူတို့နဲ့ဆိုင်တဲ့ folder ထဲမှာပဲ သူတို့ အေးဆေး အလုပ်လုပ်နိုင်ပါလိမ့်မယ်။
+
+⚠️ သတိထားရန် -
+Folder နာမည်တွေကို အမြဲတမ်း စာလုံးအသေး (lowercase) ပဲ သုံးပေးပါ။ (ဥပမာ - uiux လို့ပေးရင် data.js မှာလည်း uiux လို့ပဲ ရေးပါ)။
+အခုဆိုရင် သင့်ရဲ့ App က တကယ့်ကို စနစ်တကျနဲ့ Professional အဆင့်မီ High-scale Platform တစ်ခု ဖြစ်သွားပါပြီဗျာ။ အဆင်မပြေတာရှိရင် ထပ်ပြောပေးပါ။
