@@ -3219,12 +3219,18 @@ async function viewMySubmissionDetail(docId) {
     }
 }
 
-function renderPaymentPage() {
+function renderPaymentPage(courseId) {
     const body = document.getElementById('dynamic-body');
+    const course = allCourses[courseId]; // သင်တန်းအချက်အလက်ယူမည်
+
+    if (!course) return alert("Course not found!");
+
     body.innerHTML = `
         <div class="content-card animate-up" style="max-width: 700px; margin: auto;">
-            <h2 style="text-align:center; color:var(--primary);">သင်တန်းအပ်နှံရန်</h2>
+            <h2 style="text-align:center; color:var(--primary);">${course.title} အပ်နှံရန်</h2>
+            <p style="text-align:center;">သင်တန်းကြေး - <strong>${course.price}</strong></p>
             <p style="text-align:center;">အောက်ပါ နည်းလမ်းများထဲမှ အဆင်ပြေရာဖြင့် ပေးချေနိုင်ပါသည်။</p>
+        
             <br>
             
             <div class="dashboard-grid">
@@ -3242,7 +3248,7 @@ function renderPaymentPage() {
             </div>
 
             <div class="academic-box" style="margin-top:20px;">
-                <label><strong>၁။ ငွေလွှဲပြီးကြောင်း Screenshot တင်ပါ (တိုက်ရိုက် Upload တင်ရန်)</strong></label>
+                <label><strong>၁။ ငွေလွှဲပြီးကြောင်း Screenshot တင်ပါ</strong></label>
                 <input type="file" id="payment-file" class="edit-input" accept="image/*" style="padding:10px;">
                 
                 <label style="margin-top:15px; display:block;"><strong>၂။ သို့မဟုတ် ပေးချေမှုလင့်ခ်ကို အသုံးပြုပါ</strong></label>
@@ -3251,8 +3257,12 @@ function renderPaymentPage() {
                 </button>
             </div>
 
-            <button class="save-btn" id="upload-btn" style="width: 100%; margin-top: 25px; height:50px; font-size:1.1rem;" onclick="handlePaymentUpload()">
+            <button class="save-btn" id="upload-btn" style="width: 100%; margin-top: 25px; height:50px; font-size:1.1rem;" onclick="handlePaymentUpload('${courseId}')">
                 <i class="fas fa-cloud-upload-alt"></i> စာရင်းသွင်းမှု အတည်ပြုခိုင်းမည်
+            </button>
+
+            <button class="menu-btn" style="width:100%; margin-top:10px; background:#64748b;" onclick="renderCourseSelection()">
+                Back to Courses
             </button>
         </div>
     `;
@@ -3289,7 +3299,7 @@ async function submitPaymentRequest() {
 
 async function renderPaymentRequests() {
     const body = document.getElementById('dynamic-body');
-    body.innerHTML = `<h3>သင်တန်းကြေး စစ်ဆေးရန်စာရင်း</h3><div class="loader">Loading...</div>`;
+    body.innerHTML = `<h3><i class="fas fa-receipt"></i> ပေးချေမှု စစ်ဆေးရန်</h3><div class="loader">Loading...</div>`;
 
     const snap = await db.collection('payments').where('status', '==', 'pending').get();
     let html = '<div class="dashboard-grid">';
@@ -3304,10 +3314,12 @@ async function renderPaymentRequests() {
         html += `
             <div class="content-card animate-up">
                 <h5>${p.studentName}</h5>
+                <small>သင်တန်း- ${p.courseTitle}</small>
                 <img src="${p.screenshot}" style="width:100%; border-radius:10px; margin:10px 0; cursor:pointer;" onclick="window.open('${p.screenshot}')">
-                <div style="margin-top:15px; display:flex; gap:10px;">
-                    <button class="save-btn" onclick="approveStudent('${doc.id}', '${p.studentId}')">Approve</button>
-                    <button class="menu-btn" style="background:red" onclick="alert('Rejected')">Reject</button>
+                <div style="display:flex; gap:10px;">
+                    <!-- 🔥 ဒီနေရာမှာ p.courseId ကို သေချာ ပို့ပေးလိုက်ပါပြီ -->
+                    <button class="save-btn" onclick="approveStudent('${doc.id}', '${p.studentId}', '${p.courseId}')">Approve</button>
+                    <button class="menu-btn" style="background:red; color:white;" onclick="rejectPayment('${doc.id}')">Reject</button>
                 </div>
             </div>
         `;
@@ -3336,38 +3348,43 @@ async function handlePaymentUpload(courseId) {
     const fileInput = document.getElementById('payment-file');
     const btn = document.getElementById('upload-btn');
     
+    // Safety check: သင်တန်း ID နဲ့ ဖိုင် ပါမပါ စစ်မည်
+    if (!courseId || !allCourses[courseId]) return alert("Invalid Course ID!");
+    // if (!courseId) return alert("Course ID is missing!");
     if (fileInput.files.length === 0) return alert("ငွေလွှဲပုံ အရင်ရွေးပါ။");
+
     const file = fileInput.files[0];
-    // ၂ မီဂါဘိုက် (2 * 1024 * 1024 bytes) ထက် ကြီးမကြီး စစ်ဆေးခြင်း
-    if (file.size > 2 * 1024 * 1024) {
-        return alert("ပုံဆိုဒ် အရမ်းကြီးနေပါတယ်။ ၂ မီဂါဘိုက် (2MB) အောက်ပဲ တင်ပေးပါ။");
-    }
+    if (file.size > 2 * 1024 * 1024) return alert("ပုံဆိုဒ် 2MB ထက် မကျော်ရပါ။");
 
     try {
         btn.disabled = true;
-        btn.innerText = "Uploading...";
+        btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Uploading... Please wait`;
 
+        // Firebase Storage သို့ တင်ခြင်း
         const storageRef = firebase.storage().ref(`payments/${courseId}_${currentUser.uid}_${Date.now()}`);
         const snapshot = await storageRef.put(file);
         const downloadURL = await snapshot.ref.getDownloadURL();
 
-        // Database ထဲသို့ ပေးချေမှုမှတ်တမ်းပို့မည်
+        // Database ထဲသို့ ပို့မည်
         await db.collection('payments').add({
             studentId: currentUser.uid,
             studentName: currentUser.name,
-            courseId: courseId, // 🔥 ဘယ်သင်တန်းအတွက်လဲ
-            courseTitle: allCourses[courseId].title,
+            courseId: courseId, 
+            courseTitle: allCourses[courseId].title, // 🔥 အခုဆိုရင် currentId ရှိတဲ့အတွက် title ကို ဖတ်လို့ရပါပြီ
             screenshot: downloadURL,
             status: "pending",
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
 
-        alert("ပေးချေမှု တင်ပြပြီးပါပြီ။ ဆရာမှ အတည်ပြုပေးသည်နှင့် သင်တန်းတက်ရောက်နိုင်ပါမည်။");
-        renderCourseSelection(); // ရွေးချယ်မှု စာမျက်နှာသို့ ပြန်သွားမည်
+        alert("ပေးချေမှု တင်ပြပြီးပါပြီ။ ဆရာမှ စစ်ဆေးပြီး အတည်ပြုပေးပါမည်။");
+        renderCourseSelection(); // အောင်မြင်ရင် သင်တန်းရွေးတဲ့နေရာ ပြန်သွားမည်
 
     } catch (e) {
-        alert("Error: " + e.message);
+        console.error("Upload Error:", e);
+        alert("Upload Error: " + e.message);
+        // Error တက်ရင် ခလုတ်ကို ပြန်ပွင့်အောင်လုပ်မည်
         btn.disabled = false;
+        btn.innerHTML = `<i class="fas fa-cloud-upload-alt"></i> ပြန်လည်ကြိုးစားမည်`;
     }
 }
 
@@ -3445,6 +3462,9 @@ function renderCourseSelection() {
         const isEnrolled = currentUser.enrolledCourses?.includes(id);
         const isTeacher = currentUser.role === 'Teacher';
 
+        // 🔥 အဓိကအချက်: ဆရာဖြစ်စေ၊ ဝယ်ပြီးသားကျောင်းသားဖြစ်စေ 'Joined' ပဲ ပြမည်
+        const hasAccess = isEnrolled || isTeacher;
+
         const card = document.createElement('div');
         card.className = 'topic-card course-selection-card';
         card.onclick = () => selectCourse(id);
@@ -3460,10 +3480,15 @@ function renderCourseSelection() {
 
             <div style="font-weight:bold; color:var(--primary); margin-bottom:15px;">${course.price}</div>
 
-            <div class="enroll-status">
-                ${isEnrolled || isTeacher
-                    ? `<span class="badge" style="background:#22c55e; color:white; padding:8px 20px; border-radius:20px; width:100%; display:block;">တက်ရောက်နေဆဲ <i class="fas fa-check"></i></span>` 
-                    : `<span class="badge" style="background:#f59e0b; color:white; padding:8px 20px; border-radius:20px; width:100%; display:block;"><i class="fas fa-shopping-cart"></i> Enroll Now</span>`}
+            <div class="enroll-status-container">
+                ${hasAccess 
+                    ? `<button class="course-card-btn btn-joined">
+                         တက်ရောက်နေဆဲ <i class="fas fa-check-circle"></i>
+                       </button>` 
+                    : `<button class="course-card-btn btn-enroll-now">
+                         <i class="fas fa-shopping-cart"></i> Enroll Now
+                       </button>`
+                }
             </div>
         `;
         grid.appendChild(card);

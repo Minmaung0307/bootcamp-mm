@@ -335,7 +335,54 @@ body {
 .topic-card:hover { 
     transform: translateY(-10px); 
     box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
-.topic-card i { font-size: 3rem; color: var(--primary); margin-bottom: 15px; }
+.topic-card i { font-size: 1.7rem; color: var(--primary); margin-bottom: 15px; }
+
+/* --- Course Card Button Standard Styling --- */
+.course-card-btn {
+    width: 100%;
+    padding: 12px 20px;
+    border-radius: 12px;
+    border: none;
+    display: flex; /* 🔥 Icon နဲ့ စာသားကို ဘေးတိုက်စီရန် */
+    align-items: center; /* 🔥 ဒေါင်လိုက် အလယ်ညှိရန် */
+    justify-content: center; /* 🔥 အလျားလိုက် အလယ်ညှိရန် */
+    gap: 12px; /* 🔥 Icon နဲ့ စာသားကြား အကွာအဝေး */
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Enroll Now ခလုတ် (လိမ္မော်ရောင်) */
+.btn-enroll-now {
+    padding: 19px 0;
+    background-color: #f59e0b;
+    color: white;
+}
+.btn-enroll-now:hover {
+    background-color: #d97706;
+    transform: translateY(-2px);
+}
+
+/* Joined ခလုတ် (အစိမ်းရောင်) */
+.btn-joined {
+    background-color: #22c55e;
+    color: white;
+    cursor: default; /* တက်ပြီးသားမို့ ထပ်နှိပ်စရာမလိုကြောင်း ပြရန် */
+}
+
+/* Icon Size များကို ထိန်းချုပ်ခြင်း (အရမ်းကြီးမနေစေရန်) */
+.course-card-btn i {
+    font-size: 1.2rem !important; /* 🔥 Icon ဆိုဒ်ကို ကွက်တိညှိထားသည် */
+    margin: 0 !important;
+}
+
+/* Topic Card ထဲက List များကို ပိုသေသပ်စေရန် */
+.course-selection-card ul {
+    margin: 15px 0;
+    min-height: 80px; /* Card အမြင့်တွေ တူညီစေရန် */
+}
 
 /* Profile Design */
 .profile-container { background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
