@@ -615,11 +615,16 @@ async function awardBadge(name) {
 // --- သင်ခန်းစာမာတိကာကို Database ပါ ဖတ်နိုင်အောင် ပြင်ဆင်ခြင်း ---
 async function renderCourseTree(filterCat) {
     const body = document.getElementById('dynamic-body');
+    if (!body) return;
+
     body.innerHTML = '<div id="course-outline"></div>';
     const container = document.getElementById('course-outline');
 
     // ၁။ အခြေခံ သင်ရိုးများ (Local data.js မှ)
-    let filteredData = filterCat ? courseData.filter(c => c.category.toLowerCase() === filterCat.toLowerCase()) : courseData;
+    let filteredData = filterCat ? 
+        courseData.filter(c => c.category.toLowerCase() === 
+        filterCat.toLowerCase()) : 
+        courseData;
 
     // ၂။ Database ထဲမှ အသစ်တိုးထားသော သင်ခန်းစာများကို ဆွဲယူမည်
     try {
