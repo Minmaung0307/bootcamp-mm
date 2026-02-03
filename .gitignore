@@ -10,6 +10,7 @@ firebase-debug.*.log*
 .github/
 folderStructure.txt
 ပုံထည့်ရန်.txt
+data-*.txt
 
 # Firebase cache
 .firebase/

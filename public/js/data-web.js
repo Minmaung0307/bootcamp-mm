@@ -7,6 +7,11 @@ const webCourseData = {
     benefits: ["React & Node.js Mastery", "Portfolio Project ၅ ခု", "Job Placement Support"],
     price: "50,000 MMK",
     icon: "fa-code",
+    resources: [
+        { name: "Git Cheat Sheet", url: "https://...", icon: "fa-git-alt" },
+        { name: "HTML5 MDN Reference", url: "https://...", icon: "fa-html5" },
+        { name: "CSS Flexbox Guide", url: "https://...", icon: "fa-css3-alt" }
+    ],
     data: [
         {
             category: "Foundations",

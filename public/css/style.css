@@ -1746,3 +1746,31 @@ body, html {
 
 .approve-btn { background-color: #10b981 !important; font-size: 0.85rem !important; height: 35px !important; }
 .reject-btn { background-color: #ef4444 !important; color: white !important; font-size: 0.85rem !important; height: 35px !important; }
+
+/* Toast Notification Design */
+.toast-container {
+    position: fixed; top: 20px; right: 20px; z-index: 9999;
+}
+.toast {
+    background: var(--primary); color: white; padding: 12px 25px;
+    border-radius: 8px; margin-bottom: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    animation: slideIn 0.3s ease-out; display: flex; align-items: center; gap: 10px;
+}
+@keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+
+/* သင်ယူပြီးသော သင်ခန်းစာ Style */
+.completed-green {
+    background: rgba(34, 197, 94, 0.05) !important;
+    border-left: 4px solid #22c55e !important;
+    color: #166534 !important;
+}
+
+.type-badge {
+    background: #e2e8f0; padding: 2px 8px; border-radius: 4px;
+    font-size: 0.7rem; text-transform: uppercase; float: right;
+}
+
+/* Alert တွေအစားသုံးမယ့် Custom Modal (Optional) */
+.welcome-banner button {
+    /* Alert ပေါ်တာထက် စာတန်းလေးပဲ ပြောင်းသွားအောင် လုပ်ထားပါတယ် */
+}

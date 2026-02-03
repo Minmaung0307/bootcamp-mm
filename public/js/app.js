@@ -205,25 +205,37 @@ function showSection(section, filterCat = null) {
 
 function renderResources() {
     const body = document.getElementById('dynamic-body');
-    body.innerHTML = `
-        <div class="dashboard-grid animate-up">
-            <div class="content-card">
-                <h4><i class="fab fa-git-alt"></i> Git Cheat Sheet</h4>
-                <p>အသုံးများသော Git Commands များ</p>
-                <button class="save-btn" onclick="window.open('https://education.github.com/git-cheat-sheet-education.pdf', '_blank')">Download</button>
+    const currentCourse = allCourses[currentUser.selectedCourseId];
+    
+    if (!currentCourse) {
+        body.innerHTML = `<div class="content-card">ကျေးဇူးပြု၍ သင်တန်းတစ်ခု အရင်ရွေးချယ်ပါ။</div>`;
+        return;
+    }
+
+    const resList = currentCourse.resources || [];
+
+    if (resList.length === 0) {
+        body.innerHTML = `<div class="content-card">ဤသင်တန်း (${currentCourse.title}) အတွက် အရင်းအမြစ်များ မရှိသေးပါ။</div>`;
+        return;
+    }
+
+    let html = `<div class="dashboard-grid animate-up">`;
+
+    // 🔥 Loop ပတ်ပြီး အချက်အလက်များကို စနစ်တကျ ထုတ်ယူခြင်း
+    resList.forEach(item => {
+        html += `
+            <div class="content-card animate-up">
+                <h4><i class="fab ${item.icon || 'fa-file-alt'}"></i> ${item.name}</h4>
+                <p style="font-size:0.85rem; color:var(--text-muted); margin: 10px 0;">${currentCourse.title} အတွက် အထောက်အကူပြုဖိုင်</p>
+                <button class="save-btn" style="width:100%;" onclick="window.open('${item.url}', '_blank')">
+                    <i class="fas fa-external-link-alt"></i> View / Download
+                </button>
             </div>
-            <div class="content-card">
-                <h4><i class="fab fa-html5"></i> HTML Reference</h4>
-                <p>MDN Web Docs - HTML Elements</p>
-                <button class="save-btn" onclick="window.open('https://developer.mozilla.org/en-US/docs/Web/HTML/Element', '_blank')">View Online</button>
-            </div>
-            <div class="content-card">
-                <h4><i class="fab fa-css3-alt"></i> CSS Grid Guide</h4>
-                <p>A Complete Guide to Grid</p>
-                <button class="save-btn" onclick="window.open('https://css-tricks.com/snippets/css/complete-guide-grid/', '_blank')">Read Guide</button>
-            </div>
-        </div>
-    `;
+        `;
+    });
+
+    html += `</div>`;
+    body.innerHTML = html;
 }
 
 // ==========================================
@@ -620,63 +632,60 @@ async function renderCourseTree(filterCat) {
     body.innerHTML = '<div id="course-outline"></div>';
     const container = document.getElementById('course-outline');
 
-    // ၁။ အခြေခံ သင်ရိုးများ (Local data.js မှ)
+    // ၁။ အခြေခံ သင်ရိုးများ
     let filteredData = filterCat ? 
-        courseData.filter(c => c.category.toLowerCase() === 
-        filterCat.toLowerCase()) : 
+        courseData.filter(c => c.category.toLowerCase() === filterCat.toLowerCase()) : 
         courseData;
 
-    // ၂။ Database ထဲမှ အသစ်တိုးထားသော သင်ခန်းစာများကို ဆွဲယူမည်
+    // ၂။ Dynamic Content ဆွဲယူခြင်း (အရင်အတိုင်း)
     try {
         const dynamicSnap = await db.collection('course_structure').get();
-        const dynamicLessons = [];
-        dynamicSnap.forEach(doc => dynamicLessons.push(doc.data()));
-
-        // Local data ထဲကို Dynamic data တွေ ပေါင်းထည့်မယ်
-        // (မှတ်ချက် - Category နဲ့ Module နာမည် တူရပါမယ်)
-        dynamicLessons.forEach(dl => {
-            let catIndex = filteredData.findIndex(c => c.category === dl.category);
-            if (catIndex !== -1) {
-                let modIndex = filteredData[catIndex].modules.findIndex(m => m.moduleTitle === dl.module);
-                if (modIndex !== -1) {
-                    // ရှိပြီးသား Module ထဲကို lesson အသစ် ထည့်မယ်
-                    filteredData[catIndex].modules[modIndex].lessons.push({
-                        title: dl.title, path: dl.path, type: dl.type
-                    });
-                }
+        dynamicSnap.forEach(doc => {
+            const dl = doc.data();
+            let cat = filteredData.find(c => c.category === dl.category);
+            if (cat) {
+                let mod = cat.modules.find(m => m.moduleTitle === dl.module);
+                if (mod) mod.lessons.push({ title: dl.title, path: dl.path, type: dl.type });
             }
         });
-    } catch (e) { console.warn("Dynamic content load failed."); }
+    } catch (e) { console.warn("Dynamic load failed"); }
 
-    // ၃။ Rendering Logic (ယခင်အတိုင်း ဆက်လက်လုပ်ဆောင်မည်)
+    // ၃။ Rendering Logic (HTML String အဖြစ် စုတည်ဆောက်မည်)
+    let fullHtml = "";
+    const completedList = currentUser.completedLessons || [];
+
     filteredData.forEach((cat, catIdx) => {
-        const catH = document.createElement('div');
-        catH.className = 'category-header';
-        catH.innerHTML = `<i class="fas fa-folder"></i> ${cat.category}`;
-        container.appendChild(catH);
+        fullHtml += `<div class="category-header"><i class="fas fa-folder"></i> ${cat.category}</div>`;
 
         cat.modules.forEach((mod, modIdx) => {
             const modId = `mod-${catIdx}-${modIdx}`;
-            const group = document.createElement('div');
-            group.className = 'module-group';
-            group.innerHTML = `
-                <div class="module-title-header" onclick="toggleModuleAccordion(this, '${modId}')">
-                    <span><i class="fas fa-chevron-right"></i> ${mod.moduleTitle}</span>
-                </div>
-                <div id="${modId}" class="lessons-list"></div>
-            `;
-            container.appendChild(group);
+            let lessonsHtml = "";
 
-            const list = document.getElementById(modId);
             mod.lessons.forEach((les, lesIdx) => {
-                const item = document.createElement('div');
-                item.className = 'lesson-item';
-                item.innerHTML = `<i class="far fa-file-alt"></i> ${les.title}`;
-                item.onclick = () => renderLessonContent(catIdx, modIdx, lesIdx);
-                list.appendChild(item);
+                const isDone = completedList.includes(les.title);
+                const originalCatIdx = courseData.findIndex(c => c.category === cat.category);
+                
+                lessonsHtml += `
+                    <div class="lesson-item ${isDone ? 'completed-green' : ''}" 
+                         onclick="renderLessonContent(${originalCatIdx}, ${modIdx}, ${lesIdx})">
+                        <i class="${isDone ? 'fas fa-check-circle' : 'far fa-circle'}" 
+                           style="color: ${isDone ? '#22c55e' : '#cbd5e1'}"></i>
+                        <span>${les.title}</span>
+                        <small class="type-badge">${les.type}</small>
+                    </div>`;
             });
+
+            fullHtml += `
+                <div class="module-group animate-up">
+                    <div class="module-title-header" onclick="toggleModuleAccordion(this, '${modId}')">
+                        <span><i class="fas fa-chevron-right"></i> ${mod.moduleTitle}</span>
+                    </div>
+                    <div id="${modId}" class="lessons-list">${lessonsHtml}</div>
+                </div>`;
         });
     });
+
+    container.innerHTML = fullHtml;
 }
 
 async function renderLessonContent(catIdx, modIdx, lesIdx) {
@@ -842,10 +851,11 @@ async function checkQuizResult(quizId, quizData, c, m, l) {
 
     if (!currentUser.quizAttempts) currentUser.quizAttempts = {};
     if (!currentUser.completedLessons) currentUser.completedLessons = [];
+    if (!currentUser.grades) currentUser.grades = {};
 
     const currentAttempt = (currentUser.quizAttempts[quizId] || 0) + 1;
 
-    // အဖြေစစ်ဆေးခြင်း
+    // ၁။ အဖြေစစ်ဆေးခြင်း
     questions.forEach((q, i) => {
         const feedbackEl = document.getElementById(`f-${i}`);
         const qBox = document.getElementById(`q-box-${i}`);
@@ -856,25 +866,36 @@ async function checkQuizResult(quizId, quizData, c, m, l) {
             const sel = Array.from(inputs).find(r => r.checked);
             if (sel && parseInt(sel.value) === q.correct) isCorrect = true;
         } else if (q.type === 'multiple') {
-            // Multiple Choice စစ်ဆေးခြင်း (Array တိုက်စစ်သည်)
             const selected = Array.from(inputs).filter(cb => cb.checked).map(cb => parseInt(cb.value));
-            const correctAnswers = q.correct.sort().toString();
-            if (selected.sort().toString() === correctAnswers) isCorrect = true;
+            if (JSON.stringify(selected.sort()) === JSON.stringify(q.correct.sort())) isCorrect = true;
         } else if (q.type === 'short') {
             if (inputs[0].value.trim().toLowerCase() === q.correct.toLowerCase()) isCorrect = true;
         }
 
         if (isCorrect) {
             score++;
-            feedbackEl.innerHTML = '<span class="text-success"><i class="fas fa-check"></i> Correct</span>';
+            feedbackEl.innerHTML = '<span class="text-success">Correct</span>';
             if (qBox) qBox.style.borderColor = "#22c55e";
         } else {
-            feedbackEl.innerHTML = '<span class="text-danger"><i class="fas fa-times"></i> Wrong</span>';
+            feedbackEl.innerHTML = '<span class="text-danger">Wrong</span>';
             if (qBox) qBox.style.borderColor = "#ef4444";
         }
     });
 
-    // ဒေတာ သိမ်းဆည်းခြင်း
+    // ၂။ 🔥 Best Score Logic (Loop အပြင်ဘက်တွင် ထားရမည်)
+    const courseId = courseData[c].id || currentUser.selectedCourseId;
+    if (!currentUser.grades[courseId]) currentUser.grades[courseId] = {};
+    
+    const oldScore = currentUser.grades[courseId][quizId] || 0;
+
+    if (score > oldScore) {
+        currentUser.grades[courseId][quizId] = score;
+        showToast(`ရမှတ်အသစ် ${score} ကို သိမ်းဆည်းလိုက်ပါပြီ။`, "success");
+    } else {
+        showToast(`သင်ယူမှုအတွက် ကျေးဇူးတင်ပါသည်။ (ယခင်ရမှတ် ${oldScore} က ပိုများနေပါသည်)`);
+    }
+
+    // ၃။ Attempt နှင့် Completion Update
     currentUser.quizAttempts[quizId] = currentAttempt;
     const lessonTitle = courseData[c].modules[m].lessons[l].title;
     
@@ -883,26 +904,26 @@ async function checkQuizResult(quizId, quizData, c, m, l) {
             currentUser.completedLessons.push(lessonTitle);
         }
     }
-    localStorage.setItem('currentUser', JSON.stringify(currentUser));
-    await syncProgressToCloud(); // <--- Cloud ပေါ် တန်းပို့မည်
 
-    // အသိပေးချက်နှင့် Redirection
+    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    await syncProgressToCloud(); // Cloud Sync
+
+    // ၄။ Redirection
     setTimeout(() => {
-        const total = questions.length;
-        if (score === total) {
-            alert(`ဂုဏ်ယူပါတယ်! အမှတ်ပြည့် (${score}/${total}) ရရှိပါတယ်။`);
+        if (score === questions.length) {
+            showToast("ဂုဏ်ယူပါတယ်! အမှတ်ပြည့်ရရှိပါတယ်။", "success");
             goToNextLesson(c, m, l);
         } else if (currentAttempt >= 3) {
-            alert(`၃ ကြိမ်ဖြေဆိုမှု ပြီးဆုံးပါပြီ။ သင်၏နောက်ဆုံးရမှတ်မှာ (${score}/${total}) ဖြစ်ပါသည်။`);
+            showToast("၃ ကြိမ်ဖြေဆိုမှု ပြီးဆုံးပါပြီ။");
             goToNextLesson(c, m, l);
         } else {
-            if (confirm(`ရမှတ်: ${score}/${total} ဖြစ်ပါသည်။ အကြိမ်ရေ ${3 - currentAttempt} ကြိမ် ကျန်ပါသေးသည်။ ထပ်ဖြေမလား?`)) {
+            if (confirm(`ရမှတ်: ${score}/${questions.length}။ ထပ်ဖြေမလား?`)) {
                 renderLessonContent(c, m, l);
             } else {
                 goToNextLesson(c, m, l);
             }
         }
-    }, 500);
+    }, 800);
 }
 
 function renderAssignmentUI(catIdx, modIdx, lesIdx, bc) {
@@ -1002,29 +1023,29 @@ async function showMessages(targetUid = null, targetName = null) {
         activeChatName = "Chat: " + targetName; 
     }
     
-    // ၁။ နောက်ဆုံးရ ကျောင်းသား/ဆရာ စာရင်းကို Database မှ ဆွဲယူမည်
-    await fetchStudentsFromDB(); // ဤ function ထဲတွင် ဆရာများကိုပါ ဆွဲယူရန် အောက်တွင် ပြင်ပေးထားပါသည်
+    // Database မှ ကျောင်းသား/ဆရာ စာရင်းကို နောက်ဆုံးအခြေအနေ ဆွဲယူမည်
+    await fetchStudentsFromDB(); 
 
     const body = document.getElementById('dynamic-body');
     const isTeacher = currentUser.role === 'Teacher';
 
-    // ၂။ --- Groups Filtering ---
-    // ဆရာဆိုလျှင် ရှိသမျှ Batch အကုန်ပြမည်၊ ကျောင်းသားဆိုလျှင် မိမိ Batch တစ်ခုတည်းသာ ပြမည်
-    const allBatches = [...new Set(studentsList.map(s => s.batchId))].sort();
-    const myBatchList = isTeacher ? allBatches : [currentUser.batchId];
-
-    // ၃။ --- DM List Filtering ---
+    // ၁။ 🔥 DM List Filtering (Privacy Logic)
     const visibleDMList = studentsList.filter(s => {
         if (isTeacher) {
-            // ဆရာမြင်ကွင်း: မိမိမဟုတ်သော ကျောင်းသားအားလုံးကို ပြမည်
-            return s.role === 'Student';
+            // ဆရာမြင်ကွင်း: ကျောင်းသားအားလုံးကို ပြမည်
+            return true;
         } else {
-            // ကျောင်းသားမြင်ကွင်း: မိမိ Batch တူသူများကိုသာ ပြမည် (ကျော်ကျော်ကို Su Su မြင်ရတော့မည်မဟုတ်)
+            // ကျောင်းသားမြင်ကွင်း: မိမိ Batch တူသူများကိုသာ ပြမည် (တခြားသင်တန်းကလူတွေ မမြင်ရပါ)
             return s.batchId === currentUser.batchId && s.uid !== currentUser.uid;
         }
     });
 
-    // ၄။ --- ဆရာနှင့် စကားပြောရန် (ကျောင်းသားများအတွက်သာ) ---
+    // ၂။ Groups Filtering
+    // ဆရာဆိုလျှင် ရှိသမျှ Batch အကုန်ပြမည်၊ ကျောင်းသားဆိုလျှင် မိမိ Batch တစ်ခုတည်းသာ ပြမည်
+    const allBatches = [...new Set(studentsList.map(s => s.batchId))].sort();
+    const myBatchList = isTeacher ? allBatches : (currentUser.batchId ? [currentUser.batchId] : []);
+
+    // ၃။ ဆရာများကို ရှာဖွေခြင်း (ကျောင်းသားများ ဆရာ့ဆီ စာပို့နိုင်ရန်)
     const teachers = allUsersList.filter(u => u.role === 'Teacher' && u.uid !== currentUser.uid);
 
     body.innerHTML = `
@@ -1049,21 +1070,18 @@ async function showMessages(targetUid = null, targetName = null) {
                         `).join('')}
                     ` : ''}
 
-                    <div class="chat-list-divider">Direct Messages</div>
+                    <div class="chat-list-divider">Classmates (${currentUser.batchId || 'N/A'})</div>
                     ${visibleDMList.length > 0 ? visibleDMList.map(s => `
                         <div class="chat-item ${activeChatId === s.uid ? 'active' : ''}" onclick="switchChat('${s.uid}', 'Chat: ${s.name}')">
                             <i class="fas fa-user-circle"></i> 
-                            <div style="display:flex; flex-direction:column;">
-                                <span>${s.name}</span>
-                                ${isTeacher ? `<small style="font-size:0.6rem; opacity:0.6;">${s.batchId}</small>` : ''}
-                            </div>
+                            <span>${s.name}</span>
                         </div>
                     `).join('') : '<p style="padding:15px; font-size:0.8rem; color:grey;">စကားပြောရန် လူမရှိသေးပါ။</p>'}
                 </div>
             </div>
             
             <div class="chat-window">
-                <div class="chat-window-header">${activeChatName}</div>
+                <div class="chat-window-header" id="active-chat-title">${activeChatName}</div>
                 <div class="chat-display" id="chat-display"></div>
                 <div class="chat-input-box">
                     <input type="text" id="chat-input" placeholder="စာရိုက်ပါ..." onkeypress="if(event.key==='Enter') sendMessage()">
@@ -3642,6 +3660,24 @@ function selectCourse(id) {
         renderPaymentPage(id);
     }
 }
+
+function showToast(message, type = 'info') {
+    let container = document.querySelector('.toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.className = 'toast-container';
+        document.body.appendChild(container);
+    }
+    const toast = document.createElement('div');
+    toast.className = 'toast animate-up';
+    const icon = type === 'success' ? 'fa-check-circle' : 'fa-info-circle';
+    toast.innerHTML = `<i class="fas ${icon}"></i> <span>${message}</span>`;
+    container.appendChild(toast);
+    setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 500); }, 3000);
+}
+
+// 🔥 အခုကစပြီး alert() နေရာမှာ showToast() ကို အစားထိုးသုံးပါ
+// ဥပမာ- alert("မင်္ဂလာပါ");  =>  showToast("မင်္ဂလာပါ", "success");
 
 /*
 // --- ၁။ Text-to-Speech (စာဖတ်ပြသည့်စနစ်) ---
