@@ -1223,11 +1223,14 @@ function renderProfile() {
 
   // 🔥 ပြင်ဆင်ချက်: Alert Box ကို Variable ထဲ အရင်ထည့်မည်
   let unpaidAlert = "";
-  if (!currentUser.isPaid && currentUser.role !== 'Teacher') {
+  // အကယ်၍ အကောင့်ဝင်ထားသူသည် ဆရာမဟုတ်ဘဲ၊ ဝယ်ထားသောသင်တန်းလည်း တစ်ခုမှ မရှိလျှင် (enrolledCourses အလွတ်ဖြစ်လျှင်)
+  const hasNoEnrolledCourses = !currentUser.enrolledCourses || currentUser.enrolledCourses.length === 0;
+
+  if (currentUser.role !== 'Teacher' && hasNoEnrolledCourses) {
     unpaidAlert = `
-        <div class="tip-box" style="background:#fffbeb; border:1px solid #f59e0b; color:#92400e; margin-bottom:20px; padding:15px; border-radius:8px;">
+        <div class="tip-box animate-up" style="background:#fffbeb; border:1px solid #f59e0b; color:#92400e; margin-bottom:20px; padding:15px; border-radius:8px;">
             <i class="fas fa-info-circle"></i> သင်၏ Profile ကို ပြင်ဆင်နိုင်ပါသည်။ သင်ခန်းစာများ စတင်လေ့လာရန် သင်တန်းကြေးပေးသွင်းရန် လိုအပ်ပါသည်။ 
-            <button class="save-btn" style="padding:4px 12px; margin-left:10px; font-size:0.8rem;" onclick="renderPaymentPage()">သင်တန်းအပ်ရန်</button>
+            <button class="save-btn" style="padding:4px 12px; margin-left:10px; font-size:0.8rem;" onclick="renderCourseSelection()">သင်တန်းအပ်ရန်</button>
         </div>
     `;
   }
@@ -1446,7 +1449,7 @@ async function handleLogin() {
             document.getElementById("app-wrapper").style.display = "flex";
 
             // ၃။ သင်တန်းအခြေအနေအလိုက် လမ်းကြောင်းခွဲမည်
-            if (currentUser.isPaid || currentUser.role === 'Teacher') {
+            if (currentUser.enrolledCourses && currentUser.enrolledCourses.length > 0 || currentUser.role === 'Teacher') {
                 showSection("dashboard");
                 alert("မင်္ဂလာပါ " + currentUser.name);
             } else {
@@ -1787,34 +1790,60 @@ function viewCertificate(uid, isAdminPreview = false) {
 // ==========================================
 
 window.onload = () => {
-    syncLMSSettings();
-    syncZoomConfig();
-    initNotifications();
-    startLiveCountdown();
-
+    // ၁။ အခြေခံ UI Setup (Auth နဲ့ မဆိုင်တာတွေကို အရင်လုပ်မည်)
     const yearEl = document.getElementById('current-year'); 
     if(yearEl) yearEl.innerText = new Date().getFullYear();
     if (localStorage.getItem('dark-mode') === 'true') document.body.classList.add('dark-theme');
 
-    if (currentUser.isLoggedIn) {
-        document.getElementById('login-page').style.display = 'none';
-        document.getElementById('app-wrapper').style.display = 'flex';
+    // ၂။ 🔥 Firebase Auth အခြေအနေကို စောင့်ကြည့်ခြင်း (အဓိက ဂိတ်ဝ)
+    auth.onAuthStateChanged((user) => {
+        if (user) {
+            // --- လူရှိလျှင် (Logged In) ---
+            currentUser.uid = user.uid;
+            currentUser.isLoggedIn = true;
 
-        const hasNoCourse = !currentUser.enrolledCourses || currentUser.enrolledCourses.length === 0;
+            // Cloud Data များကို စတင် Sync လုပ်မည်
+            syncLMSSettings(); 
+            syncZoomConfig();
+            initNotifications();
+            startLiveCountdown();
 
-        if (currentUser.role !== 'Teacher' && hasNoCourse) {
-            // 🔥 ကျောင်းသားက သင်တန်းမရှိသေးရင် Menu တွေကို Lock လုပ်မယ်
-            lockMenus();
-            renderCourseSelection();
-        } else if (currentUser.selectedCourseId) {
-            // သင်တန်းရှိပြီးသားဆိုရင် Dashboard သို့သွားမယ်
-            showSection('dashboard');
+            // UI ကို အရင်ဖော်မည်
+            document.getElementById('login-page').style.display = 'none';
+            document.getElementById('app-wrapper').style.display = 'flex';
+
+            // ၃။ 🔥 Enrollment & Role အလိုက် လမ်းကြောင်းခွဲခြင်း
+            const enrolled = currentUser.enrolledCourses || [];
+            const isTeacher = currentUser.role === 'Teacher';
+
+            if (!isTeacher && enrolled.length === 0) {
+                // (က) ကျောင်းသားဖြစ်ပြီး ဘယ်သင်တန်းမှ မရှိသေးလျှင် - Lock ချပြီး ရွေးခိုင်းမည်
+                lockMenus();
+                renderCourseSelection();
+                document.getElementById('page-title').innerText = "သင်တန်းများ ရွေးချယ်ရန်";
+            } 
+            else if (currentUser.selectedCourseId) {
+                // (ခ) သင်တန်းရှိပြီးသားဖြစ်ပြီး တစ်ခုခုကို ရွေးထားလျှင် - Dashboard သို့ တိုက်ရိုက်သွားမည်
+                // အရေးကြီးသည်- courseData ကို load အရင်လုပ်ပေးရမည်
+                if (allCourses[currentUser.selectedCourseId]) {
+                    courseData = allCourses[currentUser.selectedCourseId].data;
+                    showSection('dashboard');
+                } else {
+                    renderCourseSelection();
+                }
+            } 
+            else {
+                // (ဂ) သင်တန်းရှိသော်လည်း လက်ရှိလေ့လာမည့်သင်တန်း မရွေးရသေးလျှင်
+                renderCourseSelection();
+            }
+
         } else {
-            renderCourseSelection();
+            // --- လူမရှိလျှင် (Logged Out) ---
+            currentUser.isLoggedIn = false;
+            document.getElementById('login-page').style.display = 'flex';
+            document.getElementById('app-wrapper').style.display = 'none';
         }
-    } else {
-        document.getElementById('login-page').style.display = 'flex';
-    }
+    });
 };
 
 // Menu များကို Lock ချသည့် Function
@@ -3219,53 +3248,79 @@ async function viewMySubmissionDetail(docId) {
     }
 }
 
-function renderPaymentPage(courseId) {
+async function renderPaymentPage(courseId) {
     const body = document.getElementById('dynamic-body');
-    const course = allCourses[courseId]; // သင်တန်းအချက်အလက်ယူမည်
+    const course = allCourses[courseId];
 
     if (!course) return alert("Course not found!");
 
-    body.innerHTML = `
-        <div class="content-card animate-up" style="max-width: 700px; margin: auto;">
-            <h2 style="text-align:center; color:var(--primary);">${course.title} အပ်နှံရန်</h2>
-            <p style="text-align:center;">သင်တန်းကြေး - <strong>${course.price}</strong></p>
-            <p style="text-align:center;">အောက်ပါ နည်းလမ်းများထဲမှ အဆင်ပြေရာဖြင့် ပေးချေနိုင်ပါသည်။</p>
-        
-            <br>
-            
-            <div class="dashboard-grid">
-                <!-- Mobile Banking -->
-                <div class="content-card" style="border: 1px solid #e2e8f0;">
-                    <h4><i class="fas fa-mobile-alt"></i> Mobile Banking</h4>
-                    <p style="font-size:0.85rem;">Kpay / WavePay<br><strong>09 123 456 789</strong></p>
-                </div>
-                
-                <!-- Credit / Debit Card -->
-                <div class="content-card" style="border: 1px solid #e2e8f0;">
-                    <h4><i class="fas fa-credit-card"></i> Credit Card</h4>
-                    <p style="font-size:0.85rem;">Visa, Master, JCB<br>Online Payment</p>
-                </div>
-            </div>
+    body.innerHTML = '<div class="loader">စစ်ဆေးနေသည်...</div>';
 
-            <div class="academic-box" style="margin-top:20px;">
-                <label><strong>၁။ ငွေလွှဲပြီးကြောင်း Screenshot တင်ပါ</strong></label>
-                <input type="file" id="payment-file" class="edit-input" accept="image/*" style="padding:10px;">
+    try {
+        // 🔥 နောက်ဆုံးတင်ထားတဲ့ ပေးချေမှုမှတ်တမ်းကို Firestore ကနေ တိုက်ရိုက်သွားစစ်မည်
+        const q = await db.collection('payments')
+                          .where('studentId', '==', auth.currentUser.uid)
+                          .where('courseId', '==', courseId)
+                          .orderBy('timestamp', 'desc').limit(1).get();
+        
+        let statusBanner = "";
+        if (!q.empty) {
+            const payData = q.docs[0].data();
+            if (payData.status === 'pending') {
+                statusBanner = `<div class="tip-box animate-up" style="background:#f0f9ff; border-left:5px solid #0ea5e9; padding:15px; margin-bottom:20px;">
+                    <i class="fas fa-clock fa-spin"></i> သင်၏ပေးချေမှုကို ဆရာမှ စစ်ဆေးနေဆဲ ဖြစ်ပါသည်။ (Pending)
+                </div>`;
+            } else if (payData.status === 'rejected') {
+                statusBanner = `<div class="error-msg animate-up" style="background:#fff1f2; border:1px solid #fda4af; color:#9f1239; padding:20px; border-radius:12px; margin-bottom:20px;">
+                    <h4><i class="fas fa-exclamation-circle"></i> သင်တန်းအပ်နှံမှု အပယ်ခံရပါသည်</h4>
+                    <p><strong>အကြောင်းရင်း:</strong> ${payData.rejectReason || "အချက်အလက် မစုံလင်ပါ။"}</p>
+                    <small>ကျေးဇူးပြု၍ ပြန်လည်စစ်ဆေးပြီး အသစ်ပြန်တင်ပေးပါ။</small>
+                </div>`;
+            }
+        }
+
+        body.innerHTML = `
+            <div class="content-card animate-up" style="max-width: 700px; margin: auto;">
+                <h2 style="text-align:center; color:var(--primary);">${course.title} အပ်နှံရန်</h2>
+                <p style="text-align:center;">သင်တန်းကြေး - <strong>${course.price}</strong></p>
+                <p style="text-align:center;">အောက်ပါ နည်းလမ်းများထဲမှ အဆင်ပြေရာဖြင့် ပေးချေနိုင်ပါသည်။</p>
+            
+                <br>
                 
-                <label style="margin-top:15px; display:block;"><strong>၂။ သို့မဟုတ် ပေးချေမှုလင့်ခ်ကို အသုံးပြုပါ</strong></label>
-                <button class="save-btn" style="background:#000; width:100%;" onclick="handleCardPayment()">
-                    <i class="fas fa-credit-card"></i> Pay with Card (Visa/Master/JCB)
+                <div class="dashboard-grid">
+                    <!-- Mobile Banking -->
+                    <div class="content-card" style="border: 1px solid #e2e8f0;">
+                        <h4><i class="fas fa-mobile-alt"></i> Mobile Banking</h4>
+                        <p style="font-size:0.85rem;">Kpay / WavePay<br><strong>09 123 456 789</strong></p>
+                    </div>
+                    
+                    <!-- Credit / Debit Card -->
+                    <div class="content-card" style="border: 1px solid #e2e8f0;">
+                        <h4><i class="fas fa-credit-card"></i> Credit Card</h4>
+                        <p style="font-size:0.85rem;">Visa, Master, JCB<br>Online Payment</p>
+                    </div>
+                </div>
+
+                <div class="academic-box" style="margin-top:20px;">
+                    <label><strong>၁။ ငွေလွှဲပြီးကြောင်း Screenshot တင်ပါ</strong></label>
+                    <input type="file" id="payment-file" class="edit-input" accept="image/*" style="padding:10px;">
+                    
+                    <label style="margin-top:15px; display:block;"><strong>၂။ သို့မဟုတ် ပေးချေမှုလင့်ခ်ကို အသုံးပြုပါ</strong></label>
+                    <button class="save-btn" style="background:#000; width:100%;" onclick="handleCardPayment()">
+                        <i class="fas fa-credit-card"></i> Pay with Card (Visa/Master/JCB)
+                    </button>
+                </div>
+
+                <button class="save-btn" id="upload-btn" style="width: 100%; margin-top: 25px; height:50px; font-size:1.1rem;" onclick="handlePaymentUpload('${courseId}')">
+                    <i class="fas fa-cloud-upload-alt"></i> စာရင်းသွင်းမှု အတည်ပြုခိုင်းမည်
+                </button>
+
+                <button class="menu-btn" style="width:100%; margin-top:10px; background:#64748b;" onclick="renderCourseSelection()">
+                    Back to Courses
                 </button>
             </div>
-
-            <button class="save-btn" id="upload-btn" style="width: 100%; margin-top: 25px; height:50px; font-size:1.1rem;" onclick="handlePaymentUpload('${courseId}')">
-                <i class="fas fa-cloud-upload-alt"></i> စာရင်းသွင်းမှု အတည်ပြုခိုင်းမည်
-            </button>
-
-            <button class="menu-btn" style="width:100%; margin-top:10px; background:#64748b;" onclick="renderCourseSelection()">
-                Back to Courses
-            </button>
-        </div>
-    `;
+        `;
+    } catch (e) { console.log(e); }
 }
 
 function handleCardPayment() {
@@ -3299,32 +3354,36 @@ async function submitPaymentRequest() {
 
 async function renderPaymentRequests() {
     const body = document.getElementById('dynamic-body');
-    body.innerHTML = `<h3><i class="fas fa-receipt"></i> ပေးချေမှု စစ်ဆေးရန်</h3><div class="loader">Loading...</div>`;
+    body.innerHTML = `<h3><i class="fas fa-receipt"></i> သင်တန်းကြေး စစ်ဆေးရန်စာရင်း</h3><div class="loader">Loading...</div>`;
 
-    const snap = await db.collection('payments').where('status', '==', 'pending').get();
-    let html = '<div class="dashboard-grid">';
-    
-    if (snap.empty) {
-        body.innerHTML = `<h3>စစ်ဆေးရန် မရှိပါ။</h3><button class="menu-btn" onclick="renderAdminPanel()">Back</button>`;
-        return;
+    try {
+        // Pending ဖြစ်နေတဲ့ ပေးချေမှုတွေကိုပဲ ဆွဲယူမည်
+        const snap = await db.collection('payments').where('status', '==', 'pending').get();
+        
+        if (snap.empty) {
+            body.innerHTML = `<h3>စစ်ဆေးရန်စာရင်း မရှိပါ။</h3><button class="menu-btn" onclick="renderAdminPanel()">Back</button>`;
+            return;
+        }
+
+        let html = '<div class="dashboard-grid">';
+        snap.forEach(doc => {
+            const p = doc.data();
+            html += `
+                <div class="content-card animate-up">
+                    <h5>${p.studentName}</h5>
+                    <small>Course ID: ${p.courseId}</small>
+                    <img src="${p.screenshot}" style="width:100%; border-radius:10px; margin:10px 0; cursor:pointer;" onclick="window.open('${p.screenshot}')">
+                    <div style="display:flex; gap:10px;">
+                        <button class="save-btn" onclick="approveStudent('${doc.id}', '${p.studentId}', '${p.courseId}')">Approve</button>
+                        <button class="menu-btn" style="background:red; color:white;" onclick="rejectPayment('${doc.id}')">Reject</button>
+                    </div>
+                </div>`;
+        });
+        body.innerHTML = html + '</div><br><button class="menu-btn" onclick="renderAdminPanel()">Back</button>';
+    } catch (e) {
+        console.error("Payment Request Error:", e);
+        body.innerHTML = `<div class="error-msg">Error: ${e.message}</div>`;
     }
-
-    snap.forEach(doc => {
-        const p = doc.data();
-        html += `
-            <div class="content-card animate-up">
-                <h5>${p.studentName}</h5>
-                <small>သင်တန်း- ${p.courseTitle}</small>
-                <img src="${p.screenshot}" style="width:100%; border-radius:10px; margin:10px 0; cursor:pointer;" onclick="window.open('${p.screenshot}')">
-                <div style="display:flex; gap:10px;">
-                    <!-- 🔥 ဒီနေရာမှာ p.courseId ကို သေချာ ပို့ပေးလိုက်ပါပြီ -->
-                    <button class="save-btn" onclick="approveStudent('${doc.id}', '${p.studentId}', '${p.courseId}')">Approve</button>
-                    <button class="menu-btn" style="background:red; color:white;" onclick="rejectPayment('${doc.id}')">Reject</button>
-                </div>
-            </div>
-        `;
-    });
-    body.innerHTML = html + '</div><br><button class="menu-btn" onclick="renderAdminPanel()">Back</button>';
 }
 
 async function approveStudent(payDocId, studentUid, courseId) {

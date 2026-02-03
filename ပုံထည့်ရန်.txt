@@ -1,0 +1,45 @@
+public/assets ထဲမှာ အခုလိုမျိုး Folder လေးတွေ ခွဲလိုက်ပါ-
+
+/public
+  └── assets/
+        └── profiles/
+              ├── teachers/   <-- ဆရာများပုံ (ဥပမာ- ashin.jpg, tutor.png)
+              └── students/   <-- ကျောင်းသားပုံ (ဥပမာ- aung.png, susu.jpg)
+
+၂။ Path ပေးရမည့် နည်းလမ်း (အရေးကြီးသည်)
+Firebase Hosting မှာ public folder သည် Root (ပင်မလမ်းကြောင်း) ဖြစ်တဲ့အတွက် ကုဒ်ထဲမှာဖြစ်ဖြစ်၊ Database ထဲမှာဖြစ်ဖြစ် Path ပေးတဲ့အခါ public ဆိုတဲ့ စာလုံးကို ထည့်စရာမလိုပါဘူး။
+
+မှန်ကန်သော Path ပုံစံများ-
+ဆရာ့ပုံအတွက်: /assets/profiles/teachers/ashin.jpg
+ကျောင်းသားပုံအတွက်: /assets/profiles/students/aung.png
+
+၃။ app.js သို့မဟုတ် Firestore တွင် အသုံးပြုပုံ
+ကျောင်းသား/ဆရာ စာရင်းကို သတ်မှတ်တဲ့အခါ photo နေရာမှာ အခုလို ရေးပေးရပါမယ်။
+ကုဒ်ထဲတွင် တိုက်ရိုက်ပေးခြင်း (Initial State):
+
+let studentsList = [
+  {
+    uid: "st001",
+    name: "Aung Aung",
+    // ... အခြား data များ ...
+    photo: "/assets/profiles/students/aung.png" // ပုံလမ်းကြောင်းကို ဤသို့ပေးပါ
+  }
+];
+
+Firebase Console (Firestore) ထဲတွင် ထည့်သွင်းခြင်း:
+Firestore ရဲ့ users collection ထဲက photo field မှာလည်း အဲ့ဒီအတိုင်းပဲ ရိုက်ထည့်ပေးရပါမယ်-
+Field: photo
+Type: string
+Value: /assets/profiles/teachers/ashin.jpg
+
+၄။ ပုံမပေါ်မှာ စိုးရိမ်ရင် (Safety Tip)
+အကယ်၍ ပုံလမ်းကြောင်း မှားသွားလို့ဖြစ်ဖြစ်၊ ဖိုင်ပျက်သွားလို့ဖြစ်ဖြစ် ပုံမပေါ်ဘဲ ဖြစ်မနေစေဖို့ app.js ထဲက <img> tag မှာ onerror ဆိုတာလေး ထည့်ထားပေးတာ အကောင်းဆုံးပါ။
+
+// renderProfile သို့မဟုတ် renderAuthFooter ထဲက img tag မှာ အခုလို ရေးပါ
+<img src="${currentUser.photo}" 
+     onerror="this.src='/assets/profiles/default-user.png'" 
+     class="profile-large-avatar">
+
+⚠️ သတိထားရန် အချက်များ-
+၁။ Case Sensitive: Folder နာမည်နဲ့ ပုံနာမည်တွေကို အမြဲတမ်း စာလုံးအသေး (lowercase) ပဲ သုံးပါ။ (ဥပမာ- Ashin.JPG လို့ မပေးဘဲ ashin.jpg လို့ ပေးပါ)။
+၂။ Slash (/): လမ်းကြောင်းရဲ့ ရှေ့ဆုံးမှာ / ခံပေးတာက Browser ကို "အပြင်ဆုံးကနေ စရှာပါ" လို့ ပြောတာဖြစ်လို့ ပိုပြီး တိကျသေချာစေပါတယ်။
