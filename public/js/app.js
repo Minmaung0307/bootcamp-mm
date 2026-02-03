@@ -1215,90 +1215,85 @@ async function editMsg(id, oldText) {
 
 // Profile ပြသခြင်း (View Mode & Academic Info)
 function renderProfile() {
-  const body = document.getElementById("dynamic-body");
+    const body = document.getElementById("dynamic-body");
+    const enrolled = currentUser.enrolledCourses || [];
+    const isTeacher = currentUser.role === "Teacher";
+    const roleBadgeStyle = isTeacher ? "background:#ef4444; color:white;" : "background:#e2e8f0; color:black;";
 
-  const grades = currentUser.grades || {};
-  const completedCount = Object.keys(grades).length;
-  let totalScore = 0;
-  Object.values(grades).forEach(s => totalScore += s);
-  const gpa = completedCount > 0 ? (totalScore / completedCount).toFixed(2) : 0;
+    // ပိုက်ဆံမသွင်းရသေးသူများအတွက် Alert Box (Overwrite မဖြစ်အောင် Variable ထဲအရင်ထည့်မည်)
+    let unpaidAlert = "";
+    if (!isTeacher && enrolled.length === 0) {
+        unpaidAlert = `
+            <div class="tip-box animate-up" style="background:#fffbeb; border:1px solid #f59e0b; color:#92400e; margin-bottom:20px; padding:15px; border-radius:8px;">
+                <i class="fas fa-info-circle"></i> သင်တန်းများ စတင်လေ့လာရန် သင်တန်းအနည်းဆုံးတစ်ခု အရင်အပ်နှံရန် လိုအပ်ပါသည်။ 
+                <button class="save-btn" style="padding:4px 12px; margin-left:10px; font-size:0.8rem;" onclick="renderCourseSelection()">သင်တန်းအပ်ရန်</button>
+            </div>`;
+    }
 
-  const isEligible = completedCount >= 5 && gpa >= 75;
-  const roleBadgeStyle = currentUser.role === "Teacher" ? "background:#ef4444; color:white;" : "background:#e2e8f0; color:black;";
+    // တက်ရောက်နေသော သင်တန်းတစ်ခုချင်းစီအတွက် Achievement Cards များ တည်ဆောက်ခြင်း
+    let coursesHtml = "";
+    enrolled.forEach(courseId => {
+        const course = allCourses[courseId];
+        if (course) {
+            // ဤသင်တန်းအတွက် GPA တွက်ချက်ခြင်း
+            const courseGrades = currentUser.grades?.[courseId] || {};
+            const subjects = course.transcriptSubjects || lmsSettings.subjects;
+            let total = 0;
+            subjects.forEach(sub => total += (courseGrades[sub.toLowerCase()] || 0));
+            const gpa = subjects.length > 0 ? (total / subjects.length).toFixed(2) : 0;
+            const isEligible = subjects.length > 0 && gpa >= 75;
 
-  // 🔥 ပြင်ဆင်ချက်: Alert Box ကို Variable ထဲ အရင်ထည့်မည်
-  let unpaidAlert = "";
-  // အကယ်၍ အကောင့်ဝင်ထားသူသည် ဆရာမဟုတ်ဘဲ၊ ဝယ်ထားသောသင်တန်းလည်း တစ်ခုမှ မရှိလျှင် (enrolledCourses အလွတ်ဖြစ်လျှင်)
-  const hasNoEnrolledCourses = !currentUser.enrolledCourses || currentUser.enrolledCourses.length === 0;
+            coursesHtml += `
+                <div class="content-card academic-card animate-up" style="margin-bottom:20px; border-left: 5px solid var(--primary);">
+                    <h4 style="color:var(--primary); margin-bottom:10px;">🎓 ${course.title}</h4>
+                    <div class="academic-box">
+                        <div class="academic-item"><span>GPA:</span> <strong style="color:green">${gpa}</strong></div>
+                        <div class="academic-item"><span>Status:</span> <strong>${gpa >= 75 ? 'Completed' : 'Learning'}</strong></div>
+                    </div>
+                    <div style="margin-top:15px; display:flex; gap:10px; flex-wrap:wrap;">
+                        <button class="menu-btn" onclick="viewTranscript('${currentUser.uid}', false, '${courseId}')">View Transcript</button>
+                        <button class="menu-btn ${isEligible ? 'cert-gold' : 'disabled-btn'}" 
+                                onclick="${isEligible ? `viewCertificate('${currentUser.uid}', false, '${courseId}')` : "alert('GPA 75 ကျော်ရန် လိုအပ်သည်')"}">
+                            Certificate
+                        </button>
+                    </div>
+                </div>`;
+        }
+    });
 
-  if (currentUser.role !== 'Teacher' && hasNoEnrolledCourses) {
-    unpaidAlert = `
-        <div class="tip-box animate-up" style="background:#fffbeb; border:1px solid #f59e0b; color:#92400e; margin-bottom:20px; padding:15px; border-radius:8px;">
-            <i class="fas fa-info-circle"></i> သင်၏ Profile ကို ပြင်ဆင်နိုင်ပါသည်။ သင်ခန်းစာများ စတင်လေ့လာရန် သင်တန်းကြေးပေးသွင်းရန် လိုအပ်ပါသည်။ 
-            <button class="save-btn" style="padding:4px 12px; margin-left:10px; font-size:0.8rem;" onclick="renderCourseSelection()">သင်တန်းအပ်ရန်</button>
-        </div>
-    `;
-  }
-
-  // အားလုံးပေါင်းပြီး တစ်ခါတည်း innerHTML ထဲ ထည့်မည် (overwrite မဖြစ်တော့ပါ)
-  body.innerHTML = `
+    // အားလုံးကို စုစည်းပြီး တစ်ခါတည်း Render လုပ်ခြင်း
+    body.innerHTML = `
     ${unpaidAlert}
     <div class="profile-card-pro fade-in">
         <div class="profile-cover"></div>
         <div class="profile-header-main">
-            <img src="${currentUser.photo}" class="profile-large-avatar" onerror="this.src='https://placehold.co/150x150/003087/white?text=User'">
+            <img src="${currentUser.photo}" class="profile-large-avatar" onerror="this.src='https://placehold.co/150'">
             <div class="profile-info-text">
-                <h2>${currentUser.name} <span class="badge-verify"><i class="fas fa-check-circle"></i></span></h2>
+                <h2>${currentUser.name} <i class="fas fa-check-circle text-primary"></i></h2>
                 <span class="u-role-tag" style="${roleBadgeStyle}">${currentUser.role}</span>
-                <div style="margin-top:15px; display:flex; gap:10px; flex-wrap:wrap;">
-                    <button class="save-btn" onclick="renderEditProfile()"><i class="fas fa-user-edit"></i> Edit Profile</button>
-                    ${currentUser.role === "Teacher" ? `<button class="menu-btn" style="background:#000; color:white;" onclick="renderAdminPanel()"><i class="fas fa-user-shield"></i> Admin Panel</button>` : ""}
+                <div style="margin-top:15px;">
+                    <button class="save-btn" onclick="renderEditProfile()">Edit Profile</button>
+                    ${isTeacher ? `<button class="menu-btn" style="background:#000; color:white;" onclick="renderAdminPanel()">Admin Panel</button>` : ""}
                 </div>
             </div>
         </div>
-        
         <div class="profile-content-grid">
             <div class="profile-side-info">
                 <div class="content-card">
-                    <h4>Connect with me</h4>
+                    <h4>Social & Links</h4>
                     <div class="social-links-grid">
                         ${currentUser.portfolio ? `<a href="${currentUser.portfolio}" target="_blank"><i class="fas fa-globe"></i></a>` : ""}
                         ${currentUser.github ? `<a href="${currentUser.github}" target="_blank"><i class="fab fa-github"></i></a>` : ""}
-                        ${currentUser.linkedin ? `<a href="${currentUser.linkedin}" target="_blank"><i class="fab fa-linkedin"></i></a>` : ""}
-                        ${currentUser.email ? `<a href="mailto:${currentUser.email}"><i class="fas fa-envelope"></i></a>` : ""}
+                        <a href="mailto:${currentUser.email}"><i class="fas fa-envelope"></i></a>
                     </div>
                 </div>
             </div>
-
             <div class="profile-main-data">
-                <div class="content-card academic-card">
-                    <h4><i class="fas fa-university"></i> Academic Achievement</h4>
-                    <div class="academic-box">
-                        <div class="academic-item"><span>Batch:</span> <strong>${currentUser.batchId || "-"}</strong></div>
-                        <div class="academic-item"><span>တက်ရောက်မှု:</span> <strong>${currentUser.attendance || "0%"}</strong></div>
-                        <div class="academic-item"><span>Grade:</span> <strong style="color:green">${currentUser.overallGrade || "-"}</strong></div>
-                        <div class="academic-item"><span>စာမေးပွဲရက်:</span> <strong style="color:red">${currentUser.examDate || "-"}</strong></div>
-                        <div class="academic-item"><span>GPA:</span> <strong style="color:green">${gpa}</strong></div>
-                        <div class="academic-item"><span>Completed Modules:</span> <strong>${completedCount}</strong></div>
-                    </div>
-                    
-                    <div style="margin-top:20px; display:flex; gap:10px; flex-wrap:wrap;">
-                        <button class="menu-btn" onclick="viewTranscript('${currentUser.uid}')">
-                            <i class="fas fa-file-invoice"></i> Transcript
-                        </button>
-                        <button class="menu-btn" style="background:#0ea5e9; color:white;" onclick="renderMySubmissions()">
-                            <i class="fas fa-folder-open"></i> Submissions
-                        </button>
-                        <button class="menu-btn ${isEligible ? 'cert-gold' : 'disabled-btn'}" 
-                                onclick="${isEligible ? `viewCertificate('${currentUser.uid}')` : "alert('သင်တန်းမပြီးသေးပါ သို့မဟုတ် ရမှတ်မလုံလောက်ပါ')"}">
-                            <i class="fas fa-award"></i> Certificate
-                        </button>
-                    </div>
-                </div>
-
+                ${coursesHtml || '<div class="content-card">တက်ရောက်နေသော သင်တန်း မရှိသေးပါ။</div>'}
                 <div class="content-card">
-                    <h4>Personal Notes / Bio</h4>
+                    <h4>Personal Bio</h4>
                     <p>${currentUser.notes || "မှတ်စုများ မရှိသေးပါ။"}</p>
+                    <button class="menu-btn" style="background:#0ea5e9; color:white; margin-top:10px;" onclick="renderMySubmissions()">My Submissions</button>
                 </div>
             </div>
         </div>
@@ -1419,6 +1414,13 @@ function renderAuthFooter() {
             <button class="logout-mini-btn" onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i></button>
         </div>
     `;
+
+    // 🔥 Teacher ဖြစ်ရင် Sidebar က သော့တွေကို အမြဲဖြုတ်ထားမည်
+    if (currentUser.role === 'Teacher') {
+        setTimeout(() => {
+            document.querySelectorAll('.nav-links a').forEach(l => l.classList.remove('nav-locked'));
+        }, 100);
+    }
 }
 
 // Firebase Auth Login Function
@@ -1492,88 +1494,72 @@ async function handleLogout() {
 }
 
 // --- Transcript ပြသခြင်း ---
-function viewTranscript(uid, isAdminPreview = false) {
+function viewTranscript(uid, isAdminPreview = false, courseId) {
     const student = (uid === currentUser.uid) ? currentUser : studentsList.find(s => s.uid === uid);
-    if (!student) return alert("Student not found!");
+    // courseId မပါလာရင် လက်ရှိရွေးထားတဲ့သင်တန်းကို ယူမယ်
+    const cId = courseId || currentUser.selectedCourseId;
+    const course = allCourses[cId];
+    
+    if (!student || !course) return alert("Data Error: သင်တန်းအချက်အလက် ရှာမတွေ့ပါ။");
 
     const body = document.getElementById('dynamic-body');
     const backFunc = isAdminPreview ? `previewStudentAchievements('${uid}')` : "showSection('profile')";
     
-    const grades = student.grades || {};
+    // 🔥 အမှတ်စာရင်းကို သင်တန်း ID အလိုက် ခွဲဖတ်မည်
+    const courseGrades = (student.grades && student.grades[cId]) ? student.grades[cId] : {};
+    
     let totalScore = 0;
-    let subjectCount = lmsSettings.subjects.length;
-
-    let rows = lmsSettings.subjects.map(sub => {
-        const score = grades[sub.toLowerCase()] || 0;
+    // 🔥 သင်တန်းအလိုက် သတ်မှတ်ထားတဲ့ ဘာသာရပ်စာရင်းကိုပဲ loop ပတ်မည်
+    let rows = course.transcriptSubjects.map(sub => {
+        const score = courseGrades[sub.toLowerCase()] || 0;
         totalScore += score;
-        const status = score >= 50 ? '<span class="text-success" style="font-weight:bold;">Pass</span>' : '<span class="text-danger" style="font-weight:bold;">Fail</span>';
-        return `<tr><td style="text-transform:uppercase; text-align:left; padding:12px;">${sub}</td><td style="padding:12px;">${score}</td><td style="padding:12px;">${status}</td></tr>`;
+        const status = score >= 50 ? '<span class="text-success">Pass</span>' : '<span class="text-danger">Fail</span>';
+        return `
+            <tr>
+                <!-- 🔥 ဒီနေရာမှာ text-align: left; ပြောင်းလိုက်ပါပြီ -->
+                <td style="text-align: left; padding-left: 25px; text-transform: uppercase;">${sub.replace('_',' ')}</td>
+                <td style="text-align: center;">${score}</td>
+                <td style="text-align: center;">${status}</td>
+            </tr>`;
     }).join('');
 
-    const gpa = subjectCount > 0 ? (totalScore / subjectCount).toFixed(2) : 0;
-    const issueDate = new Date().toLocaleDateString('en-GB');
+    const gpa = course.transcriptSubjects.length > 0 ? (totalScore / course.transcriptSubjects.length).toFixed(2) : 0;
 
     body.innerHTML = `
-        <div class="transcript-outer-container animate-up">
-            <div class="no-print" style="margin-bottom:20px;">
+        <div class="content-card animate-up transcript-area" style="max-width: 900px; margin: auto;">
+            <div class="no-print" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h3>Official Transcript ${isAdminPreview ? '(Demo)' : ''}</h3>
                 <button class="menu-btn" onclick="${backFunc}"><i class="fas fa-arrow-left"></i> Back</button>
             </div>
-
-            <div class="transcript-paper shadow-lg">
-                <div class="transcript-header" style="text-align:center; margin-bottom:30px;">
-                    <h2 style="color:#003087; text-transform:uppercase; margin:0; font-size: 2rem;">Myanmar Full-Stack Bootcamp</h2>
-                    <p style="color:#64748b; font-weight: bold; margin:5px 0;">OFFICIAL STUDENT RECORD</p>
-                </div>
-
-                <!-- 🔥 ဘယ်/ညာ တိတိကျကျ ခွဲထားသော အချက်အလက်များ 🔥 -->
-                <div class="academic-info-grid" style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:25px; margin-bottom:30px; -webkit-print-color-adjust: exact;">
-                    <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                        <span><strong>Student Name:</strong> ${student.name}</span>
-                        <span><strong>Course Title:</strong> ${lmsSettings.courseTitle}</span>
+            <div style="text-align:center; margin-bottom:30px;">
+                <h2 style="color:#003087; text-transform:uppercase; margin:0;">Myanmar Full-Stack Bootcamp</h2>
+                <!-- 🔥 သင်တန်းအလိုက် နာမည်ပြောင်းမည် -->
+                <p style="margin-top:5px; font-weight:bold;">${course.title}</p>
+            </div>
+            <div class="academic-box" style="display:grid; grid-template-columns: 1fr 1fr; padding:20px; background:var(--main-bg); border-radius:10px; margin-bottom:20px;">
+                <div><p>Name: <strong>${student.name}</strong></p><p>ID: <strong>${student.uid.substring(0,8).toUpperCase()}</strong></p></div>
+                <div style="text-align:right;"><p>GPA: <strong style="color:green">${gpa}</strong></p><p>Date: <strong>${new Date().toLocaleDateString('en-GB')}</strong></p></div>
+            </div>
+            <table class="admin-table" style="width:100%; border-collapse:collapse;">
+                <thead><tr style="background:#003087; color:white;"><th style="text-align:left; padding-left:25px;">Subject</th><th>Score</th><th>Result</th></tr></thead>
+                <tbody>${rows}</tbody>
+            </table>
+            
+            <div class="transcript-footer" style="margin-top:60px; display:flex; justify-content:space-between; align-items:flex-end;">
+                <div style="font-size:0.8rem; color:grey;">* Computer-generated official record.</div>
+                <div style="text-align:center; width:220px;">
+                    <!-- 🔥 သင်တန်းအလိုက် ဆရာနာမည် ပြောင်းမည် -->
+                    <div style="border-bottom:1px solid #333; height:40px; font-family:'Dancing Script', cursive; font-size:1.3rem;">
+                        ${course.instructor || lmsSettings.instructorName}
                     </div>
-                    <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                        <span><strong>Student ID:</strong> ${student.uid.substring(0, 8).toUpperCase()}</span>
-                        <span><strong>Date Issued:</strong> ${issueDate}</span>
-                    </div>
-                    <div style="display:flex; justify-content:space-between;">
-                        <span><strong>Batch:</strong> ${student.batchId || academicInfo.batchName}</span>
-                        <span><strong>Average GPA:</strong> <span style="color:#003087; font-weight:bold; font-size:1.2rem;">${gpa}</span></span>
-                    </div>
-                </div>
-
-                <!-- 🔥 ဇယားကို ညာဘက်အစွန်ထိ အပြည့်ချဲ့ခြင်း 🔥 -->
-                <table class="transcript-table" style="width:100%; border-collapse:collapse; border: 1px solid #ddd;">
-                    <thead>
-                        <tr style="background:#003087 !important; color:white !important; -webkit-print-color-adjust: exact;">
-                            <th style="padding:15px; text-align:left; border: 1px solid #ddd;">SUBJECT / MODULE</th>
-                            <th style="padding:15px; text-align:center; border: 1px solid #ddd; width:120px;">SCORE</th>
-                            <th style="padding:15px; text-align:center; border: 1px solid #ddd; width:120px;">RESULT</th>
-                        </tr>
-                    </thead>
-                    <tbody style="text-align:center;">
-                        ${rows || '<tr><td colspan="3" style="padding:30px;">အမှတ်စာရင်း မရှိသေးပါ။</td></tr>'}
-                    </tbody>
-                </table>
-
-                <div class="transcript-footer" style="margin-top:80px; display:flex; justify-content:space-between; align-items:flex-end;">
-                    <div style="font-size:0.85rem; color:#64748b; text-align:left; line-height:1.6;">
-                        * This is a computer-generated official transcript.<br>
-                        * Minimum passing score for each module is 50.
-                    </div>
-                    <div style="text-align:center; width:250px;">
-                        <div style="border-bottom:1.5px solid #333; height:45px; font-family:'Dancing Script', cursive; font-size:1.5rem; display:flex; align-items:center; justify-content:center; color:#000;">
-                            ${lmsSettings.instructorName}
-                        </div>
-                        <p style="margin-top:10px; font-weight:bold; font-size:0.9rem; text-transform:uppercase; color:#000;">Registrar Office</p>
-                    </div>
+                    <p style="margin-top:8px; font-weight:bold; font-size:0.9rem;">Registrar Office</p>
                 </div>
             </div>
 
             <div class="no-print" style="margin-top:40px; text-align:center;">
-                <button class="save-btn" onclick="window.print()" style="padding:12px 50px; font-size: 1.1rem;"><i class="fas fa-print"></i> Print Transcript</button>
+                <button class="save-btn" onclick="window.print()"><i class="fas fa-print"></i> Print Transcript</button>
             </div>
-        </div>
-    `;
+        </div>`;
 }
 
 // --- ၁။ Global Settings Variables ---
@@ -1607,6 +1593,10 @@ function syncLMSSettings() {
                 renderAuthFooter(); 
             }
         }, err => console.warn("Settings access restricted"));
+    }
+
+    if (currentUser.role === 'Teacher' || currentUser.enrolledCourses?.length > 0) {
+        document.querySelectorAll('.nav-links a').forEach(l => l.classList.remove('nav-locked'));
     }
 }
 
@@ -1703,91 +1693,65 @@ async function saveLMSSettings() {
 }
 
 // --- ၃။ Dynamic Certificate (ID နှင့် Date ပါဝင်ခြင်း) ---
-function viewCertificate(uid, isAdminPreview = false) {
+function viewCertificate(uid, isAdminPreview = false, courseId) {
     const student = (uid === currentUser.uid) ? currentUser : studentsList.find(s => s.uid === uid);
-    if (!student) return alert("Student not found!");
+    const cId = courseId || currentUser.selectedCourseId;
+    const course = allCourses[cId];
+    
+    if (!student || !course) return alert("Data Error!");
 
     const body = document.getElementById('dynamic-body');
     const backFunc = isAdminPreview ? `previewStudentAchievements('${uid}')` : "showSection('profile')";
-    
-    const issueDate = new Date().toLocaleDateString('en-GB');
-    const certId = `CERT-2026-${student.uid.substring(0, 5).toUpperCase()}`;
-    const instructor = lmsSettings.instructorName || "Ashin";
+    const certId = `CERT-${cId.toUpperCase()}-${student.uid.substring(0, 5).toUpperCase()}`;
 
     body.innerHTML = `
         <div class="certificate-page-wrapper animate-up">
             <div class="certificate-frame shadow-lg">
                 <div class="cert-border">
                     <div style="position: relative; z-index: 1; height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
-                        
-                        <div>
-                            <h1 style="font-family: 'Times New Roman', serif; font-size: 3.5rem; color: #1e293b; margin: 0;">CERTIFICATE</h1>
-                            <p style="letter-spacing: 8px; font-weight: bold; color: #64748b; margin-bottom: 30px;">OF COMPLETION</p>
-                            
-                            <p style="font-size: 1.2rem; color: #334155;">This is to certify that</p>
-                            <h2 style="font-family: 'Georgia', serif; font-size: 3rem; color: #003087; border-bottom: 2px solid #e2e8f0; display: inline-block; padding: 0 40px; margin: 15px 0;">
+                        <div style="text-align:center;">
+                            <h1 style="font-family:serif; font-size:3.5rem; color:#1e293b; margin:0;">CERTIFICATE</h1>
+                            <p style="letter-spacing:8px; font-weight:bold; color:#64748b;">OF COMPLETION</p>
+                            <br>
+                            <p style="font-size:1.2rem;">This is to certify that</p>
+                            <h2 style="font-family:serif; font-size:3rem; color:#003087; border-bottom:2px solid #e2e8f0; display:inline-block; padding:0 40px; margin:15px 0;">
                                 ${student.name}
                             </h2>
-                            
-                            <p style="font-size: 1.1rem; color: #334155; margin-top: 20px;">
-                                has successfully completed the Professional Bootcamp in
-                            </p>
-                            <h3 style="color: #003087; font-size: 1.8rem; margin: 15px 0; text-transform: uppercase;">
-                                ${lmsSettings.courseTitle || "Full-Stack Web Development"}
-                            </h3>
-                            <p style="color: #64748b; font-size: 1rem;">Given under our seal on this day, <strong>${issueDate}</strong></p>
+                            <p style="font-size:1.1rem; margin-top:20px;">has successfully completed the Professional Bootcamp in</p>
+                            <!-- 🔥 သင်တန်းအလိုက် ဘွဲ့နာမည်ပြောင်းမည် -->
+                            <h3 style="color:#003087; font-size:1.8rem; text-transform:uppercase;">${course.title}</h3>
+                            <p style="color:#64748b; font-size:1rem;">Issued on: <strong>${new Date().toLocaleDateString('en-GB')}</strong></p>
                         </div>
 
-                        <!-- 🔥 Gold Seal (ရွှေရောင်တံဆိပ်) -->
                         <div class="cert-seal-wrapper">
                             <div class="gold-seal">
-                                <!-- ဝိုင်းနေသော စာသား -->
                                 <svg class="seal-text-svg" viewBox="0 0 100 100">
                                     <path id="circlePath" d="M 50, 50 m -37, 0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0" fill="transparent" />
-                                    <text class="seal-text-path">
-                                        <textPath xlink:href="#circlePath">
-                                            Myanmar Full-Stack Bootcamp • Official Seal •
-                                        </textPath>
-                                    </text>
+                                    <text class="seal-text-path"><textPath xlink:href="#circlePath">Official Bootcamp Seal • ${new Date().getFullYear()} •</textPath></text>
                                 </svg>
-                                
-                                <!-- အလယ်က ဘွဲ့ဦးထုပ်နှင့် သပြေခက် အမှတ်အသား -->
-                                <div class="seal-icon-inner">
-                                    <i class="fas fa-graduation-cap"></i>
-                                    <div style="font-size: 1rem; margin-top: -5px;">
-                                        <i class="fas fa-certificate"></i>
-                                    </div>
-                                </div>
+                                <div class="seal-icon-inner"><i class="fas fa-graduation-cap"></i></div>
                             </div>
                         </div>
 
-                        <div style="display: flex; justify-content: space-around; align-items: flex-end; margin-bottom: 20px;">
-                            <div style="text-align: center;">
-                                <p style="font-family: 'Dancing Script', cursive; font-size: 1.8rem; color: #1e293b; margin-bottom: 5px;">
-                                    ${instructor}
-                                </p>
-                                <div style="border-top: 2px solid #334155; width: 200px; padding-top: 5px; font-weight: bold; font-size: 0.8rem;">LEAD INSTRUCTOR</div>
+                        <div style="display:flex; justify-content:space-around; align-items:flex-end;">
+                            <div style="text-align:center;">
+                                <!-- 🔥 သင်တန်းအလိုက် ဆရာနာမည်ပြောင်းမည် -->
+                                <p style="font-family:'Dancing Script', cursive; font-size:1.8rem; color:#1e293b;">${course.instructor || lmsSettings.instructorName}</p>
+                                <div style="border-top:2px solid #334155; width:180px; padding-top:5px; font-weight:bold; font-size:0.8rem;">LEAD INSTRUCTOR</div>
                             </div>
-                            <div style="text-align: center;">
-                                <p style="font-weight: bold; font-size: 1.1rem; color: #1e293b; margin-bottom: 12px;">${certId}</p>
-                                <div style="border-top: 2px solid #334155; width: 200px; padding-top: 5px; font-weight: bold; font-size: 0.8rem;">CERTIFICATE ID</div>
+                            <div style="text-align:center;">
+                                <p style="font-weight:bold; font-size:1.1rem; color:#1e293b;">${certId}</p>
+                                <div style="border-top:2px solid #334155; width:180px; padding-top:5px; font-weight:bold; font-size:0.8rem;">CERTIFICATE ID</div>
                             </div>
                         </div>
-
                     </div>
                 </div>
             </div>
-
-            <div class="no-print cert-action-buttons">
-                <button class="save-btn" onclick="window.print()">
-                    <i class="fas fa-print"></i> Print Official Certificate
-                </button>
-                <button class="menu-btn" style="background:#64748b; color:white;" onclick="${backFunc}">
-                    <i class="fas fa-arrow-left"></i> Back
-                </button>
+            <div class="no-print cert-action-buttons" style="margin-top:30px;">
+                <button class="save-btn" onclick="window.print()">Print Official Certificate</button>
+                <button class="menu-btn" onclick="${backFunc}">Back</button>
             </div>
-        </div>
-    `;
+        </div>`;
 }
 
 // ==========================================
@@ -1988,8 +1952,11 @@ async function fetchStudentsFromDB() {
             const data = doc.data();
             const userObj = {
                 uid: doc.id,
+                ...data, // name, batchId, role, photo, enrolledCourses, grades အကုန်ပါလာမည်
+
                 name: data.name || "No Name",
                 batchId: data.batchId || "General",
+                attendance: data.attendance || "0%",
                 role: data.role || "Student",
                 photo: data.photo || "https://placehold.co/50"
             };
@@ -1997,6 +1964,7 @@ async function fetchStudentsFromDB() {
             allUsersList.push(userObj);
             if (data.role === 'Student') studentsList.push(userObj);
         });
+        console.log("Students data synced from Cloud.");
     } catch (e) { console.error("Fetch Error:", e); }
 }
 
@@ -2013,12 +1981,13 @@ function renderLMSGuide() {
 
                 <!-- ၁။ ငွေပေးချေမှု အတည်ပြုခြင်း -->
                 <div class="academic-box" style="border-left-color: #10b981;">
-                    <h4 style="color:#059669;"><i class="fas fa-receipt"></i> ၁။ ပိုက်ဆံသွင်းထားသူများ (Payment Requests)</h4>
-                    <p>ကျောင်းသားသစ်များ သင်တန်းအပ်နှံမှုအား ဤနေရာတွင် အဓိက စစ်ဆေးရမည်။</p>
+                    <h4 style="color:#059669;"><i class="fas fa-receipt"></i> ၁။ ပိုက်ဆံသွင်းထားသူများ (Payment Approval)</h4>
+                    <p>ကျောင်းသားများ၏ KPay/WavePay သို့မဟုတ် Card Screenshot များကို အတည်ပြုသည့်နေရာ ဖြစ်သည်။</p>
                     <ul>
+                        <li><strong>Card Design:</strong> ပေးချေမှုများကို ကတ်ပြားလေးများဖြင့် သေသပ်စွာ ပြသပေးထားပါသည်။</li>
+                        <li><strong>Multi-Course Support:</strong> ကျောင်းသားသည် မည်သည့်သင်တန်းအတွက် ငွေလွှဲထားသည်ကိုပါ တစ်ခါတည်း စစ်ဆေးနိုင်သည်။</li>
                         <li>ကျောင်းသားတင်ထားသော <strong>KPay/Wave Screenshot</strong> ကို သေချာစွာ စစ်ဆေးပါ။</li>
-                        <li>အချက်အလက်မှန်ကန်ပါက <strong>Approve</strong> ကို နှိပ်ပါ။ ၎င်းသည် ကျောင်းသား၏ <code>isPaid</code> status ကို အလိုအလျောက် <code>true</code> ပြောင်းပေးပြီး သင်ခန်းစာအားလုံးကို ပွင့်သွားစေမည်။</li>
-                        <li>Approve လုပ်ပြီးနောက် ကျောင်းသားထံသို့ "သင်တန်းဝင်ခွင့်ရပြီ" ဟူသော <strong>Real-time Notification</strong> အလိုအလျောက် ရောက်ရှိမည်။</li>
+                        <li><strong>Approve Logic:</strong> Approve နှိပ်လိုက်သည်နှင့် ၎င်းကျောင်းသား၏ <code>enrolledCourses</code> စာရင်းထဲသို့ သင်တန်း ID အလိုအလျောက် ရောက်ရှိသွားပြီး သင်ခန်းစာများ ချက်ချင်း ပွင့်သွားမည်။</li>
                     </ul>
                 </div>
 
@@ -2033,15 +2002,24 @@ function renderLMSGuide() {
                     </ul>
                 </div>
 
+                <!-- သင်ခန်းစာနှင့် စာစစ်ခြင်း -->
+                <div class="academic-box" style="border-left-color: #3b82f6; margin-top:20px;">
+                    <h4 style="color:#2563eb;"><i class="fas fa-file-signature"></i> ၃။ Review & Content Management</h4>
+                    <ul>
+                        <li><strong>Review Submissions:</strong> ကျောင်းသားများ၏ Assignment (စာသား) နှင့် Project (GitHub Link) များကို စစ်ဆေးပြီး အမှတ်ပေးနိုင်သည်။</li>
+                        <li><strong>Add Content:</strong> သင်ခန်းစာအသစ်များကို Folder path တိကျစွာပေး၍ Database ထဲသို့ တိုက်ရိုက် တိုးချဲ့ထည့်သွင်းနိုင်သည်။</li>
+                    </ul>
+                </div>
+
                 <!-- ၃။ စနစ်တစ်ခုလုံး၏ Settings များ -->
                 <div class="academic-box" style="border-left-color: #f59e0b; margin-top:20px;">
-                    <h4 style="color:#d97706;"><i class="fas fa-cog"></i> ၃။ System Settings & Zoom (စနစ်ထိန်းချုပ်မှု)</h4>
-                    <p>LMS ၏ ပင်မအချက်အလက်များကို ကုဒ်ပြင်စရာမလိုဘဲ ဤနေရာတွင် ပြင်ဆင်နိုင်သည်။</p>
+                    <h4 style="color:#d97706;"><i class="fas fa-cog"></i> ၃။ System Settings (LMS Control)</h4>
+                    <p>ဤနေရာတွင် ပြင်ဆင်သမျှသည် ကုဒ်ပြင်စရာမလိုဘဲ App တစ်ခုလုံးသို့ <strong>Real-time</strong> သက်ရောက်သည်။</p>
                     <ul>
-                        <li><strong>Announcement:</strong> ကြေညာချက်စာသားကို ပြင်လိုက်သည်နှင့် ကျောင်းသားအားလုံး၏ အပေါ်ဘားတွင် ချက်ချင်း ပြောင်းလဲသွားမည်။</li>
-                        <li><strong>Zoom/Meet Link:</strong> Link ထည့်သွင်းထားမှသာ ကျောင်းသား Dashboard တွင် "Join via Zoom" ခလုတ် ပေါ်လာမည်။</li>
-                        <li><strong>Class Time:</strong> အချိန်သတ်မှတ်ပေးပါက Dashboard တွင် Countdown Timer (အချိန်ပြောင်းပြန်ရေတွက်မှု) အလိုအလျောက် ပေါ်နေမည်။</li>
-                        <li><strong>Course Title & Instructor:</strong> ဤနေရာတွင် ပြင်သမျှသည် <strong>Transcript နှင့် Certificate</strong> များတွင် တိုက်ရိုက် သက်ရောက်မည်။</li>
+                        <li><strong>Announcement:</strong> စာသားထည့်သွင်းပါက အပေါ်ဘားတွင် Marquee (စာတန်းလှုပ်) အနေဖြင့် ပေါ်လာမည်။ စာသားဖျက်ထားပါက အလိုအလျောက် ပုန်းနေမည်။</li>
+                        <li><strong>Instructor Name:</strong> ဤနေရာတွင် "အရှင်" ဟု ပြင်လိုက်ပါက အောင်လက်မှတ်နှင့် Transcript များရှိ လက်မှတ်နေရာတွင် အလိုအလျောက် ပြောင်းလဲမည်။</li>
+                        <li><strong>Dynamic Subjects:</strong> Transcript တွင် ပြလိုသော ဘာသာရပ်များကို comma ခြား၍ စိတ်ကြိုက် တိုး/လျှော့ လုပ်နိုင်သည်။</li>
+                        <li><strong>Zoom Config:</strong> သင်တန်းချိန်နှင့် Link ထည့်သွင်းပါက Dashboard တွင် Countdown Timer နှင့် Join Button ပေါ်လာမည်။</li>
                     </ul>
                 </div>
 
@@ -2062,6 +2040,37 @@ function renderLMSGuide() {
                         <li><strong>Preview (မျက်လုံးပုံစံ):</strong> ကျောင်းသားအကောင့်သို့ ဝင်စရာမလိုဘဲ ၎င်း၏ Transcript နှင့် Certificate ထွက်လာမည့် ပုံစံကို Demo ကြည့်နိုင်သည်။</li>
                         <li><strong>Gold Seal:</strong> GPA 75 ကျော်မှသာ ကျောင်းသား Profile တွင် အောင်လက်မှတ်ခလုတ် ပွင့်မည်ဖြစ်သော်လည်း ဆရာအနေဖြင့် အချိန်မရွေး Preview ကြည့်နိုင်သည်။</li>
                     </ul>
+                </div>
+
+                <!-- ကျောင်းသား အောင်မြင်မှုမှတ်တမ်းများ -->
+                <div class="academic-box" style="border-left-color: #d4af37; margin-top:20px;">
+                    <h4 style="color:#b8860b;"><i class="fas fa-award"></i> ၄။ Transcript & Gold Seal Certificate</h4>
+                    <ul>
+                        <li><strong>Transcript:</strong> ဘာသာရပ်နာမည်များကို ဘယ်ဘက်ကပ်ညှိ (Left Align) ပေးထားပြီး စနစ်တကျ Print ထုတ်ယူနိုင်သည်။</li>
+                        <li><strong>Landscape Certificate:</strong> အောင်လက်မှတ်ကို <strong>Landscape (US Letter)</strong> ပုံစံဖြင့် ကွက်တိဖြစ်အောင် ပြင်ဆင်ထားပါသည်။</li>
+                        <li><strong>Gold Seal:</strong> အလယ်တည့်တည့်တွင် "Official Bootcamp Seal" ရွှေတံဆိပ် ပါဝင်သောကြောင့် ခန့်ညားထည်ဝါစေပါသည်။</li>
+                        <li><strong>GPA Logic:</strong> GPA 75 ကျော်မှသာ ကျောင်းသား Profile တွင် အောင်လက်မှတ်ခလုတ် ပွင့်မည်ဖြစ်သည်။ (Admin သည် အချိန်မရွေး Preview ကြည့်နိုင်သည်)။</li>
+                    </ul>
+                </div>
+
+                <!-- အဆင့်မြင့် Accessibility Features -->
+                <div class="academic-box" style="border-left-color: #8b5cf6; margin-top:20px;">
+                    <h4 style="color:#7c3aed;"><i class="fas fa-universal-access"></i> ၅။ Smart Learning Tools</h4>
+                    <p>ကျောင်းသားများ သင်ယူမှု လွယ်ကူစေရန် အောက်ပါတို့ကို ထည့်သွင်းထားသည် -</p>
+                    <ul>
+                        <li><strong>Smart Reader:</strong> စာသားကို Select ပေးပြီး Speaker icon နှိပ်ပါက Browser မှ အသံဖြင့် ဖတ်ပြမည်။</li>
+                        <li><strong>Focus Mode:</strong> စာဖတ်သည့်နေရာမှအပ ကျန်တာအားလုံး ဖျောက်ထားနိုင်သည့် Mode။</li>
+                        <li><strong>Cloud Notebook:</strong> ကျောင်းသားတိုင်းအတွက် စာလုံးရေ ၁၀,၀၀၀ အထိ မှတ်သားနိုင်သော ကိုယ်ပိုင် Cloud မှတ်စုစာအုပ်။</li>
+                        <li><strong>Dark Mode:</strong> ညဘက်လေ့လာသူများအတွက် မျက်စိအေးစေမည့် Professional Dark Theme။</li>
+                    </ul>
+                </div>
+
+                <!-- Maintenance Checklist -->
+                <div class="error-msg" style="margin-top:30px; text-align:left; background:#fff1f2; border:1px solid #fda4af; color:#9f1239; padding:20px; border-radius:12px;">
+                    <h5 style="margin-bottom:10px;"><i class="fas fa-exclamation-triangle"></i> အရေးကြီး သတိပြုရန်များ</h5>
+                    <p>၁။ <strong>Message History:</strong> စာတိုများကို စာမျက်နှာ ရှင်းလင်းစေရန်အတွက် <strong>နောက်ဆုံး ၇ ရက်စာ</strong> ကိုသာ ပြသပေးပါသည်။</p>
+                    <p>၂။ <strong>Anti-Plagiarism:</strong> Assignment တင်သည့်နေရာတွင် အပြင်မှစာများကို Copy/Paste လုပ်ခြင်းအား ပိတ်ပင်ထားပါသည်။</p>
+                    <p>၃။ <strong>Storage Sync:</strong> ကျောင်းသား၏ Progress များသည် Cloud (Firebase) နှင့် အမြဲ Sync လုပ်နေမည် ဖြစ်ပါသည်။</p>
                 </div>
 
                 <!-- အရေးကြီးသတိပေးချက် -->
@@ -2189,23 +2198,31 @@ function renderLMSGuide() {
 // Batch အလိုက် Filter လုပ်ပြီး Table ထုတ်ပေးခြင်း
 function filterStudentsByBatch(batchId) {
   const tableBody = document.getElementById("student-table-body");
+  if (!tableBody) return;
+
   tableBody.innerHTML = "";
 
   const filtered = batchId === "All" ? studentsList : studentsList.filter((s) => s.batchId === batchId);
 
   filtered.forEach((student) => {
+    // GPA တွက်ချက်ခြင်း
+    const grades = student.grades || {};
     const row = document.createElement("tr");
+
+    // အခုလက်ရှိ ရွေးထားတဲ့ သင်တန်းရှိရင် အဲ့ဒီသင်တန်းရဲ့ Grade ကိုပြမယ်၊ မရှိရင် Overall ကိုပြမယ်
+    const displayGrade = student.overallGrade || "-";
+
     row.innerHTML = `
             <td><strong>${student.name}</strong></td>
             <td>${student.batchId}</td>
             <td>${student.attendance}</td>
-            <td><span class="s-tag">${student.grade || 'A-'}</span></td>
+            <td><span class="s-tag">${displayGrade}</span></td>
             <td>
                 <!-- Preview ခလုတ်အသစ် (မျက်လုံးပုံစံ) -->
-                <button class="action-btn preview" onclick="previewStudentAchievements('${student.uid}')" title="Demo ကြည့်ရန်">
+                <button class="action-btn preview" onclick="previewStudentAchievements('${student.uid}')" title="Preview">
                     <i class="fas fa-eye"></i>
                 </button>
-                <button class="action-btn msg" onclick="openDirectMessage('${student.uid}')" title="Message ပို့ရန်">
+                <button class="action-btn msg" onclick="openDirectMessage('${student.uid}')" title="Send Message">
                     <i class="fas fa-comment"></i>
                 </button>
                 <button class="action-btn edit" onclick="openGradeModal('${student.uid}')" title="အမှတ်သွင်းရန်">
@@ -2223,31 +2240,41 @@ function previewStudentAchievements(uid) {
     if (!student) return alert("ကျောင်းသား ရှာမတွေ့ပါ။");
 
     const body = document.getElementById('dynamic-body');
+    const enrolled = student.enrolledCourses || []; 
+
+    let courseOptionsHtml = "";
+    
+    if (enrolled.length > 0) {
+        courseOptionsHtml = enrolled.map(cId => {
+            const course = allCourses[cId];
+            if (!course) return "";
+            return `
+                <div class="content-card animate-up" style="margin-bottom:15px; border-left:5px solid #f59e0b; padding: 20px;">
+                    <h5 style="margin-bottom:10px;">${course.title}</h5>
+                    <div style="display:flex; gap:10px;">
+                        <!-- 🔥 Parameter များကို သေသေချာချာ ထည့်ပေးလိုက်ပါပြီ -->
+                        <button class="save-btn" style="padding: 8px 15px; font-size: 0.85rem;" onclick="viewTranscript('${uid}', true, '${cId}')">
+                            <i class="fas fa-file-invoice"></i> Transcript Demo
+                        </button>
+                        <button class="menu-btn cert-gold" style="padding: 8px 15px; font-size: 0.85rem; color:black;" onclick="viewCertificate('${uid}', true, '${cId}')">
+                            <i class="fas fa-award"></i> Certificate Demo
+                        </button>
+                    </div>
+                </div>`;
+        }).join('');
+    } else {
+        courseOptionsHtml = `<div class="academic-box" style="padding: 20px;">ဤကျောင်းသားသည် မည်သည့်သင်တန်းမှ အပ်နှံထားခြင်း မရှိသေးပါ။</div>`;
+    }
+
     body.innerHTML = `
         <div class="content-card animate-up">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
                 <h3><i class="fas fa-user-shield"></i> Admin Preview: ${student.name}</h3>
-                <button class="menu-btn" onclick="renderAdminPanel()"><i class="fas fa-arrow-left"></i> Back to Admin</button>
+                <button class="menu-btn" onclick="renderAdminPanel()"><i class="fas fa-arrow-left"></i> Back</button>
             </div>
-            <p style="color:var(--text-muted); margin-top:10px;">ဤကျောင်းသားအတွက် Transcript နှင့် Certificate တို့ကို Demo အနေဖြင့် စစ်ဆေးကြည့်ရှုနိုင်ပါသည်။</p>
-            <hr style="margin:20px 0;">
-            
-            <div class="dashboard-grid">
-                <div class="content-card">
-                    <h4>Official Transcript</h4>
-                    <p>ဘာသာရပ်အလိုက် ရမှတ်များကို Demo ကြည့်ရန်။</p>
-                    <button class="save-btn" style="margin-top:15px; width:100%;" onclick="viewTranscript('${uid}', true)">
-                        <i class="fas fa-file-invoice"></i> View Transcript Demo
-                    </button>
-                </div>
-                <div class="content-card">
-                    <h4>Certificate</h4>
-                    <p>အောင်လက်မှတ် ထွက်လာမည့် ပုံစံကို Demo ကြည့်ရန်။</p>
-                    <button class="menu-btn cert-gold" style="margin-top:15px; width:100%;" onclick="viewCertificate('${uid}', true)">
-                        <i class="fas fa-award"></i> View Certificate Demo
-                    </button>
-                </div>
-            </div>
+            <p style="color:var(--text-muted); margin-bottom:20px;">ကျောင်းသားတက်ရောက်နေသော သင်တန်းများအလိုက် အမှတ်စာရင်းနှင့် လက်မှတ်များကို စစ်ဆေးကြည့်ရှုနိုင်ပါသည်။</p>
+            <hr><br>
+            ${courseOptionsHtml}
         </div>
     `;
 }
@@ -3359,35 +3386,72 @@ async function submitPaymentRequest() {
 
 async function renderPaymentRequests() {
     const body = document.getElementById('dynamic-body');
-    body.innerHTML = `<h3><i class="fas fa-receipt"></i> သင်တန်းကြေး စစ်ဆေးရန်စာရင်း</h3><div class="loader">Loading...</div>`;
+    
+    body.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h3><i class="fas fa-receipt"></i> ပေးချေမှု စစ်ဆေးရန်စာရင်း</h3>
+            <button class="menu-btn" onclick="renderAdminPanel()"><i class="fas fa-arrow-left"></i> Back</button>
+        </div>
+        <div id="payment-loading" class="loader">Loading...</div>
+    `;
 
     try {
         // Pending ဖြစ်နေတဲ့ ပေးချေမှုတွေကိုပဲ ဆွဲယူမည်
         const snap = await db.collection('payments').where('status', '==', 'pending').get();
+
+        const loadingDiv = document.getElementById('payment-loading');
+        if (loadingDiv) loadingDiv.remove();
         
         if (snap.empty) {
-            body.innerHTML = `<h3>စစ်ဆေးရန်စာရင်း မရှိပါ။</h3><button class="menu-btn" onclick="renderAdminPanel()">Back</button>`;
+            body.innerHTML += `<div class="content-card">စစ်ဆေးရန် ပေးချေမှုအသစ် မရှိသေးပါ။</div>`;
             return;
         }
 
-        let html = '<div class="dashboard-grid">';
+        let html = '<div class="dashboard-grid">'; // ၃ ခုပြိုင်တူ ပေါ်မည့် Grid System
+        
         snap.forEach(doc => {
             const p = doc.data();
+            const date = p.timestamp ? p.timestamp.toDate().toLocaleDateString() : 'N/A';
+            
             html += `
-                <div class="content-card animate-up">
-                    <h5>${p.studentName}</h5>
-                    <small>Course ID: ${p.courseId}</small>
-                    <img src="${p.screenshot}" style="width:100%; border-radius:10px; margin:10px 0; cursor:pointer;" onclick="window.open('${p.screenshot}')">
-                    <div style="display:flex; gap:10px;">
-                        <button class="save-btn" onclick="approveStudent('${doc.id}', '${p.studentId}', '${p.courseId}')">Approve</button>
-                        <button class="menu-btn" style="background:red; color:white;" onclick="rejectPayment('${doc.id}')">Reject</button>
+                <div class="content-card animate-up payment-req-card">
+                    <div class="payment-card-header">
+                        <div class="user-info-mini">
+                            <i class="fas fa-user-circle"></i>
+                            <div>
+                                <strong>${p.studentName}</strong>
+                                <small>${date}</small>
+                            </div>
+                        </div>
+                        <span class="badge-waiting">Pending</span>
                     </div>
-                </div>`;
+
+                    <div class="payment-card-details">
+                        <p><i class="fas fa-book-open"></i> ${p.courseTitle || p.courseId}</p>
+                    </div>
+
+                    <!-- 🔥 Screenshot ကို Thumbnail အနေဖြင့်သာပြမည် -->
+                    <div class="screenshot-preview" onclick="window.open('${p.screenshot}', '_blank')">
+                        <img src="${p.screenshot}" alt="Screenshot">
+                        <div class="overlay-zoom"><i class="fas fa-search-plus"></i> View Image</div>
+                    </div>
+
+                    <div class="payment-card-actions">
+                        <button class="save-btn approve-btn" onclick="approveStudent('${doc.id}', '${p.studentId}', '${p.courseId}')">
+                            <i class="fas fa-check"></i> Approve
+                        </button>
+                        <button class="menu-btn reject-btn" onclick="rejectPayment('${doc.id}')">
+                            <i class="fas fa-times"></i> Reject
+                        </button>
+                    </div>
+                </div>
+            `;
         });
-        body.innerHTML = html + '</div><br><button class="menu-btn" onclick="renderAdminPanel()">Back</button>';
+        
+        body.innerHTML += html + '</div>';
     } catch (e) {
-        console.error("Payment Request Error:", e);
-        body.innerHTML = `<div class="error-msg">Error: ${e.message}</div>`;
+        console.error(e);
+        body.innerHTML += `<div class="error-msg">Error: ${e.message}</div>`;
     }
 }
 

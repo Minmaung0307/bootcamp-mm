@@ -1,6 +1,8 @@
 const webCourseData = {
     id: "web",
     title: "Full-Stack Web Development",
+    instructor: "U Aung Aung", // 🔥 ဤသင်တန်းအတွက် ဆရာအမည်
+    transcriptSubjects: ["html", "css", "javascript", "react", "nodejs"], // 🔥 Transcript ပြမည့် ဘာသာရပ်များ
     description: "Front-end မှ Back-end အထိ Website တစ်ခုလုံးကို စနစ်တကျ တည်ဆောက်နည်း။",
     benefits: ["React & Node.js Mastery", "Portfolio Project ၅ ခု", "Job Placement Support"],
     price: "50,000 MMK",

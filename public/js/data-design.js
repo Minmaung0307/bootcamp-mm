@@ -1,6 +1,8 @@
 const designCourseData = {
     id: "design", 
     title: "UI/UX Design Fundamentals", 
+    instructor: "Ashin Panna", // 🔥 ဤသင်တန်းအတွက် ဆရာအမည်
+    transcriptSubjects: ["HTML", "CSS", "JavaScript", "Figma"], // 🔥 ဘာသာရပ်စာရင်း
     description: "User Interface နှင့် User Experience အခြေခံများကို လေ့လာပါမယ်။",
     benefits: ["Design Thinking", "Prototyping Skills", "User Research"],
     price: "50,000 MMK", 
