@@ -1,9 +1,0 @@
-{
-    "id": "q001",
-    "maxAttempts": 3,
-    "questions": [
-        { "type": "single", "q": "HTML ရဲ့ အဓိပ္ပာယ်မှာ M က ဘာလဲ?", "options": ["Markup", "Markdown", "Machine"], "correct": 0 },
-        { "type": "multiple", "q": "စာလုံးအထူလုပ်ရန် ဘာတွေသုံးသလဲ?", "options": ["<b>", "<strong>", "<i>"], "correct": [0, 1] },
-        { "type": "short", "q": "CSS ရဲ့ အရှည်က ဘာလဲ?", "correct": "Cascading Style Sheets" }
-    ]
-}

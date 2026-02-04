@@ -172,6 +172,9 @@ function showSection(section, filterCat = null) {
     } else if (section === 'resources') {
         title.innerText = "Learning Resources";
         renderResources();
+    } else if (section === 'showcase') {
+        title.innerText = "Project Showcase";
+        renderShowcase(); // <--- ဒီမှာပဲ ခေါ်သုံးပါ
     } else if (section === 'about') {
         title.innerText = "About Us";
         renderAbout();
@@ -713,6 +716,12 @@ async function renderLessonContent(catIdx, modIdx, lesIdx) {
         const res = await fetch(`${lesson.path}?t=${new Date().getTime()}`);
         if (!res.ok) throw new Error(`File not found`);
 
+        // 🔥 အကယ်၍ Firebase က ဖိုင်မရှိလို့ index.html ကို အစားထိုးပြလိုက်ရင် တားဆီးရန်
+        const contentType = res.headers.get("content-type");
+        if (lesson.type === 'quiz' && !contentType.includes("application/json")) {
+            throw new Error("JSON ဖိုင်မဟုတ်ဘဲ HTML ဒေတာများ ရောက်ရှိနေပါသည်။ လမ်းကြောင်း ပြန်စစ်ပါ။");
+        }
+
         if (lesson.type === "quiz") {
             const quizData = await res.json();
             renderQuizUI(quizData, bc, catIdx, modIdx, lesIdx);
@@ -722,6 +731,10 @@ async function renderLessonContent(catIdx, modIdx, lesIdx) {
             renderProjectUI(catIdx, modIdx, lesIdx, bc);
         } else {
             const html = await res.text();
+            // အကယ်၍ html ထဲမှာ <!DOCTYPE html> ပါနေရင် ဒါဟာ သင်ခန်းစာဖိုင်မဟုတ်ဘဲ ပင်မ App ဖိုင်ဖြစ်နေလို့ပါ
+            if (html.includes("<!DOCTYPE html>") || html.trim() === "") {
+                throw new Error("သင်ခန်းစာ အချက်အလက်များ မရှိပါ။ ဖိုင်အမည်နှင့် လမ်းကြောင်းကို စစ်ဆေးပါ။");
+            }
             body.innerHTML = `
                 ${bc}
                 <article class="content-card animate-up">
@@ -1882,15 +1895,47 @@ function closeAnnouncement() {
 // ၉။ Genreral Admin Panel Logic
 // ==========================================
 
+async function renderAnalytics() {
+    const userSnap = await db.collection('users').where('role', '==', 'Student').get();
+    const paySnap = await db.collection('payments').where('status', '==', 'approved').get();
+    const subSnap = await db.collection('submissions').where('status', '==', 'pending').get();
+
+    let totalRevenue = 0;
+    paySnap.forEach(doc => {
+        const price = parseInt(doc.data().coursePrice) || 50000; // Default price
+        totalRevenue += price;
+    });
+
+    return `
+        <div class="dashboard-grid animate-up" style="margin-bottom:30px;">
+            <div class="content-card" style="border-top: 4px solid #3b82f6;">
+                <small>စုစုပေါင်းကျောင်းသား</small>
+                <h2 style="margin:10px 0;">${userSnap.size} ယောက်</h2>
+            </div>
+            <div class="content-card" style="border-top: 4px solid #10b981;">
+                <small>စုစုပေါင်းဝင်ငွေ (ခန့်မှန်း)</small>
+                <h2 style="margin:10px 0;">${totalRevenue.toLocaleString()} MMK</h2>
+            </div>
+            <div class="content-card" style="border-top: 4px solid #f59e0b;">
+                <small>စစ်ဆေးရန် ကျန်ရှိသော အိမ်စာ</small>
+                <h2 style="margin:10px 0;">${subSnap.size} ခု</h2>
+            </div>
+        </div>
+    `;
+}
+
 // အစမ်းသုံးရန် ကျောင်းသားစာရင်း Data (တကယ်တမ်းတွင် Firestore မှ ဆွဲယူမည်)
 let studentsList = [];
 
 // --- Admin Panel (Teacher သာ ဝင်နိုင်မည်) ---
 // --- ဆရာအတွက် Admin Panel (Academic Status ပြင်ဆင်ရန်) ---
 async function renderAdminPanel() {
+
     await fetchStudentsFromDB(); // Database မှ အရင်ဆွဲမည်
 
   const body = document.getElementById("dynamic-body");
+
+  const analyticsHtml = await renderAnalytics(); 
 
   // ရှိသမျှ Batch များကို စုစည်းပြီး Dropdown ပြုလုပ်ခြင်း
     const batchOptions = [...new Set(studentsList.map(s => s.batchId))].sort();
@@ -1929,6 +1974,8 @@ async function renderAdminPanel() {
                     </button>
                 </div>
             </div>
+
+            ${analyticsHtml} <!-- 🔥 ကိန်းဂဏန်းများ ဤနေရာတွင် ပေါ်မည် -->
 
             <!-- Batch Filter အပိုင်း -->
             <div class="content-card" style="margin-bottom:20px; padding:15px;">
@@ -3683,6 +3730,70 @@ function showToast(message, type = 'info') {
     toast.innerHTML = `<i class="fas ${icon}"></i> <span>${message}</span>`;
     container.appendChild(toast);
     setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 500); }, 3000);
+}
+
+async function renderShowcase() {
+    const body = document.getElementById('dynamic-body');
+    if (!body) return;
+
+    body.innerHTML = `<h3><i class="fas fa-rocket"></i> Student Project Showcase</h3><div class="loader">Loading Projects...</div>`;
+    
+    try {
+        // 🔥 အဆင့် ၁- Database မှ အမှတ်ပေးပြီးသား Project များကို ဆွဲယူမည်
+        const snap = await db.collection('submissions')
+                             .where('type', '==', 'project')
+                             .where('status', '==', 'graded')
+                             .limit(12)
+                             .get();
+
+        if (snap.empty) {
+            body.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                    <h3>Project Showcase</h3>
+                    <button class="menu-btn" onclick="showSection('dashboard')"><i class="fas fa-home"></i> Back</button>
+                </div>
+                <div class="content-card">ပြသရန် ပရောဂျက်များ မရှိသေးပါ။ ဆရာမှ အမှတ်ပေးပြီးမှသာ ဤနေရာတွင် ပေါ်လာမည်ဖြစ်သည်။</div>
+            `;
+            return;
+        }
+
+        let html = `
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h3><i class="fas fa-rocket"></i> Student Project Showcase</h3>
+                <button class="menu-btn" onclick="showSection('dashboard')"><i class="fas fa-home"></i> Back</button>
+            </div>
+            <div class="dashboard-grid">`;
+
+        snap.forEach(doc => {
+            const p = doc.data();
+            html += `
+                <div class="topic-card animate-up" style="text-align:left; padding:20px;">
+                    <div style="font-size:2rem; margin-bottom:15px; color:var(--primary);"><i class="fas fa-laptop-code"></i></div>
+                    <h4 style="margin-bottom:5px;">${p.studentName}</h4>
+                    <p style="font-size:0.8rem; color:var(--text-muted);">${p.lessonTitle}</p>
+                    <hr style="margin:15px 0; border-color:var(--border-color);"><br>
+                    <!-- 🔥 Button Syntax ကို ပြင်လိုက်ပါပြီ -->
+                    <button class="save-btn" style="width:100%;" onclick="window.open('${p.githubLink}', '_blank')">
+                        <i class="fab fa-github"></i> View GitHub
+                    </button>
+                </div>`;
+        });
+        
+        body.innerHTML = html + '</div>';
+
+    } catch (e) {
+        console.error("Showcase Error Details:", e);
+        // 🔥 Index မရှိလျှင် Browser Console (F12) ထဲက Link ကို နှိပ်ရပါမည်
+        body.innerHTML = `
+            <div class="error-msg animate-up">
+                <h4><i class="fas fa-exclamation-triangle"></i> ပြခန်းကို ဖွင့်၍မရပါ။</h4>
+                <p>${e.message}</p>
+                <br>
+                <small>မှတ်ချက်- Firebase Console တွင် Index ဆောက်ရန် လိုအပ်နိုင်ပါသည်။ (F12 တွင် Link ကိုစစ်ပါ)</small>
+                <br><br>
+                <button class="menu-btn" onclick="showSection('dashboard')">Back to Home</button>
+            </div>`;
+    }
 }
 
 // 🔥 အခုကစပြီး alert() နေရာမှာ showToast() ကို အစားထိုးသုံးပါ

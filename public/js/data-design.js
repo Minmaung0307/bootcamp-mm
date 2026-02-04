@@ -21,7 +21,8 @@ const designCourseData = {
                     lessons: [
                         { title: "1.1.1: Auto Layout Pro", type: "article", path: "/content/design/technical/mod1/autolayout.html" },
                         { title: "Layout Grid Quiz", type: "quiz", path: "/content/design/technical/mod1/quiz1.json" },
-                        { title: "Landing Page Project", type: "project", path: "/content/design/technical/mod1/project1.html" }
+                        { title: "Landing Page Project", type: "project", path: "/content/design/technical/mod1/project1.html" },
+                        { title: "Intro", type: "project", path: "/content/design/technical/mod1/intro.html" }
                     ]
                 }
             ]
