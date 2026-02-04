@@ -1129,8 +1129,20 @@ body {
 @media print {
     /* ၁။ စာရွက်ကို Landscape အတင်းပြောင်းပြီး ဘောင်များကို ဖယ်ထုတ်မည် */
     @page {
-        size: letter landscape;
+        size: landscape; /* စာရွက်ကို ဘေးတိုက် (Landscape) အဖြစ် အတင်းသတ်မှတ်မည် */
         margin: 0;
+    }
+
+    /* ၂။ Browser က Background အရောင်တွေကို ဖျောက်မပစ်ရန် အတင်းခိုင်းခြင်း */
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    body {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        background-color: white !important;
     }
 
     /* ၂။ မလိုအပ်သော UI အစိတ်အပိုင်းများ အားလုံးကို ဖျောက်ခြင်း */
@@ -1148,7 +1160,17 @@ body {
         overflow: hidden !important; /* ဗလာစာရွက် မပါစေရန် */
     }
 
-    .wrapper, .main-content, .body-container {
+    .main-content, .body-container {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        height: 100vh !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+    }
+
+    .wrapper {
         display: flex !important;
         justify-content: center !important;
         align-items: center !important;
@@ -1181,10 +1203,14 @@ body {
     }
 
     .certificate-frame {
-        width: 9.8in !important; /* စာရွက်အနားသတ်ထက် အနည်းငယ်သေးအောင်ထားသည် */
-        height: 7.2in !important;
-        margin: 0 auto !important;
+        width: 10.5in !important; /* US Letter Width */
+        height: 8in !important;   /* US Letter Height */
         border: 15px solid #1e293b !important;
+        box-shadow: none !important;
+        margin: 0 !important;
+        /* width: 9.8in !important;  */  /* စာရွက်အနားသတ်ထက် အနည်းငယ်သေးအောင်ထားသည် */
+        /* height: 7.2in !important; */
+        /* margin: 0 auto !important; */
         transform: none !important;
         box-sizing: border-box !important;
         /* page-break-before: avoid;
@@ -1247,6 +1273,32 @@ body {
         display: flex !important;
         justify-content: space-between !important;
         align-items: flex-end !important;
+    }
+
+    /* Transcript စာမျက်နှာကို Print အတွက် ညှိခြင်း */
+    .transcript-paper {
+        border: 1px solid #ddd !important; /* ဘောင်လေး ပြန်ထည့်မည် */
+        border-radius: 15px !important;
+        box-shadow: none !important;
+        padding: 40px !important;
+        width: 100% !important;
+        max-width: 1000px !important;
+        margin: 0 auto !important;
+        display: block !important;
+    }
+    
+    .transcript-outer-container {
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    /* အချက်အလက်ပြ Box (Name, ID, GPA) ကို ပုံစံမပျက်စေရန် */
+    .academic-info-row {
+        background-color: #f8fafc !important;
+        border: 1px solid #e2e8f0 !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        padding: 15px 25px !important;
     }
 }
 
@@ -1386,13 +1438,32 @@ body {
 
 .notification-wrapper {
     position: relative;
-    display: inline-flex !important; /* Safari မှာ နေရာမှန်စေရန် */
+    display: none; /* အစပိုင်းတွင် ဖျောက်ထားမည် */
     align-items: center;
     justify-content: center;
     width: 40px;
     height: 40px;
     z-index: 5000;
 }
+
+/* Mobile Header Title Fix (ခေါင်းစဉ်ရှည်ရင် မလျှံထွက်စေရန်) */
+#page-title {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 300px; /* ၁၅၀ မှ ၃၀၀ သို့ တိုးလိုက်ပါသည် */
+    font-size: 1.2rem;
+    color: var(--text-main);
+    flex: 1; /* နေရာပိုရစေရန် */
+}
+
+@media (max-width: 480px) {
+    #page-title {
+        max-width: 180px; /* ဖုန်းအသေးစားများအတွက်သာ ကန့်သတ်မည် */
+        font-size: 1rem;
+    }
+}
+
 .badge-red {
     position: absolute;
     top: -2px;

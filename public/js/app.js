@@ -127,81 +127,61 @@ function showSection(section, filterCat = null) {
 
     if (!title || !body) return;
 
-    // ၁။ 🔥 ပိုက်ဆံမသွင်းရသေးသူ (သို့မဟုတ်) သင်တန်းမရှိသေးသူများကို တားဆီးရန် Logic
+    // ၁။ Gatekeeper: ပိုက်ဆံမသွင်းရသေးသူများကို တားဆီးရန်
     const restrictedSections = ['courses', 'messages', 'resources', 'profile'];
-    
-    // ကျောင်းသားဖြစ်ပြီး ဘယ်သင်တန်းမှ မဝယ်ရသေးရင် (enrolledCourses အလွတ်ဖြစ်နေရင်) တားပါမယ်
     const hasNoCourse = !currentUser.enrolledCourses || currentUser.enrolledCourses.length === 0;
 
     if (restrictedSections.includes(section) && currentUser.role !== 'Teacher' && hasNoCourse) {
         alert("⚠️ ဤကဏ္ဍများကို အသုံးပြုရန် သင်တန်းအနည်းဆုံးတစ်ခု အရင်အပ်နှံရန် လိုအပ်ပါသည်။");
-        renderCourseSelection(); // သင်တန်းရွေးချယ်မှုစာမျက်နှာသို့ ပြန်ပို့မည်
+        renderCourseSelection(); 
         return; 
     }
 
-    // Sidebar ပိတ်မည်
-    if (sidebar && sidebar.classList.contains('open')) toggleNav();
+    if (window.innerWidth <= 768) {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        // ဖုန်းဖြစ်ပြီး Sidebar ပွင့်နေရင် ပြန်ပိတ်မယ်
+        if (sidebar.classList.contains('open')) {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('show');
+        }
+    }
 
-    // Section Switching logic များ (Dashboard, Courses, Profile စသည် - အရင်အတိုင်းထားပါ)
+    // ၂။ Sidebar ပိတ်သည့် Logic (Mobile & Desktop)
+    if (sidebar && sidebar.classList.contains('open')) {
+        toggleNav();
+    }
+
+    // ၃။ 🔥 Section အလိုက် ခေါင်းစဉ် (Title) ပြောင်းလဲခြင်း Logic
     if (section === 'dashboard') {
-        title.innerText = "Dashboard";
+        title.innerText = "Dashboard Overview";
         renderDashboard();
     } else if (section === 'courses') {
+        // filterCat ရှိလျှင် (ဥပမာ Foundations) ၎င်းအမည်ကိုပြမည်
+        title.innerText = filterCat ? `${filterCat} Lessons` : "My Lessons";
         renderCourseTree(filterCat);
     } else if (section === 'courses_all') {
+        title.innerText = "သင်တန်းများ ရွေးချယ်ရန်";
         renderCourseSelection();
     } else if (section === 'messages') {
+        title.innerText = "Messenger";
         showMessages();
     } else if (section === 'profile') {
+        title.innerText = "User Profile";
         renderProfile();
     } else if (section === 'resources') {
+        title.innerText = "Learning Resources";
         renderResources();
     } else if (section === 'about') {
+        title.innerText = "About Us";
         renderAbout();
     } else if (section === 'privacy') {
+        title.innerText = "Privacy Policy";
         renderPrivacy();
     }
     
     renderAuthFooter();
 }
-// function showSection(section, filterCat = null) {
-
-//     // 🔥 အရေးကြီးသည် - 'သင်တန်းများအားလုံး' ခလုတ်အတွက်
-//     if (section === 'courses_all') {
-//         title.innerText = "သင်တန်းများ ရွေးချယ်ရန်";
-//         renderCourseSelection();
-//         return;
-//     }
-
-//     // ၁။ Gatekeeper စစ်ဆေးခြင်း (သင်တန်းမရွေးရသေးဘဲ Dashboard/Lessons ဝင်ခိုင်းခြင်းကို တားဆီးရန်)
-//     if ((section === 'dashboard' || section === 'courses') && !currentUser.selectedCourseId && currentUser.role !== 'Teacher') {
-//         renderCourseSelection();
-//         return;
-//     }
-
-//     if (section === 'dashboard') {
-//         title.innerText = "Dashboard";
-//         renderDashboard();
-//     } else if (section === 'courses') {
-//         // 🔥 လက်ရှိရွေးထားတဲ့ သင်တန်းရှိမှ သင်ခန်းစာမာတိကာပြမည်
-//         if (currentUser.selectedCourseId) {
-//             title.innerText = filterCat ? `${filterCat} သင်ခန်းစာများ` : "သင်ခန်းစာများအားလုံး";
-//             renderCourseTree(filterCat);
-//         } else {
-//             renderCourseSelection();
-//         }
-//     } else if (section === 'messages') {
-//         title.innerText = "Messages";
-//         showMessages();
-//     } else if (section === 'profile') {
-//         title.innerText = "My Profile";
-//         renderProfile();
-//     } else if (section === 'resources') {
-//         renderResources();
-//     }
-    
-//     renderAuthFooter();
-// }
 
 function renderResources() {
     const body = document.getElementById('dynamic-body');
@@ -246,30 +226,33 @@ function renderDashboard() {
     const body = document.getElementById('dynamic-body');
     if (!body) return;
 
-    // ၁။ လက်ရှိရွေးထားတဲ့ သင်တန်းရှိမရှိ စစ်ဆေးခြင်း
     const currentCourse = allCourses[currentUser.selectedCourseId];
     if (!currentCourse) {
-        renderCourseSelection(); // သင်တန်းမရွေးရသေးရင် ရွေးခိုင်းမည်
+        renderCourseSelection();
         return;
     }
 
-    // ၂။ ပြီးစီးမှု ရာခိုင်နှုန်းတွက်ချက်သည့် Helper
+    // ၁။ ပြီးစီးမှု ရာခိုင်နှုန်းတွက်ချက်သည့် Helper
     const getPercent = (catName) => {
         const categoryData = currentCourse.data.find(c => c.category.toLowerCase() === catName.toLowerCase());
         if (!categoryData) return 0;
-        
-        let totalLessons = 0;
-        categoryData.modules.forEach(m => totalLessons += m.lessons.length);
-        
+        let total = 0;
+        categoryData.modules.forEach(m => total += m.lessons.length);
         const doneList = currentUser.completedLessons || []; 
-        const doneCount = doneList.filter(l => {
-            return categoryData.modules.some(m => m.lessons.some(les => les.title === l));
-        }).length;
-
-        return Math.round((doneCount / totalLessons) * 100) || 0;
+        const doneCount = doneList.filter(l => categoryData.modules.some(m => m.lessons.some(les => les.title === l))).length;
+        return Math.round((doneCount / total) * 100) || 0;
     };
 
-    // ၃။ Live Class Card (Link ရှိမှ တည်ဆောက်မည်)
+    const fPercent = getPercent('Foundations');
+    const tPercent = getPercent('Technical');
+    const fsPercent = getPercent('Full-Stack');
+
+    // ၂။ 🔥 သင်တန်းအလိုက် မှတ်စုကို ယူခြင်း (Logic ကို HTML အပြင်ထုတ်ထားပါသည်)
+    const currentCourseId = currentUser.selectedCourseId;
+    if (!currentUser.courseNotes) currentUser.courseNotes = {}; // Object မရှိရင် အသစ်ဆောက်မည်
+    const myNoteText = currentUser.courseNotes[currentCourseId] || "";
+
+    // ၃။ Live Class Card
     let liveClassHtml = "";
     if (currentZoomLink && currentZoomLink.trim() !== "") {
         liveClassHtml = `
@@ -280,78 +263,73 @@ function renderDashboard() {
                         onclick="window.open('${currentZoomLink}', '_blank')">
                     <i class="fas fa-video"></i> Join via Zoom
                 </button>
-            </div>
-        `;
+            </div>`;
     }
 
-    // ၄။ သင်တန်းထဲမှာ ရှိသမျှ Category Cards များကို Dynamic ထုတ်ယူခြင်း
-    let categoryCardsHtml = "";
-    currentCourse.data.forEach(cat => {
-        const percent = getPercent(cat.category);
-        categoryCardsHtml += `
-            <div class="topic-card animate-up" onclick="showSection('courses', '${cat.category}')">
-                <div class="card-icon"><i class="fas fa-layer-group"></i></div>
-                <h3>${cat.category}</h3>
-                <div class="progress-container"><div class="progress-bar" style="width:${percent}%"></div></div>
-                <small>${percent}% Completed</small>
-            </div>
-        `;
-    });
-
-    // ၅။ ဆရာဖြစ်လျှင် Leaderboard ထည့်မည်
-    let leaderboardHtml = "";
-    if (currentUser.role === 'Teacher') {
-        leaderboardHtml = `
-            <div class="content-card animate-up" style="grid-column: span 1;">
-                <h4><i class="fas fa-trophy" style="color:gold"></i> Top Students</h4>
-                <div id="leaderboard-content" style="margin-top:10px;">
-                    <div class="loader">Loading...</div>
-                </div>
-            </div>
-        `;
-    }
-
-    // ၆။ အားလုံးကို စုစည်းပြီး တစ်ခါတည်း Render လုပ်ခြင်း
-    body.innerHTML = `
+    // ၄။ HTML စုစည်းတည်ဆောက်ခြင်း
+    let dashboardHtml = `
         ${liveClassHtml}
-
         <div class="welcome-banner fade-in">
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px;">
                 <div>
                     <h2>မင်္ဂလာပါ ${currentUser.name}! 👋</h2>
-                    <p>လက်ရှိသင်တန်း- <strong>${currentCourse.title}</strong></p>
+                    <p style="margin-top:5px; opacity:0.9;">လက်ရှိသင်တန်း- <strong>${currentCourse.title}</strong></p>
                 </div>
                 <button class="menu-btn" style="background:rgba(255,255,255,0.2); border:1px solid white;" onclick="renderCourseSelection()">
-                    <i class="fas fa-exchange-alt"></i> သင်တန်းပြောင်းရန်
+                    <i class="fas fa-exchange-alt"></i> <span>သင်တန်းပြောင်းရန်</span>
                 </button>
             </div>
         </div>
 
         <div class="dashboard-grid">
-            ${categoryCardsHtml}
-            ${leaderboardHtml}
-        </div>
+            <div class="topic-card animate-up" onclick="showSection('courses', 'Foundations')">
+                <div class="card-icon"><i class="fas fa-cubes"></i></div>
+                <h3>Foundations</h3>
+                <div class="progress-container"><div class="progress-bar" style="width:${fPercent}%"></div></div>
+                <small>${fPercent}% Completed</small>
+            </div>
+            <div class="topic-card animate-up" onclick="showSection('courses', 'Technical')">
+                <div class="card-icon"><i class="fas fa-code"></i></div>
+                <h3>Technical</h3>
+                <div class="progress-container"><div class="progress-bar" style="width:${tPercent}%"></div></div>
+                <small>${tPercent}% Completed</small>
+            </div>
+            <div class="topic-card animate-up" onclick="showSection('courses', 'Full-Stack')">
+                <div class="card-icon"><i class="fas fa-server"></i></div>
+                <h3>Full-Stack</h3>
+                <div class="progress-container"><div class="progress-bar" style="width:${fsPercent}%"></div></div>
+                <small>${fsPercent}% Completed</small>
+            </div>
+    `;
 
+    if (currentUser.role === 'Teacher') {
+        dashboardHtml += `
+            <div class="content-card animate-up" style="grid-column: span 1;">
+                <h4><i class="fas fa-trophy" style="color:gold"></i> Top Students</h4>
+                <div id="leaderboard-content" style="margin-top:10px;"><div class="loader">Loading...</div></div>
+            </div>`;
+    }
+
+    // ၅။ Notebook Section (သင်တန်းအလိုက် စာသားပြမည်)
+    dashboardHtml += `
+        </div> <!-- Grid End -->
         <div class="content-card animate-up" style="margin-top:25px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                <h4><i class="fas fa-sticky-note"></i> My Personal Notebook</h4>
-                <small id="char-counter" style="color:var(--text-main)">
-                    ${(currentUser.personalNote || "").length} / 10000 characters
-                </small>
+                <h4><i class="fas fa-sticky-note"></i> My Notebook (${currentCourse.title})</h4>
+                <small id="char-counter">${myNoteText.length} / 10000 characters</small>
             </div>
             <textarea id="personal-note" class="edit-input" rows="6" 
                       oninput="handleNoteInput()" 
-                      placeholder="ဒီနေ့ ဘာတွေသင်ယူခဲ့သလဲ? မှတ်သားထားပါ...">${currentUser.personalNote || ""}</textarea>
+                      placeholder="${currentCourse.title} အတွက် မှတ်သားစရာများ...">${myNoteText}</textarea>
             <div style="display:flex; justify-content:space-between; margin-top:5px;">
-                <small id="note-status" style="color:#22c55e">Cloud auto-sync active</small>
+                <small id="note-status" style="color:#22c55e">Course-specific cloud sync active</small>
                 <button class="menu-btn" style="padding:4px 12px; font-size:0.75rem;" onclick="downloadNotes()">
-                    <i class="fas fa-download"></i> Download as Text
+                    <i class="fas fa-download"></i> <span>Download as Text</span>
                 </button>
             </div>
-        </div>
-    `;
+        </div>`;
 
-    // ၇။ Logic ပြီးမှ Leaderboard ဆွဲခိုင်းမည်
+    body.innerHTML = dashboardHtml;
     if (currentUser.role === 'Teacher') fetchLeaderboard();
 }
 
@@ -391,26 +369,33 @@ function downloadNotes() {
 }
 
 let noteTimeout;
+
 function saveNoteToCloud() {
     const text = document.getElementById('personal-note').value;
-    // စာလုံးရေ ၅၀၀၀ ထက်ကျော်ရင် တားမြစ်ခြင်း
-    if (text.length > 5000) {
-        alert("မှတ်စုကို စာလုံးရေ ၅၀၀၀ အထိသာ ကန့်သတ်ထားပါသည်။");
+    const currentCourseId = currentUser.selectedCourseId;
+
+    if (!currentCourseId) return;
+
+    // စာလုံးရေ ၁၀,၀၀၀ အထိ ပေးထားလိုက်ပါမည် (၅၀၀၀ ထက် ပိုအဆင်ပြေစေရန်)
+    if (text.length > 10000) {
+        alert("မှတ်စုကို စာလုံးရေ ၁၀၀၀၀ အထိသာ ကန့်သတ်ထားပါသည်။");
         return;
     }
 
     const status = document.getElementById('note-status');
     status.innerText = "Saving...";
 
-    // ခဏခဏ save မနေစေရန် (Debouncing)
     clearTimeout(noteTimeout);
     noteTimeout = setTimeout(async () => {
-        currentUser.personalNote = text;
+        // Local State Update
+        if (!currentUser.courseNotes) currentUser.courseNotes = {};
+        currentUser.courseNotes[currentCourseId] = text;
         localStorage.setItem('currentUser', JSON.stringify(currentUser));
         
+        // 🔥 Cloud Update (သင်တန်းအလိုက် ခွဲသိမ်းခြင်း)
         if (currentUser.uid) {
             await db.collection('users').doc(currentUser.uid).update({
-                personalNote: text
+                [`courseNotes.${currentCourseId}`]: text
             });
         }
         status.innerText = "All changes saved!";
@@ -459,13 +444,22 @@ async function fetchLeaderboard() {
 // Lesson Discussion (အမေးအဖြေကဏ္ဍ)
 async function renderDiscussion(lessonId) {
     const area = document.getElementById('discussion-area');
+    if (!area) return;
+
     area.innerHTML = `
-        <div class="content-card" style="margin-top:40px;">
-            <h4><i class="fas fa-comments"></i> သင်ခန်းစာ အမေးအဖြေ (Q&A)</h4>
-            <div id="comments-list" style="margin:20px 0; max-height:400px; overflow-y:auto;"></div>
-            <div class="chat-input-box">
-                <input type="text" id="comment-input" placeholder="မရှင်းတာရှိရင် ဒီမှာမေးမြန်းနိုင်ပါတယ်...">
-                <button onclick="postComment('${lessonId}')"><i class="fas fa-paper-plane"></i></button>
+        <div class="content-card animate-up" style="margin-top:40px; padding: 20px;">
+            <h4 style="margin-bottom:15px;"><i class="fas fa-comments"></i> သင်ခန်းစာ ဆွေးနွေးချက်များ</h4>
+            <div id="comments-list" style="margin-bottom:20px; max-height:400px; overflow-y:auto; padding-right:10px;"></div>
+            
+            <!-- 🔥 Mobile အတွက် စနစ်တကျ ပြင်ထားသော Chat Input -->
+            <div class="chat-input-box" style="display:flex; align-items:center; gap:10px; background:var(--main-bg); padding:8px 15px; border-radius:30px; border:1px solid var(--border-color);">
+                <input type="text" id="comment-input" 
+                       style="flex:1; border:none; background:transparent; outline:none; font-size:16px; color:var(--text-main);" 
+                       placeholder="မရှင်းတာရှိရင် ဒီမှာ မေးမြန်းပါ...">
+                <button class="save-btn" onclick="postComment('${lessonId}')" 
+                        style="width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; padding:0;">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
             </div>
         </div>
     `;
@@ -689,61 +683,67 @@ async function renderCourseTree(filterCat) {
 }
 
 async function renderLessonContent(catIdx, modIdx, lesIdx) {
-  const body = document.getElementById("dynamic-body");
-  const cat = courseData[catIdx],
-    mod = cat.modules[modIdx],
-    lesson = mod.lessons[lesIdx];
-  document.getElementById("page-title").innerText = lesson.title;
-  body.innerHTML = '<div class="loader">Loading content...</div>';
+    const body = document.getElementById("dynamic-body");
+    const cat = courseData[catIdx];
+    const mod = cat.modules[modIdx];
+    const lesson = mod.lessons[lesIdx];
 
-  const bc = `<div class="breadcrumbs"><span onclick="showSection('dashboard')">Home</span> / <span onclick="showSection('courses', '${cat.category}')">${cat.category}</span> / <span>${mod.moduleTitle}</span></div>`;
+    // 🔥 ၁။ သင်ခန်းစာခေါင်းစဉ်ကို Header မှာ ချက်ချင်းပြောင်းမည်
+    const titleEl = document.getElementById('page-title');
+    if (titleEl) titleEl.innerText = lesson.title;
 
-  try {
-    // အရေးကြီးသည်- lesson.path ကို တိုက်ရိုက် သုံးပါမည်
-    const res = await fetch(`${lesson.path}?t=${new Date().getTime()}`);
+    body.innerHTML = '<div class="loader">Loading content...</div>';
 
-    console.log("Fetching Path:", lesson.path); // Debug စစ်ရန်
-    console.log("Response Status:", res.status);
+    const bc = `<div class="breadcrumbs"><span onclick="showSection('dashboard')">Home</span> / <span onclick="showSection('courses', '${cat.category}')">${cat.category}</span> / <span>${mod.moduleTitle}</span></div>`;
 
-    if (!res.ok) {
-      throw new Error(`File not found (Status: ${res.status})`);
-    }
-
-    if (lesson.type === "quiz") {
-      const res = await fetch(lesson.path);
-      const quizData = await res.json();
-      renderQuizUI(quizData, bc, catIdx, modIdx, lesIdx);
-    } else if (lesson.type === "assignment") {
-      renderAssignmentUI(catIdx, modIdx, lesIdx, bc);
-    } else if (lesson.type === "project") {
-      renderProjectUI(catIdx, modIdx, lesIdx, bc);
-    } else {
-      const html = await res.text();
-      body.innerHTML = `${bc}<article class="content-card animate-up"><div class="lesson-body">${html}</div>
-                <div class="pagination">
-                    <button class="menu-btn" onclick="goToLesson(${catIdx}, ${modIdx}, ${lesIdx - 1})" ${lesIdx === 0 ? "disabled" : ""}>Prev</button>
-                    <button class="menu-btn" onclick="goToLesson(${catIdx}, ${modIdx}, ${lesIdx + 1})" ${lesIdx === mod.lessons.length - 1 ? "disabled" : ""}>Next</button>
-                </div></article>`;
-        // 🔥 ARTICLE ဖြစ်မှသာ ဖွင့်ကြည့်ရုံနဲ့ Completed ထဲထည့်မည်
-        markLessonAsDone(lesson.title); 
-    }
-
-    if (lesson.type === 'article') {
-        const discussionDiv = document.createElement('div');
-        discussionDiv.id = "discussion-area";
-        body.appendChild(discussionDiv);
-        renderDiscussion(lesson.title); // Comment တွေပြမယ့် function
-    }
-
-  } catch (e) {
-    console.error("Fetch Error:", e);
-    body.innerHTML = `${bc} <div class="error-msg">
-            <h4>သင်ခန်းစာဖိုင်ကို ရှာမတွေ့ပါ။</h4>
-            <p>လမ်းကြောင်း: <code>${lesson.path}</code></p>
-            <p>အကြောင်းရင်း: Folder အမည် သို့မဟုတ် ဖိုင်အမည် မှားယွင်းနေနိုင်ပါသည်။</p>
+    // Pagination Logic
+    const paginationHtml = `
+        <div class="pagination no-print" style="display: flex; gap: 15px; margin-top: 30px;">
+            <button class="menu-btn" onclick="goToLesson(${catIdx}, ${modIdx}, ${lesIdx - 1})" 
+                ${lesIdx === 0 ? 'disabled style="opacity:0.4; pointer-events:none;"' : ''}>
+                <i class="fas fa-arrow-left"></i> Prev
+            </button>
+            <button class="menu-btn" onclick="goToLesson(${catIdx}, ${modIdx}, ${lesIdx + 1})" 
+                ${lesIdx === mod.lessons.length - 1 ? 'disabled style="opacity:0.4; pointer-events:none;"' : ''}>
+                Next <i class="fas fa-arrow-right"></i>
+            </button>
         </div>`;
-  }
-  window.scrollTo({ top: 0, behavior: "smooth" });
+
+    try {
+        const res = await fetch(`${lesson.path}?t=${new Date().getTime()}`);
+        if (!res.ok) throw new Error(`File not found`);
+
+        if (lesson.type === "quiz") {
+            const quizData = await res.json();
+            renderQuizUI(quizData, bc, catIdx, modIdx, lesIdx);
+        } else if (lesson.type === "assignment") {
+            renderAssignmentUI(catIdx, modIdx, lesIdx, bc);
+        } else if (lesson.type === "project") {
+            renderProjectUI(catIdx, modIdx, lesIdx, bc);
+        } else {
+            const html = await res.text();
+            body.innerHTML = `
+                ${bc}
+                <article class="content-card animate-up">
+                    <div class="lesson-body">${html}</div>
+                    ${paginationHtml} 
+                </article>`;
+            markLessonAsDone(lesson.title); 
+        }
+
+        // Article အတွက် Discussion Section
+        if (lesson.type === 'article') {
+            const discussionDiv = document.createElement('div');
+            discussionDiv.id = "discussion-area";
+            body.appendChild(discussionDiv);
+            renderDiscussion(lesson.title); 
+        }
+
+    } catch (e) {
+        console.error("Fetch Error:", e);
+        body.innerHTML = `${bc} <div class="error-msg"><h4>ဖိုင်ရှာမတွေ့ပါ။</h4><p>${lesson.path}</p></div>`;
+    }
+    window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 // 🔥 ထပ်ခါတလဲလဲ မရေးရအောင် Helper function တစ်ခု ဆောက်လိုက်ပါ
@@ -1514,70 +1514,81 @@ async function handleLogout() {
 // --- Transcript ပြသခြင်း ---
 function viewTranscript(uid, isAdminPreview = false, courseId) {
     const student = (uid === currentUser.uid) ? currentUser : studentsList.find(s => s.uid === uid);
-    // courseId မပါလာရင် လက်ရှိရွေးထားတဲ့သင်တန်းကို ယူမယ်
     const cId = courseId || currentUser.selectedCourseId;
     const course = allCourses[cId];
-    
-    if (!student || !course) return alert("Data Error: သင်တန်းအချက်အလက် ရှာမတွေ့ပါ။");
+    if (!student || !course) return alert("Data Error!");
 
     const body = document.getElementById('dynamic-body');
     const backFunc = isAdminPreview ? `previewStudentAchievements('${uid}')` : "showSection('profile')";
-    
-    // 🔥 အမှတ်စာရင်းကို သင်တန်း ID အလိုက် ခွဲဖတ်မည်
     const courseGrades = (student.grades && student.grades[cId]) ? student.grades[cId] : {};
     
     let totalScore = 0;
-    // 🔥 သင်တန်းအလိုက် သတ်မှတ်ထားတဲ့ ဘာသာရပ်စာရင်းကိုပဲ loop ပတ်မည်
     let rows = course.transcriptSubjects.map(sub => {
         const score = courseGrades[sub.toLowerCase()] || 0;
         totalScore += score;
-        const status = score >= 50 ? '<span class="text-success">Pass</span>' : '<span class="text-danger">Fail</span>';
-        return `
-            <tr>
-                <!-- 🔥 ဒီနေရာမှာ text-align: left; ပြောင်းလိုက်ပါပြီ -->
-                <td style="text-align: left; padding-left: 25px; text-transform: uppercase;">${sub.replace('_',' ')}</td>
-                <td style="text-align: center;">${score}</td>
-                <td style="text-align: center;">${status}</td>
-            </tr>`;
+        const status = score >= 50 ? '<span style="color:green; font-weight:bold;">Pass</span>' : '<span style="color:red; font-weight:bold;">Fail</span>';
+        return `<tr>
+            <td style="text-align:left; padding:12px; border:1px solid #ddd;">${sub.toUpperCase()}</td>
+            <td style="border:1px solid #ddd; text-align:center;">${score}</td>
+            <td style="border:1px solid #ddd; text-align:center;">${status}</td>
+        </tr>`;
     }).join('');
 
     const gpa = course.transcriptSubjects.length > 0 ? (totalScore / course.transcriptSubjects.length).toFixed(2) : 0;
+    const issueDate = new Date().toLocaleDateString('en-GB');
 
     body.innerHTML = `
-        <div class="content-card animate-up transcript-area" style="max-width: 900px; margin: auto;">
-            <div class="no-print" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                <h3>Official Transcript ${isAdminPreview ? '(Demo)' : ''}</h3>
+        <div class="transcript-outer-container animate-up">
+            <div class="no-print" style="margin-bottom:20px; display:flex; justify-content:flex-end;">
                 <button class="menu-btn" onclick="${backFunc}"><i class="fas fa-arrow-left"></i> Back</button>
             </div>
-            <div style="text-align:center; margin-bottom:30px;">
-                <h2 style="color:#003087; text-transform:uppercase; margin:0;">Myanmar Full-Stack Bootcamp</h2>
-                <!-- 🔥 သင်တန်းအလိုက် နာမည်ပြောင်းမည် -->
-                <p style="margin-top:5px; font-weight:bold;">${course.title}</p>
-            </div>
-            <div class="academic-box" style="display:grid; grid-template-columns: 1fr 1fr; padding:20px; background:var(--main-bg); border-radius:10px; margin-bottom:20px;">
-                <div><p>Name: <strong>${student.name}</strong></p><p>ID: <strong>${student.uid.substring(0,8).toUpperCase()}</strong></p></div>
-                <div style="text-align:right;"><p>GPA: <strong style="color:green">${gpa}</strong></p><p>Date: <strong>${new Date().toLocaleDateString('en-GB')}</strong></p></div>
-            </div>
-            <table class="admin-table" style="width:100%; border-collapse:collapse;">
-                <thead><tr style="background:#003087; color:white;"><th style="text-align:left; padding-left:25px;">Subject</th><th>Score</th><th>Result</th></tr></thead>
-                <tbody>${rows}</tbody>
-            </table>
-            
-            <div class="transcript-footer" style="margin-top:60px; display:flex; justify-content:space-between; align-items:flex-end;">
-                <div style="font-size:0.8rem; color:grey;">* Computer-generated official record.</div>
-                <div style="text-align:center; width:220px;">
-                    <!-- 🔥 သင်တန်းအလိုက် ဆရာနာမည် ပြောင်းမည် -->
-                    <div style="border-bottom:1px solid #333; height:40px; font-family:'Dancing Script', cursive; font-size:1.3rem;">
-                        ${course.instructor || lmsSettings.instructorName}
+
+            <div class="transcript-paper">
+                <div class="transcript-header" style="text-align:center; margin-bottom:40px;">
+                    <h2 style="color:#003087; text-transform:uppercase; margin:0; font-size: 2.2rem;">Myanmar Full-Stack Bootcamp</h2>
+                    <p style="color:#64748b; font-weight: bold; margin-top:5px;">${course.title}</p>
+                    <p style="font-size:0.75rem; letter-spacing:2px; margin-top:10px; color:#94a3b8;">OFFICIAL ACADEMIC RECORD</p>
+                </div>
+
+                <!-- 🔥 အချက်အလက်များကို တစ်တန်းတည်းပြမည့် Row 🔥 -->
+                <div class="academic-info-row" style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:15px 25px; margin-bottom:30px; font-size:0.9rem;">
+                    <div>Name: <strong>${student.name}</strong></div>
+                    <div>ID: <strong>${student.uid.substring(0, 8).toUpperCase()}</strong></div>
+                    <div>GPA: <strong style="color:#003087;">${gpa}</strong></div>
+                    <div>Date: <strong>${issueDate}</strong></div>
+                </div>
+
+                <table style="width:100%; border-collapse:collapse; border: 1px solid #ddd;">
+                    <thead>
+                        <tr style="background:#003087; color:white;">
+                            <th style="padding:15px; text-align:left; border: 1px solid #ddd;">SUBJECT / MODULE</th>
+                            <th style="padding:15px; border: 1px solid #ddd; width:120px;">SCORE</th>
+                            <th style="padding:15px; border: 1px solid #ddd; width:120px;">RESULT</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${rows || '<tr><td colspan="3" style="padding:30px;">အမှတ်စာရင်း မရှိသေးပါ။</td></tr>'}
+                    </tbody>
+                </table>
+
+                <div class="transcript-footer" style="margin-top:80px; display:flex; justify-content:space-between; align-items:flex-end;">
+                    <div style="font-size:0.8rem; color:#94a3b8;">* Computer-generated official record.</div>
+                    <div style="text-align:center; width:250px;">
+                        <div style="border-bottom:1.5px solid #333; height:45px; font-family:'Dancing Script', cursive; font-size:1.5rem; display:flex; align-items:center; justify-content:center; color:#000;">
+                            ${course.instructor || lmsSettings.instructorName}
+                        </div>
+                        <p style="margin-top:10px; font-weight:bold; font-size:0.85rem; text-transform:uppercase;">Registrar Office</p>
                     </div>
-                    <p style="margin-top:8px; font-weight:bold; font-size:0.9rem;">Registrar Office</p>
                 </div>
             </div>
 
             <div class="no-print" style="margin-top:40px; text-align:center;">
-                <button class="save-btn" onclick="window.print()"><i class="fas fa-print"></i> Print Transcript</button>
+                <button class="save-btn" onclick="window.print()" style="padding:12px 60px; font-size: 1.1rem; border-radius:30px;">
+                    <i class="fas fa-print"></i> Print Transcript
+                </button>
             </div>
-        </div>`;
+        </div>
+    `;
 }
 
 // --- ၁။ Global Settings Variables ---
@@ -2717,7 +2728,7 @@ function renderAbout() {
         <div class="content-card animate-up" style="max-width: 800px; margin: auto; line-height: 1.8;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
                 <h3><i class="fas fa-graduation-cap"></i> ကျွန်ုပ်တို့အကြောင်း (About Us)</h3>
-                <button class="menu-btn" onclick="showSection('dashboard')"><i class="fas fa-home"></i> Back to Home</button>
+                <button class="menu-btn" onclick="showSection('dashboard')"><i class="fas fa-home"></i> <span>Back to Home</span></button>
             </div>
                 <hr><br>
                 <p><strong>Myanmar Full-Stack Bootcamp (MM)</strong> သည် မြန်မာနိုင်ငံရှိ လူငယ်များ နိုင်ငံတကာအဆင့်မီ နည်းပညာရပ်များကို မိခင်ဘာသာစကားဖြင့် စနစ်တကျ သင်ယူနိုင်စေရန် ရည်ရွယ်တည်ထောင်ထားခြင်း ဖြစ်ပါသည်။</p>
@@ -2738,7 +2749,7 @@ function renderPrivacy() {
         <div class="content-card animate-up" style="max-width: 800px; margin: auto; line-height: 1.8;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
             <h3><i class="fas fa-user-shield"></i> ကိုယ်ရေးအချက်အလက် မူဝါဒ (Privacy Policy)</h3>
-            <button class="menu-btn" onclick="showSection('dashboard')"><i class="fas fa-home"></i> Back to Home</button>
+            <button class="menu-btn" onclick="showSection('dashboard')"><i class="fas fa-home"></i> <span>Back to Home</span></button>
             </div>
             <hr><br>
             <p>ကျောင်းသားများ၏ ကိုယ်ရေးအချက်အလက်များကို Google Firebase တွင် လုံခြုံစွာ သိမ်းဆည်းထားပါသည်။</p>
@@ -2887,22 +2898,20 @@ function processNotiChanges(snap, type) {
 
 function updateNotiBadge() {
     const badge = document.getElementById('noti-badge');
+    const wrapper = document.querySelector('.notification-wrapper');
     const bellIcon = document.querySelector('.notification-wrapper i');
-    if (!badge) return;
 
     if (unreadNotiCount > 0) {
         badge.innerText = unreadNotiCount;
-        badge.style.display = "flex"; // Safari အတွက် flex ကို သေချာပေးပါ
+        badge.style.display = "flex";
+        wrapper.style.display = "flex"; // 🔥 စာရှိမှ ခေါင်းလောင်းကို ပြမည်
         if (bellIcon) {
-            bellIcon.style.color = "#ef4444"; // ခေါင်းလောင်းနီသွားမည်
-            bellIcon.classList.add('fa-shake'); // အသံမြည်စဉ် ခေါင်းလောင်းတုန်ခါမည်
+            bellIcon.style.color = "#ef4444";
+            bellIcon.classList.add('fa-shake');
         }
     } else {
         badge.style.display = "none";
-        if (bellIcon) {
-            bellIcon.style.color = "";
-            bellIcon.classList.remove('fa-shake');
-        }
+        wrapper.style.display = "none"; // 🔥 စာမရှိလျှင် တစ်ခုလုံး ဖျောက်မည်
     }
 }
 
