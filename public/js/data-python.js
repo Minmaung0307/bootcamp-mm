@@ -19,9 +19,9 @@ const pythonCourseData = {
                 {
                     moduleTitle: "Module 1: Python Basics",
                     lessons: [
-                        { title: "1.1.1: Why Python for Data?", type: "article", path: "/content/python/foundations/mod1/intro.html" },
-                        { title: "1.1.2: Data Types Quiz", type: "quiz", path: "/content/python/foundations/mod1/quiz1.json" },
-                        { title: "Basic Logic Assignment", type: "assignment", path: "/content/python/foundations/mod1/assign1.html" }
+                        { title: "0.1.1: Why Python for Data?", type: "article", path: "/content/python/foundations/mod0/0.1.1-welcome.html" },
+                        { title: "0.1.2: Data Types Quiz", type: "quiz", path: "/content/python/foundations/mod0/0.1.2-quiz.json" },
+                        { title: "Basic Logic Assignment", type: "assignment", path: "/content/python/foundations/mod0/0.1.3-assignment.html" }
                     ]
                 }
             ]

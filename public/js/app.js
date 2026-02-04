@@ -973,7 +973,7 @@ function renderProjectUI(catIdx, modIdx, lesIdx, bc) {
             <h3><i class="fas fa-tasks"></i> Project Submission</h3>
             <p style="color:grey; margin-bottom:15px;">${lesson.title}</p>
             <label>GitHub Repository Link</label>
-            <input type="url" id="plink" class="edit-input" placeholder="https://github.com/user/repo">
+            <input type="url" id="plink" class="edit-input" placeholder="https://github.com/username/repo (သို့မဟုတ်) .github.io link">
             <label style="margin-top:15px; display:block;">Team Members (Names & UIDs)</label>
             <textarea id="pmembers" class="edit-input" rows="2" placeholder="Mg Mg (st001), Aye Aye (st002)"></textarea>
             
@@ -985,44 +985,68 @@ function renderProjectUI(catIdx, modIdx, lesIdx, bc) {
 
 // --- Project Submit Logic (GitHub Link တင်ရန်) ---
 async function submitProjectDB(catIdx, modIdx, lesIdx) {
-  const link = document.getElementById("plink").value.trim();
-  const members = document.getElementById("pmembers").value.trim();
-  const lesson = courseData[catIdx].modules[modIdx].lessons[lesIdx];
+    const link = document.getElementById("plink").value.trim();
+    const members = document.getElementById("pmembers").value.trim();
+    const lesson = courseData[catIdx].modules[modIdx].lessons[lesIdx];
 
-  // Validation: GitHub Link ဟုတ်မဟုတ် စစ်ဆေးခြင်း
-  if (!link.includes("github.com")) {
-    return alert(
-      "ကျေးဇူးပြု၍ မှန်ကန်သော GitHub Repository Link ကို ထည့်ပေးပါ။",
-    );
-  }
+    // --- ၁။ Validation အပိုင်း (Cleaned Version) ---
+    
+    // github.com သို့မဟုတ် github.io နှစ်ခုလုံးကို လက်ခံမည်
+    const isValidGithub = link.includes('github.com') || link.includes('github.io');
 
-  try {
-    // ၁။ Firestore: 'submissions' collection ထဲသို့ ပို့မည်
-    await db.collection("submissions").add({
-      type: "project",
-      studentId: currentUser.uid,
-      studentName: currentUser.name,
-      lessonTitle: lesson.title,
-      category: courseData[catIdx].category,
-      githubLink: link,
-      teamMembers: members,
-      status: "pending",
-      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-    });
-
-    // ၂။ ပြီးမြောက်ကြောင်း မှတ်သားမည်
-    if (!currentUser.completedLessons.includes(lesson.title)) {
-      currentUser.completedLessons.push(lesson.title);
-      localStorage.setItem("currentUser", JSON.stringify(currentUser));
+    if (!isValidGithub) {
+        return alert("ကျေးဇူးပြု၍ မှန်ကန်သော GitHub Link (Repository သို့မဟုတ် Live Site) ကို ထည့်ပေးပါ။");
     }
 
-    alert("Project ကို အောင်မြင်စွာ ပေးပို့ပြီးပါပြီ။");
+    if (!members) {
+        return alert("အဖွဲ့ဝင်များ အမည်ကို အနည်းဆုံး တစ်ယောက် ထည့်ပေးပါ။");
+    }
 
-    // ၃။ နောက်စာမျက်နှာကို တန်းသွားမည်
-    goToNextLesson(catIdx, modIdx, lesIdx);
-  } catch (error) {
-    alert("Error submitting project: " + error.message);
-  }
+    // --- ၂။ Submission အပိုင်း ---
+    try {
+        // ခလုတ်ကို Loading ပြောင်းမည် (CSS class .save-btn ကို ရှာဖွေခြင်း)
+        const btn = document.getElementById('upload-btn') || document.querySelector('.project-card .save-btn');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+        }
+
+        // Firestore: 'submissions' collection ထဲသို့ ပို့မည်
+        await db.collection("submissions").add({
+            type: "project",
+            studentId: currentUser.uid,
+            studentName: currentUser.name,
+            lessonTitle: lesson.title,
+            category: courseData[catIdx].category,
+            githubLink: link,
+            teamMembers: members,
+            status: "pending",
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+        });
+
+        // ၃။ သင်ခန်းစာ ပြီးမြောက်ကြောင်း မှတ်သားမည်
+        if (!currentUser.completedLessons.includes(lesson.title)) {
+            currentUser.completedLessons.push(lesson.title);
+            localStorage.setItem("currentUser", JSON.stringify(currentUser));
+            await syncProgressToCloud(); // Cloud သို့ Sync လုပ်မည်
+        }
+
+        alert("Project ကို အောင်မြင်စွာ ပေးပို့ပြီးပါပြီ။");
+
+        // ၄။ နောက်စာမျက်နှာကို တန်းသွားမည်
+        goToNextLesson(catIdx, modIdx, lesIdx);
+
+    } catch (error) {
+        console.error("Submit Error:", error);
+        alert("Error submitting project: " + error.message);
+        
+        // Error တက်ရင် ခလုတ်ကို ပြန်ဖွင့်မည်
+        const btn = document.getElementById('upload-btn') || document.querySelector('.project-card .save-btn');
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-upload"></i> Submit Project';
+        }
+    }
 }
 
 // ==========================================
@@ -2730,13 +2754,29 @@ async function renderSubmissions() {
     } catch (err) { console.error(err); }
 }
 
-// 🔥 ဖျက်သည့် Logic ပါဝင်ရမည်
-async function deleteSubmission(id) {
-    if (confirm("ဤပေးပို့မှုကို အပြီးဖျက်ရန် သေချာပါသလား?")) {
+// --- ၁။ ပြခန်းမှသာ ဖယ်ရှားခြင်း (Featured ကို false ပြောင်းခြင်း) ---
+async function removeFromShowcase(docId) {
+    if (confirm("ဤပရောဂျက်ကို Showcase ပြခန်းမှ ဖယ်ရှားလိုပါသလား? (ကျောင်းသား၏ အမှတ်စာရင်းကို မထိခိုက်ပါ)")) {
         try {
-            await db.collection('submissions').doc(id).delete();
-            alert("ဖျက်ပြီးပါပြီ။");
-            renderSubmissions(); // စာရင်းပြန် Render လုပ်မည်
+            await db.collection('submissions').doc(docId).update({
+                featured: false
+            });
+            showToast("ပြခန်းမှ ဖယ်ရှားပြီးပါပြီ။", "success");
+            renderShowcase(); // UI ကို Refresh လုပ်မည်
+        } catch (e) { alert(e.message); }
+    }
+}
+
+// --- ၂။ Submission ကို အပြီးဖျက်ခြင်း ---
+async function deleteSubmission(docId, fromShowcase = false) {
+    if (confirm("ဤပေးပို့မှုကို Database ထဲမှ အပြီးဖျက်ရန် သေချာပါသလား?")) {
+        try {
+            await db.collection('submissions').doc(docId).delete();
+            showToast("ဒေတာ အပြီးဖျက်ပြီးပါပြီ။", "success");
+            
+            // ဘယ်နေရာကနေ ဖျက်တာလဲအပေါ် မူတည်ပြီး UI ပြန်ပြမည်
+            if (fromShowcase) renderShowcase();
+            else renderSubmissions();
         } catch (e) { alert(e.message); }
     }
 }
@@ -2746,6 +2786,9 @@ async function gradeThisSubmission(docId) {
     const doc = await db.collection('submissions').doc(docId).get();
     const s = doc.data();
     const body = document.getElementById('dynamic-body');
+
+    // 🔥 Project အမျိုးအစား ဖြစ်မှသာ Checkbox ကို ပြမည်
+    const isProject = s.type === 'project';
 
     body.innerHTML = `
         <div class="content-card animate-up" style="max-width:700px; margin:auto;">
@@ -2761,9 +2804,21 @@ async function gradeThisSubmission(docId) {
             <br>
             <label>ဆရာ့မှတ်ချက် (Optional)</label>
             <textarea id="teacher-feedback" class="edit-input" rows="2" placeholder="အကြံပြုချက်ရေးပါ"></textarea>
+
+            <!-- 🔥 Showcase အတွက် Checkbox အသစ် -->
+            ${isProject ? `
+                <div style="margin: 20px 0; padding: 10px; background: #f0fdf4; border: 1px dashed #22c55e; border-radius: 8px;">
+                    <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+                        <input type="checkbox" id="add-to-showcase" style="width:20px; height:20px;">
+                        <span style="font-weight:bold; color:#166534;">Featured in Showcase (ပြခန်းတွင် ဖော်ပြမည်)</span>
+                    </label>
+                </div>
+            ` : ''}
             
             <div style="margin-top:20px; display:flex; gap:10px;">
-                <button class="save-btn" onclick="confirmGrade('${docId}', '${s.studentId}', '${s.lessonTitle}')">Submit Grade</button>
+                <button class="save-btn" onclick="confirmGrade('${docId}', '${s.studentId}', '${s.lessonTitle}')">
+                    <i class="fas fa-check-circle"></i> Submit Grade
+                </button>
                 <button class="menu-btn" onclick="renderSubmissions()">Cancel</button>
             </div>
         </div>
@@ -3179,43 +3234,58 @@ async function updateZoomToFirebase() {
 async function confirmGrade(docId, studentId, lessonTitle) {
     const scoreInput = document.getElementById('grade-score');
     const feedbackInput = document.getElementById('teacher-feedback');
-    
-    if (!scoreInput || !scoreInput.value) {
-        return alert("ကျေးဇူးပြု၍ အမှတ်အရင်ထည့်ပါ။");
-    }
+    const showcaseCheckbox = document.getElementById('add-to-showcase');
+
+    if (!scoreInput || !scoreInput.value) return alert("အမှတ် အရင်ထည့်ပါ။");
 
     const score = parseInt(scoreInput.value);
     const feedback = feedbackInput ? feedbackInput.value : "";
+    const isFeatured = showcaseCheckbox ? showcaseCheckbox.checked : false; 
 
     try {
-        // ၁။ ကျောင်းသားရဲ့ Document ထဲမှာ အမှတ်သွားထည့်မယ်
-        // ဘာသာရပ်အမည်ကို သင်ခန်းစာခေါင်းစဉ်မှ ယူမည် (ဥပမာ- html, css)
-        const subjectKey = lessonTitle.toLowerCase().includes('html') ? 'html' : 
-                         lessonTitle.toLowerCase().includes('css') ? 'css' : 'javascript';
+        // 🔥 အဆင့် ၁- ဤ Submission ၏ မူရင်းအချက်အလက်ကို ပြန်ယူမည် (Course ID ရရန်)
+        const subDoc = await db.collection('submissions').doc(docId).get();
+        if (!subDoc.exists) throw new Error("Submission data not found!");
+        const subData = subDoc.data();
+        const originalCourseId = subData.courseId; // မူရင်းသင်တန်း ID (web သို့မဟုတ် python စသည်)
 
+        // ၂။ ဘာသာရပ် Key ကို သတ်မှတ်ခြင်း
+        const titleLower = lessonTitle.toLowerCase();
+        const subjectKey = titleLower.includes('html') ? 'html' : 
+                         titleLower.includes('css') ? 'css' : 
+                         titleLower.includes('python') ? 'python' : 
+                         titleLower.includes('design') ? 'design' : 'javascript';
+
+        // ၃။ ကျောင်းသား အမှတ်စာရင်းကို Update လုပ်မည် (မူရင်း Course ID အောက်တွင်သာ သိမ်းမည်)
         await db.collection('users').doc(studentId).set({
-            grades: { [subjectKey]: score }
+            grades: { 
+                [originalCourseId]: { 
+                    [subjectKey]: score 
+                } 
+            }
         }, { merge: true });
 
-        // ၂။ Submission status ကို 'graded' ပြောင်းမယ်
+        // ၄။ Submission status ကို 'graded' ပြောင်းပြီး Featured သိမ်းမည်
         await db.collection('submissions').doc(docId).update({
             status: "graded",
             score: score,
-            teacherFeedback: feedback
+            featured: isFeatured,
+            teacherFeedback: feedback,
+            gradedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
 
-        // ၃။ ကျောင်းသားဆီ Noti ပို့မယ်
+        // ၅။ ကျောင်းသားဆီ Noti ပို့မည်
         await db.collection('messages').add({
-            text: `🔔 သင်၏ ${lessonTitle} အတွက် အမှတ်ထွက်ပါပြီ။ (ရမှတ်: ${score})`,
+            text: `🔔 အမှတ်ထွက်ပါပြီ- ${lessonTitle} (ရမှတ်: ${score})။ Transcript တွင် စစ်ဆေးပါ။`,
             senderId: currentUser.uid,
-            senderName: "System (Tutor)",
+            senderName: "Teacher (LMS)",
             receiverId: studentId,
             type: "direct",
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
 
-        alert("အမှတ်ပေးခြင်း အောင်မြင်ပါသည်။");
-        renderAdminPanel(); // Admin Panel သို့ ပြန်သွားမည်
+        alert(isFeatured ? "အမှတ်ပေးပြီးပါပြီ။ Showcase ထဲသို့လည်း ထည့်သွင်းလိုက်ပါသည်။" : "အမှတ်ပေးခြင်း အောင်မြင်ပါသည်။");
+        renderAdminPanel(); 
 
     } catch (error) {
         console.error("Grading Error:", error);
@@ -3739,12 +3809,16 @@ async function renderShowcase() {
     body.innerHTML = `<h3><i class="fas fa-rocket"></i> Student Project Showcase</h3><div class="loader">Loading Projects...</div>`;
     
     try {
-        // 🔥 အဆင့် ၁- Database မှ အမှတ်ပေးပြီးသား Project များကို ဆွဲယူမည်
+        // ၁။ Database မှ Featured ဖြစ်သော Project များကို ဆွဲယူမည်
         const snap = await db.collection('submissions')
                              .where('type', '==', 'project')
                              .where('status', '==', 'graded')
+                             .where('featured', '==', true)
+                             .orderBy('gradedAt', 'desc')
                              .limit(12)
                              .get();
+
+        const isTeacher = currentUser.role === 'Teacher'; // ဆရာ ဟုတ်မဟုတ် စစ်မည်
 
         if (snap.empty) {
             body.innerHTML = `
@@ -3752,7 +3826,7 @@ async function renderShowcase() {
                     <h3>Project Showcase</h3>
                     <button class="menu-btn" onclick="showSection('dashboard')"><i class="fas fa-home"></i> Back</button>
                 </div>
-                <div class="content-card">ပြသရန် ပရောဂျက်များ မရှိသေးပါ။ ဆရာမှ အမှတ်ပေးပြီးမှသာ ဤနေရာတွင် ပေါ်လာမည်ဖြစ်သည်။</div>
+                <div class="content-card">ပြသရန် ပရောဂျက်များ မရှိသေးပါ။ ${isTeacher ? 'ကျောင်းသားများ၏ Project ကို Grade ပေးစဉ် "Featured" ကို အမှန်ခြစ်ခဲ့မှ ဤနေရာတွင် ပေါ်လာမည်ဖြစ်သည်။' : ''}</div>
             `;
             return;
         }
@@ -3767,15 +3841,29 @@ async function renderShowcase() {
         snap.forEach(doc => {
             const p = doc.data();
             html += `
-                <div class="topic-card animate-up" style="text-align:left; padding:20px;">
+                <div class="topic-card animate-up" style="text-align:left; padding:20px; display:flex; flex-direction:column;">
                     <div style="font-size:2rem; margin-bottom:15px; color:var(--primary);"><i class="fas fa-laptop-code"></i></div>
                     <h4 style="margin-bottom:5px;">${p.studentName}</h4>
-                    <p style="font-size:0.8rem; color:var(--text-muted);">${p.lessonTitle}</p>
-                    <hr style="margin:15px 0; border-color:var(--border-color);"><br>
-                    <!-- 🔥 Button Syntax ကို ပြင်လိုက်ပါပြီ -->
+                    <p style="font-size:0.8rem; color:var(--text-muted); flex:1;">${p.lessonTitle}</p>
+                    <hr style="margin:15px 0; border-color:var(--border-color);">
+                    
                     <button class="save-btn" style="width:100%;" onclick="window.open('${p.githubLink}', '_blank')">
                         <i class="fab fa-github"></i> View GitHub
                     </button>
+
+                    <!-- 🔥 ဆရာအတွက်သာ ပေါ်မည့် စီမံခန့်ခွဲမှု ခလုတ်များ -->
+                    ${isTeacher ? `
+                        <div style="margin-top:15px; display:flex; gap:5px;">
+                            <button class="menu-btn" style="background:#f59e0b; flex:1; font-size:0.75rem; padding:8px 5px;" 
+                                    onclick="removeFromShowcase('${doc.id}')" title="ပြခန်းမှသာ ဖယ်ရှားမည်">
+                                <i class="fas fa-eye-slash"></i> Remove
+                            </button>
+                            <button class="menu-btn" style="background:#ef4444; flex:1; font-size:0.75rem; padding:8px 5px;" 
+                                    onclick="deleteSubmission('${doc.id}', true)" title="ဒေတာပါ အပြီးဖျက်မည်">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </div>
+                    ` : ''}
                 </div>`;
         });
         
@@ -3783,13 +3871,12 @@ async function renderShowcase() {
 
     } catch (e) {
         console.error("Showcase Error Details:", e);
-        // 🔥 Index မရှိလျှင် Browser Console (F12) ထဲက Link ကို နှိပ်ရပါမည်
         body.innerHTML = `
             <div class="error-msg animate-up">
                 <h4><i class="fas fa-exclamation-triangle"></i> ပြခန်းကို ဖွင့်၍မရပါ။</h4>
                 <p>${e.message}</p>
                 <br>
-                <small>မှတ်ချက်- Firebase Console တွင် Index ဆောက်ရန် လိုအပ်နိုင်ပါသည်။ (F12 တွင် Link ကိုစစ်ပါ)</small>
+                <small>မှတ်ချက်- Firebase Console တွင် Index ဆောက်ရန် လိုအပ်နိုင်ပါသည်။</small>
                 <br><br>
                 <button class="menu-btn" onclick="showSection('dashboard')">Back to Home</button>
             </div>`;
