@@ -862,13 +862,14 @@ async function checkQuizResult(quizId, quizData, c, m, l) {
     let score = 0;
     const questions = quizData.questions;
 
+    // ၁။ Safety Checks: လိုအပ်သော Object များ ရှိနေစေရန်
     if (!currentUser.quizAttempts) currentUser.quizAttempts = {};
     if (!currentUser.completedLessons) currentUser.completedLessons = [];
     if (!currentUser.grades) currentUser.grades = {};
 
     const currentAttempt = (currentUser.quizAttempts[quizId] || 0) + 1;
 
-    // ၁။ အဖြေစစ်ဆေးခြင်း
+    // ၂။ အဖြေစစ်ဆေးခြင်း (UI Feedback)
     questions.forEach((q, i) => {
         const feedbackEl = document.getElementById(`f-${i}`);
         const qBox = document.getElementById(`q-box-${i}`);
@@ -887,28 +888,44 @@ async function checkQuizResult(quizId, quizData, c, m, l) {
 
         if (isCorrect) {
             score++;
-            feedbackEl.innerHTML = '<span class="text-success">Correct</span>';
+            feedbackEl.innerHTML = '<span class="text-success"><i class="fas fa-check"></i> Correct</span>';
             if (qBox) qBox.style.borderColor = "#22c55e";
         } else {
-            feedbackEl.innerHTML = '<span class="text-danger">Wrong</span>';
+            feedbackEl.innerHTML = '<span class="text-danger"><i class="fas fa-times"></i> Wrong</span>';
             if (qBox) qBox.style.borderColor = "#ef4444";
         }
     });
 
-    // ၂။ 🔥 Best Score Logic (Loop အပြင်ဘက်တွင် ထားရမည်)
-    const courseId = courseData[c].id || currentUser.selectedCourseId;
-    if (!currentUser.grades[courseId]) currentUser.grades[courseId] = {};
-    
-    const oldScore = currentUser.grades[courseId][quizId] || 0;
+    // ၃။ 🔥 Transcript ထဲသို့ အမှတ်စာရင်း သွင်းခြင်း Logic
+    const courseId = currentUser.selectedCourseId;
+    // JSON ထဲတွင် subject: "html" စသဖြင့် ပါဝင်ရပါမည်။ မပါလျှင် quizId ကို သုံးမည်။
+    const subjectKey = (quizData.subject || quizId).toLowerCase();
 
-    if (score > oldScore) {
-        currentUser.grades[courseId][quizId] = score;
-        showToast(`ရမှတ်အသစ် ${score} ကို သိမ်းဆည်းလိုက်ပါပြီ။`, "success");
-    } else {
-        showToast(`သင်ယူမှုအတွက် ကျေးဇူးတင်ပါသည်။ (ယခင်ရမှတ် ${oldScore} က ပိုများနေပါသည်)`);
+    if (courseId) {
+        if (!currentUser.grades[courseId]) currentUser.grades[courseId] = {};
+        
+        const oldScore = currentUser.grades[courseId][subjectKey] || 0;
+
+        // အမှတ်အသစ်က ပိုများမှသာ Update လုပ်မည် (Best Score Strategy)
+        if (score > oldScore) {
+            currentUser.grades[courseId][subjectKey] = score;
+            
+            // Cloud (Firebase) သို့ တိုက်ရိုက် Update လုပ်မည်
+            await db.collection('users').doc(currentUser.uid).set({
+                grades: {
+                    [courseId]: {
+                        [subjectKey]: score
+                    }
+                }
+            }, { merge: true });
+            
+            showToast(`ဘာသာရပ် ${subjectKey.toUpperCase()} အတွက် ရမှတ်အသစ် (${score}) ကို မှတ်တမ်းတင်လိုက်ပါပြီ။`, "success");
+        } else {
+            showToast(`ယခင်ရမှတ် (${oldScore}) က ပိုများနေသဖြင့် အမှတ်စာရင်းကို မပြောင်းလဲပါ။`);
+        }
     }
 
-    // ၃။ Attempt နှင့် Completion Update
+    // ၄။ Attempt နှင့် Completion Update
     currentUser.quizAttempts[quizId] = currentAttempt;
     const lessonTitle = courseData[c].modules[m].lessons[l].title;
     
@@ -918,19 +935,23 @@ async function checkQuizResult(quizId, quizData, c, m, l) {
         }
     }
 
+    // Local Storage သိမ်းမည်
     localStorage.setItem('currentUser', JSON.stringify(currentUser));
-    await syncProgressToCloud(); // Cloud Sync
+    
+    // Cloud Sync (Completed Lessons & Attempts အတွက်)
+    await syncProgressToCloud(); 
 
-    // ၄။ Redirection
+    // ၅။ အသိပေးချက်နှင့် Redirection
     setTimeout(() => {
         if (score === questions.length) {
-            showToast("ဂုဏ်ယူပါတယ်! အမှတ်ပြည့်ရရှိပါတယ်။", "success");
+            alert(`ဂုဏ်ယူပါတယ်! အမှတ်ပြည့် (${score}/${questions.length}) ရရှိပါတယ်။`);
             goToNextLesson(c, m, l);
         } else if (currentAttempt >= 3) {
-            showToast("၃ ကြိမ်ဖြေဆိုမှု ပြီးဆုံးပါပြီ။");
+            alert(`၃ ကြိမ်ဖြေဆိုမှု ပြီးဆုံးပါပြီ။ သင်၏နောက်ဆုံးရမှတ်မှာ (${score}/${questions.length}) ဖြစ်ပါသည်။`);
             goToNextLesson(c, m, l);
         } else {
-            if (confirm(`ရမှတ်: ${score}/${questions.length}။ ထပ်ဖြေမလား?`)) {
+            const retry = confirm(`သင့်ရမှတ်မှာ (${score}/${questions.length}) ဖြစ်ပါသည်။ အကြိမ်ရေ ${(3 - currentAttempt)} ကြိမ် ကျန်ပါသေးသည်။ ထပ်မံဖြေဆိုလိုပါသလား?`);
+            if (retry) {
                 renderLessonContent(c, m, l);
             } else {
                 goToNextLesson(c, m, l);
@@ -1086,43 +1107,44 @@ async function showMessages(targetUid = null, targetName = null) {
     const teachers = allUsersList.filter(u => u.role === 'Teacher' && u.uid !== currentUser.uid);
 
     body.innerHTML = `
-        <div class="messaging-layout fade-in">
+        <div class="messaging-layout fade-in animate-up">
             <div class="chat-sidebar">
-                <div class="chat-list-header">Messenger</div>
-                <div class="chat-list">
-                    
-                    <div class="chat-list-divider">Class Groups</div>
+                <div class="chat-list-header" style="background: white; border-bottom: 1px solid var(--border-color); padding: 25px;">
+                    <h4 style="margin:0;"><i class="fas fa-comments"></i> Messenger</h4>
+                </div>
+                <div class="chat-list" style="padding-top: 15px;">
+                    <div class="chat-list-divider" style="margin-left:20px; font-size:0.7rem; text-transform:uppercase; letter-spacing:1px; color:grey; margin-bottom:10px;">Channels</div>
                     ${myBatchList.map(bid => `
-                        <div class="chat-item ${activeChatId === bid ? 'active' : ''}" onclick="switchChat('${bid}', 'Group: ${bid}')">
-                            <i class="fas fa-users"></i> ${bid}
+                        <div class="chat-item ${activeChatId === bid ? 'active' : ''}" onclick="switchChat('${bid}', 'Group: ${bid}')" style="padding: 12px 15px;">
+                            <i class="fas fa-hashtag"></i> <span>${bid}</span>
                         </div>
                     `).join('')}
 
-                    ${!isTeacher ? `
-                        <div class="chat-list-divider">Contact Tutor</div>
-                        ${teachers.map(t => `
-                            <div class="chat-item ${activeChatId === t.uid ? 'active' : ''}" onclick="switchChat('${t.uid}', 'Tutor: ${t.name}')">
-                                <i class="fas fa-user-tie"></i> ${t.name} (Teacher)
+                    <div class="chat-list-divider" style="margin: 20px 0 10px 20px; font-size:0.7rem; text-transform:uppercase; letter-spacing:1px; color:grey;">Direct Messages</div>
+                    ${visibleDMList.map(s => `
+                        <div class="chat-item ${activeChatId === s.uid ? 'active' : ''}" onclick="switchChat('${s.uid}', '${s.name}')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px;">
+                            <div style="width:32px; height:32px; background:#e2e8f0; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.8rem; font-weight:bold; color:var(--primary);">
+                                ${s.name.charAt(0)}
                             </div>
-                        `).join('')}
-                    ` : ''}
-
-                    <div class="chat-list-divider">Classmates (${currentUser.batchId || 'N/A'})</div>
-                    ${visibleDMList.length > 0 ? visibleDMList.map(s => `
-                        <div class="chat-item ${activeChatId === s.uid ? 'active' : ''}" onclick="switchChat('${s.uid}', 'Chat: ${s.name}')">
-                            <i class="fas fa-user-circle"></i> 
                             <span>${s.name}</span>
                         </div>
-                    `).join('') : '<p style="padding:15px; font-size:0.8rem; color:grey;">စကားပြောရန် လူမရှိသေးပါ။</p>'}
+                    `).join('')}
                 </div>
             </div>
             
-            <div class="chat-window">
-                <div class="chat-window-header" id="active-chat-title">${activeChatName}</div>
-                <div class="chat-display" id="chat-display"></div>
-                <div class="chat-input-box">
-                    <input type="text" id="chat-input" placeholder="စာရိုက်ပါ..." onkeypress="if(event.key==='Enter') sendMessage()">
-                    <button onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
+            <div class="chat-window" style="background: white;">
+                <div class="chat-window-header" style="padding: 20px 30px; border-bottom: 1px solid var(--border-color); display:flex; align-items:center; gap:15px;">
+                    <div style="width:10px; height:10px; background:var(--success); border-radius:50%;"></div>
+                    <strong style="font-size: 1.1rem;">${activeChatName}</strong>
+                </div>
+                <div class="chat-display" id="chat-display" style="padding: 30px; background: #f1f5f9;"></div>
+                <div class="chat-input-box" style="padding: 20px 30px; background: white; border-top: 1px solid var(--border-color);">
+                    <div style="display:flex; background:#f1f5f9; border-radius:30px; padding: 5px 5px 5px 20px; width:100%; align-items:center;">
+                        <input type="text" id="chat-input" placeholder="စာရိုက်ပါ..." style="flex:1; border:none; background:transparent; outline:none; height:45px;" onkeypress="if(event.key==='Enter') sendMessage()">
+                        <button onclick="sendMessage()" style="width:45px; height:45px; border-radius:50%; background:var(--primary); color:white; border:none; cursor:pointer;">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>`;
@@ -2381,32 +2403,55 @@ function previewStudentAchievements(uid) {
 
 // --- ကျောင်းသားတစ်ဦးချင်းစီကို အမှတ်သွင်းရန် Modal/Form ---
 function openGradeModal(studentUid) {
-  const student = studentsList.find((s) => s.uid === studentUid);
-  const body = document.getElementById("dynamic-body");
+    const student = studentsList.find(s => s.uid === studentUid);
+    const body = document.getElementById('dynamic-body');
+    const enrolled = student.enrolledCourses || [];
 
-  // ဘာသာရပ်စာရင်း (မာတိကာမှ ယူနိုင်သည် သို့မဟုတ် ပုံသေထားနိုင်သည်)
-  const subjects = ["HTML", "CSS", "JavaScript", "React", "NodeJS", "Database"];
+    let courseButtons = enrolled.map(cId => `
+        <button class="menu-btn" style="margin-bottom:10px; width:100%; text-align:left;" 
+                onclick="renderSubjectGrading('${studentUid}', '${cId}')">
+            <i class="fas fa-book"></i> ${allCourses[cId].title}
+        </button>
+    `).join('');
 
-  let subjectInputs = subjects
-    .map(
-      (sub) => `
-        <div class="academic-item">
-            <span class="label-grey">${sub}:</span>
-            <input type="number" id="grade-${sub.toLowerCase()}" class="edit-input" style="width:80px" value="${student.grades?.[sub.toLowerCase()] || 0}">
-        </div>
-    `,
-    )
-    .join("");
+    body.innerHTML = `
+        <div class="content-card animate-up" style="max-width:550px; margin:auto;">
+            <h3><i class="fas fa-user-edit"></i> Student Information: ${student.name}</h3>
+            <hr><br>
+            
+            <!-- 🔥 Batch ပြင်သည့်နေရာ အသစ် -->
+            <div class="academic-box" style="background:var(--main-bg); margin-bottom:20px;">
+                <label><strong>Assign Batch (လက်ရှိ- ${student.batchId})</strong></label>
+                <input type="text" id="edit-batch-id" class="edit-input" value="${student.batchId}" placeholder="ဥပမာ- Batch-04">
+                <button class="save-btn" style="margin-top:10px; width:100%;" onclick="updateStudentBatch('${studentUid}')">
+                    Update Batch Name
+                </button>
+            </div>
 
-  body.innerHTML = `
-        <div class="content-card animate-up" style="max-width: 600px; margin: 20px auto;">
-            <h4><i class="fas fa-graduation-cap"></i> ${student.name} ၏ အမှတ်စာရင်းသွင်းရန်</h4>
-            <div class="academic-box">${subjectInputs}</div>
+            <h4>အမှတ်သွင်းရန် သင်တန်းရွေးချယ်ပါ</h4>
+            <div style="margin-top:10px;">
+                ${courseButtons || "<p style='color:grey;'>တက်ရောက်ထားသော သင်တန်းမရှိသေးပါ။</p>"}
+            </div>
+            
             <br>
-            <button class="save-btn" onclick="updateGrades('${student.uid}')">အမှတ်စာရင်း သိမ်းဆည်းမည်</button>
-            <button class="menu-btn" style="background:#64748b" onclick="renderAdminPanel()">ပြန်ထွက်မည်</button>
-        </div>
-    `;
+            <button class="menu-btn" style="width:100%;" onclick="renderAdminPanel()">
+                <i class="fas fa-arrow-left"></i> Back to Student List
+            </button>
+        </div>`;
+}
+
+// 🔥 Batch ကို Cloud (Firebase) ပေါ်မှာ Update လုပ်မည့် Function အသစ်
+async function updateStudentBatch(uid) {
+    const newBatch = document.getElementById('edit-batch-id').value.trim();
+    if (!newBatch) return alert("Batch အမည် ထည့်ပေးပါ။");
+
+    try {
+        await db.collection('users').doc(uid).update({
+            batchId: newBatch
+        });
+        alert("Batch အမည်ကို " + newBatch + " သို့ ပြောင်းလဲပြီးပါပြီ။");
+        renderAdminPanel(); // List ကို ပြန်သွားမည်
+    } catch (e) { alert(e.message); }
 }
 
 // --- ကျောင်းသားအတွက်: Transcript နှင့် Certificate ပြသခြင်း ---
@@ -3720,47 +3765,70 @@ async function handleSignUp() {
 function renderCourseSelection() {
     const body = document.getElementById('dynamic-body');
     body.innerHTML = `
-        <div class="welcome-banner fade-in">
-            <h2>မင်္ဂလာပါ ${currentUser.name}! 👋</h2>
-            <p>သင်တက်ရောက်လိုသော သင်တန်းကို ရွေးချယ်ပါ။</p>
+        <div class="welcome-banner fade-in" style="border-radius: 25px; padding: 40px; margin-bottom: 40px;">
+            <h2 style="font-size: 2rem;">မင်္ဂလာပါ ${currentUser.name}! <span class="wave">👋</span></h2>
+            <p style="font-size: 1.1rem; opacity: 0.9;">သင်တက်ရောက်လိုသော သင်တန်းကို ရွေးချယ်ပြီး ခရီးစဉ်အသစ်ကို စတင်လိုက်ပါ။</p>
         </div>
         <div class="dashboard-grid animate-up" id="course-grid"></div>
     `;
 
     const grid = document.getElementById('course-grid');
     
+    // သင်တန်းအလိုက် အရောင်များ သတ်မှတ်ခြင်း
+    const courseColors = {
+        "web": "#003087",      // Blue
+        "python": "#10b981",   // Green
+        "design": "#8b5cf6"    // Purple
+    };
+
     for (let id in allCourses) {
         const course = allCourses[id];
         const isEnrolled = currentUser.enrolledCourses?.includes(id);
         const isTeacher = currentUser.role === 'Teacher';
-
-        // 🔥 အဓိကအချက်: ဆရာဖြစ်စေ၊ ဝယ်ပြီးသားကျောင်းသားဖြစ်စေ 'Joined' ပဲ ပြမည်
         const hasAccess = isEnrolled || isTeacher;
+        const themeColor = courseColors[id] || "#475569";
 
         const card = document.createElement('div');
-        card.className = 'topic-card course-selection-card';
+        card.className = 'course-selection-card animate-up';
         card.onclick = () => selectCourse(id);
         
         card.innerHTML = `
-            <div class="card-icon"><i class="fas ${course.icon || 'fa-graduation-cap'}"></i></div>
-            <h3 style="margin-bottom:10px;">${course.title}</h3>
-            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:15px;">${course.description}</p>
-            
-            <ul style="text-align:left; font-size:0.8rem; margin-bottom:15px; padding-left:20px; color:var(--text-main);">
-                ${course.benefits.map(b => `<li>${b}</li>`).join('')}
-            </ul>
+            <div class="card-top-accent" style="background: ${themeColor}"></div>
+            <div class="card-body-padding">
+                <!-- 🔥 Icon ကို Container နဲ့ အုပ်ပြီး အလယ်ပို့လိုက်ပါပြီ -->
+                <div style="display:flex; justify-content:center; margin-bottom:20px;">
+                    <div class="course-icon-box" style="background: ${themeColor}15; color: ${themeColor}; margin: 0;">
+                        <i class="fas ${course.icon || 'fa-graduation-cap'}"></i>
+                    </div>
+                </div>
 
-            <div style="font-weight:bold; color:var(--primary); margin-bottom:15px;">${course.price}</div>
+                <h3 style="font-size: 1.4rem; margin-bottom: 12px; text-align:center;">${course.title}</h3>
+                <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 20px; text-align:center;">
+                    ${course.description}
+                </p>
+                
+                <div style="flex: 1;">
+                    <ul style="list-style: none; padding: 0;">
+                        ${course.benefits.map(b => `
+                            <li style="font-size: 0.85rem; margin-bottom: 8px; display: flex; align-items: center; gap: 10px;">
+                                <i class="fas fa-check-circle" style="color: ${themeColor};"></i> ${b}
+                            </li>
+                        `).join('')}
+                    </ul>
+                </div>
 
-            <div class="enroll-status-container">
-                ${hasAccess 
-                    ? `<button class="course-card-btn btn-joined">
-                         တက်ရောက်နေဆဲ <i class="fas fa-check-circle"></i>
-                       </button>` 
-                    : `<button class="course-card-btn btn-enroll-now">
-                         <i class="fas fa-shopping-cart"></i> Enroll Now
-                       </button>`
-                }
+                <div style="margin: 25px 0; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 1.2rem; font-weight: 800; color: ${themeColor};">${course.price}</span>
+                    ${isEnrolled ? `<span style="font-size: 0.8rem; color: #22c55e; font-weight: bold;">Joined <i class="fas fa-check"></i></span>` : ''}
+                </div>
+
+                <button class="course-card-btn ${hasAccess ? 'btn-joined' : 'btn-enroll-now'}" 
+                        style="${hasAccess ? 'background:#22c55e' : `background:${themeColor}`}">
+                    ${hasAccess 
+                        ? 'တက်ရောက်နေဆဲ <i class="fas fa-arrow-right"></i>' 
+                        : '<i class="fas fa-shopping-cart"></i> Enroll Now'
+                    }
+                </button>
             </div>
         `;
         grid.appendChild(card);
@@ -3880,6 +3948,81 @@ async function renderShowcase() {
                 <br><br>
                 <button class="menu-btn" onclick="showSection('dashboard')">Back to Home</button>
             </div>`;
+    }
+}
+
+// --- သင်တန်းအလိုက် ဘာသာရပ်များကို အမှတ်သွင်းရန် UI ပြသခြင်း ---
+function renderSubjectGrading(uid, courseId) {
+    const student = studentsList.find(s => s.uid === uid);
+    const course = allCourses[courseId];
+    const body = document.getElementById('dynamic-body');
+    
+    if (!student || !course) return alert("Data Error: မရနိုင်ပါ");
+
+    // လက်ရှိ ရှိပြီးသား အမှတ်များကို ယူမည် (မရှိရင် ၀ ထားမည်)
+    const currentGrades = (student.grades && student.grades[courseId]) ? student.grades[courseId] : {};
+
+    // ဘာသာရပ်အလိုက် Input များ တည်ဆောက်ခြင်း
+    let inputsHtml = course.transcriptSubjects.map(sub => `
+        <div class="academic-item" style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #eee;">
+            <span style="text-transform:uppercase; font-weight:bold;">${sub.replace('_', ' ')}:</span>
+            <input type="number" id="gr-${sub.toLowerCase()}" class="edit-input" 
+                   style="width:100px; text-align:center;" 
+                   value="${currentGrades[sub.toLowerCase()] || 0}" min="0" max="100">
+        </div>
+    `).join('');
+
+    body.innerHTML = `
+        <div class="content-card animate-up" style="max-width: 600px; margin: auto;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3><i class="fas fa-edit"></i> ${course.title}</h3>
+                <button class="menu-btn" onclick="openGradeModal('${uid}')">Back</button>
+            </div>
+            <p style="color:var(--text-muted)">ကျောင်းသား: <strong>${student.name}</strong></p>
+            <hr><br>
+            
+            <div class="academic-box" style="background:var(--card-bg); padding:15px; border-radius:12px;">
+                ${inputsHtml}
+            </div>
+
+            <div style="margin-top:30px;">
+                <button class="save-btn" style="width:100%; height:50px; font-size:1.1rem;" 
+                        onclick="saveMultiCourseGrades('${uid}', '${courseId}')">
+                    <i class="fas fa-save"></i> အမှတ်စာရင်း သိမ်းဆည်းမည်
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+// --- အမှတ်အားလုံးကို စုစည်းပြီး Cloud သို့ သိမ်းဆည်းခြင်း ---
+async function saveMultiCourseGrades(uid, courseId) {
+    const course = allCourses[courseId];
+    const newGrades = {};
+    
+    // UI ထဲက ရိုက်ထားတဲ့ အမှတ်တွေကို loop ပတ်ပြီး ယူမည်
+    course.transcriptSubjects.forEach(sub => {
+        const val = document.getElementById('gr-' + sub.toLowerCase()).value;
+        newGrades[sub.toLowerCase()] = parseInt(val) || 0;
+    });
+
+    try {
+        // 🔥 အမှတ်စာရင်းကို grades -> courseId -> subject ပုံစံဖြင့် Cloud မှာ သိမ်းမည်
+        await db.collection('users').doc(uid).set({
+            grades: {
+                [courseId]: newGrades
+            }
+        }, { merge: true });
+
+        alert("အောင်မြင်စွာ သိမ်းဆည်းပြီးပါပြီ။");
+        
+        // Data အသစ်များကို ပြန်ဆွဲထုတ်ရန် fetch ပြန်ခေါ်မည်
+        await fetchStudentsFromDB(); 
+        renderAdminPanel();
+
+    } catch (error) {
+        console.error("Save Grade Error:", error);
+        alert("Error: " + error.message);
     }
 }
 

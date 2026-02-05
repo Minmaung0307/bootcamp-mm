@@ -1,5 +1,11 @@
 :root {
     --primary: #003087;
+    --primary-light: #e0f2fe;
+    --accent-gold: #f59e0b;
+    --success: #10b981;
+    --danger: #ef4444;
+    --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+    --glass-bg: rgba(255, 255, 255, 0.8);
     --sidebar-bg: #1e293b;
     --main-bg: #f1f5f9;      /* Light Mode နောက်ခံ */
     --card-bg: #ffffff;      /* Light Mode Card */
@@ -964,35 +970,80 @@ body {
 .chat-input-area input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 20px; }
 
 .messaging-layout {
-    display: flex; height: 75vh; background: white; border-radius: 15px;
-    box-shadow: 0 5px 25px rgba(0,0,0,0.1); overflow: hidden;
+    display: flex; 
+    height: 80vh;
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    box-shadow: var(--card-shadow); 
+    background: white; 
+    /* border-radius: 15px;
+    box-shadow: 0 5px 25px rgba(0,0,0,0.1);  */
 }
 
-.chat-sidebar { padding-left: 7px; width: 260px; border-right: 1px solid #eee; background: #f8fafc; }
-.chat-list-header { padding: 20px; font-weight: bold; background: #f1f5f9; }
+.chat-sidebar { 
+    padding-left: 7px; 
+    width: 260px; 
+    border-right: 1px solid var(--border-color); 
+    background: #f8fafc; 
+}
+
+body.dark-theme .chat-sidebar { background: #0f172a; }
+
+.chat-list-header { 
+    padding: 20px; 
+    font-weight: bold; 
+    background: #f1f5f9; 
+}
+
 .chat-item {
     padding: 15px 20px;
     cursor: pointer;
-    border-bottom: 1px solid rgba(0,0,0,0.05);
+    /* border-bottom: 1px solid rgba(0,0,0,0.05); */
     display: flex;
     align-items: center;
     gap: 10px;
-    transition: 0.2s;
     color: var(--text-main);
+    margin: 5px 12px;
+    border-radius: 12px;
+    border-bottom: none !important;
+    transition: 0.3s;
 }
 
 .chat-item.active {
-    background-color: rgba(0, 48, 135, 0.1); /* Columbia Blue အဖျော့ */
+    /* background-color: rgba(0, 48, 135, 0.1);  */  /* Columbia Blue အဖျော့ */
     border-left: 4px solid var(--primary);
-    color: var(--primary);
+    /* color: var(--primary); */
     font-weight: bold;
+    background: var(--primary) !important;
+    color: white !important;
 }
 
 .chat-window { flex: 1; display: flex; flex-direction: column; }
 .chat-window-header { padding: 15px 25px; background: white; border-bottom: 1px solid #eee; font-weight: bold; }
 .chat-display { flex: 1; padding: 20px; overflow-y: auto; background: #f1f5f9; display: flex; flex-direction: column; }
 
-.message-bubble { max-width: 70%; margin-bottom: 15px; padding: 10px 15px; border-radius: 12px; position: relative; }
+.message-bubble { 
+    max-width: 70%; 
+    margin-bottom: 15px; 
+    /* padding: 10px 15px;  */
+    /* border-radius: 12px;  */
+    position: relative; 
+    border-radius: 18px !important;
+    padding: 12px 18px !important;
+    font-size: 0.95rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.animate-up {
+    animation: fadeUp 0.6s ease forwards;
+}
+
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
 .message-bubble.me { align-self: flex-end; background: var(--primary); color: white; border-bottom-right-radius: 2px; }
 .message-bubble.other { align-self: flex-start; background: white; border: 1px solid #e2e8f0; border-bottom-left-radius: 2px; }
 
@@ -1728,10 +1779,51 @@ body, html {
 }
 
 .course-selection-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 20px !important;
+    padding: 0 !important; /* Header အတွက် 0 ထားမည် */
+    overflow: hidden;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     height: 100%;
+    transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.card-body-padding {
+    padding: 30px 25px !important;
+    text-align: center; /* အဓိက စာသားများကို အလယ်ပို့မည် */
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* List item စာသားများကိုတော့ ဘယ်ဘက်အတိုင်းထားမည် */
+.card-body-padding ul {
+    text-align: left;
+    margin: 20px 0;
+}
+
+.course-icon-box {
+    width: 70px !important;
+    height: 70px !important;
+    border-radius: 20px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 2rem !important;
+}
+
+.card-top-accent {
+    height: 10px;
+    background: linear-gradient(90deg, var(--primary), #3b82f6);
+}
+
+.course-selection-card:hover {
+    transform: translateY(-12px) scale(1.02);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+    border-color: var(--primary);
 }
 
 .course-selection-card ul li {

@@ -1,8 +1,11 @@
 {
+    "id": "quiz_m0_17",
+    "subject": "react",
+    "title": "Basic React Quiz",
     "questions": [
         {
-            "q": "HTML ရဲ့ အရှည်က ဘာလဲ?",
-            "options": ["Hyper Text Markup Language", "High Tech Multi Language"],
+            "q": "React ကို ဘာအတွက် သုံးသလဲ?",
+            "options": ["Frontend Framework", "Backend Language", "Database System"],
             "correct": 0
         },
         {
