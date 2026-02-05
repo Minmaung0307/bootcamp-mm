@@ -32,7 +32,7 @@
 }
 .lesson-banner-title { margin-left: 100px; color: #003087; font-size: 1.5rem; font-weight: bold; }
 
-/* --- 2. Callout Boxes (Rewind, Nerd Note) --- */
+/* --- 2. Callout Boxes (Rewind, Nerd Note, Legacy Lore) --- */
 .callout-box {
     display: flex; gap: 20px; background: var(--card-bg);
     border: 1px solid var(--border-color); border-radius: 12px;
@@ -43,11 +43,22 @@
     display: flex; align-items: center; justify-content: center;
     font-size: 1.5rem; color: white; flex-shrink: 0;
 }
-.bg-rewind { background-color: #58a65c; }
-.bg-nerd { background-color: #58a65c; }
+.bg-rewind, .bg-nerd { background-color: #58a65c; }
 .bg-pro-tip { background-color: #2b6cb0; }
 
-/* --- 3. Important Callout --- */
+.lore-box {
+    position: relative; background-color: var(--card-bg);
+    border: 1px solid var(--border-color); border-radius: 8px;
+    padding: 30px 25px 20px; margin: 40px 0; box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+.lore-title {
+    position: absolute; top: -15px; left: 15px;
+    background-color: white; padding: 5px 15px;
+    color: #0073b1; font-weight: bold; font-size: 0.85rem;
+    border: 1px solid var(--border-color);
+}
+
+/* --- 3. Important / Warning Callout --- */
 .important-callout {
     display: flex; margin: 30px 0; border-left: 5px solid #3498db;
     background-color: rgba(52, 152, 219, 0.05);
@@ -58,31 +69,19 @@
 }
 .important-text { padding: 15px 15px 15px 0; line-height: 1.6; }
 
-/* --- 4. Lore Box (Floating Label) --- */
-.lore-box {
-    position: relative; background-color: var(--card-bg);
-    border: 1px solid var(--border-color); border-radius: 8px;
-    padding: 30px 25px 20px; margin: 40px 0; box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-}
-.lore-title {
-    position: absolute; top: -15px; left: 15px;
-    background-color: var(--card-bg); padding: 5px 15px;
-    color: var(--primary); font-weight: bold; font-size: 0.85rem;
-    border: 1px solid var(--border-color);
-}
-
-/* --- 5. Code & Terminal Windows --- */
+/* --- 4. Code & Terminal Windows --- */
 .code-window, .terminal-window {
     background-color: #1e293b; color: #e2e8f0; padding: 20px;
-    border-radius: 8px; font-family: 'Fira Code', monospace;
+    border-radius: 8px; font-family: 'Fira Code', 'Courier New', monospace;
     margin: 25px 0; overflow-x: auto; border-left: 5px solid #3b82f6;
 }
 .terminal-window { background-color: #000; border: 2px solid #333; }
 .t-prompt { color: #10b981; margin-right: 8px; }
 .t-command { color: #fff; font-weight: bold; }
 .t-red { color: #ef4444; }
+.code-window pre { margin: 0; }
 
-/* --- 6. Tooltips --- */
+/* --- 5. Tooltips (Inline) --- */
 .tooltip {
     position: relative; display: inline-block;
     color: var(--primary); font-weight: bold;
@@ -97,7 +96,7 @@
 }
 .tooltip:hover .tooltiptext { visibility: visible; opacity: 1; }
 
-/* --- 7. Accordions (Hint & Deep Dive) --- */
+/* --- 6. Accordions (Hint & Deep Dive) --- */
 .lms-accordion {
     background: var(--card-bg); border: 1px solid var(--border-color);
     border-radius: 50px; padding: 10px 20px;
@@ -114,19 +113,27 @@
     border-radius: 12px; margin-bottom: 20px; border: 1px dashed var(--border-color);
 }
 .deep-dive-btn {
-    background: var(--primary); color: white; padding: 15px;
+    background: #003087; color: white; padding: 15px;
     border-radius: 8px; text-align: center; font-weight: bold;
     cursor: pointer; margin: 20px 0; transition: 0.3s;
 }
-.deep-dive-btn:hover { filter: brightness(1.2); }
 
-/* --- 8. Video & Downloads --- */
+/* --- 7. Video Section (Labels & Wrappers) --- */
+.video-lesson-container { margin: 30px 0; }
+.video-tag-label {
+    display: inline-flex; align-items: center; gap: 8px;
+    background-color: #cbd5e1; color: #475569;
+    padding: 4px 12px; border-radius: 6px;
+    font-size: 0.85rem; font-weight: 600; border: 1px solid #94a3b8;
+    margin-bottom: 15px;
+}
 .video-wrapper {
     position: relative; padding-bottom: 56.25%; height: 0;
-    overflow: hidden; border-radius: 12px; background: #000; margin: 20px 0;
+    overflow: hidden; border-radius: 12px; background: #000;
 }
 .video-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
 
+/* --- 8. Download Links --- */
 .download-links { list-style: none; padding: 0; }
 .download-links li { margin-bottom: 10px; }
 .download-links a {
@@ -135,8 +142,10 @@
 }
 .download-links a:hover { text-decoration: underline; }
 
-/* Dark Mode Fix for Lessons */
-body.dark-theme .icon-circle { background: rgba(0,0,0,0.3); }
+/* --- Dark Mode Fixes --- */
+body.dark-theme .icon-circle { background: rgba(255,255,255,0.1); }
 body.dark-theme .lesson-info-bar { background-color: #334155; }
 body.dark-theme .lesson-banner-title { color: #fff; }
 body.dark-theme .accordion-body { background: rgba(255,255,255,0.05); }
+body.dark-theme .lore-title { background-color: var(--card-bg); }
+body.dark-theme .video-tag-label { background-color: #334155; color: #f1f5f9; border-color: #475569; }

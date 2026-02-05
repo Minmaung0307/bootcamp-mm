@@ -12,6 +12,13 @@ folderStructure.txt
 ပုံထည့်ရန်.txt
 data-*.txt
 
+lessonComponentLibrary.html
+allLessons.css
+HighEnd-LMS.md
+lessons.md
+filePath.txt
+data.js
+
 # Firebase cache
 .firebase/
 
