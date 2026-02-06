@@ -492,7 +492,43 @@ body {
 }
 
 /* Edit Mode Styles */
-.edit-input { width: 100%; padding: 8px; margin: 5px 0; border: 1px solid #ccc; border-radius: 5px; }
+.edit-input {
+    width: 100%;
+    padding: 12px 15px !important; /* Padding ကို ညီအောင်ညှိခြင်း */
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background-color: var(--card-bg);
+    color: var(--text-main);
+    font-size: 1rem;
+    line-height: 1.5; /* 🔥 စာသားကို ဒေါင်လိုက်အလယ်ကျစေရန် အသက်ပါ */
+    outline: none;
+    transition: 0.3s;
+    box-sizing: border-box;
+    display: block;
+}
+
+/* Single line input များအတွက် အထူးညှိချက် */
+input[type="text"].edit-input, 
+input[type="url"].edit-input, 
+input[type="email"].edit-input {
+    height: 45px; /* အမြင့်ကို ပုံသေပေးခြင်းဖြင့် cursor အလယ်ကျစေသည် */
+    display: flex;
+    align-items: center;
+}
+
+/* Announcement လိုမျိုး Textarea အတွက် */
+textarea.edit-input {
+    min-height: 80px;
+    resize: vertical;
+    padding-top: 12px !important;
+    line-height: 1.6;
+}
+
+.edit-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(0, 48, 135, 0.1);
+}
+
 .save-btn { background: #166534; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
 
 /* --- Course Module Accordion Style --- */

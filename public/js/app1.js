@@ -46,14 +46,6 @@ let academicInfo = {
   startDate: "-"
 };
 
-// --- Firestore ထဲက ကျောင်းသားအားလုံးကို ဆွဲယူပြီး studentsList ထဲ ထည့်ခြင်း ---
-let allUsersList = []; // Global variable အသစ်
-
-let lastFetchTime = 0; // 🔥 နောက်ဆုံးဖတ်ခဲ့သည့်အချိန်ကို သိမ်းရန်
-
-let cachedAnalyticsHtml = ""; // Analytics UI ကို သိမ်းထားရန်
-let lastAnalyticsTime = 0;    // နောက်ဆုံးတွက်ချက်ခဲ့သည့် အချိန်
-
 // app.js ရဲ့ variables တွေထားတဲ့ နေရာမှာ ထည့်ပါ
 let isAudioUnlocked = false;
 const notiSound = new Audio('assets/noti-sound.mp3');
@@ -102,19 +94,18 @@ function syncZoomConfig() {
     db.collection('settings').doc('zoom_config').onSnapshot(doc => {
         if (doc.exists) {
             const data = doc.data();
-            currentZoomLink = data.url || ""; 
+            currentZoomLink = data.url || ""; // Link မရှိလျှင် empty string ထားမည်
             if (data.startTime) {
                 nextClassTime = data.startTime.toDate();
             }
-            console.log("Zoom Link Updated:", currentZoomLink);
-
-            // 🔥 အရေးကြီးဆုံးအချက် - လက်ရှိ Dashboard ကို ကြည့်နေရင် UI ကို ချက်ချင်း Update လုပ်မည်
-            const titleEl = document.getElementById('page-title');
-            if (titleEl && titleEl.innerText === "Dashboard Overview") {
+            
+            // 🔥 အကယ်၍ အခုလက်ရှိ Dashboard ကို ကြည့်နေတာဆိုရင် ချက်ချင်း UI ပြန်ဆွဲခိုင်းမည်
+            const title = document.getElementById('page-title');
+            if (title && title.innerText === "Dashboard") {
                 renderDashboard();
             }
         }
-    }, err => console.warn("Zoom sync restricted"));
+    }, err => console.warn("Zoom config sync restricted"));
 }
 
 // ==========================================
@@ -136,71 +127,81 @@ function showSection(section, filterCat = null) {
 
     if (!title || !body) return;
 
+    // ၁။ 🔥 ပိုက်ဆံမသွင်းရသေးသူ (သို့မဟုတ်) သင်တန်းမရှိသေးသူများကို တားဆီးရန် Logic
+    const restrictedSections = ['courses', 'messages', 'resources', 'profile'];
+    
+    // ကျောင်းသားဖြစ်ပြီး ဘယ်သင်တန်းမှ မဝယ်ရသေးရင် (enrolledCourses အလွတ်ဖြစ်နေရင်) တားပါမယ်
+    const hasNoCourse = !currentUser.enrolledCourses || currentUser.enrolledCourses.length === 0;
+
+    if (restrictedSections.includes(section) && currentUser.role !== 'Teacher' && hasNoCourse) {
+        alert("⚠️ ဤကဏ္ဍများကို အသုံးပြုရန် သင်တန်းအနည်းဆုံးတစ်ခု အရင်အပ်နှံရန် လိုအပ်ပါသည်။");
+        renderCourseSelection(); // သင်တန်းရွေးချယ်မှုစာမျက်နှာသို့ ပြန်ပို့မည်
+        return; 
+    }
+
     // Sidebar ပိတ်မည်
     if (sidebar && sidebar.classList.contains('open')) toggleNav();
 
-    const isTeacher = currentUser.role === 'Teacher';
-    const enrolledList = currentUser.enrolledCourses || [];
-    const hasEnrolled = enrolledList.length > 0;
-
-    // ၁။ Gatekeeper: ဘာသင်တန်းမှ မရှိသေးသူများအတွက်
-    const restrictedSections = ['courses', 'messages', 'resources', 'profile'];
-    if (restrictedSections.includes(section) && !isTeacher && !hasEnrolled) {
-        showToast("⚠️ သင်တန်းအနည်းဆုံးတစ်ခု အရင်အပ်နှံရန် လိုအပ်ပါသည်။", "info");
-        renderCourseSelection(); 
-        return; 
-    }
-
-    // ၂။ 🔥 သင်တန်းရှိသော်လည်း "မရွေးချယ်ရသေးဘဲ" သင်ခန်းစာကြည့်ရန် ကြိုးစားမှုကို စစ်ဆေးခြင်း
-    // အရေးကြီးသည်- section 'courses' ဖြစ်ပြီး selectedCourseId မရှိမှသာ ဤစာသားပြမည်
-    if (section === 'courses' && !currentUser.selectedCourseId) {
-        title.innerText = "သင်ခန်းစာများ";
-        body.innerHTML = `
-            <div class="content-card animate-up" style="text-align:center; padding:60px 20px; border-top: 5px solid var(--accent-gold);">
-                <div style="font-size:4rem; color:var(--text-muted); margin-bottom:20px;">
-                    <i class="fas fa-book-reader"></i>
-                </div>
-                <h3 style="color:var(--text-main)">သင်တန်း မရွေးချယ်ရသေးပါ</h3>
-                <p style="color:var(--text-muted); margin-bottom:25px;">သင်ခန်းစာများ လေ့လာနိုင်ရန်အတွက် သင်တက်ရောက်နေသော သင်တန်းတစ်ခုကို အရင်ရွေးချယ်ပေးပါ။</p>
-                <button class="save-btn" style="max-width:280px; margin:auto;" onclick="showSection('courses_all')">
-                    <i class="fas fa-th-list"></i> သင်တန်းများအားလုံးသို့ သွားရန်
-                </button>
-            </div>`;
-        return; 
-    }
-
-    // ၃။ ပုံမှန် Section Switching
+    // Section Switching logic များ (Dashboard, Courses, Profile စသည် - အရင်အတိုင်းထားပါ)
     if (section === 'dashboard') {
-        title.innerText = "Dashboard Overview";
+        title.innerText = "Dashboard";
         renderDashboard();
     } else if (section === 'courses') {
-        title.innerText = filterCat ? filterCat : "My Lessons";
         renderCourseTree(filterCat);
     } else if (section === 'courses_all') {
-        title.innerText = "သင်တန်းများ ရွေးချယ်ရန်";
         renderCourseSelection();
     } else if (section === 'messages') {
-        title.innerText = "Messenger";
         showMessages();
     } else if (section === 'profile') {
-        title.innerText = "User Profile";
         renderProfile();
     } else if (section === 'resources') {
-        title.innerText = "Learning Resources";
         renderResources();
-    } else if (section === 'showcase') {
-        title.innerText = "Project Showcase";
-        renderShowcase();
     } else if (section === 'about') {
-        title.innerText = "About Us";
         renderAbout();
     } else if (section === 'privacy') {
-        title.innerText = "Privacy Policy";
         renderPrivacy();
     }
     
     renderAuthFooter();
 }
+// function showSection(section, filterCat = null) {
+
+//     // 🔥 အရေးကြီးသည် - 'သင်တန်းများအားလုံး' ခလုတ်အတွက်
+//     if (section === 'courses_all') {
+//         title.innerText = "သင်တန်းများ ရွေးချယ်ရန်";
+//         renderCourseSelection();
+//         return;
+//     }
+
+//     // ၁။ Gatekeeper စစ်ဆေးခြင်း (သင်တန်းမရွေးရသေးဘဲ Dashboard/Lessons ဝင်ခိုင်းခြင်းကို တားဆီးရန်)
+//     if ((section === 'dashboard' || section === 'courses') && !currentUser.selectedCourseId && currentUser.role !== 'Teacher') {
+//         renderCourseSelection();
+//         return;
+//     }
+
+//     if (section === 'dashboard') {
+//         title.innerText = "Dashboard";
+//         renderDashboard();
+//     } else if (section === 'courses') {
+//         // 🔥 လက်ရှိရွေးထားတဲ့ သင်တန်းရှိမှ သင်ခန်းစာမာတိကာပြမည်
+//         if (currentUser.selectedCourseId) {
+//             title.innerText = filterCat ? `${filterCat} သင်ခန်းစာများ` : "သင်ခန်းစာများအားလုံး";
+//             renderCourseTree(filterCat);
+//         } else {
+//             renderCourseSelection();
+//         }
+//     } else if (section === 'messages') {
+//         title.innerText = "Messages";
+//         showMessages();
+//     } else if (section === 'profile') {
+//         title.innerText = "My Profile";
+//         renderProfile();
+//     } else if (section === 'resources') {
+//         renderResources();
+//     }
+    
+//     renderAuthFooter();
+// }
 
 function renderResources() {
     const body = document.getElementById('dynamic-body');
@@ -245,33 +246,30 @@ function renderDashboard() {
     const body = document.getElementById('dynamic-body');
     if (!body) return;
 
+    // ၁။ လက်ရှိရွေးထားတဲ့ သင်တန်းရှိမရှိ စစ်ဆေးခြင်း
     const currentCourse = allCourses[currentUser.selectedCourseId];
     if (!currentCourse) {
-        renderCourseSelection();
+        renderCourseSelection(); // သင်တန်းမရွေးရသေးရင် ရွေးခိုင်းမည်
         return;
     }
 
-    // ၁။ ပြီးစီးမှု ရာခိုင်နှုန်းတွက်ချက်သည့် Helper
+    // ၂။ ပြီးစီးမှု ရာခိုင်နှုန်းတွက်ချက်သည့် Helper
     const getPercent = (catName) => {
         const categoryData = currentCourse.data.find(c => c.category.toLowerCase() === catName.toLowerCase());
         if (!categoryData) return 0;
-        let total = 0;
-        categoryData.modules.forEach(m => total += m.lessons.length);
+        
+        let totalLessons = 0;
+        categoryData.modules.forEach(m => totalLessons += m.lessons.length);
+        
         const doneList = currentUser.completedLessons || []; 
-        const doneCount = doneList.filter(l => categoryData.modules.some(m => m.lessons.some(les => les.title === l))).length;
-        return Math.round((doneCount / total) * 100) || 0;
+        const doneCount = doneList.filter(l => {
+            return categoryData.modules.some(m => m.lessons.some(les => les.title === l));
+        }).length;
+
+        return Math.round((doneCount / totalLessons) * 100) || 0;
     };
 
-    const fPercent = getPercent('Foundations');
-    const tPercent = getPercent('Technical');
-    const fsPercent = getPercent('Full-Stack');
-
-    // ၂။ 🔥 သင်တန်းအလိုက် မှတ်စုကို ယူခြင်း (Logic ကို HTML အပြင်ထုတ်ထားပါသည်)
-    const currentCourseId = currentUser.selectedCourseId;
-    if (!currentUser.courseNotes) currentUser.courseNotes = {}; // Object မရှိရင် အသစ်ဆောက်မည်
-    const myNoteText = currentUser.courseNotes[currentCourseId] || "";
-
-    // ၃။ Live Class Card
+    // ၃။ Live Class Card (Link ရှိမှ တည်ဆောက်မည်)
     let liveClassHtml = "";
     if (currentZoomLink && currentZoomLink.trim() !== "") {
         liveClassHtml = `
@@ -282,73 +280,78 @@ function renderDashboard() {
                         onclick="window.open('${currentZoomLink}', '_blank')">
                     <i class="fas fa-video"></i> Join via Zoom
                 </button>
-            </div>`;
+            </div>
+        `;
     }
 
-    // ၄။ HTML စုစည်းတည်ဆောက်ခြင်း
-    let dashboardHtml = `
+    // ၄။ သင်တန်းထဲမှာ ရှိသမျှ Category Cards များကို Dynamic ထုတ်ယူခြင်း
+    let categoryCardsHtml = "";
+    currentCourse.data.forEach(cat => {
+        const percent = getPercent(cat.category);
+        categoryCardsHtml += `
+            <div class="topic-card animate-up" onclick="showSection('courses', '${cat.category}')">
+                <div class="card-icon"><i class="fas fa-layer-group"></i></div>
+                <h3>${cat.category}</h3>
+                <div class="progress-container"><div class="progress-bar" style="width:${percent}%"></div></div>
+                <small>${percent}% Completed</small>
+            </div>
+        `;
+    });
+
+    // ၅။ ဆရာဖြစ်လျှင် Leaderboard ထည့်မည်
+    let leaderboardHtml = "";
+    if (currentUser.role === 'Teacher') {
+        leaderboardHtml = `
+            <div class="content-card animate-up" style="grid-column: span 1;">
+                <h4><i class="fas fa-trophy" style="color:gold"></i> Top Students</h4>
+                <div id="leaderboard-content" style="margin-top:10px;">
+                    <div class="loader">Loading...</div>
+                </div>
+            </div>
+        `;
+    }
+
+    // ၆။ အားလုံးကို စုစည်းပြီး တစ်ခါတည်း Render လုပ်ခြင်း
+    body.innerHTML = `
         ${liveClassHtml}
+
         <div class="welcome-banner fade-in">
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px;">
                 <div>
                     <h2>မင်္ဂလာပါ ${currentUser.name}! 👋</h2>
-                    <p style="margin-top:5px; opacity:0.9;">လက်ရှိသင်တန်း- <strong>${currentCourse.title}</strong></p>
+                    <p>လက်ရှိသင်တန်း- <strong>${currentCourse.title}</strong></p>
                 </div>
                 <button class="menu-btn" style="background:rgba(255,255,255,0.2); border:1px solid white;" onclick="renderCourseSelection()">
-                    <i class="fas fa-exchange-alt"></i> <span>သင်တန်းပြောင်းရန်</span>
+                    <i class="fas fa-exchange-alt"></i> သင်တန်းပြောင်းရန်
                 </button>
             </div>
         </div>
 
         <div class="dashboard-grid">
-            <div class="topic-card animate-up" onclick="showSection('courses', 'Foundations')">
-                <div class="card-icon"><i class="fas fa-cubes"></i></div>
-                <h3>Foundations</h3>
-                <div class="progress-container"><div class="progress-bar" style="width:${fPercent}%"></div></div>
-                <small>${fPercent}% Completed</small>
-            </div>
-            <div class="topic-card animate-up" onclick="showSection('courses', 'Technical')">
-                <div class="card-icon"><i class="fas fa-code"></i></div>
-                <h3>Technical</h3>
-                <div class="progress-container"><div class="progress-bar" style="width:${tPercent}%"></div></div>
-                <small>${tPercent}% Completed</small>
-            </div>
-            <div class="topic-card animate-up" onclick="showSection('courses', 'Full-Stack')">
-                <div class="card-icon"><i class="fas fa-server"></i></div>
-                <h3>Full-Stack</h3>
-                <div class="progress-container"><div class="progress-bar" style="width:${fsPercent}%"></div></div>
-                <small>${fsPercent}% Completed</small>
-            </div>
-    `;
+            ${categoryCardsHtml}
+            ${leaderboardHtml}
+        </div>
 
-    if (currentUser.role === 'Teacher') {
-        dashboardHtml += `
-            <div class="content-card animate-up" style="grid-column: span 1;">
-                <h4><i class="fas fa-trophy" style="color:gold"></i> Top Students</h4>
-                <div id="leaderboard-content" style="margin-top:10px;"><div class="loader">Loading...</div></div>
-            </div>`;
-    }
-
-    // ၅။ Notebook Section (သင်တန်းအလိုက် စာသားပြမည်)
-    dashboardHtml += `
-        </div> <!-- Grid End -->
         <div class="content-card animate-up" style="margin-top:25px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                <h4><i class="fas fa-sticky-note"></i> My Notebook (${currentCourse.title})</h4>
-                <small id="char-counter">${myNoteText.length} / 10000 characters</small>
+                <h4><i class="fas fa-sticky-note"></i> My Personal Notebook</h4>
+                <small id="char-counter" style="color:var(--text-main)">
+                    ${(currentUser.personalNote || "").length} / 10000 characters
+                </small>
             </div>
             <textarea id="personal-note" class="edit-input" rows="6" 
                       oninput="handleNoteInput()" 
-                      placeholder="${currentCourse.title} အတွက် မှတ်သားစရာများ...">${myNoteText}</textarea>
+                      placeholder="ဒီနေ့ ဘာတွေသင်ယူခဲ့သလဲ? မှတ်သားထားပါ...">${currentUser.personalNote || ""}</textarea>
             <div style="display:flex; justify-content:space-between; margin-top:5px;">
-                <small id="note-status" style="color:#22c55e">Course-specific cloud sync active</small>
+                <small id="note-status" style="color:#22c55e">Cloud auto-sync active</small>
                 <button class="menu-btn" style="padding:4px 12px; font-size:0.75rem;" onclick="downloadNotes()">
-                    <i class="fas fa-download"></i> <span>Download as Text</span>
+                    <i class="fas fa-download"></i> Download as Text
                 </button>
             </div>
-        </div>`;
+        </div>
+    `;
 
-    body.innerHTML = dashboardHtml;
+    // ၇။ Logic ပြီးမှ Leaderboard ဆွဲခိုင်းမည်
     if (currentUser.role === 'Teacher') fetchLeaderboard();
 }
 
@@ -388,33 +391,26 @@ function downloadNotes() {
 }
 
 let noteTimeout;
-
 function saveNoteToCloud() {
     const text = document.getElementById('personal-note').value;
-    const currentCourseId = currentUser.selectedCourseId;
-
-    if (!currentCourseId) return;
-
-    // စာလုံးရေ ၁၀,၀၀၀ အထိ ပေးထားလိုက်ပါမည် (၅၀၀၀ ထက် ပိုအဆင်ပြေစေရန်)
-    if (text.length > 10000) {
-        alert("မှတ်စုကို စာလုံးရေ ၁၀၀၀၀ အထိသာ ကန့်သတ်ထားပါသည်။");
+    // စာလုံးရေ ၅၀၀၀ ထက်ကျော်ရင် တားမြစ်ခြင်း
+    if (text.length > 5000) {
+        alert("မှတ်စုကို စာလုံးရေ ၅၀၀၀ အထိသာ ကန့်သတ်ထားပါသည်။");
         return;
     }
 
     const status = document.getElementById('note-status');
     status.innerText = "Saving...";
 
+    // ခဏခဏ save မနေစေရန် (Debouncing)
     clearTimeout(noteTimeout);
     noteTimeout = setTimeout(async () => {
-        // Local State Update
-        if (!currentUser.courseNotes) currentUser.courseNotes = {};
-        currentUser.courseNotes[currentCourseId] = text;
+        currentUser.personalNote = text;
         localStorage.setItem('currentUser', JSON.stringify(currentUser));
         
-        // 🔥 Cloud Update (သင်တန်းအလိုက် ခွဲသိမ်းခြင်း)
         if (currentUser.uid) {
             await db.collection('users').doc(currentUser.uid).update({
-                [`courseNotes.${currentCourseId}`]: text
+                personalNote: text
             });
         }
         status.innerText = "All changes saved!";
@@ -463,22 +459,13 @@ async function fetchLeaderboard() {
 // Lesson Discussion (အမေးအဖြေကဏ္ဍ)
 async function renderDiscussion(lessonId) {
     const area = document.getElementById('discussion-area');
-    if (!area) return;
-
     area.innerHTML = `
-        <div class="content-card animate-up" style="margin-top:40px; padding: 20px;">
-            <h4 style="margin-bottom:15px;"><i class="fas fa-comments"></i> သင်ခန်းစာ ဆွေးနွေးချက်များ</h4>
-            <div id="comments-list" style="margin-bottom:20px; max-height:400px; overflow-y:auto; padding-right:10px;"></div>
-            
-            <!-- 🔥 Mobile အတွက် စနစ်တကျ ပြင်ထားသော Chat Input -->
-            <div class="chat-input-box" style="display:flex; align-items:center; gap:10px; background:var(--main-bg); padding:8px 15px; border-radius:30px; border:1px solid var(--border-color);">
-                <input type="text" id="comment-input" 
-                       style="flex:1; border:none; background:transparent; outline:none; font-size:16px; color:var(--text-main);" 
-                       placeholder="မရှင်းတာရှိရင် ဒီမှာ မေးမြန်းပါ...">
-                <button class="save-btn" onclick="postComment('${lessonId}')" 
-                        style="width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; padding:0;">
-                    <i class="fas fa-paper-plane"></i>
-                </button>
+        <div class="content-card" style="margin-top:40px;">
+            <h4><i class="fas fa-comments"></i> သင်ခန်းစာ အမေးအဖြေ (Q&A)</h4>
+            <div id="comments-list" style="margin:20px 0; max-height:400px; overflow-y:auto;"></div>
+            <div class="chat-input-box">
+                <input type="text" id="comment-input" placeholder="မရှင်းတာရှိရင် ဒီမှာမေးမြန်းနိုင်ပါတယ်...">
+                <button onclick="postComment('${lessonId}')"><i class="fas fa-paper-plane"></i></button>
             </div>
         </div>
     `;
@@ -702,77 +689,61 @@ async function renderCourseTree(filterCat) {
 }
 
 async function renderLessonContent(catIdx, modIdx, lesIdx) {
-    const body = document.getElementById("dynamic-body");
-    const cat = courseData[catIdx];
-    const mod = cat.modules[modIdx];
-    const lesson = mod.lessons[lesIdx];
+  const body = document.getElementById("dynamic-body");
+  const cat = courseData[catIdx],
+    mod = cat.modules[modIdx],
+    lesson = mod.lessons[lesIdx];
+  document.getElementById("page-title").innerText = lesson.title;
+  body.innerHTML = '<div class="loader">Loading content...</div>';
 
-    // 🔥 ၁။ သင်ခန်းစာခေါင်းစဉ်ကို Header မှာ ချက်ချင်းပြောင်းမည်
-    const titleEl = document.getElementById('page-title');
-    if (titleEl) titleEl.innerText = lesson.title;
+  const bc = `<div class="breadcrumbs"><span onclick="showSection('dashboard')">Home</span> / <span onclick="showSection('courses', '${cat.category}')">${cat.category}</span> / <span>${mod.moduleTitle}</span></div>`;
 
-    body.innerHTML = '<div class="loader">Loading content...</div>';
+  try {
+    // အရေးကြီးသည်- lesson.path ကို တိုက်ရိုက် သုံးပါမည်
+    const res = await fetch(`${lesson.path}?t=${new Date().getTime()}`);
 
-    const bc = `<div class="breadcrumbs"><span onclick="showSection('dashboard')">Home</span> / <span onclick="showSection('courses', '${cat.category}')">${cat.category}</span> / <span>${mod.moduleTitle}</span></div>`;
+    console.log("Fetching Path:", lesson.path); // Debug စစ်ရန်
+    console.log("Response Status:", res.status);
 
-    // Pagination Logic
-    const paginationHtml = `
-        <div class="pagination no-print" style="display: flex; gap: 15px; margin-top: 30px;">
-            <button class="menu-btn" onclick="goToLesson(${catIdx}, ${modIdx}, ${lesIdx - 1})" 
-                ${lesIdx === 0 ? 'disabled style="opacity:0.4; pointer-events:none;"' : ''}>
-                <i class="fas fa-arrow-left"></i> Prev
-            </button>
-            <button class="menu-btn" onclick="goToLesson(${catIdx}, ${modIdx}, ${lesIdx + 1})" 
-                ${lesIdx === mod.lessons.length - 1 ? 'disabled style="opacity:0.4; pointer-events:none;"' : ''}>
-                Next <i class="fas fa-arrow-right"></i>
-            </button>
-        </div>`;
-
-    try {
-        const res = await fetch(`${lesson.path}?t=${new Date().getTime()}`);
-        if (!res.ok) throw new Error(`File not found`);
-
-        // 🔥 အကယ်၍ Firebase က ဖိုင်မရှိလို့ index.html ကို အစားထိုးပြလိုက်ရင် တားဆီးရန်
-        const contentType = res.headers.get("content-type");
-        if (lesson.type === 'quiz' && !contentType.includes("application/json")) {
-            throw new Error("JSON ဖိုင်မဟုတ်ဘဲ HTML ဒေတာများ ရောက်ရှိနေပါသည်။ လမ်းကြောင်း ပြန်စစ်ပါ။");
-        }
-
-        if (lesson.type === "quiz") {
-            const quizData = await res.json();
-            renderQuizUI(quizData, bc, catIdx, modIdx, lesIdx);
-        } else if (lesson.type === "assignment") {
-            renderAssignmentUI(catIdx, modIdx, lesIdx, bc);
-        } else if (lesson.type === "project") {
-            renderProjectUI(catIdx, modIdx, lesIdx, bc);
-        } else {
-            const html = await res.text();
-            // အကယ်၍ html ထဲမှာ <!DOCTYPE html> ပါနေရင် ဒါဟာ သင်ခန်းစာဖိုင်မဟုတ်ဘဲ ပင်မ App ဖိုင်ဖြစ်နေလို့ပါ
-            if (html.includes("<!DOCTYPE html>") || html.trim() === "") {
-                throw new Error("သင်ခန်းစာ အချက်အလက်များ မရှိပါ။ ဖိုင်အမည်နှင့် လမ်းကြောင်းကို စစ်ဆေးပါ။");
-            }
-            body.innerHTML = `
-                ${bc}
-                <article class="content-card animate-up">
-                    <div class="lesson-body">${html}</div>
-                    ${paginationHtml} 
-                </article>`;
-            markLessonAsDone(lesson.title); 
-        }
-
-        // Article အတွက် Discussion Section
-        if (lesson.type === 'article') {
-            const discussionDiv = document.createElement('div');
-            discussionDiv.id = "discussion-area";
-            body.appendChild(discussionDiv);
-            renderDiscussion(lesson.title); 
-        }
-
-    } catch (e) {
-        console.error("Fetch Error:", e);
-        body.innerHTML = `${bc} <div class="error-msg"><h4>ဖိုင်ရှာမတွေ့ပါ။</h4><p>${lesson.path}</p></div>`;
+    if (!res.ok) {
+      throw new Error(`File not found (Status: ${res.status})`);
     }
-    window.scrollTo({ top: 0, behavior: "smooth" });
+
+    if (lesson.type === "quiz") {
+      const res = await fetch(lesson.path);
+      const quizData = await res.json();
+      renderQuizUI(quizData, bc, catIdx, modIdx, lesIdx);
+    } else if (lesson.type === "assignment") {
+      renderAssignmentUI(catIdx, modIdx, lesIdx, bc);
+    } else if (lesson.type === "project") {
+      renderProjectUI(catIdx, modIdx, lesIdx, bc);
+    } else {
+      const html = await res.text();
+      body.innerHTML = `${bc}<article class="content-card animate-up"><div class="lesson-body">${html}</div>
+                <div class="pagination">
+                    <button class="menu-btn" onclick="goToLesson(${catIdx}, ${modIdx}, ${lesIdx - 1})" ${lesIdx === 0 ? "disabled" : ""}>Prev</button>
+                    <button class="menu-btn" onclick="goToLesson(${catIdx}, ${modIdx}, ${lesIdx + 1})" ${lesIdx === mod.lessons.length - 1 ? "disabled" : ""}>Next</button>
+                </div></article>`;
+        // 🔥 ARTICLE ဖြစ်မှသာ ဖွင့်ကြည့်ရုံနဲ့ Completed ထဲထည့်မည်
+        markLessonAsDone(lesson.title); 
+    }
+
+    if (lesson.type === 'article') {
+        const discussionDiv = document.createElement('div');
+        discussionDiv.id = "discussion-area";
+        body.appendChild(discussionDiv);
+        renderDiscussion(lesson.title); // Comment တွေပြမယ့် function
+    }
+
+  } catch (e) {
+    console.error("Fetch Error:", e);
+    body.innerHTML = `${bc} <div class="error-msg">
+            <h4>သင်ခန်းစာဖိုင်ကို ရှာမတွေ့ပါ။</h4>
+            <p>လမ်းကြောင်း: <code>${lesson.path}</code></p>
+            <p>အကြောင်းရင်း: Folder အမည် သို့မဟုတ် ဖိုင်အမည် မှားယွင်းနေနိုင်ပါသည်။</p>
+        </div>`;
+  }
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 // 🔥 ထပ်ခါတလဲလဲ မရေးရအောင် Helper function တစ်ခု ဆောက်လိုက်ပါ
@@ -878,14 +849,13 @@ async function checkQuizResult(quizId, quizData, c, m, l) {
     let score = 0;
     const questions = quizData.questions;
 
-    // ၁။ Safety Checks: လိုအပ်သော Object များ ရှိနေစေရန်
     if (!currentUser.quizAttempts) currentUser.quizAttempts = {};
     if (!currentUser.completedLessons) currentUser.completedLessons = [];
     if (!currentUser.grades) currentUser.grades = {};
 
     const currentAttempt = (currentUser.quizAttempts[quizId] || 0) + 1;
 
-    // ၂။ အဖြေစစ်ဆေးခြင်း (UI Feedback)
+    // ၁။ အဖြေစစ်ဆေးခြင်း
     questions.forEach((q, i) => {
         const feedbackEl = document.getElementById(`f-${i}`);
         const qBox = document.getElementById(`q-box-${i}`);
@@ -904,44 +874,28 @@ async function checkQuizResult(quizId, quizData, c, m, l) {
 
         if (isCorrect) {
             score++;
-            feedbackEl.innerHTML = '<span class="text-success"><i class="fas fa-check"></i> Correct</span>';
+            feedbackEl.innerHTML = '<span class="text-success">Correct</span>';
             if (qBox) qBox.style.borderColor = "#22c55e";
         } else {
-            feedbackEl.innerHTML = '<span class="text-danger"><i class="fas fa-times"></i> Wrong</span>';
+            feedbackEl.innerHTML = '<span class="text-danger">Wrong</span>';
             if (qBox) qBox.style.borderColor = "#ef4444";
         }
     });
 
-    // ၃။ 🔥 Transcript ထဲသို့ အမှတ်စာရင်း သွင်းခြင်း Logic
-    const courseId = currentUser.selectedCourseId;
-    // JSON ထဲတွင် subject: "html" စသဖြင့် ပါဝင်ရပါမည်။ မပါလျှင် quizId ကို သုံးမည်။
-    const subjectKey = (quizData.subject || quizId).toLowerCase();
+    // ၂။ 🔥 Best Score Logic (Loop အပြင်ဘက်တွင် ထားရမည်)
+    const courseId = courseData[c].id || currentUser.selectedCourseId;
+    if (!currentUser.grades[courseId]) currentUser.grades[courseId] = {};
+    
+    const oldScore = currentUser.grades[courseId][quizId] || 0;
 
-    if (courseId) {
-        if (!currentUser.grades[courseId]) currentUser.grades[courseId] = {};
-        
-        const oldScore = currentUser.grades[courseId][subjectKey] || 0;
-
-        // အမှတ်အသစ်က ပိုများမှသာ Update လုပ်မည် (Best Score Strategy)
-        if (score > oldScore) {
-            currentUser.grades[courseId][subjectKey] = score;
-            
-            // Cloud (Firebase) သို့ တိုက်ရိုက် Update လုပ်မည်
-            await db.collection('users').doc(currentUser.uid).set({
-                grades: {
-                    [courseId]: {
-                        [subjectKey]: score
-                    }
-                }
-            }, { merge: true });
-            
-            showToast(`ဘာသာရပ် ${subjectKey.toUpperCase()} အတွက် ရမှတ်အသစ် (${score}) ကို မှတ်တမ်းတင်လိုက်ပါပြီ။`, "success");
-        } else {
-            showToast(`ယခင်ရမှတ် (${oldScore}) က ပိုများနေသဖြင့် အမှတ်စာရင်းကို မပြောင်းလဲပါ။`);
-        }
+    if (score > oldScore) {
+        currentUser.grades[courseId][quizId] = score;
+        showToast(`ရမှတ်အသစ် ${score} ကို သိမ်းဆည်းလိုက်ပါပြီ။`, "success");
+    } else {
+        showToast(`သင်ယူမှုအတွက် ကျေးဇူးတင်ပါသည်။ (ယခင်ရမှတ် ${oldScore} က ပိုများနေပါသည်)`);
     }
 
-    // ၄။ Attempt နှင့် Completion Update
+    // ၃။ Attempt နှင့် Completion Update
     currentUser.quizAttempts[quizId] = currentAttempt;
     const lessonTitle = courseData[c].modules[m].lessons[l].title;
     
@@ -951,23 +905,19 @@ async function checkQuizResult(quizId, quizData, c, m, l) {
         }
     }
 
-    // Local Storage သိမ်းမည်
     localStorage.setItem('currentUser', JSON.stringify(currentUser));
-    
-    // Cloud Sync (Completed Lessons & Attempts အတွက်)
-    await syncProgressToCloud(); 
+    await syncProgressToCloud(); // Cloud Sync
 
-    // ၅။ အသိပေးချက်နှင့် Redirection
+    // ၄။ Redirection
     setTimeout(() => {
         if (score === questions.length) {
-            alert(`ဂုဏ်ယူပါတယ်! အမှတ်ပြည့် (${score}/${questions.length}) ရရှိပါတယ်။`);
+            showToast("ဂုဏ်ယူပါတယ်! အမှတ်ပြည့်ရရှိပါတယ်။", "success");
             goToNextLesson(c, m, l);
         } else if (currentAttempt >= 3) {
-            alert(`၃ ကြိမ်ဖြေဆိုမှု ပြီးဆုံးပါပြီ။ သင်၏နောက်ဆုံးရမှတ်မှာ (${score}/${questions.length}) ဖြစ်ပါသည်။`);
+            showToast("၃ ကြိမ်ဖြေဆိုမှု ပြီးဆုံးပါပြီ။");
             goToNextLesson(c, m, l);
         } else {
-            const retry = confirm(`သင့်ရမှတ်မှာ (${score}/${questions.length}) ဖြစ်ပါသည်။ အကြိမ်ရေ ${(3 - currentAttempt)} ကြိမ် ကျန်ပါသေးသည်။ ထပ်မံဖြေဆိုလိုပါသလား?`);
-            if (retry) {
+            if (confirm(`ရမှတ်: ${score}/${questions.length}။ ထပ်ဖြေမလား?`)) {
                 renderLessonContent(c, m, l);
             } else {
                 goToNextLesson(c, m, l);
@@ -1010,7 +960,7 @@ function renderProjectUI(catIdx, modIdx, lesIdx, bc) {
             <h3><i class="fas fa-tasks"></i> Project Submission</h3>
             <p style="color:grey; margin-bottom:15px;">${lesson.title}</p>
             <label>GitHub Repository Link</label>
-            <input type="url" id="plink" class="edit-input" placeholder="https://github.com/username/repo (သို့မဟုတ်) .github.io link">
+            <input type="url" id="plink" class="edit-input" placeholder="https://github.com/user/repo">
             <label style="margin-top:15px; display:block;">Team Members (Names & UIDs)</label>
             <textarea id="pmembers" class="edit-input" rows="2" placeholder="Mg Mg (st001), Aye Aye (st002)"></textarea>
             
@@ -1022,68 +972,44 @@ function renderProjectUI(catIdx, modIdx, lesIdx, bc) {
 
 // --- Project Submit Logic (GitHub Link တင်ရန်) ---
 async function submitProjectDB(catIdx, modIdx, lesIdx) {
-    const link = document.getElementById("plink").value.trim();
-    const members = document.getElementById("pmembers").value.trim();
-    const lesson = courseData[catIdx].modules[modIdx].lessons[lesIdx];
+  const link = document.getElementById("plink").value.trim();
+  const members = document.getElementById("pmembers").value.trim();
+  const lesson = courseData[catIdx].modules[modIdx].lessons[lesIdx];
 
-    // --- ၁။ Validation အပိုင်း (Cleaned Version) ---
-    
-    // github.com သို့မဟုတ် github.io နှစ်ခုလုံးကို လက်ခံမည်
-    const isValidGithub = link.includes('github.com') || link.includes('github.io');
+  // Validation: GitHub Link ဟုတ်မဟုတ် စစ်ဆေးခြင်း
+  if (!link.includes("github.com")) {
+    return alert(
+      "ကျေးဇူးပြု၍ မှန်ကန်သော GitHub Repository Link ကို ထည့်ပေးပါ။",
+    );
+  }
 
-    if (!isValidGithub) {
-        return alert("ကျေးဇူးပြု၍ မှန်ကန်သော GitHub Link (Repository သို့မဟုတ် Live Site) ကို ထည့်ပေးပါ။");
+  try {
+    // ၁။ Firestore: 'submissions' collection ထဲသို့ ပို့မည်
+    await db.collection("submissions").add({
+      type: "project",
+      studentId: currentUser.uid,
+      studentName: currentUser.name,
+      lessonTitle: lesson.title,
+      category: courseData[catIdx].category,
+      githubLink: link,
+      teamMembers: members,
+      status: "pending",
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+
+    // ၂။ ပြီးမြောက်ကြောင်း မှတ်သားမည်
+    if (!currentUser.completedLessons.includes(lesson.title)) {
+      currentUser.completedLessons.push(lesson.title);
+      localStorage.setItem("currentUser", JSON.stringify(currentUser));
     }
 
-    if (!members) {
-        return alert("အဖွဲ့ဝင်များ အမည်ကို အနည်းဆုံး တစ်ယောက် ထည့်ပေးပါ။");
-    }
+    alert("Project ကို အောင်မြင်စွာ ပေးပို့ပြီးပါပြီ။");
 
-    // --- ၂။ Submission အပိုင်း ---
-    try {
-        // ခလုတ်ကို Loading ပြောင်းမည် (CSS class .save-btn ကို ရှာဖွေခြင်း)
-        const btn = document.getElementById('upload-btn') || document.querySelector('.project-card .save-btn');
-        if (btn) {
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
-        }
-
-        // Firestore: 'submissions' collection ထဲသို့ ပို့မည်
-        await db.collection("submissions").add({
-            type: "project",
-            studentId: currentUser.uid,
-            studentName: currentUser.name,
-            lessonTitle: lesson.title,
-            category: courseData[catIdx].category,
-            githubLink: link,
-            teamMembers: members,
-            status: "pending",
-            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-        });
-
-        // ၃။ သင်ခန်းစာ ပြီးမြောက်ကြောင်း မှတ်သားမည်
-        if (!currentUser.completedLessons.includes(lesson.title)) {
-            currentUser.completedLessons.push(lesson.title);
-            localStorage.setItem("currentUser", JSON.stringify(currentUser));
-            await syncProgressToCloud(); // Cloud သို့ Sync လုပ်မည်
-        }
-
-        alert("Project ကို အောင်မြင်စွာ ပေးပို့ပြီးပါပြီ။");
-
-        // ၄။ နောက်စာမျက်နှာကို တန်းသွားမည်
-        goToNextLesson(catIdx, modIdx, lesIdx);
-
-    } catch (error) {
-        console.error("Submit Error:", error);
-        alert("Error submitting project: " + error.message);
-        
-        // Error တက်ရင် ခလုတ်ကို ပြန်ဖွင့်မည်
-        const btn = document.getElementById('upload-btn') || document.querySelector('.project-card .save-btn');
-        if (btn) {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-upload"></i> Submit Project';
-        }
-    }
+    // ၃။ နောက်စာမျက်နှာကို တန်းသွားမည်
+    goToNextLesson(catIdx, modIdx, lesIdx);
+  } catch (error) {
+    alert("Error submitting project: " + error.message);
+  }
 }
 
 // ==========================================
@@ -1123,16 +1049,15 @@ async function showMessages(targetUid = null, targetName = null) {
     const teachers = allUsersList.filter(u => u.role === 'Teacher' && u.uid !== currentUser.uid);
 
     body.innerHTML = `
-        <div class="messaging-layout fade-in animate-up">
+        <div class="messaging-layout fade-in">
             <div class="chat-sidebar">
-                <div class="chat-list-header" style="background: white; border-bottom: 1px solid var(--border-color); padding: 25px;">
-                    <h4 style="margin:0;"><i class="fas fa-comments"></i> Messenger</h4>
-                </div>
-                <div class="chat-list" style="padding-top: 15px;">
-                    <div class="chat-list-divider" style="margin-left:20px; font-size:0.7rem; text-transform:uppercase; letter-spacing:1px; color:grey; margin-bottom:10px;">Channels</div>
+                <div class="chat-list-header">Messenger</div>
+                <div class="chat-list">
+                    
+                    <div class="chat-list-divider">Class Groups</div>
                     ${myBatchList.map(bid => `
-                        <div class="chat-item ${activeChatId === bid ? 'active' : ''}" onclick="switchChat('${bid}', 'Group: ${bid}')" style="padding: 12px 15px;">
-                            <i class="fas fa-hashtag"></i> <span>${bid}</span>
+                        <div class="chat-item ${activeChatId === bid ? 'active' : ''}" onclick="switchChat('${bid}', 'Group: ${bid}')">
+                            <i class="fas fa-users"></i> ${bid}
                         </div>
                     `).join('')}
 
@@ -1145,33 +1070,22 @@ async function showMessages(targetUid = null, targetName = null) {
                         `).join('')}
                     ` : ''}
 
-                    <div class="chat-list-divider" style="margin: 20px 0 10px 20px; font-size:0.7rem; text-transform:uppercase; letter-spacing:1px; color:grey;">Direct Messages (${currentUser.batchId || 'N/A'})</div>
-
+                    <div class="chat-list-divider">Classmates (${currentUser.batchId || 'N/A'})</div>
                     ${visibleDMList.length > 0 ? visibleDMList.map(s => `
-                        <div class="chat-item ${activeChatId === s.uid ? 'active' : ''}" onclick="switchChat('${s.uid}', 'Chat: ${s.name}')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px;">
-                            <div style="width:32px; height:32px; background:#e2e8f0; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.8rem; font-weight:bold; color:var(--primary);">
-                            <i class="fas fa-user-circle"></i>
-                                ${s.name.charAt(0)}
-                            </div>
+                        <div class="chat-item ${activeChatId === s.uid ? 'active' : ''}" onclick="switchChat('${s.uid}', 'Chat: ${s.name}')">
+                            <i class="fas fa-user-circle"></i> 
                             <span>${s.name}</span>
                         </div>
                     `).join('') : '<p style="padding:15px; font-size:0.8rem; color:grey;">စကားပြောရန် လူမရှိသေးပါ။</p>'}
                 </div>
             </div>
             
-            <div class="chat-window" style="background: white;">
-                <div class="chat-window-header" style="padding: 20px 30px; border-bottom: 1px solid var(--border-color); display:flex; align-items:center; gap:15px;">
-                    <div id="active-chat-title" style="width:10px; height:10px; background:var(--success); border-radius:50%;"></div>
-                    <strong style="font-size: 1.1rem;">${activeChatName}</strong>
-                </div>
-                <div class="chat-display" id="chat-display" style="padding: 30px; background: #f1f5f9;"></div>
-                <div class="chat-input-box" style="padding: 20px 30px; background: white; border-top: 1px solid var(--border-color);">
-                    <div style="display:flex; background:#f1f5f9; border-radius:30px; padding: 5px 5px 5px 20px; width:100%; align-items:center;">
-                        <input type="text" id="chat-input" placeholder="စာရိုက်ပါ..." style="flex:1; border:none; background:transparent; outline:none; height:45px;" onkeypress="if(event.key==='Enter') sendMessage()">
-                        <button onclick="sendMessage()" style="width:45px; height:45px; border-radius:50%; background:var(--primary); color:white; border:none; cursor:pointer;">
-                            <i class="fas fa-paper-plane"></i>
-                        </button>
-                    </div>
+            <div class="chat-window">
+                <div class="chat-window-header" id="active-chat-title">${activeChatName}</div>
+                <div class="chat-display" id="chat-display"></div>
+                <div class="chat-input-box">
+                    <input type="text" id="chat-input" placeholder="စာရိုက်ပါ..." onkeypress="if(event.key==='Enter') sendMessage()">
+                    <button onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
                 </div>
             </div>
         </div>`;
@@ -1189,76 +1103,6 @@ function switchChat(id, name) {
 }
 
 // Firestore မှ Message များ Real-time ဖတ်ခြင်း
-// function loadMessages() {
-//     const display = document.getElementById('chat-display');
-//     if (!display) return;
-    
-//     // 🔥 ၃ ရက်စာတွက်ချက်ခြင်း ( 3 days * 24 hours * 60 min * 60 sec * 1000 ms )
-//     const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
-
-//     // Safety Check: ID မရှိရင် Query မလုပ်ပါ
-//     if (!activeChatId || !currentUser.uid) {
-//         console.warn("Chat ID သို့မဟုတ် User ID မရှိသေးပါ။");
-//         display.innerHTML = '<div class="empty-msg">စာတိုများ ဖတ်ရန် အရင်ရွေးချယ်ပါ။</div>';
-//         return;
-//     }
-    
-//     let query;
-
-//     // Group Chat Query
-//     if (activeChatId.includes('Batch')) {
-//         query = db.collection('messages')
-//                   .where('batchId', '==', activeChatId)
-//                   .where('type', '==', 'group')
-//                   .where('timestamp', '>=', threeDaysAgo) // ၃ ရက်ထက် ပိုဟောင်းတာတွေကို မယူတော့ပါ
-//                   .orderBy('timestamp', 'asc');
-//     } 
-//     // Direct Message Query
-//     else {
-//         const combinedId = [currentUser.uid, activeChatId].sort().join("_");
-//         query = db.collection('messages')
-//                   .where('convoId', '==', combinedId)
-//                   .where('type', '==', 'direct')
-//                   .where('timestamp', '>=', threeDaysAgo) // ၃ ရက်ထက် ပိုဟောင်းတာတွေကို မယူတော့ပါ
-//                   .orderBy('timestamp', 'asc');
-//     }
-
-//     query.onSnapshot(snap => {
-//         display.innerHTML = '';
-//         if (snap.empty) {
-//             display.innerHTML = '<div style="text-align:center; padding:20px; color:grey; font-size:0.8rem;">ယခင် ၃ ရက်အတွင်း ပေးပို့ထားသော စာများ မရှိပါ။</div>';
-//             return;
-//         }
-
-//         snap.forEach(doc => {
-//             const m = doc.data();
-//             const isMe = m.senderId === currentUser.uid;
-//             const canManage = isMe || currentUser.role === 'Teacher';
-
-//             display.innerHTML += `
-//                 <div class="message-bubble ${isMe ? 'me' : 'other'}">
-//                     <div class="msg-header" style="display:flex; justify-content:space-between; align-items:center;">
-//                         <span style="font-size:0.7rem; opacity:0.8;">${isMe ? 'You' : m.senderName}</span>
-//                         ${canManage ? `
-//                             <div class="msg-actions" style="margin-left:10px; display:flex; gap:8px; font-size:0.7rem; opacity:0.5;">
-//                                 <i class="fas fa-edit" style="cursor:pointer;" onclick="editMsg('${doc.id}', '${m.text.replace(/'/g, "\\'")}')" title="ပြင်မည်"></i>
-//                                 <i class="fas fa-trash-alt" style="cursor:pointer;" onclick="deleteMsg('${doc.id}')" title="ဖျက်မည်"></i>
-//                             </div>
-//                         ` : ''}
-//                     </div>
-//                     <div class="msg-text">${m.text}</div>
-//                 </div>`;
-//         });
-//         display.scrollTop = display.scrollHeight;
-//     }, error => {
-//         // အကယ်၍ Index အသစ်ဆောက်ရန် လိုအပ်ပါက console မှာ link ပေါ်လာပါမည်
-//         console.error("Snapshot error:", error);
-//         if (error.code === 'failed-precondition') {
-//             display.innerHTML = '<div class="error-msg">Firebase Console တွင် Index အသစ်တစ်ခု ဆောက်ရန် လိုအပ်နေပါသည်။ Console (F12) ရှိ Link ကို နှိပ်ပေးပါ။</div>';
-//         }
-//     });
-// }
-
 function loadMessages() {
     const display = document.getElementById('chat-display');
     if (!display) return;
@@ -1272,22 +1116,19 @@ function loadMessages() {
         display.innerHTML = '<div class="empty-msg">စာတိုများ ဖတ်ရန် အရင်ရွေးချယ်ပါ။</div>';
         return;
     }
-
+    
     let query;
+
+    // Group Chat Query
     if (activeChatId.includes('Batch')) {
-        // --- Group Chat ---
-        // 🔥 အရေးကြီးသည်- ကျောင်းသားမှာ batchId မရှိရင် Query ပိတ်သွားမှာဖြစ်လို့ Safety စစ်မည်
-        if (!currentUser.batchId) {
-            display.innerHTML = '<div class="empty-msg">သင့်အား Batch သတ်မှတ်ပေးထားခြင်း မရှိသေးပါ။</div>';
-            return;
-        }
         query = db.collection('messages')
                   .where('batchId', '==', activeChatId)
                   .where('type', '==', 'group')
                   .where('timestamp', '>=', threeDaysAgo) // ၃ ရက်ထက် ပိုဟောင်းတာတွေကို မယူတော့ပါ
                   .orderBy('timestamp', 'asc');
-    } else {
-        // --- Direct Message ---
+    } 
+    // Direct Message Query
+    else {
         const combinedId = [currentUser.uid, activeChatId].sort().join("_");
         query = db.collection('messages')
                   .where('convoId', '==', combinedId)
@@ -1298,13 +1139,12 @@ function loadMessages() {
 
     query.onSnapshot(snap => {
         display.innerHTML = '';
-
-            if (snap.empty) {
+        if (snap.empty) {
             display.innerHTML = '<div style="text-align:center; padding:20px; color:grey; font-size:0.8rem;">ယခင် ၃ ရက်အတွင်း ပေးပို့ထားသော စာများ မရှိပါ။</div>';
             return;
         }
 
-            snap.forEach(doc => {
+        snap.forEach(doc => {
             const m = doc.data();
             const isMe = m.senderId === currentUser.uid;
             const canManage = isMe || currentUser.role === 'Teacher';
@@ -1324,9 +1164,8 @@ function loadMessages() {
                 </div>`;
         });
         display.scrollTop = display.scrollHeight;
-
-        }, err => {
-            // အကယ်၍ Index အသစ်ဆောက်ရန် လိုအပ်ပါက console မှာ link ပေါ်လာပါမည်
+    }, error => {
+        // အကယ်၍ Index အသစ်ဆောက်ရန် လိုအပ်ပါက console မှာ link ပေါ်လာပါမည်
         console.error("Snapshot error:", error);
         if (error.code === 'failed-precondition') {
             display.innerHTML = '<div class="error-msg">Firebase Console တွင် Index အသစ်တစ်ခု ဆောက်ရန် လိုအပ်နေပါသည်။ Console (F12) ရှိ Link ကို နှိပ်ပေးပါ။</div>';
@@ -1344,16 +1183,15 @@ function sendMessage() {
         text: text,
         senderId: currentUser.uid,
         senderName: currentUser.name,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-        type: activeChatId.includes('Batch') ? 'group' : 'direct'
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
     };
 
     if (activeChatId.includes('Batch')) {
+        // Group Chat
         msgData.batchId = activeChatId;
-        // 🔑 group အတွက်ပါ participants ထည့်
         msgData.type = "group";
     } else {
-        // 🔥 အရေးကြီးဆုံး- နှစ်ဦးလုံးအတွက် တူညီသော ID ဖြစ်အောင် အစဉ်လိုက်စီပြီးမှ ဆက်မည်
+        // Direct Message
         msgData.receiverId = activeChatId; // လက်ခံသူ UID
         msgData.type = "direct";
         // convoId ကို UID ၂ ခုစီပြီး ဆက်မည်
@@ -1362,14 +1200,6 @@ function sendMessage() {
 
     db.collection('messages').add(msgData).then(() => {
         console.log("Sent success!");
-        // 🔔 Direct message ဖြစ်ရင် receiver ရဲ့ bell တိုး
-        if (!activeChatId.includes('Batch')) {
-            db.collection("users")
-            .doc(activeChatId)
-            .update({
-                unreadCount: firebase.firestore.FieldValue.increment(1)
-            });
-        }
     }).catch(e => alert("Error: " + e.message));
 
     input.value = '';
@@ -1455,9 +1285,7 @@ function renderProfile() {
     <div class="profile-card-pro fade-in">
         <div class="profile-cover"></div>
         <div class="profile-header-main">
-            <img src="${currentUser.photo || '/assets/profiles/default.png'}" 
-                class="profile-large-avatar" 
-                onerror="this.src='https://placehold.co/150x150/003087/white?text=User'">
+            <img src="${currentUser.photo}" class="profile-large-avatar" onerror="this.src='https://placehold.co/150'">
             <div class="profile-info-text">
                 <h2>${currentUser.name} <i class="fas fa-check-circle text-primary"></i></h2>
                 <span class="u-role-tag" style="${roleBadgeStyle}">${currentUser.role}</span>
@@ -1686,81 +1514,70 @@ async function handleLogout() {
 // --- Transcript ပြသခြင်း ---
 function viewTranscript(uid, isAdminPreview = false, courseId) {
     const student = (uid === currentUser.uid) ? currentUser : studentsList.find(s => s.uid === uid);
+    // courseId မပါလာရင် လက်ရှိရွေးထားတဲ့သင်တန်းကို ယူမယ်
     const cId = courseId || currentUser.selectedCourseId;
     const course = allCourses[cId];
-    if (!student || !course) return alert("Data Error!");
+    
+    if (!student || !course) return alert("Data Error: သင်တန်းအချက်အလက် ရှာမတွေ့ပါ။");
 
     const body = document.getElementById('dynamic-body');
     const backFunc = isAdminPreview ? `previewStudentAchievements('${uid}')` : "showSection('profile')";
+    
+    // 🔥 အမှတ်စာရင်းကို သင်တန်း ID အလိုက် ခွဲဖတ်မည်
     const courseGrades = (student.grades && student.grades[cId]) ? student.grades[cId] : {};
     
     let totalScore = 0;
+    // 🔥 သင်တန်းအလိုက် သတ်မှတ်ထားတဲ့ ဘာသာရပ်စာရင်းကိုပဲ loop ပတ်မည်
     let rows = course.transcriptSubjects.map(sub => {
         const score = courseGrades[sub.toLowerCase()] || 0;
         totalScore += score;
-        const status = score >= 50 ? '<span style="color:green; font-weight:bold;">Pass</span>' : '<span style="color:red; font-weight:bold;">Fail</span>';
-        return `<tr>
-            <td style="text-align:left; padding:12px; border:1px solid #ddd;">${sub.toUpperCase()}</td>
-            <td style="border:1px solid #ddd; text-align:center;">${score}</td>
-            <td style="border:1px solid #ddd; text-align:center;">${status}</td>
-        </tr>`;
+        const status = score >= 50 ? '<span class="text-success">Pass</span>' : '<span class="text-danger">Fail</span>';
+        return `
+            <tr>
+                <!-- 🔥 ဒီနေရာမှာ text-align: left; ပြောင်းလိုက်ပါပြီ -->
+                <td style="text-align: left; padding-left: 25px; text-transform: uppercase;">${sub.replace('_',' ')}</td>
+                <td style="text-align: center;">${score}</td>
+                <td style="text-align: center;">${status}</td>
+            </tr>`;
     }).join('');
 
     const gpa = course.transcriptSubjects.length > 0 ? (totalScore / course.transcriptSubjects.length).toFixed(2) : 0;
-    const issueDate = new Date().toLocaleDateString('en-GB');
 
     body.innerHTML = `
-        <div class="transcript-outer-container animate-up">
-            <div class="no-print" style="margin-bottom:20px; display:flex; justify-content:flex-end;">
+        <div class="content-card animate-up transcript-area" style="max-width: 900px; margin: auto;">
+            <div class="no-print" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h3>Official Transcript ${isAdminPreview ? '(Demo)' : ''}</h3>
                 <button class="menu-btn" onclick="${backFunc}"><i class="fas fa-arrow-left"></i> Back</button>
             </div>
-
-            <div class="transcript-paper">
-                <div class="transcript-header" style="text-align:center; margin-bottom:40px;">
-                    <h2 style="color:#003087; text-transform:uppercase; margin:0; font-size: 2.2rem;">Myanmar Full-Stack Bootcamp</h2>
-                    <p style="color:#64748b; font-weight: bold; margin-top:5px;">${course.title}</p>
-                    <p style="font-size:0.75rem; letter-spacing:2px; margin-top:10px; color:#94a3b8;">OFFICIAL ACADEMIC RECORD</p>
-                </div>
-
-                <!-- 🔥 အချက်အလက်များကို တစ်တန်းတည်းပြမည့် Row 🔥 -->
-                <div class="academic-info-row" style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:15px 25px; margin-bottom:30px; font-size:0.9rem;">
-                    <div>Name: <strong>${student.name}</strong></div>
-                    <div>ID: <strong>${student.uid.substring(0, 8).toUpperCase()}</strong></div>
-                    <div>GPA: <strong style="color:#003087;">${gpa}</strong></div>
-                    <div>Date: <strong>${issueDate}</strong></div>
-                </div>
-
-                <table style="width:100%; border-collapse:collapse; border: 1px solid #ddd;">
-                    <thead>
-                        <tr style="background:#003087; color:white;">
-                            <th style="padding:15px; text-align:left; border: 1px solid #ddd;">SUBJECT / MODULE</th>
-                            <th style="padding:15px; border: 1px solid #ddd; width:120px;">SCORE</th>
-                            <th style="padding:15px; border: 1px solid #ddd; width:120px;">RESULT</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${rows || '<tr><td colspan="3" style="padding:30px;">အမှတ်စာရင်း မရှိသေးပါ။</td></tr>'}
-                    </tbody>
-                </table>
-
-                <div class="transcript-footer" style="margin-top:80px; display:flex; justify-content:space-between; align-items:flex-end;">
-                    <div style="font-size:0.8rem; color:#94a3b8;">* Computer-generated official record.</div>
-                    <div style="text-align:center; width:250px;">
-                        <div style="border-bottom:1.5px solid #333; height:45px; font-family:'Dancing Script', cursive; font-size:1.5rem; display:flex; align-items:center; justify-content:center; color:#000;">
-                            ${course.instructor || lmsSettings.instructorName}
-                        </div>
-                        <p style="margin-top:10px; font-weight:bold; font-size:0.85rem; text-transform:uppercase;">Registrar Office</p>
+            <div style="text-align:center; margin-bottom:30px;">
+                <h2 style="color:#003087; text-transform:uppercase; margin:0;">Myanmar Full-Stack Bootcamp</h2>
+                <!-- 🔥 သင်တန်းအလိုက် နာမည်ပြောင်းမည် -->
+                <p style="margin-top:5px; font-weight:bold;">${course.title}</p>
+            </div>
+            <div class="academic-box" style="display:grid; grid-template-columns: 1fr 1fr; padding:20px; background:var(--main-bg); border-radius:10px; margin-bottom:20px;">
+                <div><p>Name: <strong>${student.name}</strong></p><p>ID: <strong>${student.uid.substring(0,8).toUpperCase()}</strong></p></div>
+                <div style="text-align:right;"><p>GPA: <strong style="color:green">${gpa}</strong></p><p>Date: <strong>${new Date().toLocaleDateString('en-GB')}</strong></p></div>
+            </div>
+            <table class="admin-table" style="width:100%; border-collapse:collapse;">
+                <thead><tr style="background:#003087; color:white;"><th style="text-align:left; padding-left:25px;">Subject</th><th>Score</th><th>Result</th></tr></thead>
+                <tbody>${rows}</tbody>
+            </table>
+            
+            <div class="transcript-footer" style="margin-top:60px; display:flex; justify-content:space-between; align-items:flex-end;">
+                <div style="font-size:0.8rem; color:grey;">* Computer-generated official record.</div>
+                <div style="text-align:center; width:220px;">
+                    <!-- 🔥 သင်တန်းအလိုက် ဆရာနာမည် ပြောင်းမည် -->
+                    <div style="border-bottom:1px solid #333; height:40px; font-family:'Dancing Script', cursive; font-size:1.3rem;">
+                        ${course.instructor || lmsSettings.instructorName}
                     </div>
+                    <p style="margin-top:8px; font-weight:bold; font-size:0.9rem;">Registrar Office</p>
                 </div>
             </div>
 
             <div class="no-print" style="margin-top:40px; text-align:center;">
-                <button class="save-btn" onclick="window.print()" style="padding:12px 60px; font-size: 1.1rem; border-radius:30px;">
-                    <i class="fas fa-print"></i> Print Transcript
-                </button>
+                <button class="save-btn" onclick="window.print()"><i class="fas fa-print"></i> Print Transcript</button>
             </div>
-        </div>
-    `;
+        </div>`;
 }
 
 // --- ၁။ Global Settings Variables ---
@@ -1773,93 +1590,87 @@ let lmsSettings = {
 
 // Database မှ Settings များကို Sync လုပ်ခြင်း
 function syncLMSSettings() {
-    // ၁။ Announcement Sync
+    // ၁။ Announcement Sync - စာသားရှိမှ Bar ကို ပြမည်
     db.collection('settings').doc('announcement').onSnapshot(doc => {
         const bar = document.getElementById('announcement-bar');
         if (doc.exists && doc.data().text && doc.data().text.trim() !== "") {
-            document.getElementById('announcement-text').innerText = doc.data().text;
-            if (bar) bar.style.display = 'flex';
-        } else { if (bar) bar.style.display = 'none'; }
-    });
+            lmsSettings.announcement = doc.data().text;
+            const annoEl = document.getElementById('announcement-text');
+            if (annoEl) annoEl.innerText = lmsSettings.announcement;
+            if (bar) bar.style.display = 'flex'; // စာသားရှိလျှင် ပြမည်
+        } else {
+            if (bar) bar.style.display = 'none'; // စာသားမရှိလျှင် တစ်ခုလုံး ဖျောက်မည်
+        }
+    }, err => console.warn("Announcement access restricted"));
 
-    if (auth.currentUser) {
-        // ၂။ User Data Sync (ပုံနဲ့ နာမည်၊ သင်တန်းအပ်မှုစာရင်း)
-        db.collection('users').doc(auth.currentUser.uid).onSnapshot(doc => {
+    // ၂။ Course Info Sync
+    if (currentUser.isLoggedIn) {
+        db.collection('settings').doc('course_info').onSnapshot(doc => {
             if (doc.exists) {
-                const userData = doc.data();
-                currentUser = { ...currentUser, ...userData };
-                localStorage.setItem('currentUser', JSON.stringify(currentUser));
-                renderAuthFooter();
+                lmsSettings = { ...lmsSettings, ...doc.data() };
+                renderAuthFooter(); 
             }
-        });
+        }, err => console.warn("Settings access restricted"));
+    }
 
-        // ၃။ 🔥 သင်တန်းအလိုက် Zoom နှင့် Info Sync
-        const courseId = currentUser.selectedCourseId || "web";
-        
-        db.collection('settings').doc(`course_info_${courseId}`).onSnapshot(doc => {
-            if (doc.exists) lmsSettings = { ...lmsSettings, ...doc.data() };
-        });
-
-        db.collection('settings').doc(`zoom_config_${courseId}`).onSnapshot(doc => {
-            if (doc.exists) {
-                const data = doc.data();
-                currentZoomLink = data.url || "";
-                if (data.startTime) nextClassTime = data.startTime.toDate();
-                
-                // 🔥 Dashboard ကို ချက်ချင်း Update လုပ်မည်
-                if (document.getElementById('page-title')?.innerText.includes("Dashboard")) {
-                    renderDashboard();
-                }
-            }
-        });
+    if (currentUser.role === 'Teacher' || currentUser.enrolledCourses?.length > 0) {
+        document.querySelectorAll('.nav-links a').forEach(l => l.classList.remove('nav-locked'));
     }
 }
 
 // --- ၂။ Admin Panel: Announcement & Course Settings ပြင်သည့် UI ---
 function renderLMSEditor() {
     const body = document.getElementById('dynamic-body');
-    const courseId = currentUser.selectedCourseId || "web";
+    
+    // Zoom Time ကို input format ပြောင်းရန်
     const dateStr = nextClassTime ? nextClassTime.toISOString().slice(0, 16) : "";
 
     body.innerHTML = `
-        <div class="content-card animate-up" style="max-width: 850px; margin: auto;">
-            <h3><i class="fas fa-cogs"></i> System Settings (${courseId.toUpperCase()})</h3>
-            <p style="color:var(--text-muted)">ဤနေရာတွင် ပြင်ဆင်သမျှသည် <b>${courseId}</b> သင်တန်းအတွက်သာ သက်ရောက်မည်။</p>
+        <div class="content-card animate-up" style="max-width: 800px; margin: auto;">
+            <h3><i class="fas fa-cogs"></i> LMS စနစ် အလုံးစုံ စီမံခန့်ခွဲမှု</h3>
+            <p style="color:var(--text-muted)">ဤနေရာတွင် Announcement၊ Zoom Link နှင့် ဘာသာရပ်များကို ပြင်ဆင်နိုင်သည်။</p>
             <hr><br>
+            
             <!-- ၁။ Announcement Section -->
-            <label>📢 Announcement (ကျောင်းသားအားလုံးအတွက်)</label>
+            <label>📢 Announcement (အပေါ်ဆုံးတွင် ပြသမည့်စာသား)</label>
             <textarea id="adm-anno" class="edit-input" rows="2">${lmsSettings.announcement}</textarea>
             
             <div class="edit-grid" style="margin-top:20px;">
                 <!-- ၂။ Course Info Section -->
                 <div>
-                    <label>🎓 သင်တန်းဘွဲ့အမည် (${courseId})</label>
+                    <label>🎓 သင်တန်းဘွဲ့အမည် (Certificate Title)</label>
                     <input type="text" id="adm-course" class="edit-input" value="${lmsSettings.courseTitle}">
-                    <label style="margin-top:15px; display:block;">✍️ သင်တန်းဆရာအမည်</label>
+                    
+                    <label style="margin-top:15px; display:block;">✍️ သင်တန်းဆရာအမည် (Instructor)</label>
                     <input type="text" id="adm-instructor" class="edit-input" value="${lmsSettings.instructorName}">
                 </div>
+
                 <!-- ၃။ Zoom Config Section -->
                 <div>
-                    <label>📹 Zoom Meeting Link</label>
-                    <input type="url" id="adm-zoom-url" class="edit-input" value="${currentZoomLink}" placeholder="https://zoom.us/your-meeting-link">
+                    <label>📹 Zoom / Meet Meeting Link</label>
+                    <input type="url" id="adm-zoom-url" class="edit-input" value="${currentZoomLink}" placeholder="https://...">
+                    
                     <label style="margin-top:15px; display:block;">⏰ နောက်လာမည့် အတန်းချိန်</label>
                     <input type="datetime-local" id="adm-zoom-time" class="edit-input" value="${dateStr}">
                 </div>
             </div>
 
             <!-- ၄။ Subjects Section -->
-            <label style="margin-top:20px; display:block;">📚 Transcript ဘာသာရပ်စာရင်း (comma ခြားပါ)</label>
+            <label style="margin-top:20px; display:block;">📚 Transcript ဘာသာရပ်စာရင်း (comma ခြား၍ ရေးပါ)</label>
             <input type="text" id="adm-subjects" class="edit-input" value="${lmsSettings.subjects.join(', ')}">
             
             <div style="margin-top:30px; display:flex; gap:10px;">
-                <button class="save-btn" onclick="saveLMSSettings()"><i class="fas fa-save"></i> Save for ${courseId}</button>
+                <button class="save-btn" onclick="saveLMSSettings()">
+                    <i class="fas fa-save"></i> Save All Changes
+                </button>
                 <button class="menu-btn" onclick="renderAdminPanel()">Back</button>
             </div>
-        </div>`;
+        </div>
+    `;
 }
 
+// Settings အားလုံးကို Database ထဲသို့ တစ်ပြိုင်နက် သိမ်းဆည်းခြင်း
 async function saveLMSSettings() {
-    const courseId = currentUser.selectedCourseId || "web";
     const anno = document.getElementById('adm-anno').value;
     const course = document.getElementById('adm-course').value;
     const instructor = document.getElementById('adm-instructor').value;
@@ -1891,10 +1702,11 @@ async function saveLMSSettings() {
         alert("အောင်မြင်စွာ Update လုပ်ပြီးပါပြီ။");
         
         // အဆင့် ၃ - Dashboard သို့ ပြန်သွားပြီး UI အားလုံးကို Update ဖြစ်စေမည်
-        showSection('dashboard');    
+        showSection('dashboard');
+
     } catch (error) {
-        console.error("Save Settings Error:", error);
-        alert("သိမ်းဆည်း၍ မရပါ- " + error.message);
+        console.error("Save Error:", error);
+        alert("Error: " + error.message);
     }
 }
 
@@ -1977,15 +1789,6 @@ window.onload = () => {
             currentUser.uid = user.uid;
             currentUser.isLoggedIn = true;
 
-            // 🔔 Bell listener (ဒီမှာထည့်)
-            db.collection("users")
-            .doc(currentUser.uid)
-            .onSnapshot(snap => {
-                if (!snap.exists) return;
-                const count = snap.data().unreadCount || 0;
-                updateBell(count);
-            });
-
             // Cloud Data များကို စတင် Sync လုပ်မည်
             syncLMSSettings(); 
             syncZoomConfig();
@@ -2030,18 +1833,6 @@ window.onload = () => {
     });
 };
 
-function updateBell(count) {
-  const bell = document.getElementById("bellCount");
-  if (!bell) return;
-
-  if (count > 0) {
-    bell.style.display = "inline-block";
-    bell.innerText = count;
-  } else {
-    bell.style.display = "none";
-  }
-}
-
 // Menu များကို Lock ချသည့် Function
 function lockMenus() {
     const links = document.querySelectorAll('.nav-links a');
@@ -2080,140 +1871,96 @@ function closeAnnouncement() {
 // ၉။ Genreral Admin Panel Logic
 // ==========================================
 
-async function renderAnalytics() {
-    const now = Date.now();
-    // 🔥 ၅ မိနစ်မပြည့်သေးရင် အဟောင်းကိုပဲ တန်းပေးမည် (Request ထပ်မလုပ်တော့ပါ)
-    if (cachedAnalyticsHtml !== "" && (now - lastAnalyticsTime < 300000)) {
-        return cachedAnalyticsHtml;
-    }
-
-    try {
-        // တစ်ပြိုင်နက်တည်း တောင်းဆိုမည်
-        const [userSnap, paySnap, subSnap] = await Promise.all([
-            db.collection('users').where('role', '==', 'Student').get(),
-            db.collection('payments').where('status', '==', 'approved').get(),
-            db.collection('submissions').where('status', '==', 'pending').get()
-        ]);
-
-        let totalRevenue = 0;
-        paySnap.forEach(doc => {
-            totalRevenue += (parseInt(doc.data().coursePrice) || 50000);
-        });
-
-        // UI ကို တည်ဆောက်မည်
-        cachedAnalyticsHtml = `
-            <div class="dashboard-grid animate-up" style="margin-bottom:30px;">
-                <div class="content-card" style="border-top: 4px solid #3b82f6;">
-                    <small>စုစုပေါင်းကျောင်းသား</small>
-                    <h2 style="margin:10px 0;">${userSnap.size} ယောက်</h2>
-                </div>
-                <div class="content-card" style="border-top: 4px solid #10b981;">
-                    <small>စုစုပေါင်းဝင်ငွေ</small>
-                    <h2 style="margin:10px 0;">${totalRevenue.toLocaleString()} MMK</h2>
-                </div>
-                <div class="content-card" style="border-top: 4px solid #f59e0b;">
-                    <small>စစ်ဆေးရန် အိမ်စာ</small>
-                    <h2 style="margin:10px 0;">${subSnap.size} ခု</h2>
-                </div>
-            </div>
-        `;
-        
-        lastAnalyticsTime = now;
-        return cachedAnalyticsHtml;
-
-    } catch (e) {
-        console.error("Analytics Error:", e);
-        return `<div class="error-msg">ကိန်းဂဏန်းများ တွက်ချက်၍မရပါ။</div>`;
-    }
-}
-
 // အစမ်းသုံးရန် ကျောင်းသားစာရင်း Data (တကယ်တမ်းတွင် Firestore မှ ဆွဲယူမည်)
 let studentsList = [];
 
 // --- Admin Panel (Teacher သာ ဝင်နိုင်မည်) ---
 // --- ဆရာအတွက် Admin Panel (Academic Status ပြင်ဆင်ရန်) ---
 async function renderAdminPanel() {
-    const body = document.getElementById("dynamic-body");
-    const now = Date.now();
+    await fetchStudentsFromDB(); // Database မှ အရင်ဆွဲမည်
 
-    // 🔥 ဒေတာအဟောင်းတွေ ရှိပြီးသားဖြစ်ပြီး ၅ မိနစ်မကျော်သေးရင် Loader မပြတော့ဘဲ တန်း Render လုပ်မည်
-    const isDataFresh = (studentsList.length > 0 && (now - lastFetchTime < 300000));
+  const body = document.getElementById("dynamic-body");
 
-    if (!isDataFresh) {
-        body.innerHTML = `
-            <div style="text-align:center; padding:50px;">
-                <div class="loader"></div>
-                <p style="margin-top:15px;">Cloud မှ အချက်အလက်များကို ရယူနေပါသည်...</p>
-            </div>`;
-    }
+  // ရှိသမျှ Batch များကို စုစည်းပြီး Dropdown ပြုလုပ်ခြင်း
+    const batchOptions = [...new Set(studentsList.map(s => s.batchId))].sort();
+  
+  // Header အပိုင်းမှာ ခလုတ်တွေကို စုစည်းထားပြီး Table ကို တစ်ခုတည်းပဲ ထားလိုက်ပါမယ်
+  body.innerHTML = `
+        <div class="admin-container fade-in">
+            <!-- အပေါ်ဆုံး ခေါင်းစီးနှင့် အဓိက ခလုတ်များ -->
+            <div class="admin-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:15px;">
 
-    try {
-        // Promise.all က Cache ရှိရင် ချက်ချင်း return ပြန်ပါလိမ့်မည်
-        const [unused, analyticsHtml] = await Promise.all([
-            fetchStudentsFromDB(), 
-            renderAnalytics()
-        ]);
+                <h3 style="margin:0;"><i class="fas fa-user-shield"></i> Admin Control Panel</h3>
 
-        const batchOptions = [...new Set(studentsList.map(s => s.batchId))].sort();
-        
-        // UI ကို ရေးဆွဲခြင်း
-        body.innerHTML = `
-            <div class="admin-container fade-in">
-                <div class="admin-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:15px;">
-                    <h3 style="margin:0;"><i class="fas fa-user-shield"></i> Admin Control Panel</h3>
-                    <div class="admin-scroll-wrapper no-print">
-                        <div class="admin-btn-group">
-                            <button class="save-btn" onclick="renderSubmissions()"><i class="fas fa-file-signature"></i> Review</button>
-                            <button class="menu-btn" style="background:#f59e0b; color:white;" onclick="renderLMSEditor()"><i class="fas fa-cog"></i> Settings</button>
-                            <button class="menu-btn" style="background:#0ea5e9; color:white;" onclick="renderContentEditor()"><i class="fas fa-plus"></i> Add</button>
-                            <button class="menu-btn" style="background:#f59e0b" onclick="renderZoomEditor()"><i class="fas fa-video"></i> Zoom</button>
-                            <button class="menu-btn" style="background:#10b981" onclick="renderPaymentRequests()"><i class="fas fa-receipt"></i> ပိုက်ဆံသွင်းထားသူများ</button>
-                            <button class="menu-btn" style="background:#4b5563; color:white;" onclick="renderLMSGuide()"><i class="fas fa-book"></i> Guide</button>
-                        </div>
-                    </div>
-                </div>
+                <div style="display:flex; gap:10px; flex-wrap:wrap; width:100%; justify-content: flex-end;" class="admin-btn-group">
+                    <!-- 🔥 ဒီခလုတ်က အရေးကြီးဆုံးပါ၊ Editor ဆီသွားပါမယ် -->
+                    <button class="save-btn" onclick="renderSubmissions()">
+                        <i class="fas fa-file-signature"></i> Review
+                    </button>
+                    <button class="menu-btn" style="background:#f59e0b; color:white;" onclick="renderLMSEditor()">
+                        <i class="fas fa-cog"></i> Settings
+                    </button>
 
-                ${analyticsHtml}
+                    <button class="menu-btn" style="background:#0ea5e9; color:white;" onclick="renderContentEditor()">
+                        <i class="fas fa-plus"></i> Add
+                    </button>
 
-                <!-- Batch Filter & Table ... (အရင်ကုဒ်အတိုင်း ဆက်ရေးပါ) ... -->
-                <div class="content-card" style="margin-bottom:20px; padding:15px;">
-                    <div class="batch-filter">
-                        <span><strong>Batch ရွေးချယ်ရန်: </strong></span>
-                        <select id="batch-select" class="edit-input" style="width:auto; display:inline-block; margin-left:10px;" onchange="filterStudentsByBatch(this.value)">
-                            <option value="All">All Batches</option>
-                            ${batchOptions.map(b => `<option value="${b}">${b}</option>`).join('')}
-                        </select>
-                    </div>
-                </div>
+                    <button class="menu-btn" style="background:#f59e0b" onclick="renderZoomEditor()">
+                        <i class="fas fa-video"></i> Zoom
+                    </button>
 
-                <div class="content-card">
-                    <h4 style="margin-bottom:15px;"><i class="fas fa-users"></i> ကျောင်းသားစာရင်း</h4>
-                    <div class="table-responsive">
-                        <table class="admin-table">
-                            <thead><tr><th>အမည်</th><th>Batch</th><th>တက်ရောက်မှု</th><th>Grade</th><th>လုပ်ဆောင်ချက်</th></tr></thead>
-                            <tbody id="student-table-body"></tbody>
-                        </table>
-                    </div>
+                    <button class="menu-btn" style="background:#10b981" onclick="renderPaymentRequests()">
+                        <i class="fas fa-receipt"></i> ပိုက်ဆံသွင်းထားသူများ
+                    </button>
+
+                    <button class="menu-btn" style="background:#4b5563; color:white;" onclick="renderLMSGuide()">
+                        <i class="fas fa-book"></i> Guide
+                    </button>
                 </div>
             </div>
-        `;
 
-        filterStudentsByBatch("All"); 
+            <!-- Batch Filter အပိုင်း -->
+            <div class="content-card" style="margin-bottom:20px; padding:15px;">
+                <div class="batch-filter">
+                    <span><strong>Batch ရွေးချယ်ရန်: </strong></span>
+                    <select id="batch-select" class="edit-input" style="width:auto; display:inline-block; margin-left:10px;" onchange="filterStudentsByBatch(this.value)">
+                        <option value="All">All Batches</option>
+                    ${batchOptions.map(b => `<option value="${b}">${b}</option>`).join('')}
+                    </select>
+                </div>
+            </div>
 
-    } catch (error) {
-        body.innerHTML = `<div class="error-msg">Error: ${error.message}</div>`;
-    }
+            <!-- ကျောင်းသားစာရင်း ဇယား (Table) -->
+            <div class="content-card">
+                <h4 style="margin-bottom:15px;"><i class="fas fa-users"></i> ကျောင်းသားစာရင်း</h4>
+                <div class="table-responsive">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>အမည်</th>
+                                <th>Batch</th>
+                                <th>တက်ရောက်မှု</th>
+                                <th>Grade</th>
+                                <th>လုပ်ဆောင်ချက်</th>
+                            </tr>
+                        </thead>
+                        <tbody id="student-table-body">
+                            <!-- filterStudentsByBatch() ကနေ ဒီမှာ လာဖြည့်ပေးပါလိမ့်မယ် -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    `;
+
+  // ဇယားထဲမှာ data တွေဝင်လာအောင် function ကို ပြန်ခေါ်ပေးရပါမယ်
+  filterStudentsByBatch("All"); 
 }
 
-async function fetchStudentsFromDB() {
-    const now = Date.now();
-    // 🔥 အကယ်၍ နောက်ဆုံးဖတ်ခဲ့တာ ၅ မိနစ် (၃၀၀,၀၀၀ မီလီစက္ကန့်) မကျော်သေးရင် Cloud ကနေ ထပ်မတောင်းပါ
-    // ဒါဟာ အဖွင့်အပိတ်ကို အမြန်ဆုံး ဖြစ်သွားစေပါတယ်
-    if (studentsList.length > 0 && (now - lastFetchTime < 300000)) {
-        console.log("Using cached data for speed...");
-        return;
-    }
+// --- Firestore ထဲက ကျောင်းသားအားလုံးကို ဆွဲယူပြီး studentsList ထဲ ထည့်ခြင်း ---
+let allUsersList = []; // Global variable အသစ်
 
+async function fetchStudentsFromDB() {
     try {
         const snapshot = await db.collection('users').get();
         studentsList = [];
@@ -2223,7 +1970,8 @@ async function fetchStudentsFromDB() {
             const data = doc.data();
             const userObj = {
                 uid: doc.id,
-                ...data,
+                ...data, // name, batchId, role, photo, enrolledCourses, grades အကုန်ပါလာမည်
+
                 name: data.name || "No Name",
                 batchId: data.batchId || "General",
                 attendance: data.attendance || "0%",
@@ -2234,8 +1982,6 @@ async function fetchStudentsFromDB() {
             allUsersList.push(userObj);
             if (data.role === 'Student') studentsList.push(userObj);
         });
-
-        lastFetchTime = now; // 🔥 အချိန်ကို မှတ်သားထားမည်
         console.log("Students data synced from Cloud.");
     } catch (e) { console.error("Fetch Error:", e); }
 }
@@ -2553,55 +2299,32 @@ function previewStudentAchievements(uid) {
 
 // --- ကျောင်းသားတစ်ဦးချင်းစီကို အမှတ်သွင်းရန် Modal/Form ---
 function openGradeModal(studentUid) {
-    const student = studentsList.find(s => s.uid === studentUid);
-    const body = document.getElementById('dynamic-body');
-    const enrolled = student.enrolledCourses || [];
+  const student = studentsList.find((s) => s.uid === studentUid);
+  const body = document.getElementById("dynamic-body");
 
-    let courseButtons = enrolled.map(cId => `
-        <button class="menu-btn" style="margin-bottom:10px; width:100%; text-align:left;" 
-                onclick="renderSubjectGrading('${studentUid}', '${cId}')">
-            <i class="fas fa-book"></i> ${allCourses[cId].title}
-        </button>
-    `).join('');
+  // ဘာသာရပ်စာရင်း (မာတိကာမှ ယူနိုင်သည် သို့မဟုတ် ပုံသေထားနိုင်သည်)
+  const subjects = ["HTML", "CSS", "JavaScript", "React", "NodeJS", "Database"];
 
-    body.innerHTML = `
-        <div class="content-card animate-up" style="max-width:550px; margin:auto;">
-            <h3><i class="fas fa-user-edit"></i> Student Information: ${student.name}</h3>
-            <hr><br>
-            
-            <!-- 🔥 Batch ပြင်သည့်နေရာ အသစ် -->
-            <div class="academic-box" style="background:var(--main-bg); margin-bottom:20px;">
-                <label><strong>Assign Batch (လက်ရှိ- ${student.batchId})</strong></label>
-                <input type="text" id="edit-batch-id" class="edit-input" value="${student.batchId}" placeholder="ဥပမာ- Batch-04">
-                <button class="save-btn" style="margin-top:10px; width:100%;" onclick="updateStudentBatch('${studentUid}')">
-                    Update Batch Name
-                </button>
-            </div>
+  let subjectInputs = subjects
+    .map(
+      (sub) => `
+        <div class="academic-item">
+            <span class="label-grey">${sub}:</span>
+            <input type="number" id="grade-${sub.toLowerCase()}" class="edit-input" style="width:80px" value="${student.grades?.[sub.toLowerCase()] || 0}">
+        </div>
+    `,
+    )
+    .join("");
 
-            <h4>အမှတ်သွင်းရန် သင်တန်းရွေးချယ်ပါ</h4>
-            <div style="margin-top:10px;">
-                ${courseButtons || "<p style='color:grey;'>တက်ရောက်ထားသော သင်တန်းမရှိသေးပါ။</p>"}
-            </div>
-            
+  body.innerHTML = `
+        <div class="content-card animate-up" style="max-width: 600px; margin: 20px auto;">
+            <h4><i class="fas fa-graduation-cap"></i> ${student.name} ၏ အမှတ်စာရင်းသွင်းရန်</h4>
+            <div class="academic-box">${subjectInputs}</div>
             <br>
-            <button class="menu-btn" style="width:100%;" onclick="renderAdminPanel()">
-                <i class="fas fa-arrow-left"></i> Back to Student List
-            </button>
-        </div>`;
-}
-
-// 🔥 Batch ကို Cloud (Firebase) ပေါ်မှာ Update လုပ်မည့် Function အသစ်
-async function updateStudentBatch(uid) {
-    const newBatch = document.getElementById('edit-batch-id').value.trim();
-    if (!newBatch) return alert("Batch အမည် ထည့်ပေးပါ။");
-
-    try {
-        await db.collection('users').doc(uid).update({
-            batchId: newBatch
-        });
-        alert("Batch အမည်ကို " + newBatch + " သို့ ပြောင်းလဲပြီးပါပြီ။");
-        renderAdminPanel(); // List ကို ပြန်သွားမည်
-    } catch (e) { alert(e.message); }
+            <button class="save-btn" onclick="updateGrades('${student.uid}')">အမှတ်စာရင်း သိမ်းဆည်းမည်</button>
+            <button class="menu-btn" style="background:#64748b" onclick="renderAdminPanel()">ပြန်ထွက်မည်</button>
+        </div>
+    `;
 }
 
 // --- ကျောင်းသားအတွက်: Transcript နှင့် Certificate ပြသခြင်း ---
@@ -2949,29 +2672,13 @@ async function renderSubmissions() {
     } catch (err) { console.error(err); }
 }
 
-// --- ၁။ ပြခန်းမှသာ ဖယ်ရှားခြင်း (Featured ကို false ပြောင်းခြင်း) ---
-async function removeFromShowcase(docId) {
-    if (confirm("ဤပရောဂျက်ကို Showcase ပြခန်းမှ ဖယ်ရှားလိုပါသလား? (ကျောင်းသား၏ အမှတ်စာရင်းကို မထိခိုက်ပါ)")) {
+// 🔥 ဖျက်သည့် Logic ပါဝင်ရမည်
+async function deleteSubmission(id) {
+    if (confirm("ဤပေးပို့မှုကို အပြီးဖျက်ရန် သေချာပါသလား?")) {
         try {
-            await db.collection('submissions').doc(docId).update({
-                featured: false
-            });
-            showToast("ပြခန်းမှ ဖယ်ရှားပြီးပါပြီ။", "success");
-            renderShowcase(); // UI ကို Refresh လုပ်မည်
-        } catch (e) { alert(e.message); }
-    }
-}
-
-// --- ၂။ Submission ကို အပြီးဖျက်ခြင်း ---
-async function deleteSubmission(docId, fromShowcase = false) {
-    if (confirm("ဤပေးပို့မှုကို Database ထဲမှ အပြီးဖျက်ရန် သေချာပါသလား?")) {
-        try {
-            await db.collection('submissions').doc(docId).delete();
-            showToast("ဒေတာ အပြီးဖျက်ပြီးပါပြီ။", "success");
-            
-            // ဘယ်နေရာကနေ ဖျက်တာလဲအပေါ် မူတည်ပြီး UI ပြန်ပြမည်
-            if (fromShowcase) renderShowcase();
-            else renderSubmissions();
+            await db.collection('submissions').doc(id).delete();
+            alert("ဖျက်ပြီးပါပြီ။");
+            renderSubmissions(); // စာရင်းပြန် Render လုပ်မည်
         } catch (e) { alert(e.message); }
     }
 }
@@ -2981,9 +2688,6 @@ async function gradeThisSubmission(docId) {
     const doc = await db.collection('submissions').doc(docId).get();
     const s = doc.data();
     const body = document.getElementById('dynamic-body');
-
-    // 🔥 Project အမျိုးအစား ဖြစ်မှသာ Checkbox ကို ပြမည်
-    const isProject = s.type === 'project';
 
     body.innerHTML = `
         <div class="content-card animate-up" style="max-width:700px; margin:auto;">
@@ -2999,21 +2703,9 @@ async function gradeThisSubmission(docId) {
             <br>
             <label>ဆရာ့မှတ်ချက် (Optional)</label>
             <textarea id="teacher-feedback" class="edit-input" rows="2" placeholder="အကြံပြုချက်ရေးပါ"></textarea>
-
-            <!-- 🔥 Showcase အတွက် Checkbox အသစ် -->
-            ${isProject ? `
-                <div style="margin: 20px 0; padding: 10px; background: #f0fdf4; border: 1px dashed #22c55e; border-radius: 8px;">
-                    <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
-                        <input type="checkbox" id="add-to-showcase" style="width:20px; height:20px;">
-                        <span style="font-weight:bold; color:#166534;">Featured in Showcase (ပြခန်းတွင် ဖော်ပြမည်)</span>
-                    </label>
-                </div>
-            ` : ''}
             
             <div style="margin-top:20px; display:flex; gap:10px;">
-                <button class="save-btn" onclick="confirmGrade('${docId}', '${s.studentId}', '${s.lessonTitle}')">
-                    <i class="fas fa-check-circle"></i> Submit Grade
-                </button>
+                <button class="save-btn" onclick="confirmGrade('${docId}', '${s.studentId}', '${s.lessonTitle}')">Submit Grade</button>
                 <button class="menu-btn" onclick="renderSubmissions()">Cancel</button>
             </div>
         </div>
@@ -3025,7 +2717,7 @@ function renderAbout() {
         <div class="content-card animate-up" style="max-width: 800px; margin: auto; line-height: 1.8;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
                 <h3><i class="fas fa-graduation-cap"></i> ကျွန်ုပ်တို့အကြောင်း (About Us)</h3>
-                <button class="menu-btn" onclick="showSection('dashboard')"><i class="fas fa-home"></i> <span>Back to Home</span></button>
+                <button class="menu-btn" onclick="showSection('dashboard')"><i class="fas fa-home"></i> Back to Home</button>
             </div>
                 <hr><br>
                 <p><strong>Myanmar Full-Stack Bootcamp (MM)</strong> သည် မြန်မာနိုင်ငံရှိ လူငယ်များ နိုင်ငံတကာအဆင့်မီ နည်းပညာရပ်များကို မိခင်ဘာသာစကားဖြင့် စနစ်တကျ သင်ယူနိုင်စေရန် ရည်ရွယ်တည်ထောင်ထားခြင်း ဖြစ်ပါသည်။</p>
@@ -3046,7 +2738,7 @@ function renderPrivacy() {
         <div class="content-card animate-up" style="max-width: 800px; margin: auto; line-height: 1.8;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
             <h3><i class="fas fa-user-shield"></i> ကိုယ်ရေးအချက်အလက် မူဝါဒ (Privacy Policy)</h3>
-            <button class="menu-btn" onclick="showSection('dashboard')"><i class="fas fa-home"></i> <span>Back to Home</span></button>
+            <button class="menu-btn" onclick="showSection('dashboard')"><i class="fas fa-home"></i> Back to Home</button>
             </div>
             <hr><br>
             <p>ကျောင်းသားများ၏ ကိုယ်ရေးအချက်အလက်များကို Google Firebase တွင် လုံခြုံစွာ သိမ်းဆည်းထားပါသည်။</p>
@@ -3076,21 +2768,14 @@ const globalNotiSound = new Audio('assets/noti-sound.mp3');
 function initNotifications() {
     if (!currentUser.uid || !currentUser.isLoggedIn) return;
 
-    // 🔥 အချိန်ကန့်သတ်ချက်ကို ၁ နာရီအထိ တိုးမြှင့်လိုက်ပါသည် (ပိုမိုသေချာစေရန်)
-    const startTime = new Date(Date.now() - 3600000); 
+    // 🔥 အချိန်စစ်တဲ့နေရာမှာ Browser အားလုံးကို အလုပ်လုပ်စေဖို့ ၂ မိနစ် ကြိုစစ်ခိုင်းမည်
+    const startTime = new Date(Date.now() - 120000); 
 
-    // Direct Messages Noti စစ်ဆေးခြင်း
+    // ၂။ Direct Messages Noti
     db.collection('messages')
         .where('receiverId', '==', currentUser.uid)
         .where('timestamp', '>', startTime)
         .onSnapshot(snap => {
-            // snap.docChanges().forEach(change => {
-            //     if (change.type === "added") {
-            //         const msg = change.doc.data();
-            //         // Message အသစ်ဖြစ်ကြောင်း သေချာလျှင် Noti ပြမည်
-            //         showNotiInBell(`${msg.senderName}: "${msg.text.substring(0, 15)}..."`);
-            //     }
-            // });
             // Added ဖြစ်တဲ့စာအသစ်တွေကို စစ်မည်
             let newDocs = snap.docChanges().filter(c => c.type === "added");
             if (newDocs.length > 0) {
@@ -3098,8 +2783,7 @@ function initNotifications() {
             }
         }, err => console.log("DM Noti Restricted"));
 
-
-    // Group Messages Noti
+    // ၃။ Group Messages Noti
     if (currentUser.batchId) {
         db.collection('messages')
             .where('batchId', '==', currentUser.batchId)
@@ -3203,21 +2887,18 @@ function processNotiChanges(snap, type) {
 
 function updateNotiBadge() {
     const badge = document.getElementById('noti-badge');
-    const wrapper = document.querySelector('.notification-wrapper');
     const bellIcon = document.querySelector('.notification-wrapper i');
     if (!badge) return;
 
     if (unreadNotiCount > 0) {
         badge.innerText = unreadNotiCount;
-        badge.style.display = "flex";
-        wrapper.style.display = "flex"; // 🔥 စာရှိမှ ခေါင်းလောင်းကို ပြမည်
+        badge.style.display = "flex"; // Safari အတွက် flex ကို သေချာပေးပါ
         if (bellIcon) {
-            bellIcon.style.color = "#ef4444";
-            bellIcon.classList.add('fa-shake');
+            bellIcon.style.color = "#ef4444"; // ခေါင်းလောင်းနီသွားမည်
+            bellIcon.classList.add('fa-shake'); // အသံမြည်စဉ် ခေါင်းလောင်းတုန်ခါမည်
         }
     } else {
         badge.style.display = "none";
-        wrapper.style.display = "none"; // 🔥 စာမရှိလျှင် တစ်ခုလုံး ဖျောက်မည်
         if (bellIcon) {
             bellIcon.style.color = "";
             bellIcon.classList.remove('fa-shake');
@@ -3442,58 +3123,43 @@ async function updateZoomToFirebase() {
 async function confirmGrade(docId, studentId, lessonTitle) {
     const scoreInput = document.getElementById('grade-score');
     const feedbackInput = document.getElementById('teacher-feedback');
-    const showcaseCheckbox = document.getElementById('add-to-showcase');
-
-    if (!scoreInput || !scoreInput.value) return alert("အမှတ် အရင်ထည့်ပါ။");
+    
+    if (!scoreInput || !scoreInput.value) {
+        return alert("ကျေးဇူးပြု၍ အမှတ်အရင်ထည့်ပါ။");
+    }
 
     const score = parseInt(scoreInput.value);
     const feedback = feedbackInput ? feedbackInput.value : "";
-    const isFeatured = showcaseCheckbox ? showcaseCheckbox.checked : false; 
 
     try {
-        // 🔥 အဆင့် ၁- ဤ Submission ၏ မူရင်းအချက်အလက်ကို ပြန်ယူမည် (Course ID ရရန်)
-        const subDoc = await db.collection('submissions').doc(docId).get();
-        if (!subDoc.exists) throw new Error("Submission data not found!");
-        const subData = subDoc.data();
-        const originalCourseId = subData.courseId; // မူရင်းသင်တန်း ID (web သို့မဟုတ် python စသည်)
+        // ၁။ ကျောင်းသားရဲ့ Document ထဲမှာ အမှတ်သွားထည့်မယ်
+        // ဘာသာရပ်အမည်ကို သင်ခန်းစာခေါင်းစဉ်မှ ယူမည် (ဥပမာ- html, css)
+        const subjectKey = lessonTitle.toLowerCase().includes('html') ? 'html' : 
+                         lessonTitle.toLowerCase().includes('css') ? 'css' : 'javascript';
 
-        // ၂။ ဘာသာရပ် Key ကို သတ်မှတ်ခြင်း
-        const titleLower = lessonTitle.toLowerCase();
-        const subjectKey = titleLower.includes('html') ? 'html' : 
-                         titleLower.includes('css') ? 'css' : 
-                         titleLower.includes('python') ? 'python' : 
-                         titleLower.includes('design') ? 'design' : 'javascript';
-
-        // ၃။ ကျောင်းသား အမှတ်စာရင်းကို Update လုပ်မည် (မူရင်း Course ID အောက်တွင်သာ သိမ်းမည်)
         await db.collection('users').doc(studentId).set({
-            grades: { 
-                [originalCourseId]: { 
-                    [subjectKey]: score 
-                } 
-            }
+            grades: { [subjectKey]: score }
         }, { merge: true });
 
-        // ၄။ Submission status ကို 'graded' ပြောင်းပြီး Featured သိမ်းမည်
+        // ၂။ Submission status ကို 'graded' ပြောင်းမယ်
         await db.collection('submissions').doc(docId).update({
             status: "graded",
             score: score,
-            featured: isFeatured,
-            teacherFeedback: feedback,
-            gradedAt: firebase.firestore.FieldValue.serverTimestamp()
+            teacherFeedback: feedback
         });
 
-        // ၅။ ကျောင်းသားဆီ Noti ပို့မည်
+        // ၃။ ကျောင်းသားဆီ Noti ပို့မယ်
         await db.collection('messages').add({
-            text: `🔔 အမှတ်ထွက်ပါပြီ- ${lessonTitle} (ရမှတ်: ${score})။ Transcript တွင် စစ်ဆေးပါ။`,
+            text: `🔔 သင်၏ ${lessonTitle} အတွက် အမှတ်ထွက်ပါပြီ။ (ရမှတ်: ${score})`,
             senderId: currentUser.uid,
-            senderName: "Teacher (LMS)",
+            senderName: "System (Tutor)",
             receiverId: studentId,
             type: "direct",
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
 
-        alert(isFeatured ? "အမှတ်ပေးပြီးပါပြီ။ Showcase ထဲသို့လည်း ထည့်သွင်းလိုက်ပါသည်။" : "အမှတ်ပေးခြင်း အောင်မြင်ပါသည်။");
-        renderAdminPanel(); 
+        alert("အမှတ်ပေးခြင်း အောင်မြင်ပါသည်။");
+        renderAdminPanel(); // Admin Panel သို့ ပြန်သွားမည်
 
     } catch (error) {
         console.error("Grading Error:", error);
@@ -3928,70 +3594,47 @@ async function handleSignUp() {
 function renderCourseSelection() {
     const body = document.getElementById('dynamic-body');
     body.innerHTML = `
-        <div class="welcome-banner fade-in" style="border-radius: 25px; padding: 40px; margin-bottom: 40px;">
-            <h2 style="font-size: 2rem;">မင်္ဂလာပါ ${currentUser.name}! <span class="wave">👋</span></h2>
-            <p style="font-size: 1.1rem; opacity: 0.9;">သင်တက်ရောက်လိုသော သင်တန်းကို ရွေးချယ်ပြီး ခရီးစဉ်အသစ်ကို စတင်လိုက်ပါ။</p>
+        <div class="welcome-banner fade-in">
+            <h2>မင်္ဂလာပါ ${currentUser.name}! 👋</h2>
+            <p>သင်တက်ရောက်လိုသော သင်တန်းကို ရွေးချယ်ပါ။</p>
         </div>
         <div class="dashboard-grid animate-up" id="course-grid"></div>
     `;
 
     const grid = document.getElementById('course-grid');
     
-    // သင်တန်းအလိုက် အရောင်များ သတ်မှတ်ခြင်း
-    const courseColors = {
-        "web": "#003087",      // Blue
-        "python": "#10b981",   // Green
-        "design": "#8b5cf6"    // Purple
-    };
-
     for (let id in allCourses) {
         const course = allCourses[id];
         const isEnrolled = currentUser.enrolledCourses?.includes(id);
         const isTeacher = currentUser.role === 'Teacher';
+
+        // 🔥 အဓိကအချက်: ဆရာဖြစ်စေ၊ ဝယ်ပြီးသားကျောင်းသားဖြစ်စေ 'Joined' ပဲ ပြမည်
         const hasAccess = isEnrolled || isTeacher;
-        const themeColor = courseColors[id] || "#475569";
 
         const card = document.createElement('div');
-        card.className = 'course-selection-card animate-up';
+        card.className = 'topic-card course-selection-card';
         card.onclick = () => selectCourse(id);
         
         card.innerHTML = `
-            <div class="card-top-accent" style="background: ${themeColor}"></div>
-            <div class="card-body-padding">
-                <!-- 🔥 Icon ကို Container နဲ့ အုပ်ပြီး အလယ်ပို့လိုက်ပါပြီ -->
-                <div style="display:flex; justify-content:center; margin-bottom:20px;">
-                    <div class="course-icon-box" style="background: ${themeColor}15; color: ${themeColor}; margin: 0;">
-                        <i class="fas ${course.icon || 'fa-graduation-cap'}"></i>
-                    </div>
-                </div>
+            <div class="card-icon"><i class="fas ${course.icon || 'fa-graduation-cap'}"></i></div>
+            <h3 style="margin-bottom:10px;">${course.title}</h3>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:15px;">${course.description}</p>
+            
+            <ul style="text-align:left; font-size:0.8rem; margin-bottom:15px; padding-left:20px; color:var(--text-main);">
+                ${course.benefits.map(b => `<li>${b}</li>`).join('')}
+            </ul>
 
-                <h3 style="font-size: 1.4rem; margin-bottom: 12px; text-align:center;">${course.title}</h3>
-                <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 20px; text-align:center;">
-                    ${course.description}
-                </p>
-                
-                <div style="flex: 1;">
-                    <ul style="list-style: none; padding: 0;">
-                        ${course.benefits.map(b => `
-                            <li style="font-size: 0.85rem; margin-bottom: 8px; display: flex; align-items: center; gap: 10px;">
-                                <i class="fas fa-check-circle" style="color: ${themeColor};"></i> ${b}
-                            </li>
-                        `).join('')}
-                    </ul>
-                </div>
+            <div style="font-weight:bold; color:var(--primary); margin-bottom:15px;">${course.price}</div>
 
-                <div style="margin: 25px 0; display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-size: 1.2rem; font-weight: 800; color: ${themeColor};">${course.price}</span>
-                    ${isEnrolled ? `<span style="font-size: 0.8rem; color: #22c55e; font-weight: bold;">Joined <i class="fas fa-check"></i></span>` : ''}
-                </div>
-
-                <button class="course-card-btn ${hasAccess ? 'btn-joined' : 'btn-enroll-now'}" 
-                        style="${hasAccess ? 'background:#22c55e' : `background:${themeColor}`}">
-                    ${hasAccess 
-                        ? 'တက်ရောက်နေဆဲ <i class="fas fa-arrow-right"></i>' 
-                        : '<i class="fas fa-shopping-cart"></i> Enroll Now'
-                    }
-                </button>
+            <div class="enroll-status-container">
+                ${hasAccess 
+                    ? `<button class="course-card-btn btn-joined">
+                         တက်ရောက်နေဆဲ <i class="fas fa-check-circle"></i>
+                       </button>` 
+                    : `<button class="course-card-btn btn-enroll-now">
+                         <i class="fas fa-shopping-cart"></i> Enroll Now
+                       </button>`
+                }
             </div>
         `;
         grid.appendChild(card);
@@ -4032,229 +3675,3 @@ function showToast(message, type = 'info') {
     container.appendChild(toast);
     setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 500); }, 3000);
 }
-
-async function renderShowcase() {
-    const body = document.getElementById('dynamic-body');
-    if (!body) return;
-
-    body.innerHTML = `<h3><i class="fas fa-rocket"></i> Student Project Showcase</h3><div class="loader">Loading Projects...</div>`;
-    
-    try {
-        // ၁။ Database မှ Featured ဖြစ်သော Project များကို ဆွဲယူမည်
-        const snap = await db.collection('submissions')
-                             .where('type', '==', 'project')
-                             .where('status', '==', 'graded')
-                             .where('featured', '==', true)
-                             .orderBy('gradedAt', 'desc')
-                             .limit(12)
-                             .get();
-
-        const isTeacher = currentUser.role === 'Teacher'; // ဆရာ ဟုတ်မဟုတ် စစ်မည်
-
-        if (snap.empty) {
-            body.innerHTML = `
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                    <h3>Project Showcase</h3>
-                    <button class="menu-btn" onclick="showSection('dashboard')"><i class="fas fa-home"></i> Back</button>
-                </div>
-                <div class="content-card">ပြသရန် ပရောဂျက်များ မရှိသေးပါ။ ${isTeacher ? 'ကျောင်းသားများ၏ Project ကို Grade ပေးစဉ် "Featured" ကို အမှန်ခြစ်ခဲ့မှ ဤနေရာတွင် ပေါ်လာမည်ဖြစ်သည်။' : ''}</div>
-            `;
-            return;
-        }
-
-        let html = `
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                <h3><i class="fas fa-rocket"></i> Student Project Showcase</h3>
-                <button class="menu-btn" onclick="showSection('dashboard')"><i class="fas fa-home"></i> Back</button>
-            </div>
-            <div class="dashboard-grid">`;
-
-        snap.forEach(doc => {
-            const p = doc.data();
-            html += `
-                <div class="topic-card animate-up" style="text-align:left; padding:20px; display:flex; flex-direction:column;">
-                    <div style="font-size:2rem; margin-bottom:15px; color:var(--primary);"><i class="fas fa-laptop-code"></i></div>
-                    <h4 style="margin-bottom:5px;">${p.studentName}</h4>
-                    <p style="font-size:0.8rem; color:var(--text-muted); flex:1;">${p.lessonTitle}</p>
-                    <hr style="margin:15px 0; border-color:var(--border-color);">
-                    
-                    <button class="save-btn" style="width:100%;" onclick="window.open('${p.githubLink}', '_blank')">
-                        <i class="fab fa-github"></i> View GitHub
-                    </button>
-
-                    <!-- 🔥 ဆရာအတွက်သာ ပေါ်မည့် စီမံခန့်ခွဲမှု ခလုတ်များ -->
-                    ${isTeacher ? `
-                        <div style="margin-top:15px; display:flex; gap:5px;">
-                            <button class="menu-btn" style="background:#f59e0b; flex:1; font-size:0.75rem; padding:8px 5px;" 
-                                    onclick="removeFromShowcase('${doc.id}')" title="ပြခန်းမှသာ ဖယ်ရှားမည်">
-                                <i class="fas fa-eye-slash"></i> Remove
-                            </button>
-                            <button class="menu-btn" style="background:#ef4444; flex:1; font-size:0.75rem; padding:8px 5px;" 
-                                    onclick="deleteSubmission('${doc.id}', true)" title="ဒေတာပါ အပြီးဖျက်မည်">
-                                <i class="fas fa-trash"></i> Delete
-                            </button>
-                        </div>
-                    ` : ''}
-                </div>`;
-        });
-        
-        body.innerHTML = html + '</div>';
-
-    } catch (e) {
-        console.error("Showcase Error Details:", e);
-        body.innerHTML = `
-            <div class="error-msg animate-up">
-                <h4><i class="fas fa-exclamation-triangle"></i> ပြခန်းကို ဖွင့်၍မရပါ။</h4>
-                <p>${e.message}</p>
-                <br>
-                <small>မှတ်ချက်- Firebase Console တွင် Index ဆောက်ရန် လိုအပ်နိုင်ပါသည်။</small>
-                <br><br>
-                <button class="menu-btn" onclick="showSection('dashboard')">Back to Home</button>
-            </div>`;
-    }
-}
-
-// --- သင်တန်းအလိုက် ဘာသာရပ်များကို အမှတ်သွင်းရန် UI ပြသခြင်း ---
-function renderSubjectGrading(uid, courseId) {
-    const student = studentsList.find(s => s.uid === uid);
-    const course = allCourses[courseId];
-    const body = document.getElementById('dynamic-body');
-    
-    if (!student || !course) return alert("Data Error: မရနိုင်ပါ");
-
-    // လက်ရှိ ရှိပြီးသား အမှတ်များကို ယူမည် (မရှိရင် ၀ ထားမည်)
-    const currentGrades = (student.grades && student.grades[courseId]) ? student.grades[courseId] : {};
-
-    // ဘာသာရပ်အလိုက် Input များ တည်ဆောက်ခြင်း
-    let inputsHtml = course.transcriptSubjects.map(sub => `
-        <div class="academic-item" style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #eee;">
-            <span style="text-transform:uppercase; font-weight:bold;">${sub.replace('_', ' ')}:</span>
-            <input type="number" id="gr-${sub.toLowerCase()}" class="edit-input" 
-                   style="width:100px; text-align:center;" 
-                   value="${currentGrades[sub.toLowerCase()] || 0}" min="0" max="100">
-        </div>
-    `).join('');
-
-    body.innerHTML = `
-        <div class="content-card animate-up" style="max-width: 600px; margin: auto;">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h3><i class="fas fa-edit"></i> ${course.title}</h3>
-                <button class="menu-btn" onclick="openGradeModal('${uid}')">Back</button>
-            </div>
-            <p style="color:var(--text-muted)">ကျောင်းသား: <strong>${student.name}</strong></p>
-            <hr><br>
-            
-            <div class="academic-box" style="background:var(--card-bg); padding:15px; border-radius:12px;">
-                ${inputsHtml}
-            </div>
-
-            <div style="margin-top:30px;">
-                <button class="save-btn" style="width:100%; height:50px; font-size:1.1rem;" 
-                        onclick="saveMultiCourseGrades('${uid}', '${courseId}')">
-                    <i class="fas fa-save"></i> အမှတ်စာရင်း သိမ်းဆည်းမည်
-                </button>
-            </div>
-        </div>
-    `;
-}
-
-// --- အမှတ်အားလုံးကို စုစည်းပြီး Cloud သို့ သိမ်းဆည်းခြင်း ---
-async function saveMultiCourseGrades(uid, courseId) {
-    const course = allCourses[courseId];
-    const newGrades = {};
-    
-    // UI ထဲက ရိုက်ထားတဲ့ အမှတ်တွေကို loop ပတ်ပြီး ယူမည်
-    course.transcriptSubjects.forEach(sub => {
-        const val = document.getElementById('gr-' + sub.toLowerCase()).value;
-        newGrades[sub.toLowerCase()] = parseInt(val) || 0;
-    });
-
-    try {
-        // 🔥 အမှတ်စာရင်းကို grades -> courseId -> subject ပုံစံဖြင့် Cloud မှာ သိမ်းမည်
-        await db.collection('users').doc(uid).set({
-            grades: {
-                [courseId]: newGrades
-            }
-        }, { merge: true });
-
-        alert("အောင်မြင်စွာ သိမ်းဆည်းပြီးပါပြီ။");
-        
-        // Data အသစ်များကို ပြန်ဆွဲထုတ်ရန် fetch ပြန်ခေါ်မည်
-        await fetchStudentsFromDB(); 
-        renderAdminPanel();
-
-    } catch (error) {
-        console.error("Save Grade Error:", error);
-        alert("Error: " + error.message);
-    }
-}
-
-// 🔥 အခုကစပြီး alert() နေရာမှာ showToast() ကို အစားထိုးသုံးပါ
-// ဥပမာ- alert("မင်္ဂလာပါ");  =>  showToast("မင်္ဂလာပါ", "success");
-
-/*
-// --- ၁။ Text-to-Speech (စာဖတ်ပြသည့်စနစ်) ---
-let speechInstance = null;
-
-function speakLesson() {
-    // ၁။ အရင်ဖတ်နေတာရှိရင် ရပ်ပစ်မည်
-    window.speechSynthesis.cancel();
-
-    let textToRead = "";
-    
-    // ၂။ စာသားကို Select ပေးထားသလား စစ်ဆေးခြင်း
-    const selectedText = window.getSelection().toString();
-
-    if (selectedText && selectedText.trim().length > 0) {
-        // Highlight လုပ်ထားသော စာကို ဖတ်မည်
-        textToRead = selectedText;
-    } else {
-        // Highlight မရှိလျှင် သင်ခန်းစာ body ကို ရှာဖတ်မည်
-        // .article-content သို့မဟုတ် .lesson-body ထဲက စာကိုပဲ ယူမည် (Header/Nav များကို ကျော်မည်)
-        const lessonContent = document.querySelector('.article-content') || 
-                              document.querySelector('.lesson-body') || 
-                              document.getElementById('dynamic-body');
-        
-        if (lessonContent) {
-            // မလိုအပ်သော ခလုတ်စာသားများကို ဖယ်ထုတ်ရန် (innerText ၏ copy တစ်ခုယူသည်)
-            textToRead = lessonContent.innerText;
-        }
-    }
-
-    if (textToRead && textToRead.trim().length > 0) {
-        const msg = new SpeechSynthesisUtterance(textToRead);
-        
-        // ဘာသာစကား ရွေးချယ်ခြင်း (အင်္ဂလိပ်စာဆိုရင် en-US)
-        msg.lang = 'en-US'; 
-        msg.rate = 0.9;  // အနည်းငယ် နှေးနှေးဖတ်ပေးရန်
-        msg.pitch = 1;   // အသံနေအသံထား
-
-        window.speechSynthesis.speak(msg);
-        
-        // ဖတ်နေကြောင်း သိသာစေရန် Alert (Optional)
-        console.log("Reading starting...");
-    } else {
-        alert("ဖတ်စရာ စာသားကို အရင် Select ပေးပါ။");
-    }
-}
-
-function stopSpeaking() {
-    window.speechSynthesis.cancel();
-}
-
-// --- ၂။ Focus Mode (Immersive Reader) ---
-function toggleFocusMode() {
-    document.body.classList.toggle('focus-mode');
-    const isFocus = document.body.classList.contains('focus-mode');
-    const btn = document.getElementById('focus-btn');
-    
-    if (isFocus) {
-        btn.innerHTML = '<i class="fas fa-compress-arrows-alt"></i>';
-        btn.style.color = '#ef4444';
-        alert("Focus Mode ဖွင့်လိုက်ပါပြီ။ စာကိုပဲ အာရုံစိုက်ဖတ်ရှုနိုင်ပါတယ်။");
-    } else {
-        btn.innerHTML = '<i class="fas fa-expand-arrows-alt"></i>';
-        btn.style.color = '';
-    }
-}
-*/
