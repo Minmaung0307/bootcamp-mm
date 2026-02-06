@@ -896,11 +896,30 @@ body {
 /* Social Links Grid */
 .social-links-grid { display: flex; flex-wrap: wrap; gap: 15px; margin-top: 15px; }
 .social-links-grid a { 
-    width: 40px; height: 40px; background: #f1f5f9; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    color: var(--primary); font-size: 1.2rem; transition: 0.3s;
+    width: 40px; 
+    height: 40px; 
+    /* background: #f1f5f9;  */
+    background-color: #003087; 
+    border-radius: 50%;
+    display: flex !important;      /* Flexbox သုံးမည် */
+    justify-content: center !important; /* အလျားလိုက် အလယ်ညှိမည် */
+    align-items: center !important;     /* ဒေါင်လိုက် အလယ်ညှိမည် */
+    /* color: var(--primary);  */
+    color: white;
+    text-decoration: none;
+    font-size: 1.2rem; 
+    transition: 0.3s;
 }
-.social-links-grid a:hover { background: var(--primary); color: white; transform: translateY(-5px); }
+
+.social-links-grid a i {
+    margin: 0 !important;
+    font-size: 1.2rem; /* အရွယ်အစားကို လိုသလို ညှိနိုင်သည် */
+}
+
+.social-links-grid a:hover { 
+    background: var(--primary); 
+    color: white; 
+    transform: translateY(-5px); }
 
 /* Edit Profile Form Grid */
 .edit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
@@ -1936,4 +1955,48 @@ body, html {
 /* Alert တွေအစားသုံးမယ့် Custom Modal (Optional) */
 .welcome-banner button {
     /* Alert ပေါ်တာထက် စာတန်းလေးပဲ ပြောင်းသွားအောင် လုပ်ထားပါတယ် */
+}
+
+/* --- Admin Button Uniformity Fix --- */
+.admin-btn-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+
+/* ခလုတ်အားလုံးကို အမြင့်တူ၊ Padding တူဖြစ်အောင် ညှိခြင်း */
+.admin-btn-group .menu-btn, 
+.admin-btn-group .save-btn {
+    height: 42px !important;    /* 🔥 အမြင့်ကို ပုံသေ ၄၂ ပစ်ဆယ် သတ်မှတ်သည် */
+    padding: 0 20px !important; /* 🔥 ဘေး padding ကို တူညီအောင်ထားသည် */
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;        /* 🔥 Icon နဲ့ စာသားကြား အကွာအဝေး */
+    font-size: 0.9rem !important;
+    font-weight: 600 !important;
+    border-radius: 8px !important;
+    white-space: nowrap !important; /* စာသား အောက်တန်းမဆင်းစေရန် */
+    margin: 0 !important;       /* အပို margin များ ဖြုတ်ရန် */
+    border: none;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+/* Icon size များကိုလည်း ညှိပေးမည် */
+.admin-btn-group i {
+    font-size: 1rem !important;
+}
+
+/* ဖုန်းမှာကြည့်ရင် ခလုတ်တွေ ပိုလှအောင် ညှိခြင်း */
+@media (max-width: 768px) {
+    .admin-btn-group {
+        justify-content: flex-start;
+    }
+    .admin-btn-group .menu-btn, 
+    .admin-btn-group .save-btn {
+        padding: 0 15px !important;
+        font-size: 0.85rem !important;
+    }
 }
