@@ -1089,6 +1089,15 @@ async function submitProjectDB(catIdx, modIdx, lesIdx) {
 // ==========================================
 // ၆။ Messaging Logic (Real-time)
 // ==========================================
+// --- နာမည်အလိုက် အရောင်အမျိုးမျိုး ထုတ်ပေးမည့် Helper (ပိုလှစေရန်) ---
+function getAvatarColor(name) {
+    const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) {
+        hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return colors[Math.abs(hash) % colors.length];
+}
 
 // Messaging Section ပြသခြင်း
 async function showMessages(targetUid = null, targetName = null) {
@@ -1097,31 +1106,25 @@ async function showMessages(targetUid = null, targetName = null) {
         activeChatName = "Chat: " + targetName; 
     }
     
-    // Database မှ ကျောင်းသား/ဆရာ စာရင်းကို နောက်ဆုံးအခြေအနေ ဆွဲယူမည်
     await fetchStudentsFromDB(); 
 
     const body = document.getElementById('dynamic-body');
     const isTeacher = currentUser.role === 'Teacher';
 
-    // ၁။ 🔥 DM List Filtering (Privacy Logic)
+    // ၁။ DM List Filtering
     const visibleDMList = studentsList.filter(s => {
-        if (isTeacher) {
-            // ဆရာမြင်ကွင်း: ကျောင်းသားအားလုံးကို ပြမည်
-            return true;
-        } else {
-            // ကျောင်းသားမြင်ကွင်း: မိမိ Batch တူသူများကိုသာ ပြမည် (တခြားသင်တန်းကလူတွေ မမြင်ရပါ)
-            return s.batchId === currentUser.batchId && s.uid !== currentUser.uid;
-        }
+        if (isTeacher) return true;
+        return s.batchId === currentUser.batchId && s.uid !== currentUser.uid;
     });
 
     // ၂။ Groups Filtering
-    // ဆရာဆိုလျှင် ရှိသမျှ Batch အကုန်ပြမည်၊ ကျောင်းသားဆိုလျှင် မိမိ Batch တစ်ခုတည်းသာ ပြမည်
     const allBatches = [...new Set(studentsList.map(s => s.batchId))].sort();
     const myBatchList = isTeacher ? allBatches : (currentUser.batchId ? [currentUser.batchId] : []);
 
-    // ၃။ ဆရာများကို ရှာဖွေခြင်း (ကျောင်းသားများ ဆရာ့ဆီ စာပို့နိုင်ရန်)
+    // ၃။ ဆရာများကို ရှာဖွေခြင်း
     const teachers = allUsersList.filter(u => u.role === 'Teacher' && u.uid !== currentUser.uid);
 
+    // --- HTML Rendering ---
     body.innerHTML = `
         <div class="messaging-layout fade-in animate-up">
             <div class="chat-sidebar">
@@ -1129,43 +1132,55 @@ async function showMessages(targetUid = null, targetName = null) {
                     <h4 style="margin:0;"><i class="fas fa-comments"></i> Messenger</h4>
                 </div>
                 <div class="chat-list" style="padding-top: 15px;">
+                    
                     <div class="chat-list-divider" style="margin-left:20px; font-size:0.7rem; text-transform:uppercase; letter-spacing:1px; color:grey; margin-bottom:10px;">Channels</div>
                     ${myBatchList.map(bid => `
-                        <div class="chat-item ${activeChatId === bid ? 'active' : ''}" onclick="switchChat('${bid}', 'Group: ${bid}')" style="padding: 12px 15px;">
-                            <i class="fas fa-hashtag"></i> <span>${bid}</span>
+                        <div class="chat-item ${activeChatId === bid ? 'active' : ''}" onclick="switchChat('${bid}', 'Group: ${bid}')">
+                            <i class="fas fa-hashtag" style="width:38px; text-align:center;"></i> 
+                            <span>${bid}</span>
                         </div>
                     `).join('')}
 
                     ${!isTeacher ? `
-                        <div class="chat-list-divider">Contact Tutor</div>
-                        ${teachers.map(t => `
+                        <div class="chat-list-divider" style="margin: 20px 0 10px 20px; font-size:0.7rem; text-transform:uppercase; color:grey;">Contact Tutor</div>
+                        ${teachers.map(t => {
+                            const avatarColor = getAvatarColor(t.name);
+                            return `
                             <div class="chat-item ${activeChatId === t.uid ? 'active' : ''}" onclick="switchChat('${t.uid}', 'Tutor: ${t.name}')">
-                                <i class="fas fa-user-tie"></i> ${t.name} (Teacher)
-                            </div>
-                        `).join('')}
+                                <div class="user-avatar-mini" style="background-color: ${avatarColor}">${t.name.charAt(0)}</div>
+                                <span>${t.name}</span>
+                            </div>`;
+                        }).join('')}
                     ` : ''}
 
-                    <div class="chat-list-divider" style="margin: 20px 0 10px 20px; font-size:0.7rem; text-transform:uppercase; letter-spacing:1px; color:grey;">Direct Messages (${currentUser.batchId || 'N/A'})</div>
+                    <div class="chat-list-divider" style="margin: 20px 0 10px 20px; font-size:0.7rem; text-transform:uppercase; color:grey;">Direct Messages</div>
 
-                    ${visibleDMList.length > 0 ? visibleDMList.map(s => `
-                        <div class="chat-item ${activeChatId === s.uid ? 'active' : ''}" onclick="switchChat('${s.uid}', 'Chat: ${s.name}')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px;">
-                            <div style="width:32px; height:32px; background:#e2e8f0; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.8rem; font-weight:bold; color:var(--primary);">
-                            <i class="fas fa-user-circle"></i>
-                                ${s.name.charAt(0)}
+                    ${visibleDMList.length > 0 ? visibleDMList.map(s => {
+                        const avatarColor = getAvatarColor(s.name);
+                        const isActive = activeChatId === s.uid;
+                        
+                        // 🔥 ဤနေရာတွင် Avatar Logic ကို အသေအချာ ပြင်လိုက်ပါပြီ
+                        const avatarUI = (s.photo && s.photo.length > 5) 
+                            ? `<div class="user-avatar-mini"><img src="${s.photo}" onerror="this.style.display='none'; this.parentElement.innerText='${s.name.charAt(0)}'"></div>`
+                            : `<div class="user-avatar-mini" style="background-color: ${avatarColor}">${s.name.charAt(0)}</div>`;
+
+                        return `
+                            <div class="chat-item ${isActive ? 'active' : ''}" onclick="switchChat('${s.uid}', '${s.name}')">
+                                ${avatarUI}
+                                <span>${s.name}</span>
                             </div>
-                            <span>${s.name}</span>
-                        </div>
-                    `).join('') : '<p style="padding:15px; font-size:0.8rem; color:grey;">စကားပြောရန် လူမရှိသေးပါ။</p>'}
+                        `;
+                    }).join('') : '<p style="padding:15px; font-size:0.8rem; color:grey;">စကားပြောရန် လူမရှိသေးပါ။</p>'}
                 </div>
             </div>
             
             <div class="chat-window" style="background: white;">
                 <div class="chat-window-header" style="padding: 20px 30px; border-bottom: 1px solid var(--border-color); display:flex; align-items:center; gap:15px;">
-                    <div id="active-chat-title" style="width:10px; height:10px; background:var(--success); border-radius:50%;"></div>
+                    <div style="width:10px; height:10px; background:#22c55e; border-radius:50%;"></div>
                     <strong style="font-size: 1.1rem;">${activeChatName}</strong>
                 </div>
-                <div class="chat-display" id="chat-display" style="padding: 30px; background: #f1f5f9;"></div>
-                <div class="chat-input-box" style="padding: 20px 30px; background: white; border-top: 1px solid var(--border-color);">
+                <div class="chat-display" id="chat-display" style="padding: 20px; background: #f1f5f9;"></div>
+                <div class="chat-input-box" style="padding: 15px 25px; background: white; border-top: 1px solid var(--border-color);">
                     <div style="display:flex; background:#f1f5f9; border-radius:30px; padding: 5px 5px 5px 20px; width:100%; align-items:center;">
                         <input type="text" id="chat-input" placeholder="စာရိုက်ပါ..." style="flex:1; border:none; background:transparent; outline:none; height:45px;" onkeypress="if(event.key==='Enter') sendMessage()">
                         <button onclick="sendMessage()" style="width:45px; height:45px; border-radius:50%; background:var(--primary); color:white; border:none; cursor:pointer;">
@@ -1338,7 +1353,13 @@ function loadMessages() {
 function sendMessage() {
     const input = document.getElementById('chat-input');
     const text = input.value.trim();
-    if (!text || !currentUser.uid) return;
+    if (!text) return;
+
+    // အချက်အလက်များ ရှိမရှိ စစ်ဆေးပါ
+    if (!currentUser.uid || !currentUser.name) {
+        alert("User data missing! Please re-login.");
+        return;
+    }
 
     const msgData = {
         text: text,
@@ -1348,16 +1369,12 @@ function sendMessage() {
         type: activeChatId.includes('Batch') ? 'group' : 'direct'
     };
 
-    if (activeChatId.includes('Batch')) {
+    if (msgData.type === 'group') {
         msgData.batchId = activeChatId;
-        // 🔑 group အတွက်ပါ participants ထည့်
-        msgData.type = "group";
     } else {
-        // 🔥 အရေးကြီးဆုံး- နှစ်ဦးလုံးအတွက် တူညီသော ID ဖြစ်အောင် အစဉ်လိုက်စီပြီးမှ ဆက်မည်
-        msgData.receiverId = activeChatId; // လက်ခံသူ UID
-        msgData.type = "direct";
-        // convoId ကို UID ၂ ခုစီပြီး ဆက်မည်
-        msgData.convoId = [currentUser.uid, activeChatId].sort().join("_");
+        const combinedId = [currentUser.uid, activeChatId].sort().join("_");
+        msgData.convoId = combinedId; 
+        msgData.receiverId = activeChatId; // 🔥 ဒါလေး မပါရင် Permission Denied ဖြစ်ပါလိမ့်မည်
     }
 
     db.collection('messages').add(msgData).then(() => {
@@ -3068,199 +3085,89 @@ function renderPrivacy() {
         </div>`;
 }
 
-// --- ၁။ ခေါင်းလောင်း Noti စနစ် (အသေချာဆုံး Version) ---
+// --- ၁။ Global Variables (ဖိုင်အပေါ်ဆုံးတွင် ထားပါ) ---
 let unreadNotiCount = 0;
+const globalNotiSound = new Audio('/assets/noti-sound.mp3'); 
 
-const globalNotiSound = new Audio('assets/noti-sound.mp3');
-
+// --- ၂။ Notification စနစ်ကို စတင်ခြင်း ---
 function initNotifications() {
     if (!currentUser.uid || !currentUser.isLoggedIn) return;
 
-    // 🔥 အချိန်ကန့်သတ်ချက်ကို ၁ နာရီအထိ တိုးမြှင့်လိုက်ပါသည် (ပိုမိုသေချာစေရန်)
-    const startTime = new Date(Date.now() - 3600000); 
+    // အခု App ဖွင့်ထားတဲ့အချိန်ကစပြီး တက်လာမယ့်စာတွေကိုပဲ နားထောင်မည်
+    const listenFrom = new Date(); 
 
-    // Direct Messages Noti စစ်ဆေးခြင်း
+    // (က) Direct Messages Noti (မိမိထံ တိုက်ရိုက်လာသောစာ)
     db.collection('messages')
         .where('receiverId', '==', currentUser.uid)
-        .where('timestamp', '>', startTime)
+        .where('timestamp', '>', listenFrom)
         .onSnapshot(snap => {
-            // snap.docChanges().forEach(change => {
-            //     if (change.type === "added") {
-            //         const msg = change.doc.data();
-            //         // Message အသစ်ဖြစ်ကြောင်း သေချာလျှင် Noti ပြမည်
-            //         showNotiInBell(`${msg.senderName}: "${msg.text.substring(0, 15)}..."`);
-            //     }
-            // });
-            // Added ဖြစ်တဲ့စာအသစ်တွေကို စစ်မည်
-            let newDocs = snap.docChanges().filter(c => c.type === "added");
-            if (newDocs.length > 0) {
-                triggerNotiUI("DM စာတိုအသစ် ရောက်ရှိလာပါသည်");
-            }
-        }, err => console.log("DM Noti Restricted"));
+            snap.docChanges().forEach(change => {
+                if (change.type === "added") {
+                    const msg = change.doc.data();
+                    if (msg.senderId !== currentUser.uid) {
+                        triggerNotiUI(`DM: ${msg.senderName} ဆီမှ စာရောက်လာပါသည်`);
+                    }
+                }
+            });
+        }, err => console.log("DM Noti Restricted. Index needs to be enabled."));
 
-
-    // Group Messages Noti
-    if (currentUser.batchId) {
+    // (ခ) Group Messages Noti (မိမိ Batch ထဲသို့ ရောက်လာသောစာ)
+    if (currentUser.batchId && currentUser.batchId !== "Batch-Waiting") {
         db.collection('messages')
             .where('batchId', '==', currentUser.batchId)
             .where('type', '==', 'group')
-            .where('timestamp', '>', startTime)
+            .where('timestamp', '>', listenFrom)
             .onSnapshot(snap => {
-                let newDocs = snap.docChanges().filter(c => c.type === "added");
-                newDocs.forEach(change => {
-                    if (change.doc.data().senderId !== currentUser.uid) {
-                        triggerNotiUI("အုပ်စုစာတိုအသစ် ရောက်ရှိလာပါသည်");
+                snap.docChanges().forEach(change => {
+                    if (change.type === "added") {
+                        const msg = change.doc.data();
+                        if (msg.senderId !== currentUser.uid) {
+                            triggerNotiUI(`Group: ${msg.senderName} စာပို့လိုက်ပါသည်`);
+                        }
                     }
                 });
-            }, err => console.log("Group Noti Restricted"));
+            }, err => console.log("Group Noti Restricted. Index needs to be enabled."));
     }
 }
 
+// --- ၃။ UI နှင့် အသံကို Update လုပ်ပေးမည့် တစ်ခုတည်းသော Function ---
 function triggerNotiUI(text) {
     unreadNotiCount++;
-    
-    // Badge ပြရန်
+
     const badge = document.getElementById('noti-badge');
+    const wrapper = document.querySelector('.notification-wrapper');
+    const bellIcon = document.querySelector('.notification-wrapper i');
+    const list = document.getElementById('noti-list');
+
+    // ခေါင်းလောင်းကို ဖော်ပြမည်
+    if (wrapper) wrapper.style.display = "flex";
+
     if (badge) {
         badge.innerText = unreadNotiCount;
         badge.style.setProperty('display', 'flex', 'important'); // Safari အတွက် Force display
     }
 
-    // ခေါင်းလောင်း icon ကို အနီရောင်ပြောင်းရန်
-    const bell = document.querySelector('.notification-wrapper i');
-    if (bell) {
-        bell.style.color = "#ef4444";
-        bell.classList.add('fa-shake');
-    }
-
-    // List ထဲထည့်ရန်
-    addNotiToList(text);
-
-    // 🔥 အသံဖွင့်ရန် ကြိုးစားခြင်း
-    globalNotiSound.play().catch(e => {
-        console.log("Audio play blocked by browser policy. User must interact first.");
-    });
-}
-
-function processNotiAlert(snap, chatType) {
-    snap.docChanges().forEach(change => {
-        if (change.type === "added") {
-            const msg = change.doc.data();
-            if (msg.senderId === currentUser.uid) return;
-
-            unreadNotiCount++;
-            updateNotiBadge();
-            addNotiToList(`[${chatType}] ${msg.senderName}: ${msg.text.substring(0, 15)}...`);
-            
-            // 🔥 အသံမြည်စေရန် (Safari compatible logic)
-            if (isAudioUnlocked) {
-                notiSound.currentTime = 0; // အစကနေ ပြန်ဖွင့်ရန်
-                notiSound.play().catch(e => console.log("Sound play error:", e));
-            }
-        }
-    });
-}
-
-function handleNotiSnapshot(snap, type) {
-    snap.docChanges().forEach(change => {
-        if (change.type === "added") {
-            const msg = change.doc.data();
-            if (msg.senderId === currentUser.uid) return; // ကိုယ့်စာကိုယ် Noti မပေးပါ
-
-            unreadNotiCount++;
-            updateNotiBadge();
-            addNotiToList(`${msg.senderName}: ${msg.text.substring(0, 15)}...`);
-            
-            // အသံဖွင့်ရန်
-            const audio = new Audio('assets/noti-sound.mp3');
-            audio.play().catch(() => {});
-        }
-    });
-}
-
-// Noti တက်လာလျှင် လုပ်ဆောင်မည့် function
-function processNotiChanges(snap, type) {
-    snap.docChanges().forEach(change => {
-        if (change.type === "added") {
-            const msg = change.doc.data();
-            if (msg.senderId === currentUser.uid) return;
-
-            unreadNotiCount++;
-            updateNotiBadge();
-            addNotiToList(`[${type}] ${msg.senderName}: ${msg.text.substring(0, 15)}...`);
-            
-            // 🔥 Safari/Chrome Autoplay Fix:
-            const audio = new Audio('assets/noti-sound.mp3');
-            let playPromise = audio.play();
-            if (playPromise !== undefined) {
-                playPromise.catch(error => {
-                    console.log("Audio play blocked. Click anywhere to enable sound.");
-                });
-            }
-        }
-    });
-}
-
-function updateNotiBadge() {
-    const badge = document.getElementById('noti-badge');
-    const wrapper = document.querySelector('.notification-wrapper');
-    const bellIcon = document.querySelector('.notification-wrapper i');
-    if (!badge) return;
-
-    if (unreadNotiCount > 0) {
-        badge.innerText = unreadNotiCount;
-        badge.style.display = "flex";
-        wrapper.style.display = "flex"; // 🔥 စာရှိမှ ခေါင်းလောင်းကို ပြမည်
-        if (bellIcon) {
-            bellIcon.style.color = "#ef4444";
-            bellIcon.classList.add('fa-shake');
-        }
-    } else {
-        badge.style.display = "none";
-        wrapper.style.display = "none"; // 🔥 စာမရှိလျှင် တစ်ခုလုံး ဖျောက်မည်
-        if (bellIcon) {
-            bellIcon.style.color = "";
-            bellIcon.classList.remove('fa-shake');
-        }
-    }
-}
-
-function addNotiToList(text) {
-    const list = document.getElementById('noti-list');
-    if (!list) return;
-    const item = `<div class="noti-item" onclick="showSection('messages')"><i class="fas fa-comment-dots"></i> ${text}</div>`;
-    list.innerHTML = item + list.innerHTML;
-}
-
-function showNotiInBell(text) {
-    const list = document.getElementById('noti-list');
-    const badge = document.getElementById('noti-badge');
-    const bellIcon = document.querySelector('.notification-wrapper i');
-
-    if (!list || !badge) return;
-
-    // ၁။ Noti အရေအတွက် တိုးမည်
-    unreadNotiCount++;
-    badge.innerText = unreadNotiCount;
-    badge.style.display = "flex"; // ပြသမည်
-    
-    // ၂။ ခေါင်းလောင်းကို အရောင်ပြောင်းပြီး တုန်ခါစေမည်
+    // ခေါင်းလောင်းကို အနီရောင်ပြောင်းပြီး တုန်ခါစေမည်
     if (bellIcon) {
         bellIcon.style.color = "#ef4444";
-        bellIcon.classList.add('fa-shake'); // FontAwesome shake effect
+        bellIcon.classList.add('fa-shake');
     }
 
-    // ၃။ Noti List ထဲ ထည့်မည်
-    const item = `<div class="noti-item" onclick="toggleNotifications(); showSection('messages');">
-                    <i class="fas fa-comment"></i> ${text}
-                  </div>`;
-    list.innerHTML = item + list.innerHTML;
+    // Noti Dropdown List ထဲသို့ ထည့်မည်
+    if (list) {
+        const item = `<div class="noti-item" onclick="toggleNotifications(); showSection('messages');">
+                        <i class="fas fa-comment-dots"></i> ${text}
+                      </div>`;
+        list.innerHTML = item + list.innerHTML;
+    }
 
-    // ၄။ အသံဖွင့်မည်
-    const audio = new Audio('assets/noti-sound.mp3');
-    audio.play().catch(e => console.log("Sound interaction needed"));
+    // 🔥 အသံဖွင့်ခြင်း (globalNotiSound ကို သုံးထားပါသည်)
+    globalNotiSound.play().catch(e => {
+        console.log("Audio blocked: User needs to click somewhere on the page first.");
+    });
 }
 
+// --- ၄။ Noti ဖွင့်ကြည့်လျှင် Reset လုပ်ခြင်း ---
 function toggleNotifications() {
     const dropdown = document.getElementById('noti-dropdown');
     const badge = document.getElementById('noti-badge');
@@ -3270,7 +3177,7 @@ function toggleNotifications() {
         dropdown.style.display = "none";
     } else {
         dropdown.style.display = "block";
-        // Noti ဖွင့်ကြည့်ပြီးရင် Badge ကို reset လုပ်မယ်
+        // Noti ဖွင့်ကြည့်ပြီးရင် အနီရောင်တွေ ပြန်ဖြုတ်မည်
         unreadNotiCount = 0;
         if (badge) badge.style.display = "none";
         if (bellIcon) {
@@ -3279,6 +3186,213 @@ function toggleNotifications() {
         }
     }
 }
+
+// function initNotifications() {
+//     if (!currentUser.uid || !currentUser.isLoggedIn) return;
+
+//     // 🔥 အချိန်ကန့်သတ်ချက်ကို ၁ နာရီအထိ တိုးမြှင့်လိုက်ပါသည် (ပိုမိုသေချာစေရန်)
+//     const startTime = new Date(Date.now() - 3600000); 
+
+//     // Direct Messages Noti စစ်ဆေးခြင်း
+//     db.collection('messages')
+//         .where('receiverId', '==', currentUser.uid)
+//         .where('timestamp', '>', startTime)
+//         .onSnapshot(snap => {
+//             // snap.docChanges().forEach(change => {
+//             //     if (change.type === "added") {
+//             //         const msg = change.doc.data();
+//             //         // Message အသစ်ဖြစ်ကြောင်း သေချာလျှင် Noti ပြမည်
+//             //         showNotiInBell(`${msg.senderName}: "${msg.text.substring(0, 15)}..."`);
+//             //     }
+//             // });
+//             // Added ဖြစ်တဲ့စာအသစ်တွေကို စစ်မည်
+//             let newDocs = snap.docChanges().filter(c => c.type === "added");
+//             if (newDocs.length > 0) {
+//                 triggerNotiUI("DM စာတိုအသစ် ရောက်ရှိလာပါသည်");
+//             }
+//         }, err => console.log("DM Noti Restricted"));
+
+
+//     // Group Messages Noti
+//     if (currentUser.batchId) {
+//         db.collection('messages')
+//             .where('batchId', '==', currentUser.batchId)
+//             .where('type', '==', 'group')
+//             .where('timestamp', '>', startTime)
+//             .onSnapshot(snap => {
+//                 let newDocs = snap.docChanges().filter(c => c.type === "added");
+//                 newDocs.forEach(change => {
+//                     if (change.doc.data().senderId !== currentUser.uid) {
+//                         triggerNotiUI("အုပ်စုစာတိုအသစ် ရောက်ရှိလာပါသည်");
+//                     }
+//                 });
+//             }, err => console.log("Group Noti Restricted"));
+//     }
+// }
+
+// function triggerNotiUI(text) {
+//     unreadNotiCount++;
+    
+//     // Badge ပြရန်
+//     const badge = document.getElementById('noti-badge');
+//     if (badge) {
+//         badge.innerText = unreadNotiCount;
+//         badge.style.setProperty('display', 'flex', 'important'); // Safari အတွက် Force display
+//     }
+
+//     // ခေါင်းလောင်း icon ကို အနီရောင်ပြောင်းရန်
+//     const bell = document.querySelector('.notification-wrapper i');
+//     if (bell) {
+//         bell.style.color = "#ef4444";
+//         bell.classList.add('fa-shake');
+//     }
+
+//     // List ထဲထည့်ရန်
+//     addNotiToList(text);
+
+//     // 🔥 အသံဖွင့်ရန် ကြိုးစားခြင်း
+//     globalNotiSound.play().catch(e => {
+//         console.log("Audio play blocked by browser policy. User must interact first.");
+//     });
+// }
+
+// function processNotiAlert(snap, chatType) {
+//     snap.docChanges().forEach(change => {
+//         if (change.type === "added") {
+//             const msg = change.doc.data();
+//             if (msg.senderId === currentUser.uid) return;
+
+//             unreadNotiCount++;
+//             updateNotiBadge();
+//             addNotiToList(`[${chatType}] ${msg.senderName}: ${msg.text.substring(0, 15)}...`);
+            
+//             // 🔥 အသံမြည်စေရန် (Safari compatible logic)
+//             if (isAudioUnlocked) {
+//                 notiSound.currentTime = 0; // အစကနေ ပြန်ဖွင့်ရန်
+//                 notiSound.play().catch(e => console.log("Sound play error:", e));
+//             }
+//         }
+//     });
+// }
+
+// function handleNotiSnapshot(snap, type) {
+//     snap.docChanges().forEach(change => {
+//         if (change.type === "added") {
+//             const msg = change.doc.data();
+//             if (msg.senderId === currentUser.uid) return; // ကိုယ့်စာကိုယ် Noti မပေးပါ
+
+//             unreadNotiCount++;
+//             updateNotiBadge();
+//             addNotiToList(`${msg.senderName}: ${msg.text.substring(0, 15)}...`);
+            
+//             // အသံဖွင့်ရန်
+//             const audio = new Audio('assets/noti-sound.mp3');
+//             audio.play().catch(() => {});
+//         }
+//     });
+// }
+
+// // Noti တက်လာလျှင် လုပ်ဆောင်မည့် function
+// function processNotiChanges(snap, type) {
+//     snap.docChanges().forEach(change => {
+//         if (change.type === "added") {
+//             const msg = change.doc.data();
+//             if (msg.senderId === currentUser.uid) return;
+
+//             unreadNotiCount++;
+//             updateNotiBadge();
+//             addNotiToList(`[${type}] ${msg.senderName}: ${msg.text.substring(0, 15)}...`);
+            
+//             // 🔥 Safari/Chrome Autoplay Fix:
+//             const audio = new Audio('assets/noti-sound.mp3');
+//             let playPromise = audio.play();
+//             if (playPromise !== undefined) {
+//                 playPromise.catch(error => {
+//                     console.log("Audio play blocked. Click anywhere to enable sound.");
+//                 });
+//             }
+//         }
+//     });
+// }
+
+// function updateNotiBadge() {
+//     const badge = document.getElementById('noti-badge');
+//     const wrapper = document.querySelector('.notification-wrapper');
+//     const bellIcon = document.querySelector('.notification-wrapper i');
+//     if (!badge) return;
+
+//     if (unreadNotiCount > 0) {
+//         badge.innerText = unreadNotiCount;
+//         badge.style.display = "flex";
+//         wrapper.style.display = "flex"; // 🔥 စာရှိမှ ခေါင်းလောင်းကို ပြမည်
+//         if (bellIcon) {
+//             bellIcon.style.color = "#ef4444";
+//             bellIcon.classList.add('fa-shake');
+//         }
+//     } else {
+//         badge.style.display = "none";
+//         wrapper.style.display = "none"; // 🔥 စာမရှိလျှင် တစ်ခုလုံး ဖျောက်မည်
+//         if (bellIcon) {
+//             bellIcon.style.color = "";
+//             bellIcon.classList.remove('fa-shake');
+//         }
+//     }
+// }
+
+// function addNotiToList(text) {
+//     const list = document.getElementById('noti-list');
+//     if (!list) return;
+//     const item = `<div class="noti-item" onclick="showSection('messages')"><i class="fas fa-comment-dots"></i> ${text}</div>`;
+//     list.innerHTML = item + list.innerHTML;
+// }
+
+// function showNotiInBell(text) {
+//     const list = document.getElementById('noti-list');
+//     const badge = document.getElementById('noti-badge');
+//     const bellIcon = document.querySelector('.notification-wrapper i');
+
+//     if (!list || !badge) return;
+
+//     // ၁။ Noti အရေအတွက် တိုးမည်
+//     unreadNotiCount++;
+//     badge.innerText = unreadNotiCount;
+//     badge.style.display = "flex"; // ပြသမည်
+    
+//     // ၂။ ခေါင်းလောင်းကို အရောင်ပြောင်းပြီး တုန်ခါစေမည်
+//     if (bellIcon) {
+//         bellIcon.style.color = "#ef4444";
+//         bellIcon.classList.add('fa-shake'); // FontAwesome shake effect
+//     }
+
+//     // ၃။ Noti List ထဲ ထည့်မည်
+//     const item = `<div class="noti-item" onclick="toggleNotifications(); showSection('messages');">
+//                     <i class="fas fa-comment"></i> ${text}
+//                   </div>`;
+//     list.innerHTML = item + list.innerHTML;
+
+//     // ၄။ အသံဖွင့်မည်
+//     const audio = new Audio('assets/noti-sound.mp3');
+//     audio.play().catch(e => console.log("Sound interaction needed"));
+// }
+
+// function toggleNotifications() {
+//     const dropdown = document.getElementById('noti-dropdown');
+//     const badge = document.getElementById('noti-badge');
+//     const bellIcon = document.querySelector('.notification-wrapper i');
+
+//     if (dropdown.style.display === "block") {
+//         dropdown.style.display = "none";
+//     } else {
+//         dropdown.style.display = "block";
+//         // Noti ဖွင့်ကြည့်ပြီးရင် Badge ကို reset လုပ်မယ်
+//         unreadNotiCount = 0;
+//         if (badge) badge.style.display = "none";
+//         if (bellIcon) {
+//             bellIcon.style.color = "";
+//             bellIcon.classList.remove('fa-shake');
+//         }
+//     }
+// }
 
 // --- ၂။ Global Search Logic ---
 function handleSearch(query) {
