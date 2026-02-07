@@ -1667,7 +1667,7 @@ function viewTranscript(uid, isAdminPreview = false, courseId) {
 
             <div class="transcript-paper">
                 <div class="transcript-header" style="text-align:center; margin-bottom:40px;">
-                    <h2 style="color:#003087; text-transform:uppercase; margin:0; font-size: 2.2rem;">Myanmar Full-Stack Bootcamp</h2>
+                    <h2 style="text-transform:uppercase; margin:0; font-size: 2.2rem;">Myanmar Full-Stack Bootcamp</h2>
                     <p style="color:#64748b; font-weight: bold; margin-top:5px;">${course.title}</p>
                     <p style="font-size:0.75rem; letter-spacing:2px; margin-top:10px; color:#94a3b8;">OFFICIAL ACADEMIC RECORD</p>
                 </div>
@@ -1723,46 +1723,81 @@ let lmsSettings = {
 
 // Database မှ Settings များကို Sync လုပ်ခြင်း
 function syncLMSSettings() {
-    // ၁။ Announcement Sync
+    // ၁။ Announcement Sync (အားလုံးအတွက်)
     db.collection('settings').doc('announcement').onSnapshot(doc => {
         const bar = document.getElementById('announcement-bar');
+        const textEl = document.getElementById('announcement-text');
         if (doc.exists && doc.data().text && doc.data().text.trim() !== "") {
-            document.getElementById('announcement-text').innerText = doc.data().text;
+            if (textEl) textEl.innerText = doc.data().text;
             if (bar) bar.style.display = 'flex';
-        } else { if (bar) bar.style.display = 'none'; }
+        } else {
+            if (bar) bar.style.display = 'none';
+        }
     });
 
     if (auth.currentUser) {
-        // ၂။ User Data Sync (ပုံနဲ့ နာမည်၊ သင်တန်းအပ်မှုစာရင်း)
+        // ၂။ 🔥 User Data Sync (ပုံ၊ နာမည်၊ သင်တန်းအပ်မှုစာရင်း နှင့် Lock များ ဖြုတ်ခြင်း)
         db.collection('users').doc(auth.currentUser.uid).onSnapshot(doc => {
             if (doc.exists) {
                 const userData = doc.data();
-                currentUser = { ...currentUser, ...userData };
-                localStorage.setItem('currentUser', JSON.stringify(currentUser));
-                renderAuthFooter();
-            }
-        });
-
-        // ၃။ 🔥 သင်တန်းအလိုက် Zoom နှင့် Info Sync
-        const courseId = currentUser.selectedCourseId || "web";
-        
-        db.collection('settings').doc(`course_info_${courseId}`).onSnapshot(doc => {
-            if (doc.exists) lmsSettings = { ...lmsSettings, ...doc.data() };
-        });
-
-        db.collection('settings').doc(`zoom_config_${courseId}`).onSnapshot(doc => {
-            if (doc.exists) {
-                const data = doc.data();
-                currentZoomLink = data.url || "";
-                if (data.startTime) nextClassTime = data.startTime.toDate();
                 
-                // 🔥 Dashboard ကို ချက်ချင်း Update လုပ်မည်
-                if (document.getElementById('page-title')?.innerText.includes("Dashboard")) {
-                    renderDashboard();
+                // Cloud က ဒေတာအသစ်ကို currentUser ထဲ ထည့်ပေါင်းမည်
+                currentUser = { 
+                    ...currentUser, 
+                    ...userData, 
+                    enrolledCourses: userData.enrolledCourses || [] 
+                };
+                
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+
+                // 🔥 အရေးကြီးဆုံး- Device အသစ်တွင် သော့ပုံစံ (Lock) များကို အလိုအလျောက် ဖြုတ်မည်
+                const isTeacher = currentUser.role === 'Teacher';
+                const hasCourse = currentUser.enrolledCourses.length > 0;
+
+                if (isTeacher || hasCourse) {
+                    // ဝယ်ထားသော သင်တန်းရှိလျှင် Sidebar Lock များကို ချက်ချင်းဖြုတ်မည်
+                    document.querySelectorAll('.nav-links a').forEach(l => l.classList.remove('nav-locked'));
+                } else {
+                    // သင်တန်းမရှိသေးလျှင် (သို့မဟုတ်) ပိုက်ဆံမသွင်းရသေးလျှင် Lock ပြန်ချမည်
+                    lockMenus(); 
+                }
+
+                // Sidebar အောက်ခြေပုံနှင့် နာမည်ကို Update လုပ်မည်
+                renderAuthFooter();
+
+                // ၃။ 🔥 သင်တန်းအလိုက် Zoom နှင့် Info ကို ဤနေရာ၌သာ Sync လုပ်မည် (Data ရောက်မှစစ်ရန်)
+                const cId = currentUser.selectedCourseId;
+                if (cId) {
+                    syncSpecificCourseData(cId);
                 }
             }
         });
     }
+}
+
+// ၄။ 🔥 သင်တန်းတစ်ခုချင်းစီအတွက် Zoom နှင့် ဆရာအမည်များကို သီးသန့် Sync လုပ်မည့် Function
+function syncSpecificCourseData(courseId) {
+    // Course Info Sync
+    db.collection('settings').doc(`course_info_${courseId}`).onSnapshot(doc => {
+        if (doc.exists) {
+            lmsSettings = { ...lmsSettings, ...doc.data() };
+        }
+    });
+
+    // Zoom Config Sync
+    db.collection('settings').doc(`zoom_config_${courseId}`).onSnapshot(doc => {
+        if (doc.exists) {
+            const data = doc.data();
+            currentZoomLink = data.url || "";
+            if (data.startTime) nextClassTime = data.startTime.toDate();
+            
+            // Dashboard ကြည့်နေဆဲဖြစ်ပါက ချက်ချင်း Update လုပ်ခိုင်းမည်
+            const title = document.getElementById('page-title');
+            if (title && title.innerText.includes("Dashboard")) {
+                renderDashboard();
+            }
+        }
+    }, err => console.log("Course sync error or access restricted."));
 }
 
 // --- ၂။ Admin Panel: Announcement & Course Settings ပြင်သည့် UI ---
@@ -3833,7 +3868,7 @@ function renderCourseSelection() {
     
     // သင်တန်းအလိုက် အရောင်များ သတ်မှတ်ခြင်း
     const courseColors = {
-        "web": "#003087",      // Blue
+        "web": "#1b7cd2e7",      // Blue
         "python": "#10b981",   // Green
         "design": "#8b5cf6"    // Purple
     };
