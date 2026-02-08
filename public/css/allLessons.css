@@ -6,40 +6,88 @@
 .lesson-banner {
   position: relative;
   width: 100%;
-  height: 220px !important;
+  height: 270px !important;
   background-color: #2b4c61;
   border-radius: 12px;
   overflow: hidden;
-  margin-bottom: 30px;
-  display: flex;
-  align-items: flex-end;
-  margin-bottom: 75px !important;
+  margin-bottom: 40px;
+  /* display: flex; */
+  display: block; /* Flex ကို ဖျက်ပြီး block ထားပါမည် */
+  /* align-items: flex-end; */
+  /* margin-bottom: 75px !important; */
 }
 
 .banner-bg-icons {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: space-around; /* Icon ကြားထဲမှာ နေရာလွတ် အညီအမျှချန်မည် */
-  align-items: center;
-  padding: 0 20px;
-  z-index: 1; /* Icon များကို အနောက်ခံအဖြစ်ထားမည် */
+    top: 0; 
+    left: 0;
+    width: 100%; 
+    /* height: 100%; */
+    height: 180px; /* 🔥 Bar ရဲ့ အပေါ်မှာပဲ ရှိနေစေရန် အမြင့်ကို ကန့်သတ်လိုက်ပါသည် */
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0 5%;
+    z-index: 1;
 }
 
 .icon-circle {
   width: 95px;
   height: 95px;
-  background: rgba(255, 255, 255, 0.15);
   border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 1.6rem;
-  position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    position: relative;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    transition: all 0.4s ease;
+}
+
+.icon-circle img {
+    width: 60%;      /* 🔥 အဝိုင်းထဲမှာ ပုံကို ၆၀% လောက်ပဲ ယူစေပါမည် (ဘေးပတ်ပတ်လည် နေရာချန်ရန်) */
+    height: 60%;
+    object-fit: contain; /* 🔥 ပုံမပြဲသွားစေရန် */
+    filter: drop-shadow(0 2px 5px rgba(0,0,0,0.2)); /* ပုံလေးတွေ ကြွတက်နေစေရန် */
+}
+
+/* အကယ်၍ ပုံကို အဝိုင်းအပြည့် ပြချင်လျှင် */
+.icon-circle.full-img img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+/* --- ၁၀ ခု တစ်ပတ် အရောင်နှင့် အနိမ့်အမြင့် Logic --- */
+
+/* 1. Blue (React) */
+.icon-circle:nth-child(10n+1) { background: rgba(0, 216, 255, 0.2); color: #00d8ff; top: -35px; }
+/* 2. Yellow (JS) */
+.icon-circle:nth-child(10n+2) { background: rgba(247, 223, 30, 0.2); color: #f7df1e; top: 25px; }
+/* 3. Red (HTML/Git) */
+.icon-circle:nth-child(10n+3) { background: rgba(255, 75, 75, 0.2); color: #ff4b4b; top: -10px; }
+/* 4. Green (Node/Python) */
+.icon-circle:nth-child(10n+4) { background: rgba(76, 175, 80, 0.2); color: #4caf50; top: 35px; }
+/* 5. Purple (CSS/Design) */
+.icon-circle:nth-child(10n+5) { background: rgba(155, 89, 182, 0.2); color: #9b59b6; top: -25px; }
+/* 6. Orange (Firebase/AWS) */
+.icon-circle:nth-child(10n+6) { background: rgba(255, 152, 0, 0.2); color: #ff9800; top: 15px; }
+/* 7. Teal (Database) */
+.icon-circle:nth-child(10n+7) { background: rgba(0, 150, 136, 0.2); color: #009688; top: -40px; }
+/* 8. Pink (Sass/UI) */
+.icon-circle:nth-child(10n+8) { background: rgba(233, 30, 99, 0.2); color: #e91e63; top: 30px; }
+/* 9. Indigo (Full-Stack) */
+.icon-circle:nth-child(10n+9) { background: rgba(63, 81, 181, 0.2); color: #3f51b5; top: -5px; }
+/* 10. Cyan (API) */
+.icon-circle:nth-child(10n+10) { background: rgba(0, 188, 212, 0.2); color: #00bcd4; top: 20px; }
+
+/* Hover Effect: မီးလင်းလာသော ပုံစံ */
+.icon-circle:hover {
+    transform: scale(1.15) rotate(10deg);
+    background: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+    z-index: 10;
 }
 
 /*
@@ -49,59 +97,61 @@
 .icon-circle:nth-child(3) { top: -40px; } /* တတိယတစ်ခုကို အလယ်လောက်ထားမည် /
 */
 
-/* ၁၊ ၃၊ ၅၊ ၇ (မ) ဂဏန်းမြောက် icon များကို အပေါ်တင်မည် */
+/* ၁၊ ၃၊ ၅၊ ၇ (မ) ဂဏန်းမြောက် icon များကို အပေါ်တင်မည် /
 .icon-circle:nth-child(odd) {
   top: -45px;
-  transform: rotate(-10deg); /* အနည်းငယ် စောင်းပေးလျှင် ပိုလှပါသည် */
+  transform: rotate(-10deg); /* အနည်းငယ် စောင်းပေးလျှင် ပိုလှပါသည် /
 }
 
-/* ၂၊ ၄၊ ၆၊ ၈ (စုံ) ဂဏန်းမြောက် icon များကို အောက်ချမည် */
+/* ၂၊ ၄၊ ၆၊ ၈ (စုံ) ဂဏန်းမြောက် icon များကို အောက်ချမည် /
 .icon-circle:nth-child(even) {
   top: -35px;
   transform: rotate(10deg);
 }
 
-/* ပိုပြီး သဘာဝကျစေရန် အချို့ icon များကို အနည်းငယ် သေးလိုက်မည် (Optional) */
+/* ပိုပြီး သဘာဝကျစေရန် အချို့ icon များကို အနည်းငယ် သေးလိုက်မည် (Optional) /
 .icon-circle:nth-child(3n) {
   transform: scale(0.8) rotate(3deg);
   opacity: 0.4;
 }
+*/
 
 .lesson-info-bar {
-  z-index: 2; /* 🔥 Icon များထက် အပေါ်ရောက်နေစေရန် */
-  position: relative;
-  background-color: #ced4da;
-  height: 70px;
-  width: 95%;
-  border-top-right-radius: 50px;
-  border-bottom-right-radius: 50px;
-  margin-bottom: 20px;
-  display: flex;
-  align-items: center;
-  padding-left: 10px;
+  position: absolute !important;
+    bottom: 0 !important; /* 🔥 အောက်ခြေမှာ ကပ်ထားမည် */
+    left: 0;
+    background-color: #ced4da;
+    width: 95%;
+    height: 70px;
+    border-top-right-radius: 50px;
+    border-bottom-right-radius: 50px;
+    margin-bottom: 20px; /* Banner အောက်ခြေကနေ အနည်းငယ် ကွာစေရန် */
+    display: flex;
+    align-items: center;
+    z-index: 5; /* Icon များရဲ့ အပေါ်မှာ ရှိနေစေရန် */
 }
 
 .lesson-id-badge {
-  width: 80px;
-  height: 80px;
-  background-color: var(--primary);
-  color: white;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  font-weight: bold;
-  border: 6px solid #ced4da;
-  position: absolute;
-  left: 0;
-  top: -10px;
+  width: 90px;
+    height: 90px;
+    background-color: #003087;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    font-weight: bold;
+    border: 8px solid #ced4da;
+    position: absolute;
+    left: 0;
+    top: -10px; /* Bar နဲ့ အချိုးကျစေရန် */
 }
 .lesson-banner-title {
-  margin-left: 100px;
-  color: #003087;
-  font-size: 1.5rem;
-  font-weight: bold;
+  margin-left: 110px;
+    color: #003087;
+    font-size: 1.6rem;
+    font-weight: bold;
 }
 
 /* သင်ခန်းစာ ကိုယ်ထည်စာသားများ */
@@ -449,7 +499,8 @@ body.dark-theme .lms-table th { background: #0f172a; color: #60a5fa; }
 
 .video-wrapper {
   position: relative;
-  padding-bottom: 56.25%;
+  /* padding-bottom: 56.25%; */
+  padding-bottom: 50%; /* 16:9 အစား 2:1 အတွက် */
   height: 0;
   overflow: hidden;
   border-radius: 12px;

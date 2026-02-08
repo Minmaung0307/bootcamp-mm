@@ -799,6 +799,7 @@ async function renderLessonContent(catIdx, modIdx, lesIdx) {
     window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
+
 // 🔥 ထပ်ခါတလဲလဲ မရေးရအောင် Helper function တစ်ခု ဆောက်လိုက်ပါ
 async function markLessonAsDone(lessonTitle) {
     // Safety check: array မရှိသေးရင် အသစ်ဆောက်မယ်
