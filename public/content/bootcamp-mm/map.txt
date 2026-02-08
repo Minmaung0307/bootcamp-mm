@@ -1,0 +1,96 @@
+/public/content/
+  └── bootcamp-mm/
+       ├── foundation/
+       │    ├── mod0/ (0.1.1.html, 0.1.2.json, ...)
+       │    ├── mod1/
+       │    └── ... (mod8 အထိ)
+       ├── technical/
+       │    ├── mod9/
+       │    ├── mod10/
+       │    └── ... (mod17 အထိ)
+       └── fullstack/
+            ├── mod18/
+            ├── mod19/
+            └── ... (mod25 အထိ)
+
+၂။ js/data-bootcamp-mm.js (သင်ရိုးဒေတာဖိုင်)
+ဒီဖိုင်မှာ Foundation, Technical, Fullstack ၃ ခုလုံးကို Category အလိုက် စုပြီး တစ်ဖိုင်တည်းမှာပဲ သိမ်းထားတာ ပိုကောင်းပါတယ်။ (သင်တန်းတစ်ခုချင်းစီအတွက် တစ်ဖိုင်နှုန်းပဲ ခွဲတာက အကောင်းဆုံးပါ)။
+
+const bootcampMMData = {
+    id: "bootcamp-mm",
+    title: "BootCamp-MM (Full-Stack)",
+    instructor: "Ashin Panna",
+    description: "Foundation မှ Full-Stack အထိ စနစ်တကျ သင်ကြားပေးမည့် Bootcamp",
+    benefits: ["25+ Modules", "LMS Access", "Transcript & Certificate"],
+    price: "70,000 MMK",
+    icon: "fa-graduation-cap",
+    transcriptSubjects: ["html", "css", "javascript", "react", "nodejs", "python"],
+    
+    // 🔥 သင်ရိုးမာတိကာ (၃ ပိုင်းခွဲထားသည်)
+    data: [
+        {
+            category: "Foundations", // Module 0 to 8
+            modules: [
+                {
+                    moduleTitle: "Module 0: Getting Started",
+                    lessons: [
+                        { title: "0.1.1: Welcome", type: "article", path: "/content/bootcamp-mm/foundation/mod0/0.1.1.html" },
+                        { title: "0.1.2: Quiz", type: "quiz", path: "/content/bootcamp-mm/foundation/mod0/0.1.2.json" }
+                    ]
+                },
+                // Module 1 to 8 ကို ဒီအောက်မှာ ဆက်ထည့်ပါ
+            ]
+        },
+        {
+            category: "Technical", // Module 9 to 17
+            modules: [
+                {
+                    moduleTitle: "Module 9: Advanced Logic",
+                    lessons: [
+                        { title: "9.1.1: JavaScript ES6", type: "article", path: "/content/bootcamp-mm/technical/mod9/9.1.1.html" }
+                    ]
+                }
+                // Module 10 to 17 ကို ဒီအောက်မှာ ဆက်ထည့်ပါ
+            ]
+        },
+        {
+            category: "Full-Stack", // Module 18 to 25
+            modules: [
+                {
+                    moduleTitle: "Module 18: Node.js Integration",
+                    lessons: [
+                        { title: "18.1.1: Express Setup", type: "article", path: "/content/bootcamp-mm/fullstack/mod18/18.1.1.html" }
+                    ]
+                }
+                // Module 19 to 25 ကို ဒီအောက်မှာ ဆက်ထည့်ပါ
+            ]
+        }
+    ]
+};
+
+၃။ js/data-main.js (သင်တန်းအားလုံး စုစည်းရာ)
+ဒီဖိုင်မှာ bootcamp-mm ကို နာမည်ပေးပြီး လှမ်းချိတ်လိုက်ရုံပါပဲ။
+
+const allCourses = {
+    "bootcamp-mm": bootcampMMData, // 🔥 သင်တန်းအသစ်ကို ဒီမှာ လာချိတ်ပါ
+    "web": webCourseData,          // (အရင်ရှိပြီးသား သင်တန်းများ)
+    "python": pythonCourseData
+};
+
+let courseData = []; // app.js မှ သုံးရန် variable
+
+၄။ index.html မှာ အစီအစဉ်တကျ ခေါ်ယူခြင်း
+အရေးကြီးဆုံးက data-main.js ရဲ့ အပေါ်မှာ data-bootcamp-mm.js ကို အရင်ခေါ်ထားဖို့ လိုပါတယ်။
+
+<!-- index.html ၏ အောက်ခြေတွင် ဤအတိုင်း အစီအစဉ်လိုက် ထားပါ -->
+<script src="/js/data-bootcamp-mm.js"></script> <!-- ၁။ သင်တန်းဒေတာ အရင်ဖတ်မည် -->
+<script src="/js/data-web.js"></script>
+<script src="/js/data-python.js"></script>
+
+<script src="/js/data-main.js"></script>        <!-- ၂။ အားလုံးကို allCourses ထဲ စုစည်းမည် -->
+<script src="/js/app.js"></script>             <!-- ၃။ Logic အလုပ်လုပ်မည် -->
+
+💡 ဘာကြောင့် အခုလို ရေးတာ ပိုကောင်းသလဲ?
+၁။ Logical Grouping: Foundations (0-8), Technical (9-17), Fullstack (18-25) ကို data-bootcamp-mm.js ထဲမှာ Category ခေါင်းစဉ် ၃ ခုနဲ့ ခွဲလိုက်တဲ့အတွက် Dashboard ကို နှိပ်လိုက်ရင် ကတ်ပြား ၃ ခု (Foundations, Technical, Fullstack) အလိုအလျောက် ပေါ်လာပါလိမ့်မယ်။
+၂။ Path Consistency: /content/bootcamp-mm/ ဆိုပြီး အရှေ့က ခံထားတဲ့အတွက် တခြားသင်တန်းဖိုင်တွေနဲ့ ရောထွေးမသွားတော့ပါဘူး။
+၃။ Scaleable: သင်ခန်းစာတွေ များလွန်းလို့ ဖိုင်တစ်ခုတည်းမှာ ရေးရတာ ခက်လာရင် bootcampMMData.data[0].modules ဆိုပြီး module တွေကို variable ခွဲထုတ်ပြီးမှ array ထဲ ပြန်ထည့်တဲ့ နည်းလမ်းကိုလည်း သုံးနိုင်ပါတယ်။

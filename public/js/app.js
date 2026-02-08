@@ -207,34 +207,58 @@ function renderResources() {
     const currentCourse = allCourses[currentUser.selectedCourseId];
     
     if (!currentCourse) {
-        body.innerHTML = `<div class="content-card">ကျေးဇူးပြု၍ သင်တန်းတစ်ခု အရင်ရွေးချယ်ပါ။</div>`;
+        body.innerHTML = `
+            <div class="content-card animate-up" style="text-align:center; padding:40px;">
+                <i class="fas fa-layer-group" style="font-size:3rem; color:var(--text-muted); margin-bottom:15px;"></i>
+                <h3>သင်တန်း မရွေးချယ်ရသေးပါ</h3>
+                <p>Resources များ ကြည့်ရှုရန် သင်တန်းတစ်ခုကို အရင်ရွေးချယ်ပေးပါ။</p>
+                <button class="save-btn" style="margin-top:20px;" onclick="showSection('courses_all')">သင်တန်းများသို့ သွားရန်</button>
+            </div>`;
         return;
     }
 
-    const resList = currentCourse.resources || [];
+    const resData = currentCourse.resources || [];
+    let html = "";
 
-    if (resList.length === 0) {
+    // 🔥 Helper Function: Card တစ်ခုချင်းစီကို ထုတ်ပေးမည့် ကုဒ် (Deduplication)
+    const createCard = (item, catName) => `
+        <div class="content-card animate-up" style="border-top: 3px solid var(--primary);">
+            <h4><i class="fab ${item.icon || 'fa-file-alt'}"></i> ${item.name}</h4>
+            <p style="font-size:0.8rem; color:var(--text-muted); margin: 10px 0;">${catName} အတွက် အထောက်အကူပြုဖိုင်</p>
+            <button class="save-btn" style="width:100%;" onclick="window.open('${item.url}', '_blank')">
+                <i class="fas fa-external-link-alt"></i> View / Download
+            </button>
+        </div>`;
+
+    // 🔥 Logic: Resources က Category အလိုက် ခွဲထားတာလား (Object) သို့မဟုတ် ရိုးရိုးစာရင်းလား (Array) စစ်မည်
+    const isCategorized = !Array.isArray(resData) && typeof resData === 'object';
+
+    if (isCategorized) {
+        // ၁။ Foundations, Technical စသဖြင့် ခွဲပြမည့်အပိုင်း
+        for (let catName in resData) {
+            html += `<div class="category-header" style="margin: 30px 0 15px 0;"><i class="fas fa-folder-open"></i> ${catName} Resources</div>`;
+            html += `<div class="dashboard-grid">`;
+            resData[catName].forEach(item => {
+                html += createCard(item, catName);
+            });
+            html += `</div>`;
+        }
+    } else if (Array.isArray(resData) && resData.length > 0) {
+        // ၂။ အရင်အတိုင်း စာရင်းတစ်ခုတည်းပြမည့်အပိုင်း
+        html += `<div class="dashboard-grid animate-up">`;
+        resData.forEach(item => {
+            html += createCard(item, "General");
+        });
+        html += `</div>`;
+    }
+
+    // ဘာဒေတာမှ မရှိလျှင်
+    if (html === "") {
         body.innerHTML = `<div class="content-card">ဤသင်တန်း (${currentCourse.title}) အတွက် အရင်းအမြစ်များ မရှိသေးပါ။</div>`;
         return;
     }
 
-    let html = `<div class="dashboard-grid animate-up">`;
-
-    // 🔥 Loop ပတ်ပြီး အချက်အလက်များကို စနစ်တကျ ထုတ်ယူခြင်း
-    resList.forEach(item => {
-        html += `
-            <div class="content-card animate-up">
-                <h4><i class="fab ${item.icon || 'fa-file-alt'}"></i> ${item.name}</h4>
-                <p style="font-size:0.85rem; color:var(--text-muted); margin: 10px 0;">${currentCourse.title} အတွက် အထောက်အကူပြုဖိုင်</p>
-                <button class="save-btn" style="width:100%;" onclick="window.open('${item.url}', '_blank')">
-                    <i class="fas fa-external-link-alt"></i> View / Download
-                </button>
-            </div>
-        `;
-    });
-
-    html += `</div>`;
-    body.innerHTML = html;
+    body.innerHTML = `<div class="resources-wrapper fade-in">${html}</div>`;
 }
 
 // ==========================================

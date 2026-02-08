@@ -720,7 +720,7 @@ textarea.edit-input {
 /* Form Inputs များ (Dark mode မှာ ဖြူမနေအောင်) */
 .edit-input, #chat-input, #comment-input {
     background-color: var(--main-bg);
-    color: var(--text-main);
+    /* color: var(--text-main); */
     border: 1px solid var(--border-color);
 }
 .sidebar-avatar { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--primary); cursor: pointer; object-fit: cover; /* ပုံကွဲမသွားအောင် ထိန်းပေးသည် */ background-color: #fff;}

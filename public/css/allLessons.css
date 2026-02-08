@@ -4,148 +4,508 @@
 
 /* --- 1. Lesson Header Banner --- */
 .lesson-banner {
-    position: relative; width: 100%; height: 180px;
-    background-color: #2b4c61; border-radius: 12px;
-    overflow: hidden; margin-bottom: 30px;
-    display: flex; align-items: flex-end;
+  position: relative;
+  width: 100%;
+  height: 220px !important;
+  background-color: #2b4c61;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 30px;
+  display: flex;
+  align-items: flex-end;
+  margin-bottom: 75px !important;
 }
+
 .banner-bg-icons {
-    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    display: flex; justify-content: space-around; align-items: center; opacity: 0.3;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: space-around; /* Icon ကြားထဲမှာ နေရာလွတ် အညီအမျှချန်မည် */
+  align-items: center;
+  padding: 0 20px;
+  z-index: 1; /* Icon များကို အနောက်ခံအဖြစ်ထားမည် */
 }
+
 .icon-circle {
-    width: 60px; height: 60px; background: rgba(255, 255, 255, 0.2);
-    border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    color: white; font-size: 1.5rem;
+  width: 95px;
+  height: 95px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.6rem;
+  position: relative;
 }
+
+/*
+/* 🔥 Icon များကို အနိမ့်အမြင့် မတူအောင် လုပ်ခြင်း (Zig-zag) /
+.icon-circle:nth-child(1) { top: -50px; } /* ပထမတစ်ခုကို အပေါ်တင်မည် /
+.icon-circle:nth-child(2) { top: -20px; }  /* ဒုတိယတစ်ခုကို အောက်ချမည် /
+.icon-circle:nth-child(3) { top: -40px; } /* တတိယတစ်ခုကို အလယ်လောက်ထားမည် /
+*/
+
+/* ၁၊ ၃၊ ၅၊ ၇ (မ) ဂဏန်းမြောက် icon များကို အပေါ်တင်မည် */
+.icon-circle:nth-child(odd) {
+  top: -45px;
+  transform: rotate(-10deg); /* အနည်းငယ် စောင်းပေးလျှင် ပိုလှပါသည် */
+}
+
+/* ၂၊ ၄၊ ၆၊ ၈ (စုံ) ဂဏန်းမြောက် icon များကို အောက်ချမည် */
+.icon-circle:nth-child(even) {
+  top: -35px;
+  transform: rotate(10deg);
+}
+
+/* ပိုပြီး သဘာဝကျစေရန် အချို့ icon များကို အနည်းငယ် သေးလိုက်မည် (Optional) */
+.icon-circle:nth-child(3n) {
+  transform: scale(0.8) rotate(3deg);
+  opacity: 0.4;
+}
+
 .lesson-info-bar {
-    position: relative; background-color: #ced4da; height: 60px; width: 95%;
-    border-top-right-radius: 50px; border-bottom-right-radius: 50px;
-    margin-bottom: 15px; display: flex; align-items: center; padding-left: 10px;
+  z-index: 2; /* 🔥 Icon များထက် အပေါ်ရောက်နေစေရန် */
+  position: relative;
+  background-color: #ced4da;
+  height: 70px;
+  width: 95%;
+  border-top-right-radius: 50px;
+  border-bottom-right-radius: 50px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  padding-left: 10px;
 }
+
 .lesson-id-badge {
-    width: 80px; height: 80px; background-color: var(--primary);
-    color: white; border-radius: 50%; display: flex;
-    align-items: center; justify-content: center;
-    font-size: 1.5rem; font-weight: bold; border: 6px solid #ced4da;
-    position: absolute; left: 0; top: -10px;
+  width: 80px;
+  height: 80px;
+  background-color: var(--primary);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: bold;
+  border: 6px solid #ced4da;
+  position: absolute;
+  left: 0;
+  top: -10px;
 }
-.lesson-banner-title { margin-left: 100px; color: #003087; font-size: 1.5rem; font-weight: bold; }
+.lesson-banner-title {
+  margin-left: 100px;
+  color: #003087;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+/* သင်ခန်းစာ ကိုယ်ထည်စာသားများ */
+.lesson-body p,
+.article-content p {
+  
+  margin-bottom: 25px !important; /* စာပိုဒ်တစ်ခုပြီးတိုင်း နေရာလွတ်ချန်မည် */
+  line-height: 1.8 !important; /* စာကြောင်းကြား အကွာအဝေးကို ချဲ့မည် */
+  color: #334155; /* မျက်စိအေးသော အပြာရင့်ရောင်သန်းသည့် အနက်ရောင် */
+  font-size: 1.2rem; /* စာလုံးအရွယ်အစားကို အနည်းငယ် တိုးလိုက်သည် */
+  text-align: justify; /* စာကြောင်း ဘယ်ညာ ညီစေရန် */
+}
+
+/* စာပိုဒ်ရဲ့ ပထမဆုံးစာကြောင်းကို အနည်းငယ် နေရာချန်ချင်ရင် (Optional) */
+/* .lesson-body p { text-indent: 30px; } */
+
+.article-content {
+    padding: 0 40px 60px 40px !important; /* ဘယ်ညာကို 40px စီ ပုံသေထားပါမည် */
+    max-width: 1100px;
+    margin: 0 auto;
+    line-height: 1.8;
+}
+
+/* တစ်ခါတလေ Article မဟုတ်ဘဲ ရိုးရိုး body သုံးထားခဲ့ရင်ပါ အဆင်ပြေစေရန် */
+/* .lesson-body {
+    padding-top: 30px;
+    padding-bottom: 40px;
+} */
+
+/* အကယ်၍ pagination နဲ့ ကပ်နေပါက pagination မှာပါ margin ထည့်မည် */
+.pagination {
+  margin-top: 40px !important;
+}
+
+/* --- ၁။ ခေါင်းစဉ်ငယ်ဒီဇိုင်း (Border-top ပါဝင်သည်) --- */
+.article-content h2 {
+    color: #003087;
+    font-size: 2rem;
+    font-weight: 800;
+}
+
+.article-content h3 {
+    color: #004d85;
+    font-size: 1.5rem;
+    font-weight: 700;
+    border-top: 1px dashed #ced4da; /* h3 အတွက် လိုင်းကို အစက်လေးတွေနဲ့ ခွဲခြားနိုင်သည် */
+}
+
+/* --- ခေါင်းစဉ် ၂ နှင့် ၃ (Border-top ကို အညီအမျှဖြစ်စေရန်) --- */
+.article-content h2, 
+.article-content h3 {
+    width: 100%;             /* စာသားဧရိယာအပြည့် ယူမည် */
+    border-top: 1px solid #e1e4e8; /* အပေါ်က ခပ်ပါးပါးလိုင်း */
+    padding-top: 40px !important;   /* လိုင်းနဲ့ စာသားကြား နေရာလွတ် */
+    margin-top: 80px !important;    /* အပေါ်ကစာပိုဒ်နဲ့ လိုင်းကြား နေရာလွတ် */
+    display: block;
+    clear: both;
+}
+
+/* --- ၂။ ဓာတ်ပုံအရွယ်အစား ၃ မျိုး (Preset Sizes) --- */
+.lms-img {
+    display: block;
+    margin: 30px auto;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.img-s { width: 300px; max-width: 90%; } /* အသေး - 300px */
+.img-m { width: 600px; max-width: 95%; } /* အလယ်အလတ် - 600px */
+.img-l { width: 90%; max-width: 1000px; } /* အကြီး - Full Width */
+
+.article-content p, 
+.article-content ul, 
+.article-content ol {
+    margin-left: 0 !important;   /* ခေါင်းစဉ်နဲ့ တတန်းတည်းဖြစ်စေရန် */
+    margin-right: 0 !important;
+    padding-left: 0;
+}
+
+/* --- List ဒီဇိုင်းများ (Bullet & Number) --- */
+.article-content ul, .article-content ol {
+    margin-left: 25px;
+    margin-bottom: 30px;
+    padding-left: 25px;
+}
+
+.article-content li {
+    margin-bottom: 12px;
+    line-height: 1.7;
+    color: #334155;
+}
+
+/* --- Table ဒီဇိုင်း (Professional Table) --- */
+.lms-table-container {
+    margin: 60px 0 !important; /* 🔥 အထက်အောက်ကို 60px စီ ခွာလိုက်ပါပြီ */
+    width: 100%;
+    overflow-x: auto;
+}
+
+.lms-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border: 1px solid #e1e4e8;
+    margin-bottom: 0; /* Container margin သုံးထား၍ 0 ထားမည် */
+}
+
+.lms-table th {
+    background-color: #f8fafc;
+    color: #003087;
+    text-align: left;
+    padding: 15px;
+    border-bottom: 2px solid #003087;
+}
+
+.lms-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #e1e4e8;
+    font-size: 0.95rem;
+}
+
+.lms-table tr:nth-child(even) {
+    background-color: #fcfcfc; /* Zebra stripes */
+}
+
+/* Dark mode အတွက် Table ညှိခြင်း */
+body.dark-theme .lms-table { background: #1e293b; color: white; }
+body.dark-theme .lms-table th { background: #0f172a; color: #60a5fa; }
 
 /* --- 2. Callout Boxes (Rewind, Nerd Note, Legacy Lore) --- */
 .callout-box {
-    display: flex; gap: 20px; background: var(--card-bg);
-    border: 1px solid var(--border-color); border-radius: 12px;
-    padding: 20px; margin: 25px 0; position: relative;
+  display: flex;
+  gap: 20px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 20px;
+  margin: 25px 0;
+  position: relative;
 }
+
 .callout-icon {
-    width: 50px; height: 50px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.5rem; color: white; flex-shrink: 0;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: white;
+  flex-shrink: 0;
 }
-.bg-rewind, .bg-nerd { background-color: #58a65c; }
-.bg-pro-tip { background-color: #2b6cb0; }
+
+.bg-rewind,
+.bg-nerd {
+  background-color: #58a65c;
+}
+
+.bg-pro-tip {
+  background-color: #2b6cb0;
+}
 
 .lore-box {
-    position: relative; background-color: var(--card-bg);
-    border: 1px solid var(--border-color); border-radius: 8px;
-    padding: 30px 25px 20px; margin: 40px 0; box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+  position: relative;
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 30px 25px 20px;
+  margin: 40px 0;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
 }
+
 .lore-title {
-    position: absolute; top: -15px; left: 15px;
-    background-color: white; padding: 5px 15px;
-    color: #0073b1; font-weight: bold; font-size: 0.85rem;
-    border: 1px solid var(--border-color);
+  position: absolute;
+  top: -15px;
+  left: 15px;
+  background-color: white;
+  padding: 5px 15px;
+  color: #0073b1;
+  font-weight: bold;
+  font-size: 0.85rem;
+  border: 1px solid var(--border-color);
 }
 
 /* --- 3. Important / Warning Callout --- */
 .important-callout {
-    display: flex; margin: 30px 0; border-left: 5px solid #3498db;
-    background-color: rgba(52, 152, 219, 0.05);
+  display: flex;
+  margin: 30px 0;
+  border-left: 5px solid #3498db;
+  background-color: rgba(52, 152, 219, 0.05);
 }
+
 .important-label {
-    border: 2px solid #3498db; color: #3498db; padding: 5px 15px;
-    font-weight: bold; font-size: 0.8rem; margin: 15px; text-transform: uppercase; height: fit-content;
+  border: 2px solid #3498db;
+  color: #3498db;
+  padding: 5px 15px;
+  font-weight: bold;
+  font-size: 0.8rem;
+  margin: 15px;
+  text-transform: uppercase;
+  height: fit-content;
 }
-.important-text { padding: 15px 15px 15px 0; line-height: 1.6; }
+
+.important-text {
+  padding: 15px 15px 15px 0;
+  line-height: 1.6;
+}
 
 /* --- 4. Code & Terminal Windows --- */
-.code-window, .terminal-window {
-    background-color: #1e293b; color: #e2e8f0; padding: 20px;
-    border-radius: 8px; font-family: 'Fira Code', 'Courier New', monospace;
-    margin: 25px 0; overflow-x: auto; border-left: 5px solid #3b82f6;
+.code-window,
+.terminal-window {
+  background-color: #1e293b;
+  color: #e2e8f0;
+  padding: 20px;
+  border-radius: 8px;
+  font-family: "Fira Code", "Courier New", monospace;
+  margin: 25px 0;
+  overflow-x: auto;
+  border-left: 5px solid #3b82f6;
 }
-.terminal-window { background-color: #000; border: 2px solid #333; }
-.t-prompt { color: #10b981; margin-right: 8px; }
-.t-command { color: #fff; font-weight: bold; }
-.t-red { color: #ef4444; }
-.code-window pre { margin: 0; }
+
+.terminal-window {
+  background-color: #000;
+  border: 2px solid #333;
+}
+
+.t-prompt {
+  color: #10b981;
+  margin-right: 8px;
+}
+
+.t-command {
+  color: #fff;
+  font-weight: bold;
+}
+
+.t-red {
+  color: #ef4444;
+}
+
+.code-window pre {
+  margin: 0;
+}
 
 /* --- 5. Tooltips (Inline) --- */
 .tooltip {
-    position: relative; display: inline-block;
-    color: var(--primary); font-weight: bold;
-    border-bottom: 2px dotted var(--primary); cursor: help;
+  position: relative;
+  display: inline-block;
+  color: var(--primary);
+  font-weight: bold;
+  border-bottom: 2px dotted var(--primary);
+  cursor: help;
 }
+
 .tooltip .tooltiptext {
-    visibility: hidden; width: 220px; background-color: #1e293b;
-    color: #fff; text-align: center; border-radius: 6px;
-    padding: 10px; position: absolute; z-index: 100;
-    bottom: 125%; left: 50%; margin-left: -110px;
-    opacity: 0; transition: opacity 0.3s; font-size: 0.8rem; font-weight: normal;
+  visibility: hidden;
+  width: 220px;
+  background-color: #1e293b;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 10px;
+  position: absolute;
+  z-index: 100;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -110px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  font-size: 0.8rem;
+  font-weight: normal;
 }
-.tooltip:hover .tooltiptext { visibility: visible; opacity: 1; }
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+  opacity: 1;
+}
 
 /* --- 6. Accordions (Hint & Deep Dive) --- */
 .lms-accordion {
-    background: var(--card-bg); border: 1px solid var(--border-color);
-    border-radius: 50px; padding: 10px 20px;
-    display: inline-flex; align-items: center; gap: 12px;
-    cursor: pointer; margin: 15px 0; font-weight: bold; color: var(--primary);
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 50px;
+  padding: 10px 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  margin: 15px 0;
+  font-weight: bold;
+  color: var(--primary);
 }
+
 .lms-accordion i {
-    background: var(--primary); color: white;
-    width: 30px; height: 30px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
+  background: var(--primary);
+  color: white;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+
 .accordion-body {
-    display: none; padding: 20px; background: rgba(0,0,0,0.03);
-    border-radius: 12px; margin-bottom: 20px; border: 1px dashed var(--border-color);
+  display: none;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 12px;
+  margin-bottom: 20px;
+  border: 1px dashed var(--border-color);
 }
+
 .deep-dive-btn {
-    background: #003087; color: white; padding: 15px;
-    border-radius: 8px; text-align: center; font-weight: bold;
-    cursor: pointer; margin: 20px 0; transition: 0.3s;
+  background: #003087;
+  color: white;
+  padding: 15px;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: bold;
+  cursor: pointer;
+  margin: 20px 0;
+  transition: 0.3s;
 }
 
 /* --- 7. Video Section (Labels & Wrappers) --- */
-.video-lesson-container { margin: 30px 0; }
+.video-lesson-container {
+  margin: 30px 0;
+}
+
 .video-tag-label {
-    display: inline-flex; align-items: center; gap: 8px;
-    background-color: #cbd5e1; color: #475569;
-    padding: 4px 12px; border-radius: 6px;
-    font-size: 0.85rem; font-weight: 600; border: 1px solid #94a3b8;
-    margin-bottom: 15px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #cbd5e1;
+  color: #475569;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: 1px solid #94a3b8;
+  margin-bottom: 15px;
 }
+
 .video-wrapper {
-    position: relative; padding-bottom: 56.25%; height: 0;
-    overflow: hidden; border-radius: 12px; background: #000;
+  position: relative;
+  padding-bottom: 56.25%;
+  height: 0;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #000;
 }
-.video-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+
+.video-wrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
 
 /* --- 8. Download Links --- */
-.download-links { list-style: none; padding: 0; }
-.download-links li { margin-bottom: 10px; }
-.download-links a {
-    color: var(--primary); text-decoration: none; font-weight: 600;
-    display: inline-flex; align-items: center; gap: 8px;
+.download-links {
+  list-style: none;
+  padding: 0;
 }
-.download-links a:hover { text-decoration: underline; }
+
+.download-links li {
+  margin-bottom: 10px;
+}
+
+.download-links a {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.download-links a:hover {
+  text-decoration: underline;
+}
 
 /* --- Dark Mode Fixes --- */
-body.dark-theme .icon-circle { background: rgba(255,255,255,0.1); }
-body.dark-theme .lesson-info-bar { background-color: #334155; }
-body.dark-theme .lesson-banner-title { color: #fff; }
-body.dark-theme .accordion-body { background: rgba(255,255,255,0.05); }
-body.dark-theme .lore-title { background-color: var(--card-bg); }
-body.dark-theme .video-tag-label { background-color: #334155; color: #f1f5f9; border-color: #475569; }
+body.dark-theme .icon-circle {
+  background: rgba(255, 255, 255, 0.1);
+}
+body.dark-theme .lesson-info-bar {
+  background-color: #334155;
+}
+body.dark-theme .lesson-banner-title {
+  color: #fff;
+}
+body.dark-theme .accordion-body {
+  background: rgba(255, 255, 255, 0.05);
+}
+body.dark-theme .lore-title {
+  background-color: var(--card-bg);
+}
+body.dark-theme .video-tag-label {
+  background-color: #334155;
+  color: #f1f5f9;
+  border-color: #475569;
+}

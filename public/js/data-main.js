@@ -1,4 +1,5 @@
 const allCourses = {
+    "bootcamp-mm": bootcampMMData,
     "web": webCourseData,
     "python": pythonCourseData,
     "design": designCourseData
