@@ -10,8 +10,10 @@ const bootcampMMData = {
     
     resources: {
         "Foundations": [
-            { name: "Git & GitHub Guide", url: "/content/files/git-guide.pdf", icon: "fa-git-alt" },
-            { name: "HTML5 Elements List", url: "https://developer.mozilla.org/...", icon: "fa-html5" }
+            { name: "Git & GitHub Guide", url: "/content/files/git-guide.pdf", icon: "fa-git-alt", description: "Git အခြေခံ Command များနှင့် GitHub သုံးစွဲပုံ အဆင့်ဆင့် လမ်းညွှန်" },
+            { name: "HTML5 Elements List", url: "https://developer.mozilla.org/...", icon: "fa-html5", description: "အသုံးအများဆုံး HTML Tags များကို လွယ်ကူစွာ ရှာဖွေနိုင်မည့် စာရင်း" },
+            { name: "CSS Flexbox Layout Guide", url: "https://css-tricks.com/snippets/css/a-guide-to-flexbox/", icon: "fa-css3", description: "မင်္ဂလာပါ! CSS Flexbox ကို လေ့လာရန် အကောင်းဆုံး လမ်းညွှန်စာမျက်နှာ" },
+            { name: "HTML5 Elements List", url: "https://youtu.be/2KL-z9A56SQ?si=Iub9AI1GziZPS4nn", icon: "fa-question", description: "HTML5 Elements များကို လေ့လာရန် အကောင်းဆုံး ဗီဒီယိုလမ်းညွှန်" }
         ],
         "Technical": [
             { name: "JS ES6+ Cheat Sheet", url: "/content/files/js-cheatsheet.pdf", icon: "fa-js" },

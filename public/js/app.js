@@ -206,59 +206,82 @@ function renderResources() {
     const body = document.getElementById('dynamic-body');
     const currentCourse = allCourses[currentUser.selectedCourseId];
     
+    // ၁။ သင်တန်းမရွေးရသေးသော အခြေအနေ
     if (!currentCourse) {
         body.innerHTML = `
-            <div class="content-card animate-up" style="text-align:center; padding:40px;">
-                <i class="fas fa-layer-group" style="font-size:3rem; color:var(--text-muted); margin-bottom:15px;"></i>
+            <div class="content-card animate-up" style="text-align:center; padding:60px 20px;">
+                <i class="fas fa-layer-group" style="font-size:4rem; color:var(--text-muted); opacity:0.3; margin-bottom:20px;"></i>
                 <h3>သင်တန်း မရွေးချယ်ရသေးပါ</h3>
-                <p>Resources များ ကြည့်ရှုရန် သင်တန်းတစ်ခုကို အရင်ရွေးချယ်ပေးပါ။</p>
-                <button class="save-btn" style="margin-top:20px;" onclick="showSection('courses_all')">သင်တန်းများသို့ သွားရန်</button>
+                <p style="color:var(--text-muted);">အရင်းအမြစ်များ ကြည့်ရှုရန် သင်တန်းတစ်ခုကို အရင်ရွေးချယ်ပေးပါ။</p>
+                <button class="save-btn" style="max-width:250px; margin:25px auto 0;" onclick="showSection('courses_all')">
+                    သင်တန်းများသို့ သွားရန်
+                </button>
             </div>`;
         return;
     }
 
     const resData = currentCourse.resources || [];
-    let html = "";
+    let html = '<div class="resources-wrapper fade-in">';
 
-    // 🔥 Helper Function: Card တစ်ခုချင်းစီကို ထုတ်ပေးမည့် ကုဒ် (Deduplication)
-    const createCard = (item, catName) => `
-        <div class="content-card animate-up" style="border-top: 3px solid var(--primary);">
-            <h4><i class="fab ${item.icon || 'fa-file-alt'}"></i> ${item.name}</h4>
-            <p style="font-size:0.8rem; color:var(--text-muted); margin: 10px 0;">${catName} အတွက် အထောက်အကူပြုဖိုင်</p>
-            <button class="save-btn" style="width:100%;" onclick="window.open('${item.url}', '_blank')">
-                <i class="fas fa-external-link-alt"></i> View / Download
-            </button>
-        </div>`;
+    // 🔥 Icon အရောင်များကို Tech-Specific ဖြစ်စေမည့် Helper
+    const getIconStyle = (iconName) => {
+        const icon = iconName.toLowerCase();
+        if (icon.includes('html')) return 'background:#fff7ed; color:#ea580c;';
+        if (icon.includes('css')) return 'background:#f0f9ff; color:#0284c7;';
+        if (icon.includes('js') || icon.includes('python')) return 'background:#fefce8; color:#ca8a04;';
+        if (icon.includes('git') || icon.includes('react')) return 'background:#fff1f2; color:#e11d48;';
+        return 'background:#f1f5f9; color:#64748b;';
+    };
 
-    // 🔥 Logic: Resources က Category အလိုက် ခွဲထားတာလား (Object) သို့မဟုတ် ရိုးရိုးစာရင်းလား (Array) စစ်မည်
+    // 🔥 Card ထုတ်ပေးမည့် Logic (Deduplication)
+    const createResCard = (item, catName) => {
+        const iconStyle = getIconStyle(item.icon || '');
+        // 🔥 ပြင်ဆင်ချက်: item.description ရှိလျှင် သုံးမည်၊ မရှိလျှင် default စာသားပြမည်
+        const displayDesc = item.description || `${catName} အပိုင်းအတွက် လိုအပ်သော အထောက်အကူပြု လမ်းညွှန်ချက်များနှင့် ဖိုင်များ`;
+        return `
+            <div class="res-card animate-up">
+                <div>
+                    <div class="res-icon-box" style="${iconStyle}">
+                        <i class="fab ${item.icon || 'fa-file-alt'}"></i>
+                    </div>
+                    <h4>${item.name}</h4>
+                    <!-- 🔥 စိတ်ကြိုက် ရှင်းလင်းချက်စာသား ပေါ်မည့်နေရာ -->
+                    <p>${displayDesc}</p> 
+                </div>
+                <button class="res-action-btn" onclick="window.open('${item.url}', '_blank')">
+                    <i class="fas fa-external-link-alt"></i> View Resource
+                </button>
+            </div>`;
+    };
+
     const isCategorized = !Array.isArray(resData) && typeof resData === 'object';
 
     if (isCategorized) {
-        // ၁။ Foundations, Technical စသဖြင့် ခွဲပြမည့်အပိုင်း
+        // ၂။ Category အလိုက် ခွဲပြခြင်း (Foundations, Technical, etc.)
         for (let catName in resData) {
-            html += `<div class="category-header" style="margin: 30px 0 15px 0;"><i class="fas fa-folder-open"></i> ${catName} Resources</div>`;
+            html += `<div class="res-category-header"><i class="fas fa-folder-open" style="font-size:1.1rem; opacity:0.7;"></i> ${catName} Resources</div>`;
             html += `<div class="dashboard-grid">`;
             resData[catName].forEach(item => {
-                html += createCard(item, catName);
+                html += createResCard(item, catName);
             });
             html += `</div>`;
         }
     } else if (Array.isArray(resData) && resData.length > 0) {
-        // ၂။ အရင်အတိုင်း စာရင်းတစ်ခုတည်းပြမည့်အပိုင်း
-        html += `<div class="dashboard-grid animate-up">`;
+        // ၃။ စာရင်းတစ်ခုတည်းရှိသော အခြေအနေ
+        html += `<div class="dashboard-grid" style="margin-top:30px;">`;
         resData.forEach(item => {
-            html += createCard(item, "General");
+            html += createResCard(item, "General");
         });
         html += `</div>`;
     }
 
-    // ဘာဒေတာမှ မရှိလျှင်
-    if (html === "") {
+    // ၄။ ဒေတာ မရှိသော အခြေအနေ
+    if (html === '<div class="resources-wrapper fade-in">') {
         body.innerHTML = `<div class="content-card">ဤသင်တန်း (${currentCourse.title}) အတွက် အရင်းအမြစ်များ မရှိသေးပါ။</div>`;
         return;
     }
 
-    body.innerHTML = `<div class="resources-wrapper fade-in">${html}</div>`;
+    body.innerHTML = html + '</div>';
 }
 
 // ==========================================

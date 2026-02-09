@@ -3010,3 +3010,126 @@ html {
     font-size: 0.85rem !important;
   }
 }
+
+/* --- Modern Minimalist Resources UI --- */
+
+/* Category Title - အပြာရောင်ဘားကြီးများအစား သန့်ရှင်းသော ခေါင်းစဉ် */
+.res-category-header {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--text-main); /* အနက်ရောင်/ပြာရောင် */
+    margin: 45px 0 20px 0;
+    padding-left: 15px;
+    border-left: 5px solid var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Resource Card - Shadow အနုစားနှင့် နေရာလွတ်များ */
+.res-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    height: 100%;
+}
+
+.res-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+    border-color: var(--primary);
+}
+
+/* Icon Box - နည်းပညာအလိုက် အရောင်ဖျော့လေးများ သုံးထားခြင်း */
+.res-icon-box {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+}
+
+.res-card h4 {
+    font-size: 1.15rem;
+    margin-bottom: 8px;
+    color: var(--text-main);
+    font-weight: 600;
+}
+
+.res-card p {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 25px;
+}
+
+/* Button - ပိုမိုသန့်ရှင်းသော ခလုတ်ဒီဇိုင်း */
+.res-action-btn {
+    background: #f1f5f9;
+    color: var(--text-main);
+    border: 1px solid #e2e8f0;
+    padding: 12px 15px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: 0.2s;
+    width: 100%;
+}
+
+.res-action-btn:hover {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+/* Dark Mode ညှိချက် */
+body.dark-theme .res-action-btn {
+    background: #334155;
+    border-color: #475569;
+    color: #f1f5f9;
+}
+
+body.dark-theme .res-action-btn:hover {
+    background: #1590b8;
+}
+
+/* --- Resource Category Header Dark Mode Fix --- */
+
+body.dark-theme .res-category-header {
+    color: #5f7783 !important; 
+}
+
+body.dark-theme .res-category-header:hover {
+    color: #34acd4 !important; 
+}
+
+body.dark-theme .res-category-header span {
+    color: #ffffff !important;
+}
+
+body.dark-theme .res-category-header i {
+    color: var(--primary) !important;
+    opacity: 1;
+}
+
+/* Card အတွင်းက စာသားများ ပိုမိုထင်ရှားစေရန် (Optional) */
+body.dark-theme .res-card h4 {
+    color: #ffffff !important;
+}
+
+body.dark-theme .res-card p {
+    color: #94a3b8 !important; /* ခဲရောင်ဖျော့ */
+}
