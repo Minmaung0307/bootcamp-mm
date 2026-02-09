@@ -3030,45 +3030,50 @@ html {
 .res-card {
     background: var(--card-bg);
     border: 1px solid var(--border-color);
-    border-radius: 16px;
-    padding: 24px;
+    border-radius: 16px; /* ပိုဝိုင်းသော ထောင့်များ */
+    padding: 20px !important;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
     height: 100%;
+    transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .res-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.1);
     border-color: var(--primary);
 }
 
 /* Icon Box - နည်းပညာအလိုက် အရောင်ဖျော့လေးများ သုံးထားခြင်း */
 .res-icon-box {
-    width: 50px;
-    height: 50px;
-    border-radius: 12px;
+    width: 45px !important;
+    height: 45px !important;
+    border-radius: 10px !important;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.5rem;
-    margin-bottom: 20px;
+    font-size: 1.3rem !important;
+    margin-bottom: 15px;
 }
 
 .res-card h4 {
-    font-size: 1.15rem;
+    font-size: 1.05rem;
     margin-bottom: 8px;
     color: var(--text-main);
     font-weight: 600;
+    line-height: 1.3;
 }
 
 .res-card p {
     font-size: 0.85rem;
     color: var(--text-muted);
-    line-height: 1.6;
-    margin-bottom: 25px;
+    line-height: 1.5;
+    margin-bottom: 20px;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 /* Button - ပိုမိုသန့်ရှင်းသော ခလုတ်ဒီဇိုင်း */
@@ -3076,9 +3081,9 @@ html {
     background: #f1f5f9;
     color: var(--text-main);
     border: 1px solid #e2e8f0;
-    padding: 12px 15px;
-    border-radius: 12px;
-    font-size: 0.9rem;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 0.85rem;
     font-weight: 600;
     display: flex;
     align-items: center;
@@ -3132,4 +3137,31 @@ body.dark-theme .res-card h4 {
 
 body.dark-theme .res-card p {
     color: #94a3b8 !important; /* ခဲရောင်ဖျော့ */
+}
+
+/* --- Resources Section Specific Grid (4-3-2-1 Logic) --- */
+.resources-wrapper .dashboard-grid {
+    display: grid;
+    gap: 20px;
+    /* Desktop (Large): 4 columns */
+    grid-template-columns: repeat(4, 1fr);
+    margin-top: 20px;
+}
+
+/* Laptop: 3 columns */
+@media (max-width: 1200px) {
+    .resources-wrapper .dashboard-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* Tablet: 2 columns */
+@media (max-width: 900px) {
+    .resources-wrapper .dashboard-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Mobile: 1 column */
+@media (max-width: 500px) {
+    .resources-wrapper .dashboard-grid { 
+        grid-template-columns: 1fr; 
+        gap: 15px; 
+    }
 }
