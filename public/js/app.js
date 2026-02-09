@@ -669,30 +669,47 @@ async function renderCourseTree(filterCat) {
     body.innerHTML = '<div id="course-outline"></div>';
     const container = document.getElementById('course-outline');
 
-    // ၁။ အခြေခံ သင်ရိုးများ
-    let filteredData = filterCat ? 
-        courseData.filter(c => c.category.toLowerCase() === filterCat.toLowerCase()) : 
-        courseData;
+    // ၁။ 🔥 အရေးကြီးသည် - filter မလုပ်ဘဲ courseData အားလုံးကို ယူသုံးမည်
+    // ဒါမှ Category ၃ ခုလုံး (Foundations, Technical, Full-Stack) အမြဲပေါ်နေမှာပါ
+    let displayData = JSON.parse(JSON.stringify(courseData)); 
 
-    // ၂။ Dynamic Content ဆွဲယူခြင်း (အရင်အတိုင်း)
+    // ၂။ Dynamic Content (Firebase) မှ လာသော သင်ခန်းစာများကို ပေါင်းထည့်မည်
     try {
         const dynamicSnap = await db.collection('course_structure').get();
         dynamicSnap.forEach(doc => {
             const dl = doc.data();
-            let cat = filteredData.find(c => c.category === dl.category);
+            let cat = displayData.find(c => c.category === dl.category);
             if (cat) {
                 let mod = cat.modules.find(m => m.moduleTitle === dl.module);
-                if (mod) mod.lessons.push({ title: dl.title, path: dl.path, type: dl.type });
+                if (mod && !mod.lessons.some(l => l.title === dl.title)) {
+                    mod.lessons.push({ title: dl.title, path: dl.path, type: dl.type });
+                }
             }
         });
     } catch (e) { console.warn("Dynamic load failed"); }
 
-    // ၃။ Rendering Logic (HTML String အဖြစ် စုတည်ဆောက်မည်)
+    // ၃။ UI Rendering Logic
     let fullHtml = "";
     const completedList = currentUser.completedLessons || [];
 
-    filteredData.forEach((cat, catIdx) => {
-        fullHtml += `<div class="category-header"><i class="fas fa-folder"></i> ${cat.category}</div>`;
+    displayData.forEach((cat, catIdx) => {
+        const catBodyId = `cat-body-${catIdx}`;
+        
+        // 🔥 အဓိက logic - Dashboard ကနေ ရွေးလာတဲ့ Category ဖြစ်ရင် တန်းပွင့်နေအောင်လုပ်မည်
+        // ဒါမှမဟုတ် filterCat မပါဘဲ (မာတိကာ menu ကနေလာရင်) အကုန်ပိတ်ထားမည်
+        const isSelected = filterCat && cat.category.toLowerCase() === filterCat.toLowerCase();
+        const autoHeight = isSelected ? "max-height: 2000px;" : ""; 
+        const activeClass = isSelected ? "active" : "";
+        const openClass = isSelected ? "open" : "";
+
+        fullHtml += `
+            <div class="category-wrapper">
+                <div class="category-header ${activeClass}" onclick="toggleCategoryAccordion(this, '${catBodyId}')">
+                    <span><i class="fas fa-folder"></i> ${cat.category}</span>
+                    <i class="fas fa-chevron-down toggle-icon"></i>
+                </div>
+                <div id="${catBodyId}" class="category-body ${openClass}" style="${autoHeight}">
+        `;
 
         cat.modules.forEach((mod, modIdx) => {
             const modId = `mod-${catIdx}-${modIdx}`;
@@ -705,7 +722,7 @@ async function renderCourseTree(filterCat) {
                 lessonsHtml += `
                     <div class="lesson-item ${isDone ? 'completed-green' : ''}" 
                          onclick="renderLessonContent(${originalCatIdx}, ${modIdx}, ${lesIdx})">
-                        <i class="${isDone ? 'fas fa-check-circle' : 'far fa-circle'}" 
+                        <i class="${isDone ? 'fas fa-check-circle text-success' : 'far fa-circle'}" 
                            style="color: ${isDone ? '#22c55e' : '#cbd5e1'}"></i>
                         <span>${les.title}</span>
                         <small class="type-badge">${les.type}</small>
@@ -720,9 +737,41 @@ async function renderCourseTree(filterCat) {
                     <div id="${modId}" class="lessons-list">${lessonsHtml}</div>
                 </div>`;
         });
+
+        fullHtml += `</div></div>`; 
     });
 
     container.innerHTML = fullHtml;
+
+    // 🔥 Auto-scroll: Dashboard ကနေ လာတာဆိုရင် အဲ့ဒီပွင့်နေတဲ့ Category ဆီကို screen ရောက်သွားအောင်လုပ်မည်
+    if (filterCat) {
+        setTimeout(() => {
+            const activeHeader = document.querySelector('.category-header.active');
+            if (activeHeader) activeHeader.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 300);
+    }
+}
+
+// 🔥 Category ပိတ်/ဖွင့် လုပ်ပေးမည့် Function
+// function toggleCategoryAccordion(header, bodyId) {
+//     const body = document.getElementById(bodyId);
+//     header.classList.toggle('active');
+//     body.classList.toggle('open');
+// }
+
+function toggleCategoryAccordion(header, bodyId) {
+    const body = document.getElementById(bodyId);
+    header.classList.toggle('active');
+
+    if (body.style.maxHeight && body.style.maxHeight !== "0px") {
+        // ပိတ်မည်ဆိုလျှင် အမြင့်ကို ၀ ထားမည်
+        body.style.maxHeight = "0px";
+        body.classList.remove('open');
+    } else {
+        // ဖွင့်မည်ဆိုလျှင် scrollHeight (ရှိသမျှအမြင့်အကုန်) ကို တွက်ချက်၍ ထည့်ပေးမည်
+        body.classList.add('open');
+        body.style.maxHeight = body.scrollHeight + "px";
+    }
 }
 
 async function renderLessonContent(catIdx, modIdx, lesIdx) {
@@ -825,10 +874,31 @@ function goToLesson(catIdx, modIdx, lesIdx) {
 }
 
 // Module Accordion Toggle Function
+// function toggleModuleAccordion(header, targetId) {
+//   const content = document.getElementById(targetId);
+//   header.classList.toggle("active");
+//   content.classList.toggle("show");
+// }
+
+// 🔥 Module (သင်ခန်းစာစာရင်း) ပိတ်/ဖွင့် လုပ်ပေးမည့် Function (Smooth Version)
 function toggleModuleAccordion(header, targetId) {
-  const content = document.getElementById(targetId);
-  header.classList.toggle("active");
-  content.classList.toggle("show");
+    const content = document.getElementById(targetId);
+    header.classList.toggle('active');
+
+    if (content.style.maxHeight && content.style.maxHeight !== "0px") {
+        content.style.maxHeight = "0px";
+        content.classList.remove('show');
+    } else {
+        content.classList.add('show');
+        content.style.maxHeight = content.scrollHeight + "px";
+        
+        // --- အရေးကြီးသောအချက် ---
+        // အထဲက Module ပွင့်လာရင် အပြင်က Category Body ရဲ့ maxHeight ကိုပါ လိုက်တိုးပေးရမည်
+        const parentBody = content.closest('.category-body');
+        if (parentBody && parentBody.style.maxHeight !== "0px") {
+            parentBody.style.maxHeight = (parentBody.scrollHeight + content.scrollHeight) + "px";
+        }
+    }
 }
 
 // ==========================================
