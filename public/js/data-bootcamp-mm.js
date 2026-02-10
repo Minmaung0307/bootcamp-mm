@@ -344,7 +344,7 @@ const bootcampMMData = {
                 {
                     moduleTitle: "Module 25: Continuation Courses",
                     lessons: [
-                        { title: "25.1: Continuation Courses Invitation", type: "article", path: "/content/bootcamp-mm/foundation/mod25/continuation-courses-invitation.html" }
+                        { title: "25.1: Continuation Courses Invitation", type: "article", path: "/content/bootcamp-mm/foundation/mod25/continuation-courses.html" }
                     ]
                 }
             ]

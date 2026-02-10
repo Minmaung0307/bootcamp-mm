@@ -1,0 +1,31 @@
+{
+    "id": "quiz_m0_1",
+    "subject": "html",
+    "title": "Basic HTML Quiz",
+    "questions": [
+        { 
+            "type": "single", 
+            "q": "HTML ရဲ့ အရှည်က ဘာလဲ?", 
+            "options": ["Hyper Text Markup Language", "High Tech Language"], 
+            "correct": 0 
+        },
+        { 
+            "type": "short", 
+            "q": "Website ရဲ့ အရိုးစုကို ဘာနဲ့တည်ဆောက်သလဲ?", 
+            "correct": "HTML" 
+        },
+        {
+            "type": "multiple",
+            "q": "အောက်ပါတို့အနက် programming languages များမှာ အဘယ်နည်း? (အဖြေ ၂ ခု ရွေးပါ)",
+            "options": ["HTML", "JavaScript", "Python", "CSS"],
+            "correct": [1, 2]
+        },
+        {
+            "type": "single",
+            "q": "ပုံထဲတွင် မြင်ရသော အရာမှာ အဘယ်နည်း?",
+            "image": "/assets/img/sample-code.png",
+            "options": ["Function", "Variable", "Loop"],
+            "correct": 0
+        }
+    ]
+}

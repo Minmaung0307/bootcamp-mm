@@ -564,7 +564,7 @@ body.dark-theme .video-tag-label {
 
 /* --- ၁။ Category Header (Foundations) ကို အဆင့်မြှင့်တင်ခြင်း --- */
 .category-header {
-    background: linear-gradient(135deg, #003087 0%, #0056b3 100%) !important;
+    background: linear-gradient(135deg, #5a8d9ee2 50%, #03a9d7da 50%) !important;
     color: white !important;
     padding: 22px 28px !important;
     border-radius: 12px !important;
