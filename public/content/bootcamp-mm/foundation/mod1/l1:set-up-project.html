@@ -14,10 +14,422 @@
     </div>
     <div class="lesson-info-bar">
       <div class="lesson-id-badge">1.1</div>
-      <div class="lesson-banner-title">
-        HTML, CSS, and Git
-      </div>
+      <div class="lesson-banner-title">Set Up the Project</div>
     </div>
   </div>
 
+  <h1>Introduction</h1>
+  <p>
+    Full-stack web developer တစ်ယောက်ဖြစ်ဖို့ ခရီးစတင်လိုက်တဲ့အတွက်
+    <strong>ကြိုဆိုပါတယ်!</strong> အခုလာမယ့် တစ်ပတ်အတွင်းမှာ developer
+    တစ်ယောက်ဖြစ်ဖို့ အခြေခံအကျဆုံးနဲ့ အရေးကြီးဆုံးဖြစ်တဲ့
+    <strong>HTML, CSS</strong> နဲ့ <strong>Git</strong> နည်းပညာ သုံးခုကို
+    ကျွမ်းကျင်အောင် သင်ယူရမှာပါ။
+  </p>
+  <p>
+    ဒီပညာရပ်တွေကို <strong>Run Buddy</strong> ဆိုတဲ့ ကုမ္ပဏီအတွက်
+    <strong>landing page</strong> တစ်ခု တည်ဆောက်ရင်းနဲ့ လက်တွေ့လေ့လာသွားမှာပါ။
+    မင်းကို <strong>freelance web developer</strong> တစ်ယောက်အနေနဲ့
+    ငှားထားတယ်လို့ သဘောထားပြီး ဒီ website ကို အလှပဆုံးဖြစ်အောင် ဖန်တီးပေးရမှာ
+    ဖြစ်ပါတယ်။ အပြင်အဆင်ပိုင်း (design) ပြီးသွားရင်တော့ ကုမ္ပဏီရဲ့ developer
+    တွေဆီကို လက်လွှဲပေးရမှာပါ။
+  </p>
+  <h2>ဒီသင်ခန်းစာမှာ ဘာတွေတတ်မြောက်မလဲ?</h2>
+  <p>
+    ပထမဆုံး သင်ခန်းစာမှာတင် <strong>HTML code</strong> တွေ စရေးနိုင်ဖို့အတွက်
+    အရေးကြီးတဲ့ <strong>tools</strong> တွေနဲ့ လုပ်ငန်းစဉ်တွေကို လေ့လာရမှာပါ။
+    အဓိကအားဖြင့် အောက်ပါတို့ကို လုပ်ဆောင်နိုင်မှာ ဖြစ်ပါတယ် -
+  </p>
+  <ul>
+    <li>
+      <strong>Command line</strong> ကို သုံးပြီး folder တွေထဲ သွားလာတာနဲ့ file
+      အသစ်တွေ တည်ဆောက်တာ။
+    </li>
+    <li>
+      <strong>HTML document</strong> တစ်ခုရဲ့ အခြေခံ
+      <strong>structure</strong> ကို စနစ်တကျ ချမှတ်တာ။
+    </li>
+    <li>
+      <strong>Git</strong> ကို သုံးပြီး ကိုယ့်ရဲ့ အလုပ်တွေကို သိမ်းဆည်းတာနဲ့
+      <strong>remote repository</strong> ပေါ်ကို <strong>push</strong> လုပ်တာ။
+    </li>
+  </ul>
+
+  <h2>Preview (အကြိုကြည့်ရှုခြင်း)</h2>
+  <p>
+    ဒီအပတ်မှာ ဘာတွေ တည်ဆောက်မလဲဆိုတာ အကြမ်းဖျင်း ကြည့်လိုက်ရအောင်။ Run Buddy
+    ဒီဇိုင်းအဖွဲ့ကနေ <strong>Landing page</strong> အတွက်
+    <strong>Mock-up</strong> (ပုံစံကြမ်း) တစ်ခု ပေးထားပါတယ်။
+  </p>
+  <img
+    src="assets/bootcamp-mm/050-mock-up.jpg"
+    class="lms-img img-m"
+    alt="Dashboard Preview"
+  />
+  <p>
+    <strong>အရေးကြီးချက်:</strong> Run Buddy စာမျက်နှာကို လုပ်နေတဲ့အချိန်မှာ
+    ဒီပုံကို ခဏခဏ ပြန်ကြည့်ရမှာဖြစ်လို့ သင့်ကွန်ပျူတာထဲမှာ
+    <strong>Download</strong> ဆွဲထားဖို့ အကြံပြုပါတယ်။ ပုံပေါ်မှာ ညာဘက်ထောက်
+    (Right-click) နှိပ်ပြီး "Save Image As" နဲ့ မှတ်မိလွယ်မယ့်နေရာမှာ
+    သိမ်းထားလိုက်ပါ။
+  </p>
+  <p>
+    သင်ဟာ Developer အသစ်တစ်ယောက်အနေနဲ့ ဒီ <strong>Mock-up</strong> ကိုကြည့်ပြီး
+    "တော်တော်ခက်မှာပဲ" လို့ ထင်ကောင်းထင်နိုင်ပါတယ်။ စိတ်မပူပါနဲ့၊ ကျွန်တော်တို့
+    တစ်ဆင့်ချင်းစီ အေးအေးဆေးဆေး သွားကြမှာပါ။
+    <strong>Web development</strong> နည်းပညာက အမြဲတမ်း အလျှင်အမြန်
+    ပြောင်းလဲနေတာဖြစ်လို့ ဝါရင့် <strong>Developers</strong> တွေတောင်
+    <strong>Project</strong> အသစ်စတိုင်း <strong>Tools</strong> အသစ်တွေကို
+    ပြန်သင်ယူရလေ့ရှိပါတယ်။ ဒီသင်တန်းမှာ မင်းတို့ တွေ့ရှိလာမှာကတော့ Developer
+    တစ်ယောက်ဖြစ်လာဖို့ဆိုတာ "ဘယ်လိုသင်ယူရမလဲ" ဆိုတာကို သင်ယူခြင်းပဲ ဖြစ်ပါတယ်။
+  </p>
+  <p>
+    အခု ပထမဆုံးသင်ခန်းစာမှာတော့ အောက်မှာပြထားတဲ့အတိုင်း အခြေခံ
+    <strong>Layout</strong> ကိုပဲ အရင်ဆုံး တည်ဆောက်မှာ ဖြစ်ပါတယ်။
+  </p>
+  <img
+    src="assets/bootcamp-mm/800-html-screenshot.jpg"
+    class="lms-img img-m"
+    alt="Dashboard Preview"
+  />
+  <p>
+    ဒါကို အောင်အောင်မြင်မြင် လုပ်နိုင်ဖို့ အောက်ပါအဆင့်တွေကို လိုက်နာသွားပါမယ် -
+  </p>
+  <ol>
+    <li>
+      <strong>Command line နဲ့ စတင်ခြင်း:</strong> Project ရဲ့
+      <strong>File structure</strong> ကို တည်ဆောက်ဖို့ အခြေခံ
+      <strong>Commands</strong> တွေကို လေ့လာပါမယ်။
+    </li>
+    <li>
+      <strong>HTML အနည်းငယ် ထည့်သွင်းခြင်း:</strong> Project အတွက် အဓိက
+      <strong>HTML file</strong> ကို တည်ဆောက်ပြီး အရေးကြီးတဲ့
+      <strong>HTML elements</strong> တွေအကြောင်း သင်ယူပါမယ်။
+    </li>
+    <li>
+      <strong>Git ကို အသုံးပြုခြင်း:</strong>
+      <strong>Git version control tool</strong> ရဲ့ အခြေခံတွေကို လေ့လာပြီး ဒီ
+      project အတွက် <strong>Repository</strong> ဆောက်တာနဲ့ ပထမဆုံး
+      <strong>Commits</strong> လုပ်တာတွေကို လုပ်ဆောင်ပါမယ်။
+    </li>
+    <li>
+      <strong>စာမျက်နှာကို Outline ဆွဲခြင်း:</strong> HTML အကြောင်းကို
+      ပိုနက်နက်ရှိုင်းရှိုင်း လေ့လာပြီး Project အတွက် အခြေခံ
+      <strong>Structure</strong> ကို စီစဉ်ပါမယ်။
+    </li>
+    <li>
+      <strong>Git workflow ကို ပြန်လည်သုံးသပ်ခြင်း:</strong> လုပ်ဆောင်ထားတဲ့
+      တိုးတက်မှုတွေကို local <strong>Git repository</strong> ထဲမှာ
+      <strong>Commit</strong> လုပ်ပါမယ်။
+    </li>
+    <li>
+      <strong>GitHub နဲ့ Publish လုပ်ခြင်း:</strong> ကိုယ်တိုင်လုပ်ထားတဲ့
+      <strong>Local repository</strong> ကို <strong>GitHub Pages</strong> ပေါ်
+      တင်ပါမယ်။ ဒါဆိုရင် ကမ္ဘာပေါ်က ဘယ်သူမဆို မင်းရဲ့ website ကို
+      ကြည့်လို့ရသွားပါပြီ။
+    </li>
+  </ol>
+  <p>ကဲ... အခုပဲ <strong>Coding</strong> စတင်လိုက်ရအောင်!</p>
+
+  <h1>Get Started with the Command Line</h1>
+  <p>
+    အရင်တုန်းကတော့ ကွန်ပျူတာကို စာသားတွေရိုက်ပြီး ခိုင်းရတဲ့
+    <strong>Command-line interface (CLI)</strong> ဒါမှမဟုတ်
+    <strong>Terminal</strong> နဲ့ပဲ အသုံးပြုခဲ့ကြတာပါ။ အခုခေတ်မှာ
+    <strong>Windows</strong> နဲ့ <strong>macOS</strong> တို့လို ပုံတွေ၊
+    ခလုတ်တွေနဲ့ သုံးရတဲ့ <strong>Operating Systems</strong> တွေ ပေါ်လာတော့ CLI
+    ကို သုံးစရာမလိုတော့သလို ဖြစ်နေပေမဲ့ <strong>Developers</strong> တွေကတော့
+    အလုပ်တော်တော်များများအတွက် CLI ကို အခုထိ သုံးနေရတုန်းပါပဲ။
+  </p>
+  <p>
+    အခုလောလောဆယ်တော့ ကျွန်တော်တို့ <strong>Project</strong> ကို
+    <strong>Set up</strong> လုပ်ဖို့ CLI ကို သုံးသွားပါမယ်။ အဲ့ဒီမတိုင်ခင် ဒါကို
+    ဘယ်လိုဖွင့်ရမလဲဆိုတာ အရင်ကြည့်ရအောင်။
+  </p>
+  <h2>Access the Command Line (Command Line ကို ဖွင့်နည်း)</h2>
+  <h3>macOS အသုံးပြုသူများ</h3>
+  <p>
+    <strong>macOS</strong> မှာ <strong>Terminal</strong> ဆိုတဲ့
+    <strong>App</strong> ပါပြီးသားပါ။
+    <strong>Spotlight Search</strong> (စာရိုက်ပြီး ရှာဖွေခြင်း) မှာ "terminal"
+    လို့ ရိုက်ရှာပြီး ဖွင့်နိုင်ပါတယ်။ <strong>Spotlight Search</strong> ကို
+    ဖွင့်ဖို့ မှန်ဘီလူးပုံလေးကို နှိပ်ပါ ဒါမှမဟုတ်
+    <code>Command+Space</code> ကို နှိပ်ပါ။
+  </p>
+  <h3>Windows အသုံးပြုသူများ</h3>
+  <p>
+    <strong>Prework</strong> မှာ <strong>Git Bash</strong> ကို
+    <strong>Install</strong> လုပ်ခဲ့ပြီးပြီနော်။
+    <strong>Windows</strong> စခရင်ရဲ့ အောက်ခြေ ဘယ်ဘက်မှာရှိတဲ့
+    <strong>Search box</strong> မှာ "git bash" လို့ ရိုက်ရှာပြီး ဖွင့်လိုက်ပါ။
+    ဒါမှမဟုတ် <code>Windows+S</code> ကို နှိပ်ပြီး ရှာဖွေနိုင်ပါတယ်။
+  </p>
+  <h2>Use the Command Line (စတင်အသုံးပြုခြင်း)</h2>
+  <p>
+    <strong>Command Line</strong> ကို ဖွင့်လိုက်တဲ့အခါ စာရိုက်ဖို့ စောင့်နေတဲ့
+    cursor လေး ပါတဲ့ window တစ်ခု ပေါ်လာပါလိမ့်မယ်။ အဲ့ဒီ window ထဲမှာ
+    <code>pwd</code> လို့ ရိုက်ပြီး <strong>Enter</strong> ခေါက်လိုက်ပါ။
+  </p>
+  <p>
+    <code>pwd</code> ဆိုတာ <strong>"Print Working Directory"</strong> ကို
+    ပြောတာပါ။ <strong>Print</strong> ဆိုတာက စခရင်ပေါ်မှာ ပြပေးဖို့ဖြစ်ပြီး
+    <strong>Working Directory</strong> ဆိုတာကတော့ CLI က အခုလက်ရှိ ရောက်နေတဲ့
+    <strong>Folder</strong> ကို ပြောတာပါ။ ဒါကြောင့် <code>pwd</code> လို့
+    ရိုက်တာဟာ <strong>"ငါအခု ဘယ်နေရာ ရောက်နေတာလဲ?"</strong> လို့ မေးလိုက်တာပါပဲ။
+  </p>
+
+  <div class="important-container animate-up">
+    <div class="important-label">IMPORTANT</div>
+    <div class="important-body">
+        <p>
+            ဒီ <strong>boot camp</strong> မှာ အောင်မြင်ဖို့အတွက် <strong>code</strong> တွေကို 
+            <strong>copy/paste</strong> မလုပ်ဘဲ တစ်ကြောင်းချင်းစီ ကိုယ်တိုင် လက်နဲ့ ရိုက်ရေးပါ။ 
+            ဒါမှသာ ကျွမ်းကျင်တဲ့ <strong>coder</strong> တစ်ယောက်ဖြစ်ဖို့ လိုအပ်တဲ့ 
+            <strong>muscle memory</strong> ကို အမြန်ဆုံး တည်ဆောက်နိုင်မှာပါ။
+        </p>
+    </div>
+</div>
+  <p>
+    <strong>Terminal</strong> ဒါမှမဟုတ် <strong>Git Bash</strong> ကို
+    စဖွင့်လိုက်ရင် ပုံမှန်အားဖြင့် ကိုယ့်ရဲ့
+    <strong>User Directory</strong> (မိမိအကောင့်အမည်နဲ့ folder) ထဲမှာ
+    ရောက်နေပါလိမ့်မယ်။ <code>pwd</code> လို့ ရိုက်ကြည့်ရင်
+    <strong>Windows</strong> မှာ <code>/c/Users/your-username</code> လို့ ပြပြီး
+    <strong>macOS</strong> မှာတော့ <code>/Users/your-username</code> လို့
+    ပြပါလိမ့်မယ်။
+  </p>
+  <p>
+    အခု ဒီ <strong>Directory</strong> ထဲမှာ ဘာတွေရှိလဲဆိုတာ <code>ls</code> လို့
+    ရိုက်ပြီး ကြည့်ရအောင်။ ဒီ <strong>Command</strong> က လက်ရှိရောက်နေတဲ့ နေရာက
+    <strong>Files</strong> တွေနဲ့ <strong>Folders</strong> တွေကို
+    စာရင်းပြပေးတာပါ။ <code>pwd</code> က "ငါဘယ်မှာလဲ?" လို့ မေးတာဆိုရင်
+    <code>ls</code> က <strong>"ဒီမှာ ဘာတွေရှိလဲ?"</strong> လို့ မေးတာပါပဲ။
+  </p>
+  <p>
+    <code>ls</code> ရိုက်လိုက်ရင်
+    <strong>Documents, Pictures, Music</strong> နဲ့
+    <strong>Desktop</strong> စတဲ့ folder တွေကို တွေ့ရပါလိမ့်မယ်။
+  </p>
+
+  <div class="nerd-note-box animate-up">
+    <!-- ဘောင်ပေါ်မှာ တင်မည့် အဝိုင်းလေး -->
+    <div class="nerd-icon-badge">
+        <i class="fas fa-glasses"></i>
+    </div>
+    
+    <h4>Nerd Note</h4>
+    <p>
+        ကွန်ပျူတာ စဖွင့်လိုက်ရင် မြင်ရတဲ့ <strong>Desktop</strong> ဆိုတာ တကယ်တော့ 
+        မင်းရဲ့ <strong>User Directory</strong> ထဲမှာ ရှိတဲ့ 
+        <strong>Desktop</strong> ဆိုတဲ့ <strong>Folder</strong> လေးပါပဲ။
+    </p>
+</div>
+
+  <p>
+    အခု <strong>Desktop</strong> ပေါ်ကို CLI ကနေ သွားကြည့်ရအောင်။ အောက်က
+    <strong>Commands</strong> တွေကို တစ်ကြောင်းချင်း ရိုက်ပြီး
+    <strong>Enter</strong> ခေါက်ပါ -
+  </p>
+
+      <div class="code-snippet-box animate-up">
+    <pre>cd Desktop
+pwd</pre>
+</div>
+
+  <div class="pause-box animate-up">
+    <!-- ထောင့်တွင် တင်မည့် Question Mark -->
+    <div class="pause-icon-badge">
+        <i class="fas fa-question-circle"></i>
+    </div>
+    
+    <h4>PAUSE</h4>
+    <p><code>cd</code> ဆိုတာ ဘာကို ဆိုလိုတာလို့ ထင်လဲ?</p>
+
+    <!-- 🔥 အဖြေကို ဤနေရာတွင် ထည့်ပါ (အစပိုင်းတွင် display:none ထားမည်) -->
+    <div id="ans-cd-01" class="answer-content" style="display: none;">
+        အဖြေ - <code>cd</code> ဆိုတာ <strong>Change Directory</strong> ကို ပြောတာပါ။ 
+        Folder တစ်ခုကနေ တစ်ခုကို ကူးပြောင်းဖို့ သုံးပါတယ်။
+    </div>
+
+    <!-- ပိတ်/ဖွင့် လုပ်မည့် ခလုတ် -->
+    <a href="javascript:void(0)" class="toggle-answer-link" onclick="togglePauseAnswer(this, 'ans-cd-01')">
+        Show Answer
+    </a>
+</div>
+
+  <p>
+    အခု အောက်ကအတိုင်း ထပ်ရိုက်ကြည့်ပါ။ <code>pwd</code> မှာ ဘာတွေပြလဲဆိုတာ
+    သတိထားကြည့်နော် -
+  </p>
+
+    <div class="code-snippet-box animate-up">
+    <pre>cd ..
+pwd
+cd Desktop
+pwd</pre>
+</div>
+
+  <p>
+    ဒါကြောင့် <code>cd ..</code> လို့ ရိုက်ရင် အနောက်ကို တစ်ဆင့် (ဒါမှမဟုတ်
+    အပေါ်က <strong>Directory</strong> ထဲကို) ပြန်သွားတယ်ဆိုတာ မှတ်ထားလိုက်ပါ!
+  </p>
+  <p>
+    အခု <strong>Desktop</strong> ပေါ် ပြန်ရောက်နေပြီဆိုရင် <code>ls</code> လို့
+    ရိုက်ကြည့်ပါ။ ကိုယ့် <strong>Desktop</strong> ပေါ်မှာ တကယ်ရှိနေတဲ့
+    ဖိုင်တွေကို မြင်ရတယ်မလား?
+  </p>
+  <p>
+    အခု <strong>Folder</strong> အသစ်တစ်ခု ဆောက်ကြည့်ရအောင်။ အောက်ပါအတိုင်း
+    ရိုက်ပါ -
+  </p>
+
+  <div class="code-snippet-box animate-up">
+    <pre>mkdir projects
+ls</pre>
+</div>
+
+  <p>
+    <code>mkdir</code> ဆိုတာ <strong>"Make Directory"</strong> ပါ။ Folder
+    အသစ်ဆောက်တာကို ဆိုလိုပါတယ်။ <strong>projects</strong> ဆိုတဲ့ folder လေး
+    ဆောက်လိုက်တာပါ။
+  </p>
+
+  <div class="pro-tip-wrapper">
+    <!-- 🔥 စိန်ပုံ Badge (၎င်းကို အပြင်မှာ ထားလိုက်သည့်အတွက် လုံးဝ မလှုပ်တော့ပါ) -->
+    <div class="tip-diamond-badge">
+        <i class="fas fa-gem"></i>
+    </div>
+
+    <!-- ၁။ ပိတ်ထားစဉ် Pill -->
+    <div id="tip-pill-01" class="pro-tip-pill animate-up" onclick="toggleProTipPro('tip-pill-01', 'tip-box-01')">
+        <span>SHOW PRO TIP</span>
+    </div>
+
+    <!-- ၂။ ပွင့်နေစဉ် Box -->
+    <div id="tip-box-01" class="pro-tip-expanded-box">
+        <h5 onclick="toggleProTipPro('tip-pill-01', 'tip-box-01')">HIDE PRO TIP</h5>
+        <p>
+            Terminal ထဲမှာ ရိုက်ထားသမျှကို ရှင်းလင်းချင်ရင် <code>clear</code> လို့ ရိုက်နိုင်ပါတယ်။ 
+            ဒါဟာ အလုပ်တွေကို ဖျက်ပစ်တာ မဟုတ်ဘဲ မျက်နှာပြင်ကို ရှင်းလင်းသွားစေတာ ဖြစ်ပါတယ်။
+        </p>
+    </div>
+</div>
+
+  <p>
+    အခု <strong>Command Line</strong> ကို <strong>Minimize</strong> လုပ်ပြီး
+    ကိုယ့်ကွန်ပျူတာ <strong>Desktop</strong> ကို သွားကြည့်လိုက်ပါ။
+    <strong>projects</strong> ဆိုတဲ့ folder လေး ရောက်နေတာကို တွေ့ရပါလိမ့်မယ်။
+    ဒါကို ကြည့်ခြင်းအားဖြင့် <strong>Command Line</strong> မှာ မင်းလုပ်လိုက်တဲ့
+    အရာတွေဟာ ကွန်ပျူတာထဲမှာ တကယ် ဖြစ်ပျက်သွားတယ်ဆိုတာ သိနိုင်ပါတယ်။ ဒီ
+    <strong>projects</strong> folder ထဲမှာပဲ တစ်သင်တန်းလုံးက အလုပ်တွေကို
+    သိမ်းသွားမှာပါ။
+  </p>
+  <p>
+    အခု <strong>projects</strong> ထဲကို ဝင်ပြီး <strong>Run Buddy</strong> အတွက်
+    folder ထပ်ဆောက်မယ် -
+  </p>
+
+  <div class="code-snippet-box animate-up">
+    <pre>cd projects
+mkdir run-buddy
+cd run-buddy
+pwd</pre>
+  </div>
+
+  <p>
+    အခု <code>touch</code> command ကို သုံးပြီး <strong>Files</strong> တွေ
+    ဆောက်ကြည့်ရအောင် -
+  </p>
+  <div class="code-snippet-box animate-up">
+    <pre>touch hello.txt
+touch index.html
+ls</pre>
+</div>
+
+  <p>
+    <code>touch</code> ဆိုတာ <strong>File</strong> အသစ်တွေ ဆောက်ဖို့ သုံးတာပါ။
+    အခု စာသားဖိုင် (<strong>hello.txt</strong>) နဲ့ HTML ဖိုင်
+    (<strong>index.html</strong>) ကို ဆောက်လိုက်တာပါ။
+  </p>
+  <div class="important-container animate-up">
+    <div class="important-label">IMPORTANT</div>
+    <div class="important-body">
+        <p>ဖိုင်နာမည်ပေးတဲ့အခါ <strong>Lowercase</strong> (စာလုံးအသေး) တွေပဲ သုံးဖို့ သေချာပါစေ။ <code>index.html</code> နဲ့ <code>Index.html</code> ဟာ မတူပါဘူး။</p>
+    </div>
+  </div>
+
+
+  <p>
+    စာသားဖိုင်က မလိုတော့ဘူးဆိုရင် <code>rm</code> command နဲ့ ဖျက်လို့ရပါတယ်။
+  </p>
+  <div class="code-snippet-box animate-up">
+    <pre>rm hello.txt
+ls</pre>
+</div>
+  <p>
+    <code>rm</code> ဆိုတာ <strong>Remove</strong> ကို ပြောတာပါ။ ဒါဆိုရင် ဖိုင်က
+    အပြီးပျက်သွားပါလိမ့်မယ်။
+  </p>
+  <h3>Summary (အနှစ်ချုပ်)</h3>
+  <p>အခုဆိုရင် မင်း အောက်ပါ <strong>Commands</strong> တွေကို သိသွားပါပြီ -</p>
+  <ul>
+    <li><code>pwd</code>: လက်ရှိ ဘယ်နေရာ ရောက်နေလဲဆိုတာ ပြပါ။</li>
+    <li><code>ls</code>: Folder ထဲမှာ ရှိသမျှကို စာရင်းပြပါ။</li>
+    <li><code>cd [နာမည်]</code>: သတ်မှတ်ထားတဲ့ Folder ထဲကို ဝင်ပါ။</li>
+    <li><code>cd ..</code>: အနောက် (အပေါ်) ကို တစ်ဆင့် ပြန်ထွက်ပါ။</li>
+    <li><code>mkdir [နာမည်]</code>: Folder အသစ် ဆောက်ပါ။</li>
+    <li><code>touch [နာမည်]</code>: File အသစ် ဆောက်ပါ။</li>
+    <li><code>rm [နာမည်]</code>: File ကို ဖျက်ပါ။</li>
+  </ul>
+  <div class="deep-dive-btn" onclick="toggleAccordion('dive-1')">
+    DEEP DIVE <i class="fas fa-chevron-down"></i>
+  </div>
+  <div id="dive-1" class="accordion-body">
+    <div
+      style="
+        /* background-color: #005682; */
+        color: white;
+        padding: 15px;
+        margin: 15px 0;
+        border-radius: 5px;
+      "
+    >
+      <p><strong>🌊 DEEP DIVE</strong></p>
+      <p>
+        အောက်မှာပေးထားတဲ့ တခြားအသုံးဝင်တဲ့ <strong>Commands</strong> တွေက
+        ဘာတွေလုပ်ပေးနိုင်သလဲဆိုတာကို အင်တာနက်မှာ ရှာဖွေပြီး ထပ်မံလေ့လာကြည့်ပါ -
+      </p>
+      <p><strong>Code</strong></p>
+      <ul>
+        <li>
+          <strong>cp</strong> : File ဒါမှမဟုတ် Folder တွေကို
+          <strong>Copy</strong> ကူးဖို့ သုံးပါတယ်။
+        </li>
+        <li>
+          <strong>mv</strong> : File တွေကို တစ်နေရာကနေ တစ်နေရာကို ရွှေ့ဖို့
+          (<strong>Move</strong>) ဒါမှမဟုတ် ဖိုင်နာမည်ပြောင်းဖို့ သုံးပါတယ်။
+        </li>
+        <li>
+          <strong>rm -R</strong> : Folder တစ်ခုလုံးနဲ့ အထဲမှာရှိသမျှ
+          အရာအားလုံးကို အဆင့်ဆင့် ဖျက်ပစ်ဖို့ (<strong>Recursive Remove</strong
+          >) သုံးပါတယ်။ (အကုန်ပျက်သွားမှာဖြစ်လို့ သတိထားသုံးရမယ့် Command ပါ)
+        </li>
+        <li>
+          <strong>open .</strong> (macOS အတွက်) : အခုရောက်နေတဲ့
+          <strong>Directory</strong> ကို <strong>Finder</strong> ထဲမှာ
+          ဖွင့်ပေးမှာပါ။
+        </li>
+        <li>
+          <strong>explorer .</strong> (Windows အတွက်) : အခုရောက်နေတဲ့
+          <strong>Directory</strong> ကို <strong>File Explorer</strong> (ပုံမှန်
+          Folder ကြည့်တဲ့ Window) ထဲမှာ ဖွင့်ပေးမှာပါ။
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <p>
+    <strong>Command Line</strong> အခြေခံတွေ သိသွားပြီဆိုတော့
+    <strong>HTML</strong> တွေ စထည့်ဖို့ အဆင်သင့် ဖြစ်ပါပြီ!
+  </p>
 </div>

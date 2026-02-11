@@ -2,7 +2,7 @@
   <!-- 🔥 ဒီလို class လေးနဲ့ အုပ်ပေးပါ -->
   <div class="lesson-banner no-print">
     <div class="banner-bg-icons">
-        <!-- <div class="icon-circle">
+      <!-- <div class="icon-circle">
             <img src="/assets/icons/html-logo.png" alt="HTML">
         </div> -->
       <div class="icon-circle"><i class="fas fa-code"></i></div>
@@ -12,28 +12,520 @@
       <div class="icon-circle"><i class="fab fa-js"></i></div>
       <div class="icon-circle"><i class="fab fa-react"></i></div>
       <div class="icon-circle"><i class="fab fa-html5"></i></div>
-    <div class="icon-circle"><i class="fab fa-css3-alt"></i></div>
-    <div class="icon-circle"><i class="fab fa-git-alt"></i></div>
-    <div class="icon-circle"><i class="fas fa-terminal"></i></div>
+      <div class="icon-circle"><i class="fab fa-css3-alt"></i></div>
+      <div class="icon-circle"><i class="fab fa-git-alt"></i></div>
+      <div class="icon-circle"><i class="fas fa-terminal"></i></div>
     </div>
     <div class="lesson-info-bar">
       <div class="lesson-id-badge">1.0</div>
-      <div class="lesson-banner-title">
-        HTML, CSS, and Git
-      </div>
+      <div class="lesson-banner-title">Introduction to Module 1</div>
     </div>
   </div>
 
-  <h1>Module 1: HTML, CSS, and Git ကို စတင်ခြင်း</h1>
-<p>၁၉၉၀ ခုနှစ်တွေတုန်းက ကမ္ဘာပေါ်မှာ ထူးခြားတဲ့ အပြောင်းအလဲတွေ အများကြီး ရှိခဲ့ပါတယ်။ အဲ့ဒီထဲမှာ အရေးအကြီးဆုံးကတော့ ဆယ်စုနှစ်ပေါင်းများစွာ တဖြည်းဖြည်း တိုးတက်လာခဲ့တဲ့ <strong>Internet</strong> ကနေ <strong>World Wide Web</strong> ဆိုတာ ပေါ်ပေါက်လာတာပါပဲ။</p>
-<p>ဒီ <strong>Web</strong> ကြောင့်ပဲ သတင်းအချက်အလက်တွေကို အလွယ်တကူ မျှဝေနိုင်လာတယ်၊ ဖျော်ဖြေရေး ပုံစံသစ်တွေ ပေါ်လာတယ်၊ ကမ္ဘာ့စီးပွားရေး စနစ်သစ်တွေ ဖြစ်ပေါ်လာပြီး လူမှုကွန်ရက်ပေါ်က <strong>Cat memes</strong> တွေအထိ လူသားတွေရဲ့ နေထိုင်မှုပုံစံကို ပြောင်းလဲပေးခဲ့ပါတယ်။</p>
-<p>ဒါတင်မကသေးပါဘူး၊ ဒီ <strong>Web</strong> ဟာ မင်းတို့အတွက် <strong>Web Developer</strong> တစ်ယောက် ဖြစ်လာဖို့ အနာဂတ် အလုပ်အကိုင် လမ်းကြောင်းကိုလည်း ဖန်တီးပေးလိုက်တာပါ။ ဒီ <strong>Module</strong> မှာဆိုရင် အခုလို ခေတ်သစ်ကို ဖြစ်ပေါ်စေခဲ့တဲ့ အခြေခံ နည်းပညာတွေဖြစ်တဲ့ <strong>HTML</strong>၊ <strong>CSS</strong> နဲ့ <strong>Git</strong> တို့ကို ကျွမ်းကျင်အောင် စတင် လေ့လာရမှာ ဖြစ်ပါတယ်။</p>
-<p>ဒီအပတ်မှာ ဘာတွေ သင်ယူရမလဲဆိုတာ ပိုသိစေဖို့ အောက်က <strong>Video</strong> ကို ကြည့်လိုက်ရအောင်။</p>
+  <h1>HTML, CSS, and Git</h1>
+  <p>
+    ၁၉၉၀ ပြည့်လွန်နှစ်တွေမှာ ထူးခြားတဲ့အပြောင်းအလဲတွေ အများကြီး ရှိခဲ့ပါတယ်။
+    ဆယ်စုနှစ်ပေါင်းများစွာ တဖြည်းဖြည်း တိုးတက်လာခဲ့တဲ့
+    <strong>Internet</strong> ကနေ <strong>World Wide Web</strong> ဆိုတာ
+    ပေါ်ပေါက်လာခဲ့တာပါ။ ဒီ <strong>Web</strong> ကြောင့်ပဲ သတင်းအချက်အလက်တွေကို
+    အကြီးအကျယ် မျှဝေနိုင်လာတယ်၊ ဖျော်ဖြေရေး ပုံစံသစ်တွေ ပေါ်လာတယ်၊
+    ကမ္ဘာ့စီးပွားရေး စနစ်သစ်တွေ ဖြစ်ပေါ်လာသလို လူသားတွေရဲ့ နေထိုင်မှုပုံစံကို
+    ပြောင်းလဲပေးခဲ့တဲ့ <strong>Cat memes</strong> တွေအထိ ပေါ်ပေါက်လာခဲ့ပါတယ်။
+  </p>
+  <p>
+    ဒီ <strong>Web</strong> နည်းပညာဟာ မင်းတို့အတွက်
+    <strong>Web Developer</strong> တစ်ယောက် ဖြစ်လာဖို့ အနာဂတ် အလုပ်အကိုင်
+    လမ်းကြောင်းကိုလည်း ဖန်တီးပေးလိုက်တာပါ။ ဒီ <strong>Module</strong> မှာဆိုရင်
+    အခုလို ခေတ်သစ်ကို ဖြစ်ပေါ်စေခဲ့တဲ့ အခြေခံနည်းပညာတွေဖြစ်တဲ့
+    <strong>HTML</strong>၊ <strong>CSS</strong> နဲ့ <strong>Git</strong> တို့ကို
+    ကျွမ်းကျင်အောင် စတင်လေ့လာရမှာ ဖြစ်ပါတယ်။
+  </p>
+  <p>
+    ဒီအပတ်မှာ ဘာတွေ မျှော်လင့်ထားလို့ရမလဲဆိုတာ ပိုသိစေဖို့ အောက်က
+    <strong>Video</strong> ကို ကြည့်လိုက်ရအောင်။
+  </p>
 
-<div class="video-lesson-container">
-    <span class="video-tag-label"><i class="fas fa-video"></i> Video Guide</span>
+  <div class="video-lesson-container">
+    <span class="video-tag-label"
+      ><i class="fas fa-video"></i> Video Guide</span
+    >
     <div class="video-wrapper">
-        <iframe width="560" height="315" src="https://www.youtube.com/embed/8zsbUyt4jzo?si=LXXdkdR1SLdmar1O" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+      <iframe
+        width="560"
+        height="315"
+        src="https://www.youtube.com/embed/8zsbUyt4jzo?si=LXXdkdR1SLdmar1O"
+        title="YouTube video player"
+        frameborder="0"
+        allow="
+          accelerometer;
+          autoplay;
+          clipboard-write;
+          encrypted-media;
+          gyroscope;
+          picture-in-picture;
+          web-share;
+        "
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen
+      ></iframe>
     </div>
-</div>
+  </div>
+
+  <h2>Roadmap</h2>
+  <h3>ဒီအပတ်ရဲ့ Challenge</h3>
+  <img src="/assets/bootcamp-mm/Coding-Roadmap-M1.png" class="lms-img img-l" />
+  <p>
+    ဒီအပတ်အကုန်မှာ <strong>Challenge assignment</strong> တစ်ခုကို လုပ်ရပါမယ်။
+    အဲ့ဒါကတော့ ရှိပြီးသား <strong>webpage</strong> တစ်ခုကို
+    <strong>Web Accessibility Standards</strong> (မသန်စွမ်းသူတွေပါ အဆင်ပြေပြေ
+    သုံးနိုင်တဲ့ စံနှုန်းများ) နဲ့ ကိုက်ညီအောင် ပြင်ဆင်ရမှာပါ။ ဆိုလိုတာက
+    အမြင်အာရုံ ချို့တဲ့သူတွေသုံးတဲ့ <strong>screen readers</strong> လိုမျိုး
+    <strong>assistive technology</strong> တွေနဲ့ ဖတ်လို့ရအောင် လုပ်ပေးရမှာ
+    ဖြစ်သလို၊ <strong>code</strong> တွေကိုလည်း ပိုပြီး သေသပ်ကောင်းမွန်အောင်
+    ရှင်းလင်းရမှာ ဖြစ်ပါတယ်။
+  </p>
+  <p>
+    ဒီ <strong>challenge</strong> ကို အောင်အောင်မြင်မြင် လုပ်နိုင်ဖို့ အောက်ပါ
+    <strong>skills</strong> တွေကို အသုံးချရပါမယ် -
+  </p>
+  <ul>
+    <li>
+      <strong>HTML</strong> နဲ့ <strong>CSS</strong> ရဲ့ ကွာခြားချက်၊
+      တစ်ခုချင်းစီရဲ့ အလုပ်လုပ်ပုံနဲ့ ၎င်းတို့ အပြန်အလှန် ချိတ်ဆက်ပုံကို သိရမယ်။
+    </li>
+    <li>
+      <strong>Semantic HTML</strong> အကြောင်းနဲ့
+      <strong>HTML files</strong> တွေကို စနစ်တကျ တည်ဆောက်တဲ့
+      <strong>best practices</strong> တွေကို နားလည်ရမယ်။
+    </li>
+    <li>
+      <strong>Screen readers</strong> တွေက <strong>page</strong> ရဲ့
+      အကြောင်းအရာကို သေချာဖတ်ပြနိုင်အောင်
+      <strong>accessibility standards</strong> နဲ့အညီ
+      <strong>HTML elements</strong> တွေကို ဖွဲ့စည်းရမယ်။
+    </li>
+    <li>
+      <strong>CSS files</strong> တွေကို စနစ်တကျ ရေးသားတဲ့ နည်းလမ်းတွေကို
+      လိုက်နာရမယ်။
+    </li>
+    <li>
+      <strong>Code</strong> ကို ဖတ်ရလွယ်အောင် <strong>CSS files</strong> ထဲမှာ
+      <strong>comments</strong> တွေ ထည့်တတ်ရမယ်။
+    </li>
+    <li>
+      ကိုယ့်ရဲ့ <strong>webpage</strong> ကို အင်တာနက်ပေါ် တင်ဖို့ (<strong
+        >publish</strong
+      >
+      လုပ်ဖို့) <strong>GitHub Pages</strong> ကို သုံးတတ်ရမယ်။
+    </li>
+  </ul>
+  <p>
+    ဒါတွေက အခုလောလောဆယ် အစိမ်းသက်သက် ဖြစ်နေရင်လည်း မစိုးရိမ်ပါနဲ့။ ဒီအပတ်ရဲ့
+    သင်ခန်းစာတွေမှာ <strong>Run Buddy</strong> ဆိုတဲ့
+    <strong>landing page</strong> လေးကို တည်ဆောက်ရင်း ဒါတွေကို တစ်ဆင့်ချင်း
+    သင်ယူသွားရမှာပါ။
+  </p>
+  <h2>မင်းတို့ ဘာတွေ သင်ယူရမလဲ?</h2>
+  <p>
+    ဒီ <strong>module</strong> အပြီးမှာတော့ အောက်ပါအချက်တွေကို
+    တတ်မြောက်သွားမှာပါ -
+  </p>
+  <ul>
+    <li>
+      <strong>Semantic HTML</strong> နဲ့ <strong>CSS</strong> ကို သုံးပြီး
+      <strong>static webpages</strong> တွေ တည်ဆောက်တတ်မယ်။
+    </li>
+    <li>
+      <strong>HTML files</strong> တွေ ရေးတဲ့အခါ
+      <strong>nested elements</strong>၊ <strong>indentation</strong>၊
+      <strong>comments</strong> နဲ့ <strong>line breaks</strong> စတဲ့
+      စံနှုန်းတွေကို လိုက်နာတတ်မယ်။
+    </li>
+    <li>
+      <strong>External stylesheets</strong>၊ <strong>inline styles</strong> နဲ့
+      <strong>embedded style tags</strong> တွေကို သုံးပြီး
+      <strong>class</strong>၊ <strong>id</strong> နဲ့
+      <strong>element selectors</strong> တွေနဲ့
+      <strong>CSS styling</strong> လုပ်တတ်မယ်။
+    </li>
+    <li>
+      <strong>Cascading Style Sheets</strong> ရဲ့
+      <strong>“cascade”</strong> အလုပ်လုပ်ပုံကို ရှင်းပြနိုင်မယ်။
+    </li>
+    <li>
+      <strong>CSS Box Model</strong> ကို သုံးပြီး <strong>space</strong> နဲ့
+      <strong>margin</strong> တွေကို သတ်မှတ်တတ်မယ်။
+    </li>
+  </ul>
+  <ul>
+    <li>
+      <strong>Version control</strong> ရဲ့ အရေးပါပုံကို သိပြီး
+      <strong>Git workflow</strong> သုံးကာ <strong>projects</strong> တွေ စတင်တာ၊
+      <strong>changes</strong> တွေကို မှတ်တမ်းတင်တာနဲ့
+      <strong>remote server</strong> ပေါ် တင်တာတွေ လုပ်တတ်မယ်။
+    </li>
+    <li>
+      <strong>Command line</strong> သုံးပြီး
+      <strong>operating system</strong> နဲ့ ချိတ်ဆက် ခိုင်းစေတတ်မယ်။
+    </li>
+    <li>
+      <strong>GitHub Pages</strong> သုံးပြီး
+      <strong>live deployment</strong> (အင်တာနက်ပေါ် တင်ခြင်း) လုပ်တတ်မယ်။
+    </li>
+    <li>
+      <strong>HTML</strong> နဲ့ <strong>CSS issues</strong> တွေကို ဘယ်လို
+      <strong>debug</strong> လုပ်ရမလဲဆိုတာ သိမယ်။
+    </li>
+    <li>
+      <strong>HTML attributes</strong> တွေအကြောင်း၊ အထူးသဖြင့်
+      <strong>form elements</strong> တွေမှာ ဘယ်လို သက်ရောက်မှု ရှိလဲဆိုတာ
+      ရှင်းပြနိုင်မယ်။
+    </li>
+    <li>
+      <strong>Positioning</strong> နဲ့ <strong>floats</strong> တွေကို သုံးပြီး
+      <strong>CSS layouts</strong> တွေကို ထိန်းချုပ်တတ်မယ်။
+    </li>
+  </ul>
+  <h2>Weekly Tip: သင်တန်းကို ကိုယ်ပိုင် တန်ဖိုးထားမှုတွေနဲ့ ချိတ်ဆက်ပါ</h2>
+  <p>
+    ပထမဆုံး အပတ်မှာတော့ <strong>Personal Values</strong> (ကိုယ်ပိုင်
+    တန်ဖိုးထားမှုများ) အကြောင်း ပြောချင်ပါတယ်။ ကျွန်တော်တို့မှာ ဘဝရဲ့
+    ဆုံးဖြတ်ချက်တွေကို လွှမ်းမိုးနေတဲ့ မိသားစု၊ အောင်မြင်မှု၊
+    တီထွင်ဖန်တီးနိုင်မှု စတဲ့ တန်ဖိုးထားမှုတွေ ရှိကြပါတယ်။
+  </p>
+  <p>
+    ဒီသင်တန်းကို ဘာကြောင့် တက်ဖို့ ဆုံးဖြတ်ခဲ့တာလဲဆိုတာကို ကိုယ့်ရဲ့
+    တန်ဖိုးထားမှုတွေနဲ့ ချိတ်ဆက်ကြည့်ရင် ပင်ပန်းတဲ့အခါမှာလည်း နောက်မဆုတ်ဘဲ
+    ဆက်သွားနိုင်ဖို့ အားဖြစ်စေပါတယ်။ ဥပမာ -
+  </p>
+  <ul>
+    <li>
+      <strong>Adventurousness</strong> (စွန့်စားလိုစိတ်) ကို တန်ဖိုးထားရင်
+      နည်းပညာအသစ်တွေကို လေ့လာရတာဟာ ခရီးသစ်တစ်ခု သွားနေရသလို ခံစားရပါလိမ့်မယ်။
+    </li>
+    <li>
+      <strong>Family</strong> (မိသားစု) ကို တန်ဖိုးထားရင် ဒီပညာရပ်က
+      ကိုယ့်မိသားစုကို ပိုကောင်းတဲ့ ဘဝတစ်ခု ပေးနိုင်မယ်လို့ တွေးပြီး
+      ကြိုးစားနိုင်ပါတယ်။
+    </li>
+  </ul>
+  <h2>အချိန်ဇယား ဆွဲခြင်း</h2>
+  <p>
+    ဒီ <strong>module</strong> မှာ သင်ခန်းစာ ၇ ခု ပါဝင်ပါတယ်။ အချိန်ကို
+    အောက်ပါအတိုင်း စီစဉ်ထားပါ -
+  </p>
+  <ul>
+    <li>
+      <strong>ပထမဆုံး Virtual Class</strong> မတိုင်ခင် သင်ခန်းစာ (Lesson) ၁ နဲ့
+      ၂ ကို အပြီးလေ့လာထားပါ။
+    </li>
+    <li>
+      <strong>ဒုတိယမြောက် Virtual Class</strong> မတိုင်ခင် သင်ခန်းစာ ၃၊ ၄ နဲ့ ၅
+      ကို အပြီးလေ့လာထားပါ။
+    </li>
+    <li>
+      <strong>Challenge assignment</strong> ကို အပတ်စဉ် အစကတည်းက ကြိုကြည့်ထားပါ။
+      ကြိုက်တဲ့အချိန်မှာ စလုပ်လို့ ရပါတယ်။
+    </li>
+  </ul>
+  <p>
+    ဒီပထမဆုံး <strong>module</strong> ကတော့ အသစ်အဆန်းတွေ၊
+    <strong>tools</strong> တွေ အများကြီး မိတ်ဆက်ရမှာ ဖြစ်လို့ နည်းနည်း
+    ပိုရှည်ပါလိမ့်မယ်။ နောက်ပိုင်း <strong>modules</strong> တွေမှာတော့
+    သင်တန်းသားတွေ လက်ယဉ်သွားမှာ ဖြစ်လို့ ပိုပြီး တိုတိုရှင်းရှင်း ဖြစ်လာမှာပါ။
+  </p>
+
+  <h2>Getting Ready for Class (အတန်းအတွက် ပြင်ဆင်ခြင်း)</h2>
+  <p>
+    ဒီအပတ်ရဲ့ <strong>Virtual Classes</strong> တွေမှာ ကိုယ်တိုင်
+    လက်တွေ့လေ့ကျင့်နိုင်ဖို့နဲ့ မရှင်းတာတွေကို ဆရာတွေကို မေးမြန်းနိုင်ဖို့အတွက်
+    ကြိုတင်ပြင်ဆင်ထားရအောင်။
+  </p>
+  <p>
+    အောက်ပါ <strong>starter files</strong> တွေကို အတန်းမစခင် သေချာ
+    <strong>download</strong> ဆွဲထားပါ။ အတန်းမတိုင်ခင် အပြီးလုပ်ထားဖို့
+    မလိုပေမဲ့ ဘာတွေသင်မလဲဆိုတာ ကြိုကြည့်ထားရင် ပိုကောင်းပါတယ်။
+  </p>
+  <h3>Virtual Class 1</h3>
+  <p>အတန်းမစခင် အောက်ပါဖိုင်များကို <strong>download</strong> လုပ်ထားပါ -</p>
+  <div class="academic-box">
+    <h4><i class="fas fa-cloud-download-alt"></i> Download Resources</h4>
+    <ul class="download-links">
+      <li>
+        <a href="/content/bootcamp-mm/foundation/mod1/01-HTML.zip" download
+          >01-HTML<i class="fas fa-external-link-alt"></i
+        ></a>
+      </li>
+      <li>
+        <a
+          href="/content/bootcamp-mm/foundation/mod1/02-Attributes.zip"
+          download
+          >02-Attributes<i class="fas fa-external-link-alt"></i
+        ></a>
+      </li>
+      <li>
+        <a href="/content/bootcamp-mm/foundation/mod1/Git-Guide.zip" download
+          >Git Guide<i class="fas fa-external-link-alt"></i
+        ></a>
+      </li>
+    </ul>
+  </div>
+  <p>
+    <strong>Git Guide</strong> ဗီဒီယိုကို ကြည့်ပြီး ဒီ
+    <strong>module</strong> မှာ ပါဝင်တဲ့ <strong>Git</strong> ရဲ့ အခြေခံ
+    သဘောတရားတွေကို လေ့လာထားပါ။
+  </p>
+  <div class="video-lesson-container animate-up">
+    <span class="video-tag-label"
+      ><i class="fas fa-video"></i> Video Guide</span
+    >
+    <div class="video-wrapper">
+      <iframe
+        width="560"
+        height="315"
+        src="https://www.youtube.com/embed/cBosUoJAxbg?si=4oiVSTSQhefFr6Ft"
+        title="YouTube video player"
+        frameborder="0"
+        allow="
+          accelerometer;
+          autoplay;
+          clipboard-write;
+          encrypted-media;
+          gyroscope;
+          picture-in-picture;
+          web-share;
+        "
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen
+      ></iframe>
+    </div>
+  </div>
+
+  <h3>Virtual Class 2</h3>
+  <p>အတန်းမစခင် အောက်ပါဖိုင်များကို <strong>download</strong> လုပ်ထားပါ -</p>
+  <div class="academic-box">
+    <h4><i class="fas fa-cloud-download-alt"></i> Download Resources</h4>
+    <ul class="download-links">
+      <li>
+        <a
+          href="/content/bootcamp-mm/foundation/mod1/03-CSS-Selectors.zip"
+          download
+          >03-CSS-Selectors<i class="fas fa-external-link-alt"></i
+        ></a>
+      </li>
+      <li>
+        <a href="/content/bootcamp-mm/foundation/mod1/04-Box-Model.zip" download
+          >04-Box-Model<i class="fas fa-external-link-alt"></i
+        ></a>
+      </li>
+      <li>
+        <a
+          href="/content/bootcamp-mm/foundation/mod1/05-CSS-Positioning.zip"
+          download
+          >05-CSS-Positioning<i class="fas fa-external-link-alt"></i
+        ></a>
+      </li>
+    </ul>
+  </div>
+  <h3>Code Review Videos</h3>
+  <p>
+    သင်ခန်းစာတွေရဲ့ လက်တွေ့အသုံးချပုံကို
+    <strong>Code Review</strong> ဗီဒီယိုတွေကနေတစ်ဆင့် လေ့လာနိုင်ပါတယ်။
+  </p>
+  <div class="video-lesson-container animate-up">
+    <span class="video-tag-label"
+      ><i class="fas fa-video"></i> Video Guide</span
+    >
+    <div class="video-wrapper">
+      <iframe
+        width="560"
+        height="315"
+        src="https://www.youtube.com/embed/wRTBjCH-7ME?si=7AHgbp39VAG4cl0_"
+        title="YouTube video player"
+        frameborder="0"
+        allow="
+          accelerometer;
+          autoplay;
+          clipboard-write;
+          encrypted-media;
+          gyroscope;
+          picture-in-picture;
+          web-share;
+        "
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen
+      ></iframe>
+    </div>
+  </div>
+
+  <div class="video-lesson-container animate-up">
+    <span class="video-tag-label"
+      ><i class="fas fa-video"></i> Video Guide</span
+    >
+    <div class="video-wrapper">
+      <iframe
+        width="560"
+        height="315"
+        src="https://www.youtube.com/embed/UaS1zMHIxnM?si=NCR3s0s00QDHQcCu"
+        title="YouTube video player"
+        frameborder="0"
+        allow="
+          accelerometer;
+          autoplay;
+          clipboard-write;
+          encrypted-media;
+          gyroscope;
+          picture-in-picture;
+          web-share;
+        "
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen
+      ></iframe>
+    </div>
+  </div>
+
+  <h3>Full-Stack Blog Posts</h3>
+  <p>
+    ထပ်မံလေ့လာဖို့အတွက် အောက်ပါ <strong>resources</strong> တွေကိုလည်း
+    အသုံးပြုနိုင်ပါတယ် -
+  </p>
+  <ul>
+    <li>
+      <strong>Getting Started with Git</strong> (Git စတင်အသုံးပြုပုံ)<a
+        href="https://coding-boot-camp.github.io/full-stack/git/getting-started-with-git"
+        target="_blank"
+        rel="noopener noreferrer"
+        >Getting Started with GitLinks</a
+      >
+    </li>
+    <li>
+      <strong>Professional README Guide</strong> (Project ဖော်ပြချက်
+      ရေးသားနည်းလမ်းညွှန်)
+      <a
+        href="https://coding-boot-camp.github.io/full-stack/github/professional-readme-guide"
+        target="_blank"
+        rel="noopener noreferrer"
+        >Professional README GuideLinks</a
+      >
+    </li>
+    <li>
+      <strong>Full-Stack Blog HTML Cheatsheet</strong> (HTML အတိုကောက်
+      မှတ်စုများ)
+      <a
+        href="https://coding-boot-camp.github.io/full-stack/html/html-cheatsheet"
+        target="_blank"
+        rel="noopener noreferrer"
+        >Full-Stack Blog HTML CheatsheetLinks</a
+      >
+    </li>
+  </ul>
+
+  <h1>Up and Running</h1>
+  <h2>Module Project: Run Buddy</h2>
+  <p>
+    ဒီ Module မှာ <strong>HTML</strong> နဲ့ <strong>CSS</strong> ကို သင်ယူရင်း
+    <strong>Run Buddy</strong> ဆိုတဲ့ ဝန်ဆောင်မှုအတွက်
+    <strong>landing page</strong> တစ်ခုကို ကိုယ်တိုင် ဖန်တီးရမှာပါ။ မင်းရဲ့
+    <strong>code</strong> တွေကို <strong>Git</strong> (version control system)
+    သုံးပြီး စနစ်တကျ စီမံခန့်ခွဲသွားမယ်။ အားလုံးပြီးသွားရင်တော့
+    <strong>GitHub Pages</strong> ကို သုံးပြီး မင်းရဲ့ လက်ရာကို အင်တာနက်ပေါ်မှာ
+    <strong>deploy</strong> လုပ် (တင်) သွားမှာပါ။
+  </p>
+
+  <div class="video-lesson-container animate-up">
+    <span class="video-tag-label"
+      ><i class="fas fa-video"></i> Video Guide</span
+    >
+    <div class="video-wrapper">
+      <iframe
+        width="560"
+        height="315"
+        src="https://www.youtube.com/embed/EDHowSsLNUg?si=I7RLJZ3mvo1-Qzra"
+        title="YouTube video player"
+        frameborder="0"
+        allow="
+          accelerometer;
+          autoplay;
+          clipboard-write;
+          encrypted-media;
+          gyroscope;
+          picture-in-picture;
+          web-share;
+        "
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen
+      ></iframe>
+    </div>
+  </div>
+
+  <h2>Getting Ready (စတင်ဖို့ ပြင်ဆင်ကြစို့)</h2>
+  <p>
+    ဒီ Module မှာ အသုံးပြုမယ့် <strong>tools</strong> တွေရဲ့ စာရင်းပါ။ အကယ်၍
+    <strong>prework</strong> လုပ်ခဲ့ရင် အချို့က
+    <strong>install</strong> လုပ်ပြီးသား ဖြစ်နေပါလိမ့်မယ်။ အသစ်တွေဆိုရင်တော့
+    သင်ခန်းစာထဲမှာမှ တစ်ဆင့်ချင်း <strong>install</strong> လုပ်သွားမှာမို့
+    အခုချက်ချင်း လုပ်စရာမလိုသေးပါဘူး။
+  </p>
+  <p>အသုံးပြုမယ့် <strong>tools</strong> များမှာ -</p>
+  <ul>
+    <li>
+      <a
+        href="https://www.google.com/chrome/"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><strong>Google Chrome</strong></a
+      ><strong>project</strong> ကို စမ်းသပ်ဖို့နဲ့
+      <strong>debug</strong> လုပ်ဖို့ အဓိက သုံးမယ့်
+      <strong>web browser</strong> ဖြစ်ပါတယ်။
+    </li>
+    <li>
+      <strong>Chrome DevTools:</strong> <strong>Google Chrome</strong> ထဲမှာတင်
+      ပါပြီးသား <strong>tools</strong> တွေပါ။ <strong>web page</strong> တွေကို
+      ချက်ချင်းပြင်ကြည့်တာနဲ့ ပြဿနာတွေကို ရှာဖွေ (<strong>debug</strong>) တာတွေ
+      လုပ်နိုင်ပါတယ်။
+    </li>
+    <li>
+      <strong>The command line:</strong>
+      <strong>graphical interface</strong> (ပုံတွေ၊ ခလုတ်တွေ) မလိုဘဲ စာသားနဲ့ပဲ
+      <strong>project</strong> တွေ တည်ဆောက်ဖို့နဲ့ ကွန်ပျူတာကို ခိုင်းစေဖို့
+      သုံးပါတယ်။
+    </li>
+    <li>
+      <strong>Git:</strong> ကိုယ်လုပ်ထားတဲ့ အလုပ်တွေကို မှတ်တိုင် (<strong
+        >save points</strong
+      >) အနေနဲ့ သိမ်းထားဖို့ သုံးတဲ့ စနစ်ပါ။ ဒါကို <strong>commits</strong> လို့
+      ခေါ်ပါတယ်။ လိုအပ်ရင် အရင် <strong>version</strong> ဆီ ပြန်သွားလို့လည်း
+      ရပါတယ်။
+    </li>
+    <li>
+      <a
+        href="https://code.visualstudio.com/"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><strong>Visual Studio (VS) Code:</strong></a
+      ><strong>code</strong> တွေ ရေးဖို့ အခမဲ့ သုံးနိုင်တဲ့
+      <strong>text editor</strong> ဖြစ်ပါတယ်။
+    </li>
+    <li>
+      <a href="https://github.com/" target="_blank" rel="noopener noreferrer"
+        ><strong>GitHub:</strong></a
+      ><strong>Git</strong> ကို Windows မှာ သုံးဖို့
+      <strong>Git repositories</strong> တွေကို အင်တာနက်ပေါ်မှာ သိမ်းပေးတဲ့
+      <strong>website</strong> ဖြစ်ပါတယ်။ အခြားသူတွေနဲ့
+      <strong>code</strong> တွေ စုပေါင်းရေးသားဖို့လည်း သုံးပါတယ်။
+    </li>
+    <li>
+      <a
+        href="https://docs.github.com/en/pages"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <strong>GitHub Pages:</strong></a
+      >
+      <strong>GitHub</strong> ပေါ်က <strong>HTML, CSS</strong> နဲ့
+      <strong>JavaScript</strong> ဖိုင်တွေကို
+      <strong>live website</strong> တစ်ခုအဖြစ် အင်တာနက်ပေါ် တင်ပေးတဲ့
+      <strong>static site hosting service</strong> ဖြစ်ပါတယ်။
+    </li>
+  </ul>
 </div>

@@ -1,17 +1,23 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="my">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
     <title>Columbia Bootcamp MM - Pro</title>
-    <link rel="icon" type="image/png" href="assets/logo.png">
+    <link rel="icon" type="image/png" href="assets/logo.png" />
     <!-- Mobile Icon -->
-    <link rel="apple-touch-icon" href="assets/logo.png">
-    <link rel="manifest" href="/manifest.json">
-    <link rel="stylesheet" href="css/mobile.css">
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/allLessons.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="apple-touch-icon" href="assets/logo.png" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="stylesheet" href="css/mobile.css" />
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/allLessons.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
     <!-- Firebase SDKs -->
     <script src="/__/firebase/9.22.0/firebase-app-compat.js"></script>
     <script src="/__/firebase/9.22.0/firebase-auth-compat.js"></script>
@@ -20,127 +26,201 @@
 
     <!-- Firebase Storage SDK (ဒါလေးမပါရင် ပုံတင်လို့မရပါ) -->
     <script src="/__/firebase/9.22.0/firebase-storage-compat.js"></script>
-</head>
-<body>
+  </head>
+  <body>
     <!-- Announcement -->
     <div id="announcement-bar" class="announcement-container">
-        <div class="announcement-content">
-            <i class="fas fa-bullhorn"></i>
-            <div class="marquee">
-                <!-- 🔥 ဒီနေရာမှာ id ထည့်လိုက်ပါပြီ -->
-                <p id="announcement-text"></p> 
-            </div>
+      <div class="announcement-content">
+        <i class="fas fa-bullhorn"></i>
+        <div class="marquee">
+          <!-- 🔥 ဒီနေရာမှာ id ထည့်လိုက်ပါပြီ -->
+          <p id="announcement-text"></p>
         </div>
-        <button class="close-announcement" onclick="closeAnnouncement()">&times;</button>
+      </div>
+      <button class="close-announcement" onclick="closeAnnouncement()">
+        &times;
+      </button>
     </div>
 
     <div class="wrapper" id="app-wrapper" style="display: none">
-        <aside id="sidebar" class="sidebar">
-            <div class="sidebar-header">
-                <h3><i class="fas fa-graduation-cap"></i> Bootcamp Pro</h3>
-                <button class="icon-btn" onclick="toggleNav()">&times;</button>
+      <aside id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+          <h3><i class="fas fa-graduation-cap"></i> Bootcamp Pro</h3>
+          <button class="icon-btn" onclick="toggleNav()">&times;</button>
+        </div>
+        <nav class="nav-links">
+          <a href="javascript:void(0)" onclick="showSection('dashboard')"
+            ><i class="fas fa-th-large"></i> Dashboard</a
+          >
+          <a href="javascript:void(0)" onclick="showSection('courses_all')">
+            <i class="fas fa-layer-group"></i> သင်တန်းများအားလုံး
+          </a>
+          <a href="javascript:void(0)" onclick="showSection('courses')"
+            ><i class="fas fa-book-open"></i> သင်ခန်းစာများ</a
+          >
+          <a href="javascript:void(0)" onclick="showSection('resources')"
+            ><i class="fas fa-layer-group"></i> Resources</a
+          >
+          <a href="javascript:void(0)" onclick="showSection('messages')"
+            ><i class="fas fa-comments"></i> စာတိုပေးပို့ခြင်း</a
+          >
+          <a href="javascript:void(0)" onclick="showSection('profile')"
+            ><i class="fas fa-user-circle"></i> Profile</a
+          >
+          <a href="javascript:void(0)" onclick="showSection('showcase')"
+            ><i class="fas fa-rocket"></i> Showcase</a
+          >
+        </nav>
+        <!-- Sidebar Footer: Logout နေရာ -->
+        <div class="sidebar-footer" id="auth-section"></div>
+      </aside>
+
+      <main id="main-content" class="main-content">
+        <header class="top-nav">
+          <div class="nav-left">
+            <button class="menu-btn" onclick="toggleNav()">☰ Menu</button>
+
+            <!-- 🔥 ဒီနေရာမှာ page-title ရှိနေရပါမယ် -->
+            <h2 id="page-title">Dashboard</h2>
+
+            <!-- Global Search -->
+            <div class="search-box no-mobile">
+              <i class="fas fa-search"></i>
+              <input
+                type="text"
+                id="global-search"
+                placeholder="သင်ခန်းစာ ရှာဖွေရန်..."
+                oninput="handleSearch(this.value)"
+              />
+              <div id="search-results" class="search-dropdown"></div>
             </div>
-            <nav class="nav-links">
-                <a href="javascript:void(0)" onclick="showSection('dashboard')"><i class="fas fa-th-large"></i> Dashboard</a>
-                <a href="javascript:void(0)" onclick="showSection('courses_all')">
-                    <i class="fas fa-layer-group"></i> သင်တန်းများအားလုံး
-                </a>
-                <a href="javascript:void(0)" onclick="showSection('courses')"><i class="fas fa-book-open"></i> သင်ခန်းစာများ</a>
-                <a href="javascript:void(0)" onclick="showSection('resources')"><i class="fas fa-layer-group"></i> Resources</a>
-                <a href="javascript:void(0)" onclick="showSection('messages')"><i class="fas fa-comments"></i> စာတိုပေးပို့ခြင်း</a>
-                <a href="javascript:void(0)" onclick="showSection('profile')"><i class="fas fa-user-circle"></i> Profile</a>
-                <a href="javascript:void(0)" onclick="showSection('showcase')"><i class="fas fa-rocket"></i> Showcase</a>
-            </nav>
-            <!-- Sidebar Footer: Logout နေရာ -->
-            <div class="sidebar-footer" id="auth-section"></div>
-        </aside>
+          </div>
 
-        <main id="main-content" class="main-content">
-            <header class="top-nav">
-                <div class="nav-left">
-                    <button class="menu-btn" onclick="toggleNav()">☰ Menu</button>
+          <div class="notification-wrapper" onclick="toggleNotifications()">
+            <i class="fas fa-bell"></i>
+            <!-- <span id="bellCount" class="badge-red" style="display:none;">0</span> -->
+            <span id="noti-badge" class="badge-red" style="display: none"
+              >0</span
+            >
+            <div id="noti-dropdown" class="noti-dropdown">
+              <div class="noti-header">Notifications</div>
+              <div id="noti-list">
+                <!-- Noti များ ဤနေရာတွင် ပေါ်မည် -->
+              </div>
+            </div>
+          </div>
 
-                    <!-- 🔥 ဒီနေရာမှာ page-title ရှိနေရပါမယ် -->
-                    <h2 id="page-title">Dashboard</h2> 
-
-                    <!-- Global Search -->
-                    <div class="search-box no-mobile">
-                        <i class="fas fa-search"></i>
-                        <input type="text" id="global-search" placeholder="သင်ခန်းစာ ရှာဖွေရန်..." oninput="handleSearch(this.value)">
-                        <div id="search-results" class="search-dropdown"></div>
-                    </div>
-                </div>
-
-                <div class="notification-wrapper" onclick="toggleNotifications()">
-                    <i class="fas fa-bell"></i>
-                    <!-- <span id="bellCount" class="badge-red" style="display:none;">0</span> -->
-                    <span id="noti-badge" class="badge-red" style="display:none;">0</span>
-                    <div id="noti-dropdown" class="noti-dropdown">
-                        <div class="noti-header">Notifications</div>
-                        <div id="noti-list">
-                            <!-- Noti များ ဤနေရာတွင် ပေါ်မည် -->
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="nav-right">
-                    <!-- အသစ်ထည့်လိုက်သော Accessibility Buttons -->
-                    <!-- <div class="accessibility-tools">
+          <div class="nav-right">
+            <!-- အသစ်ထည့်လိုက်သော Accessibility Buttons -->
+            <!-- <div class="accessibility-tools">
                         <button onclick="speakLesson()" title="စာဖတ်ပြရန်" class="tool-btn"><i class="fas fa-volume-up"></i></button>
                         <button onclick="stopSpeaking()" title="ရပ်တန့်ရန်" class="tool-btn"><i class="fas fa-volume-mute"></i></button>
                         <button onclick="toggleFocusMode()" id="focus-btn" title="Focus Mode" class="tool-btn"><i class="fas fa-expand-arrows-alt"></i></button>
                     </div> -->
-                    <button onclick="changeFontSize('plus')" title="စာလုံးကြီးရန်" class="tool-btn">A+</button>
-                    <button onclick="changeFontSize('reset')" title="ပုံမှန်အရွယ်အစား" class="tool-btn">A</button>
-                    <span class="badge paid no-mobile">Paid</span>
-                </div>
-                <div id="install-area" style="display:none; padding: 10px 20px;">
-                    <button id="btn-install" class="save-btn" style="width:100%; background:#059669;">
-                        <i class="fas fa-download"></i> App
-                    </button>
-                </div>
-            </header>
+            <button
+              onclick="changeFontSize('plus')"
+              title="စာလုံးကြီးရန်"
+              class="tool-btn"
+            >
+              A+
+            </button>
+            <button
+              onclick="changeFontSize('reset')"
+              title="ပုံမှန်အရွယ်အစား"
+              class="tool-btn"
+            >
+              A
+            </button>
+            <span class="badge paid no-mobile">Paid</span>
+          </div>
+          <div id="install-area" style="display: none; padding: 10px 20px">
+            <button
+              id="btn-install"
+              class="save-btn"
+              style="width: 100%; background: #059669"
+            >
+              <i class="fas fa-download"></i> App
+            </button>
+          </div>
+        </header>
 
-            <!-- သင်ခန်းစာများနှင့် Dashboard ပေါ်မည့်နေရာ -->
-            <div id="dynamic-body" class="body-container"></div>
+        <!-- သင်ခန်းစာများနှင့် Dashboard ပေါ်မည့်နေရာ -->
+        <div id="dynamic-body" class="body-container"></div>
 
-            <button id="back-to-top" onclick="scrollToTop()"><i class="fas fa-arrow-up"></i></button>
+        <!-- Footer ကို ဒီနေရာမှာ ထားပါ -->
+        <footer class="app-footer no-print">
+          <div class="footer-links">
+            <a href="javascript:void(0)" onclick="showSection('about')"
+              >About Us</a
+            >
+            |
+            <a href="javascript:void(0)" onclick="showSection('privacy')"
+              >Privacy Policy</a
+            >
+          </div>
+          <p>
+            Powered by <span class="brand-name">MM</span>
+            <span id="current-year"></span>
+          </p>
+        </footer>
+      </main>
 
-            <!-- Footer ကို ဒီနေရာမှာ ထားပါ -->
-            <footer class="app-footer no-print">
-                <div class="footer-links">
-                    <a href="javascript:void(0)" onclick="showSection('about')">About Us</a> | 
-                    <a href="javascript:void(0)" onclick="showSection('privacy')">Privacy Policy</a>
-                </div>
-                <p>Powered by <span class="brand-name">MM</span> <span id="current-year"></span></p>
-            </footer>
-        </main>
+      <!-- <button id="back-to-top" onclick="scrollToTop()">
+          <i class="fas fa-arrow-up"></i>
+        </button> -->
+        <button id="back-to-top" onclick="scrollToTop()" title="Go to top">
+          <i class="fas fa-arrow-up"></i>
+        </button>
     </div>
 
     <!-- Login Page -->
-    <div id="login-page" class="login-container" style="display: none;">
-        <div class="login-box animate-up">
-            <!-- ၁။ Login Form -->
-            <div id="login-form-area">
-                <h2>Welcome Back</h2>
-                <p>ကျေးဇူးပြု၍ Login အရင်ဝင်ပေးပါ</p>
-                <input type="email" id="login-email" placeholder="Email">
-                <input type="password" id="login-password" placeholder="Password">
-                <button class="login-btn" onclick="handleLogin()">Login</button>
-                <p class="auth-toggle">အကောင့်မရှိသေးပါက <a href="javascript:void(0)" onclick="toggleAuthMode('signup')">အသစ်ဖွင့်ရန်</a></p>
-            </div>
-
-            <!-- ၂။ Sign Up Form (အစပိုင်းတွင် ဖျောက်ထားမည်) -->
-            <div id="signup-form-area" style="display:none;">
-                <h2>Create Account</h2>
-                <p>Bootcamp သို့ စာရင်းသွင်းရန် အချက်အလက်ဖြည့်ပါ</p>
-                <input type="text" id="signup-name" placeholder="Full Name (အမည်ရင်း)">
-                <input type="email" id="signup-email" placeholder="Email">
-                <input type="password" id="signup-password" placeholder="Create Password">
-                <button class="login-btn" style="background:#166534;" onclick="handleSignUp()">Sign Up (အကောင့်ဖွင့်မည်)</button>
-                <p class="auth-toggle">အကောင့်ရှိပြီးသားဆိုလျှင် <a href="javascript:void(0)" onclick="toggleAuthMode('login')">ပြန်ဝင်ရန်</a></p>
-            </div>
+    <div id="login-page" class="login-container" style="display: none">
+      <div class="login-box animate-up">
+        <!-- ၁။ Login Form -->
+        <div id="login-form-area">
+          <h2>Welcome Back</h2>
+          <p>ကျေးဇူးပြု၍ Login အရင်ဝင်ပေးပါ</p>
+          <input type="email" id="login-email" placeholder="Email" />
+          <input type="password" id="login-password" placeholder="Password" />
+          <button class="login-btn" onclick="handleLogin()">Login</button>
+          <p class="auth-toggle">
+            အကောင့်မရှိသေးပါက
+            <a href="javascript:void(0)" onclick="toggleAuthMode('signup')"
+              >အသစ်ဖွင့်ရန်</a
+            >
+          </p>
         </div>
+
+        <!-- ၂။ Sign Up Form (အစပိုင်းတွင် ဖျောက်ထားမည်) -->
+        <div id="signup-form-area" style="display: none">
+          <h2>Create Account</h2>
+          <p>Bootcamp သို့ စာရင်းသွင်းရန် အချက်အလက်ဖြည့်ပါ</p>
+          <input
+            type="text"
+            id="signup-name"
+            placeholder="Full Name (အမည်ရင်း)"
+          />
+          <input type="email" id="signup-email" placeholder="Email" />
+          <input
+            type="password"
+            id="signup-password"
+            placeholder="Create Password"
+          />
+          <button
+            class="login-btn"
+            style="background: #166534"
+            onclick="handleSignUp()"
+          >
+            Sign Up (အကောင့်ဖွင့်မည်)
+          </button>
+          <p class="auth-toggle">
+            အကောင့်ရှိပြီးသားဆိုလျှင်
+            <a href="javascript:void(0)" onclick="toggleAuthMode('login')"
+              >ပြန်ဝင်ရန်</a
+            >
+          </p>
+        </div>
+      </div>
     </div>
 
     <div id="overlay" class="overlay" onclick="toggleNav()"></div>
@@ -153,8 +233,8 @@
 
     <!-- ၂။ စုစည်းထားသော Main Data ဖိုင် -->
     <script src="js/data-main.js"></script>
-    
+
     <script src="js/pwa.js"></script>
     <script src="js/app.js"></script>
-</body>
+  </body>
 </html>

@@ -14,27 +14,32 @@ let activeChatId = "Batch-05"; // Default ကို Group Chat ထားမယ�
 let activeChatName = "Group: Batch-05";
 
 // Global User State
-let currentUser = JSON.parse(localStorage.getItem('currentUser')) || {
-    isLoggedIn: false, 
-    uid: "", 
-    name: "", 
-    role: "Student",
-    enrolledCourses: [], // 🔥 ဥပမာ - ["web", "python"] (ပိုက်ဆံပေးပြီးသော ID များ)
-    selectedCourseId: "", // 🔥 လက်ရှိ ဝင်ရောက်ကြည့်ရှုနေသော သင်တန်း ID
-    photo: "https://placehold.co/150x150/003087/white?text=User",
-    skills: [], 
-    notes: "", 
-    isPaid: false, // 🔥 အစပိုင်းမှာ false ဖြစ်ရပါမည်
-    github: "", 
-    portfolio: "", 
-    linkedin: "", facebook: "", youtube: "", tiktok: "", instagram: "", email: "",
-    quizAttempts: {}, 
-    
-    // ပြီးမြောက်ထားသော သင်ခန်းစာ ၅ ခု (Certificate ပွင့်ရန် လိုအပ်ချက်)
-    completedLessons: [], 
-    
-    // ဘာသာရပ်အလိုက် အမှတ်စာရင်း (GPA 75 ကျော်စေရန်)
-    grades: {},
+let currentUser = JSON.parse(localStorage.getItem("currentUser")) || {
+  isLoggedIn: false,
+  uid: "",
+  name: "",
+  role: "Student",
+  enrolledCourses: [], // 🔥 ဥပမာ - ["web", "python"] (ပိုက်ဆံပေးပြီးသော ID များ)
+  selectedCourseId: "", // 🔥 လက်ရှိ ဝင်ရောက်ကြည့်ရှုနေသော သင်တန်း ID
+  photo: "https://placehold.co/150x150/003087/white?text=User",
+  skills: [],
+  notes: "",
+  isPaid: false, // 🔥 အစပိုင်းမှာ false ဖြစ်ရပါမည်
+  github: "",
+  portfolio: "",
+  linkedin: "",
+  facebook: "",
+  youtube: "",
+  tiktok: "",
+  instagram: "",
+  email: "",
+  quizAttempts: {},
+
+  // ပြီးမြောက်ထားသော သင်ခန်းစာ ၅ ခု (Certificate ပွင့်ရန် လိုအပ်ချက်)
+  completedLessons: [],
+
+  // ဘာသာရပ်အလိုက် အမှတ်စာရင်း (GPA 75 ကျော်စေရန်)
+  grades: {},
 };
 
 // ဆရာမှ သတ်မှတ်ပေးမည့် ပြင်လို့မရသော အချက်အလက်များ (Database မှ လာမည်)
@@ -43,7 +48,7 @@ let academicInfo = {
   attendance: "0%",
   overallGrade: "-",
   batchName: "-",
-  startDate: "-"
+  startDate: "-",
 };
 
 // --- Firestore ထဲက ကျောင်းသားအားလုံးကို ဆွဲယူပြီး studentsList ထဲ ထည့်ခြင်း ---
@@ -52,69 +57,84 @@ let allUsersList = []; // Global variable အသစ်
 let lastFetchTime = 0; // 🔥 နောက်ဆုံးဖတ်ခဲ့သည့်အချိန်ကို သိမ်းရန်
 
 let cachedAnalyticsHtml = ""; // Analytics UI ကို သိမ်းထားရန်
-let lastAnalyticsTime = 0;    // နောက်ဆုံးတွက်ချက်ခဲ့သည့် အချိန်
+let lastAnalyticsTime = 0; // နောက်ဆုံးတွက်ချက်ခဲ့သည့် အချိန်
 
 // app.js ရဲ့ variables တွေထားတဲ့ နေရာမှာ ထည့်ပါ
 let isAudioEnabled = false;
-const notiSound = new Audio('assets/noti-sound.mp3');
+const notiSound = new Audio("assets/noti-sound.mp3");
 
 // Browser အားလုံးမှာ အသံဖွင့်ခွင့်ရအောင် user က ပထမဆုံး click တဲ့အချိန်မှာ unlock လုပ်မည်
-window.addEventListener('click', () => {
+window.addEventListener(
+  "click",
+  () => {
     if (!isAudioEnabled) {
-        // အသံတိတ် (mute) နဲ့ ခဏဖွင့်ပြီး ပြန်ရပ်လိုက်ခြင်းဖြင့် အသံစနစ်ကို ပွင့်သွားစေပါသည်
-        notiSound.muted = true;
-        notiSound.play().then(() => {
-            notiSound.pause();
-            notiSound.muted = false;
-            isAudioEnabled = true;
-            console.log("Audio system enabled for Safari/Firefox/Chrome");
-        });
+      // အသံတိတ် (mute) နဲ့ ခဏဖွင့်ပြီး ပြန်ရပ်လိုက်ခြင်းဖြင့် အသံစနစ်ကို ပွင့်သွားစေပါသည်
+      notiSound.muted = true;
+      notiSound.play().then(() => {
+        notiSound.pause();
+        notiSound.muted = false;
+        isAudioEnabled = true;
+        console.log("Audio system enabled for Safari/Firefox/Chrome");
+      });
     }
-}, { once: true });
+  },
+  { once: true },
+);
 
 // ၁။ Dark Mode (ညဘက်လေ့လာသူများအတွက်)
 function toggleDarkMode() {
-    document.body.classList.toggle('dark-theme');
-    const isDarkNow = document.body.classList.contains('dark-theme');
-    localStorage.setItem('dark-mode', isDarkNow); // Browser မှာ မှတ်ထားမည်
-    renderAuthFooter(); // Sidebar ခလုတ် icon ပြောင်းရန်
+  document.body.classList.toggle("dark-theme");
+  const isDarkNow = document.body.classList.contains("dark-theme");
+  localStorage.setItem("dark-mode", isDarkNow); // Browser မှာ မှတ်ထားမည်
+  renderAuthFooter(); // Sidebar ခလုတ် icon ပြောင်းရန်
 }
 
 // ၂။ Firestore Sync (Cloud Backup)
 async function syncProgressToCloud() {
-    if (!currentUser.uid || !currentUser.isLoggedIn) return;
+  if (!currentUser.uid || !currentUser.isLoggedIn) return;
 
-    try {
-        await db.collection('users').doc(currentUser.uid).set({
-            completedLessons: currentUser.completedLessons || [],
-            quizAttempts: currentUser.quizAttempts || {},
-            lastLesson: currentUser.lastLesson || null
-        }, { merge: true }); // merge: true က ရှိပြီးသား data တွေကို မဖျက်ဘဲ အသစ်ပေါင်းထည့်ပေးတာပါ
-        
-        console.log("Progress synced to Cloud!");
-    } catch (error) {
-        console.error("Cloud Sync Error:", error);
-    }
+  try {
+    await db
+      .collection("users")
+      .doc(currentUser.uid)
+      .set(
+        {
+          completedLessons: currentUser.completedLessons || [],
+          quizAttempts: currentUser.quizAttempts || {},
+          lastLesson: currentUser.lastLesson || null,
+        },
+        { merge: true },
+      ); // merge: true က ရှိပြီးသား data တွေကို မဖျက်ဘဲ အသစ်ပေါင်းထည့်ပေးတာပါ
+
+    console.log("Progress synced to Cloud!");
+  } catch (error) {
+    console.error("Cloud Sync Error:", error);
+  }
 }
 
 // Database မှ Zoom Link နှင့် အတန်းချိန်ကို အမြဲစောင့်ကြည့်နေမည့် function
 function syncZoomConfig() {
-    db.collection('settings').doc('zoom_config').onSnapshot(doc => {
+  db.collection("settings")
+    .doc("zoom_config")
+    .onSnapshot(
+      (doc) => {
         if (doc.exists) {
-            const data = doc.data();
-            currentZoomLink = data.url || ""; 
-            if (data.startTime) {
-                nextClassTime = data.startTime.toDate();
-            }
-            console.log("Zoom Link Updated:", currentZoomLink);
+          const data = doc.data();
+          currentZoomLink = data.url || "";
+          if (data.startTime) {
+            nextClassTime = data.startTime.toDate();
+          }
+          console.log("Zoom Link Updated:", currentZoomLink);
 
-            // 🔥 အရေးကြီးဆုံးအချက် - လက်ရှိ Dashboard ကို ကြည့်နေရင် UI ကို ချက်ချင်း Update လုပ်မည်
-            const titleEl = document.getElementById('page-title');
-            if (titleEl && titleEl.innerText === "Dashboard Overview") {
-                renderDashboard();
-            }
+          // 🔥 အရေးကြီးဆုံးအချက် - လက်ရှိ Dashboard ကို ကြည့်နေရင် UI ကို ချက်ချင်း Update လုပ်မည်
+          const titleEl = document.getElementById("page-title");
+          if (titleEl && titleEl.innerText === "Dashboard Overview") {
+            renderDashboard();
+          }
         }
-    }, err => console.warn("Zoom sync restricted"));
+      },
+      (err) => console.warn("Zoom sync restricted"),
+    );
 }
 
 // ==========================================
@@ -128,34 +148,33 @@ function toggleNav() {
   overlay.classList.toggle("show");
 }
 
-
 function showSection(section, filterCat = null) {
-    const title = document.getElementById('page-title');
-    const body = document.getElementById('dynamic-body');
-    const sidebar = document.getElementById('sidebar');
+  const title = document.getElementById("page-title");
+  const body = document.getElementById("dynamic-body");
+  const sidebar = document.getElementById("sidebar");
 
-    if (!title || !body) return;
+  if (!title || !body) return;
 
-    // Sidebar ပိတ်မည်
-    if (sidebar && sidebar.classList.contains('open')) toggleNav();
+  // Sidebar ပိတ်မည်
+  if (sidebar && sidebar.classList.contains("open")) toggleNav();
 
-    const isTeacher = currentUser.role === 'Teacher';
-    const enrolledList = currentUser.enrolledCourses || [];
-    const hasEnrolled = enrolledList.length > 0;
+  const isTeacher = currentUser.role === "Teacher";
+  const enrolledList = currentUser.enrolledCourses || [];
+  const hasEnrolled = enrolledList.length > 0;
 
-    // ၁။ Gatekeeper: ဘာသင်တန်းမှ မရှိသေးသူများအတွက်
-    const restrictedSections = ['courses', 'messages', 'resources', 'profile'];
-    if (restrictedSections.includes(section) && !isTeacher && !hasEnrolled) {
-        showToast("⚠️ သင်တန်းအနည်းဆုံးတစ်ခု အရင်အပ်နှံရန် လိုအပ်ပါသည်။", "info");
-        renderCourseSelection(); 
-        return; 
-    }
+  // ၁။ Gatekeeper: ဘာသင်တန်းမှ မရှိသေးသူများအတွက်
+  const restrictedSections = ["courses", "messages", "resources", "profile"];
+  if (restrictedSections.includes(section) && !isTeacher && !hasEnrolled) {
+    showToast("⚠️ သင်တန်းအနည်းဆုံးတစ်ခု အရင်အပ်နှံရန် လိုအပ်ပါသည်။", "info");
+    renderCourseSelection();
+    return;
+  }
 
-    // ၂။ 🔥 သင်တန်းရှိသော်လည်း "မရွေးချယ်ရသေးဘဲ" သင်ခန်းစာကြည့်ရန် ကြိုးစားမှုကို စစ်ဆေးခြင်း
-    // အရေးကြီးသည်- section 'courses' ဖြစ်ပြီး selectedCourseId မရှိမှသာ ဤစာသားပြမည်
-    if (section === 'courses' && !currentUser.selectedCourseId) {
-        title.innerText = "သင်ခန်းစာများ";
-        body.innerHTML = `
+  // ၂။ 🔥 သင်တန်းရှိသော်လည်း "မရွေးချယ်ရသေးဘဲ" သင်ခန်းစာကြည့်ရန် ကြိုးစားမှုကို စစ်ဆေးခြင်း
+  // အရေးကြီးသည်- section 'courses' ဖြစ်ပြီး selectedCourseId မရှိမှသာ ဤစာသားပြမည်
+  if (section === "courses" && !currentUser.selectedCourseId) {
+    title.innerText = "သင်ခန်းစာများ";
+    body.innerHTML = `
             <div class="content-card animate-up" style="text-align:center; padding:60px 20px; border-top: 5px solid var(--accent-gold);">
                 <div style="font-size:4rem; color:var(--text-muted); margin-bottom:20px;">
                     <i class="fas fa-book-reader"></i>
@@ -166,49 +185,49 @@ function showSection(section, filterCat = null) {
                     <i class="fas fa-th-list"></i> သင်တန်းများအားလုံးသို့ သွားရန်
                 </button>
             </div>`;
-        return; 
-    }
+    return;
+  }
 
-    // ၃။ ပုံမှန် Section Switching
-    if (section === 'dashboard') {
-        title.innerText = "Dashboard Overview";
-        renderDashboard();
-    } else if (section === 'courses') {
-        title.innerText = filterCat ? filterCat : "My Lessons";
-        renderCourseTree(filterCat);
-    } else if (section === 'courses_all') {
-        title.innerText = "သင်တန်းများ ရွေးချယ်ရန်";
-        renderCourseSelection();
-    } else if (section === 'messages') {
-        title.innerText = "Messenger";
-        showMessages();
-    } else if (section === 'profile') {
-        title.innerText = "User Profile";
-        renderProfile();
-    } else if (section === 'resources') {
-        title.innerText = "Learning Resources";
-        renderResources();
-    } else if (section === 'showcase') {
-        title.innerText = "Project Showcase";
-        renderShowcase();
-    } else if (section === 'about') {
-        title.innerText = "About Us";
-        renderAbout();
-    } else if (section === 'privacy') {
-        title.innerText = "Privacy Policy";
-        renderPrivacy();
-    }
-    
-    renderAuthFooter();
+  // ၃။ ပုံမှန် Section Switching
+  if (section === "dashboard") {
+    title.innerText = "Dashboard Overview";
+    renderDashboard();
+  } else if (section === "courses") {
+    title.innerText = filterCat ? filterCat : "My Lessons";
+    renderCourseTree(filterCat);
+  } else if (section === "courses_all") {
+    title.innerText = "သင်တန်းများ ရွေးချယ်ရန်";
+    renderCourseSelection();
+  } else if (section === "messages") {
+    title.innerText = "Messenger";
+    showMessages();
+  } else if (section === "profile") {
+    title.innerText = "User Profile";
+    renderProfile();
+  } else if (section === "resources") {
+    title.innerText = "Learning Resources";
+    renderResources();
+  } else if (section === "showcase") {
+    title.innerText = "Project Showcase";
+    renderShowcase();
+  } else if (section === "about") {
+    title.innerText = "About Us";
+    renderAbout();
+  } else if (section === "privacy") {
+    title.innerText = "Privacy Policy";
+    renderPrivacy();
+  }
+
+  renderAuthFooter();
 }
 
 function renderResources() {
-    const body = document.getElementById('dynamic-body');
-    const currentCourse = allCourses[currentUser.selectedCourseId];
-    
-    // ၁။ သင်တန်းမရွေးရသေးသော အခြေအနေ
-    if (!currentCourse) {
-        body.innerHTML = `
+  const body = document.getElementById("dynamic-body");
+  const currentCourse = allCourses[currentUser.selectedCourseId];
+
+  // ၁။ သင်တန်းမရွေးရသေးသော အခြေအနေ
+  if (!currentCourse) {
+    body.innerHTML = `
             <div class="content-card animate-up" style="text-align:center; padding:60px 20px;">
                 <i class="fas fa-layer-group" style="font-size:4rem; color:var(--text-muted); opacity:0.3; margin-bottom:20px;"></i>
                 <h3>သင်တန်း မရွေးချယ်ရသေးပါ</h3>
@@ -217,32 +236,36 @@ function renderResources() {
                     သင်တန်းများသို့ သွားရန်
                 </button>
             </div>`;
-        return;
-    }
+    return;
+  }
 
-    const resData = currentCourse.resources || [];
-    let html = '<div class="resources-wrapper fade-in">';
+  const resData = currentCourse.resources || [];
+  let html = '<div class="resources-wrapper fade-in">';
 
-    // 🔥 Icon အရောင်များကို Tech-Specific ဖြစ်စေမည့် Helper
-    const getIconStyle = (iconName) => {
-        const icon = iconName.toLowerCase();
-        if (icon.includes('html')) return 'background:#fff7ed; color:#ea580c;';
-        if (icon.includes('css')) return 'background:#f0f9ff; color:#0284c7;';
-        if (icon.includes('js') || icon.includes('python')) return 'background:#fefce8; color:#ca8a04;';
-        if (icon.includes('git') || icon.includes('react')) return 'background:#fff1f2; color:#e11d48;';
-        return 'background:#f1f5f9; color:#64748b;';
-    };
+  // 🔥 Icon အရောင်များကို Tech-Specific ဖြစ်စေမည့် Helper
+  const getIconStyle = (iconName) => {
+    const icon = iconName.toLowerCase();
+    if (icon.includes("html")) return "background:#fff7ed; color:#ea580c;";
+    if (icon.includes("css")) return "background:#f0f9ff; color:#0284c7;";
+    if (icon.includes("js") || icon.includes("python"))
+      return "background:#fefce8; color:#ca8a04;";
+    if (icon.includes("git") || icon.includes("react"))
+      return "background:#fff1f2; color:#e11d48;";
+    return "background:#f1f5f9; color:#64748b;";
+  };
 
-    // 🔥 Card ထုတ်ပေးမည့် Logic (Deduplication)
-    const createResCard = (item, catName) => {
-        const iconStyle = getIconStyle(item.icon || '');
-        // 🔥 ပြင်ဆင်ချက်: item.description ရှိလျှင် သုံးမည်၊ မရှိလျှင် default စာသားပြမည်
-        const displayDesc = item.description || `${catName} အပိုင်းအတွက် လိုအပ်သော အထောက်အကူပြု လမ်းညွှန်ချက်များနှင့် ဖိုင်များ`;
-        return `
+  // 🔥 Card ထုတ်ပေးမည့် Logic (Deduplication)
+  const createResCard = (item, catName) => {
+    const iconStyle = getIconStyle(item.icon || "");
+    // 🔥 ပြင်ဆင်ချက်: item.description ရှိလျှင် သုံးမည်၊ မရှိလျှင် default စာသားပြမည်
+    const displayDesc =
+      item.description ||
+      `${catName} အပိုင်းအတွက် လိုအပ်သော အထောက်အကူပြု လမ်းညွှန်ချက်များနှင့် ဖိုင်များ`;
+    return `
             <div class="res-card animate-up">
                 <div>
                     <div class="res-icon-box" style="${iconStyle}">
-                        <i class="fab ${item.icon || 'fa-file-alt'}"></i>
+                        <i class="fab ${item.icon || "fa-file-alt"}"></i>
                     </div>
                     <h4>${item.name}</h4>
                     <!-- 🔥 စိတ်ကြိုက် ရှင်းလင်းချက်စာသား ပေါ်မည့်နေရာ -->
@@ -252,36 +275,36 @@ function renderResources() {
                     <i class="fas fa-external-link-alt"></i> View Resource
                 </button>
             </div>`;
-    };
+  };
 
-    const isCategorized = !Array.isArray(resData) && typeof resData === 'object';
+  const isCategorized = !Array.isArray(resData) && typeof resData === "object";
 
-    if (isCategorized) {
-        // ၂။ Category အလိုက် ခွဲပြခြင်း (Foundations, Technical, etc.)
-        for (let catName in resData) {
-            html += `<div class="res-category-header"><i class="fas fa-folder-open" style="font-size:1.1rem; opacity:0.7;"></i> ${catName} Resources</div>`;
-            html += `<div class="dashboard-grid">`;
-            resData[catName].forEach(item => {
-                html += createResCard(item, catName);
-            });
-            html += `</div>`;
-        }
-    } else if (Array.isArray(resData) && resData.length > 0) {
-        // ၃။ စာရင်းတစ်ခုတည်းရှိသော အခြေအနေ
-        html += `<div class="dashboard-grid" style="margin-top:30px;">`;
-        resData.forEach(item => {
-            html += createResCard(item, "General");
-        });
-        html += `</div>`;
+  if (isCategorized) {
+    // ၂။ Category အလိုက် ခွဲပြခြင်း (Foundations, Technical, etc.)
+    for (let catName in resData) {
+      html += `<div class="res-category-header"><i class="fas fa-folder-open" style="font-size:1.1rem; opacity:0.7;"></i> ${catName} Resources</div>`;
+      html += `<div class="dashboard-grid">`;
+      resData[catName].forEach((item) => {
+        html += createResCard(item, catName);
+      });
+      html += `</div>`;
     }
+  } else if (Array.isArray(resData) && resData.length > 0) {
+    // ၃။ စာရင်းတစ်ခုတည်းရှိသော အခြေအနေ
+    html += `<div class="dashboard-grid" style="margin-top:30px;">`;
+    resData.forEach((item) => {
+      html += createResCard(item, "General");
+    });
+    html += `</div>`;
+  }
 
-    // ၄။ ဒေတာ မရှိသော အခြေအနေ
-    if (html === '<div class="resources-wrapper fade-in">') {
-        body.innerHTML = `<div class="content-card">ဤသင်တန်း (${currentCourse.title}) အတွက် အရင်းအမြစ်များ မရှိသေးပါ။</div>`;
-        return;
-    }
+  // ၄။ ဒေတာ မရှိသော အခြေအနေ
+  if (html === '<div class="resources-wrapper fade-in">') {
+    body.innerHTML = `<div class="content-card">ဤသင်တန်း (${currentCourse.title}) အတွက် အရင်းအမြစ်များ မရှိသေးပါ။</div>`;
+    return;
+  }
 
-    body.innerHTML = html + '</div>';
+  body.innerHTML = html + "</div>";
 }
 
 // ==========================================
@@ -289,39 +312,45 @@ function renderResources() {
 // ==========================================
 
 function renderDashboard() {
-    const body = document.getElementById('dynamic-body');
-    if (!body) return;
+  const body = document.getElementById("dynamic-body");
+  if (!body) return;
 
-    const currentCourse = allCourses[currentUser.selectedCourseId];
-    if (!currentCourse) {
-        renderCourseSelection();
-        return;
-    }
+  const currentCourse = allCourses[currentUser.selectedCourseId];
+  if (!currentCourse) {
+    renderCourseSelection();
+    return;
+  }
 
-    // ၁။ ပြီးစီးမှု ရာခိုင်နှုန်းတွက်ချက်သည့် Helper
-    const getPercent = (catName) => {
-        const categoryData = currentCourse.data.find(c => c.category.toLowerCase() === catName.toLowerCase());
-        if (!categoryData) return 0;
-        let total = 0;
-        categoryData.modules.forEach(m => total += m.lessons.length);
-        const doneList = currentUser.completedLessons || []; 
-        const doneCount = doneList.filter(l => categoryData.modules.some(m => m.lessons.some(les => les.title === l))).length;
-        return Math.round((doneCount / total) * 100) || 0;
-    };
+  // ၁။ ပြီးစီးမှု ရာခိုင်နှုန်းတွက်ချက်သည့် Helper
+  const getPercent = (catName) => {
+    const categoryData = currentCourse.data.find(
+      (c) => c.category.toLowerCase() === catName.toLowerCase(),
+    );
+    if (!categoryData) return 0;
+    let total = 0;
+    categoryData.modules.forEach((m) => (total += m.lessons.length));
+    const doneList = currentUser.completedLessons || [];
+    const doneCount = doneList.filter((l) =>
+      categoryData.modules.some((m) =>
+        m.lessons.some((les) => les.title === l),
+      ),
+    ).length;
+    return Math.round((doneCount / total) * 100) || 0;
+  };
 
-    const fPercent = getPercent('Foundations');
-    const tPercent = getPercent('Technical');
-    const fsPercent = getPercent('Full-Stack');
+  const fPercent = getPercent("Foundations");
+  const tPercent = getPercent("Technical");
+  const fsPercent = getPercent("Full-Stack");
 
-    // ၂။ 🔥 သင်တန်းအလိုက် မှတ်စုကို ယူခြင်း (Logic ကို HTML အပြင်ထုတ်ထားပါသည်)
-    const currentCourseId = currentUser.selectedCourseId;
-    if (!currentUser.courseNotes) currentUser.courseNotes = {}; // Object မရှိရင် အသစ်ဆောက်မည်
-    const myNoteText = currentUser.courseNotes[currentCourseId] || "";
+  // ၂။ 🔥 သင်တန်းအလိုက် မှတ်စုကို ယူခြင်း (Logic ကို HTML အပြင်ထုတ်ထားပါသည်)
+  const currentCourseId = currentUser.selectedCourseId;
+  if (!currentUser.courseNotes) currentUser.courseNotes = {}; // Object မရှိရင် အသစ်ဆောက်မည်
+  const myNoteText = currentUser.courseNotes[currentCourseId] || "";
 
-    // ၃။ Live Class Card
-    let liveClassHtml = "";
-    if (currentZoomLink && currentZoomLink.trim() !== "") {
-        liveClassHtml = `
+  // ၃။ Live Class Card
+  let liveClassHtml = "";
+  if (currentZoomLink && currentZoomLink.trim() !== "") {
+    liveClassHtml = `
             <div class="live-countdown animate-up">
                 <h4><i class="fas fa-video"></i> Next Live Class</h4>
                 <div class="timer-grid" id="live-timer">Loading...</div>
@@ -330,10 +359,10 @@ function renderDashboard() {
                     <i class="fas fa-video"></i> Join via Zoom
                 </button>
             </div>`;
-    }
+  }
 
-    // ၄။ HTML စုစည်းတည်ဆောက်ခြင်း
-    let dashboardHtml = `
+  // ၄။ HTML စုစည်းတည်ဆောက်ခြင်း
+  let dashboardHtml = `
         ${liveClassHtml}
         <div class="welcome-banner fade-in">
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px;">
@@ -368,16 +397,16 @@ function renderDashboard() {
             </div>
     `;
 
-    if (currentUser.role === 'Teacher') {
-        dashboardHtml += `
+  if (currentUser.role === "Teacher") {
+    dashboardHtml += `
             <div class="content-card animate-up" style="grid-column: span 1;">
                 <h4><i class="fas fa-trophy" style="color:gold"></i> Top Students</h4>
                 <div id="leaderboard-content" style="margin-top:10px;"><div class="loader">Loading...</div></div>
             </div>`;
-    }
+  }
 
-    // ၅။ Notebook Section (သင်တန်းအလိုက် စာသားပြမည်)
-    dashboardHtml += `
+  // ၅။ Notebook Section (သင်တန်းအလိုက် စာသားပြမည်)
+  dashboardHtml += `
         </div> <!-- Grid End -->
         <div class="content-card animate-up" style="margin-top:25px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
@@ -395,124 +424,130 @@ function renderDashboard() {
             </div>
         </div>`;
 
-    body.innerHTML = dashboardHtml;
-    if (currentUser.role === 'Teacher') fetchLeaderboard();
+  body.innerHTML = dashboardHtml;
+  if (currentUser.role === "Teacher") fetchLeaderboard();
 }
 
 // Input ကို စစ်ဆေးပြီး Auto-save လုပ်မည့် function
 function handleNoteInput() {
-    const textarea = document.getElementById('personal-note');
-    const counter = document.getElementById('char-counter');
-    
-    if (!textarea || !counter) return;
+  const textarea = document.getElementById("personal-note");
+  const counter = document.getElementById("char-counter");
 
-    const currentLength = textarea.value.length;
+  if (!textarea || !counter) return;
 
-    // စာလုံးရေကို UI မှာ ချက်ချင်း Update လုပ်ခြင်း
-    counter.innerText = `${currentLength} / 10000 characters`;
+  const currentLength = textarea.value.length;
 
-    // ၅၀၀၀ ထက်ကျော်မကျော် စစ်ဆေးခြင်း
-    if (currentLength > 10000) {
-        // ၅၀၀၀ ထက်ပိုတဲ့စာတွေကို ဖြတ်ထုတ်မည်
-        textarea.value = textarea.value.substring(0, 10000);
-        counter.innerText = `10000 / 10000 characters`;
-        counter.style.color = "red";
-        alert("မှတ်စုကို စာလုံးရေ ၁၀၀၀၀ အထိသာ ကန့်သတ်ထားပါသည်။");
-    } else {
-        counter.style.color = "var(--text-main)";
-        saveNoteToCloud(); // Cloud ပေါ်သိမ်းမည့် function ကို ခေါ်မည်
-    }
+  // စာလုံးရေကို UI မှာ ချက်ချင်း Update လုပ်ခြင်း
+  counter.innerText = `${currentLength} / 10000 characters`;
+
+  // ၅၀၀၀ ထက်ကျော်မကျော် စစ်ဆေးခြင်း
+  if (currentLength > 10000) {
+    // ၅၀၀၀ ထက်ပိုတဲ့စာတွေကို ဖြတ်ထုတ်မည်
+    textarea.value = textarea.value.substring(0, 10000);
+    counter.innerText = `10000 / 10000 characters`;
+    counter.style.color = "red";
+    alert("မှတ်စုကို စာလုံးရေ ၁၀၀၀၀ အထိသာ ကန့်သတ်ထားပါသည်။");
+  } else {
+    counter.style.color = "var(--text-main)";
+    saveNoteToCloud(); // Cloud ပေါ်သိမ်းမည့် function ကို ခေါ်မည်
+  }
 }
 
 // ကျောင်းသားက သူ့မှတ်စုကို သူပြန်သိမ်းချင်ရင် (Computer ထဲသို့ ဒေါင်းလုဒ်ဆွဲခြင်း)
 function downloadNotes() {
-    const text = document.getElementById('personal-note').value;
-    const blob = new Blob([text], { type: 'text/plain' });
-    const anchor = document.createElement('a');
-    anchor.download = `my-bootcamp-notes.txt`;
-    anchor.href = window.URL.createObjectURL(blob);
-    anchor.click();
+  const text = document.getElementById("personal-note").value;
+  const blob = new Blob([text], { type: "text/plain" });
+  const anchor = document.createElement("a");
+  anchor.download = `my-bootcamp-notes.txt`;
+  anchor.href = window.URL.createObjectURL(blob);
+  anchor.click();
 }
 
 let noteTimeout;
 
 function saveNoteToCloud() {
-    const text = document.getElementById('personal-note').value;
-    const currentCourseId = currentUser.selectedCourseId;
+  const text = document.getElementById("personal-note").value;
+  const currentCourseId = currentUser.selectedCourseId;
 
-    if (!currentCourseId) return;
+  if (!currentCourseId) return;
 
-    // စာလုံးရေ ၁၀,၀၀၀ အထိ ပေးထားလိုက်ပါမည် (၅၀၀၀ ထက် ပိုအဆင်ပြေစေရန်)
-    if (text.length > 10000) {
-        alert("မှတ်စုကို စာလုံးရေ ၁၀၀၀၀ အထိသာ ကန့်သတ်ထားပါသည်။");
-        return;
+  // စာလုံးရေ ၁၀,၀၀၀ အထိ ပေးထားလိုက်ပါမည် (၅၀၀၀ ထက် ပိုအဆင်ပြေစေရန်)
+  if (text.length > 10000) {
+    alert("မှတ်စုကို စာလုံးရေ ၁၀၀၀၀ အထိသာ ကန့်သတ်ထားပါသည်။");
+    return;
+  }
+
+  const status = document.getElementById("note-status");
+  status.innerText = "Saving...";
+
+  clearTimeout(noteTimeout);
+  noteTimeout = setTimeout(async () => {
+    // Local State Update
+    if (!currentUser.courseNotes) currentUser.courseNotes = {};
+    currentUser.courseNotes[currentCourseId] = text;
+    localStorage.setItem("currentUser", JSON.stringify(currentUser));
+
+    // 🔥 Cloud Update (သင်တန်းအလိုက် ခွဲသိမ်းခြင်း)
+    if (currentUser.uid) {
+      await db
+        .collection("users")
+        .doc(currentUser.uid)
+        .update({
+          [`courseNotes.${currentCourseId}`]: text,
+        });
     }
-
-    const status = document.getElementById('note-status');
-    status.innerText = "Saving...";
-
-    clearTimeout(noteTimeout);
-    noteTimeout = setTimeout(async () => {
-        // Local State Update
-        if (!currentUser.courseNotes) currentUser.courseNotes = {};
-        currentUser.courseNotes[currentCourseId] = text;
-        localStorage.setItem('currentUser', JSON.stringify(currentUser));
-        
-        // 🔥 Cloud Update (သင်တန်းအလိုက် ခွဲသိမ်းခြင်း)
-        if (currentUser.uid) {
-            await db.collection('users').doc(currentUser.uid).update({
-                [`courseNotes.${currentCourseId}`]: text
-            });
-        }
-        status.innerText = "All changes saved!";
-    }, 1000);
+    status.innerText = "All changes saved!";
+  }, 1000);
 }
 
 function changeFontSize(size) {
-    const body = document.getElementById('dynamic-body');
-    if (size === 'plus') body.style.fontSize = "1.2rem";
-    else if (size === 'minus') body.style.fontSize = "0.9rem";
-    else body.style.fontSize = "1rem";
+  const body = document.getElementById("dynamic-body");
+  if (size === "plus") body.style.fontSize = "1.2rem";
+  else if (size === "minus") body.style.fontSize = "0.9rem";
+  else body.style.fontSize = "1rem";
 }
 
 async function fetchLeaderboard() {
-    const leaderboardDiv = document.getElementById('leaderboard-content');
-    if (!leaderboardDiv) return;
+  const leaderboardDiv = document.getElementById("leaderboard-content");
+  if (!leaderboardDiv) return;
 
-    try {
-        // Firestore: အမှတ်အများဆုံး ကျောင်းသား ၅ ယောက်ကို ဆွဲယူမည်
-        const snapshot = await db.collection('users')
-            .where('role', '==', 'Student')
-            .orderBy('overallGrade', 'desc') // Grade အလိုက်စီမည်
-            .limit(5)
-            .get();
+  try {
+    // Firestore: အမှတ်အများဆုံး ကျောင်းသား ၅ ယောက်ကို ဆွဲယူမည်
+    const snapshot = await db
+      .collection("users")
+      .where("role", "==", "Student")
+      .orderBy("overallGrade", "desc") // Grade အလိုက်စီမည်
+      .limit(5)
+      .get();
 
-        let html = '<ul style="list-style:none; padding:0;">';
-        let rank = 1;
+    let html = '<ul style="list-style:none; padding:0;">';
+    let rank = 1;
 
-        snapshot.forEach(doc => {
-            const student = doc.data();
-            html += `<li style="padding:8px 0; border-bottom:1px solid #eee;">
-                        ${rank}. <strong>${student.name}</strong> - ${student.overallGrade || '0'} pts
+    snapshot.forEach((doc) => {
+      const student = doc.data();
+      html += `<li style="padding:8px 0; border-bottom:1px solid #eee;">
+                        ${rank}. <strong>${student.name}</strong> - ${student.overallGrade || "0"} pts
                      </li>`;
-            rank++;
-        });
+      rank++;
+    });
 
-        html += '</ul>';
-        leaderboardDiv.innerHTML = snapshot.empty ? "ကျောင်းသားစာရင်း မရှိသေးပါ။" : html;
-
-    } catch (error) {
-        console.error("Leaderboard Error:", error);
-        leaderboardDiv.innerHTML = "Leaderboard ဖတ်လို့မရပါ။ Index လိုအပ်နိုင်ပါသည်။";
-    }
+    html += "</ul>";
+    leaderboardDiv.innerHTML = snapshot.empty
+      ? "ကျောင်းသားစာရင်း မရှိသေးပါ။"
+      : html;
+  } catch (error) {
+    console.error("Leaderboard Error:", error);
+    leaderboardDiv.innerHTML =
+      "Leaderboard ဖတ်လို့မရပါ။ Index လိုအပ်နိုင်ပါသည်။";
+  }
 }
 
 // Lesson Discussion (အမေးအဖြေကဏ္ဍ)
 async function renderDiscussion(lessonId) {
-    const area = document.getElementById('discussion-area');
-    if (!area) return;
+  const area = document.getElementById("discussion-area");
+  if (!area) return;
 
-    area.innerHTML = `
+  area.innerHTML = `
         <div class="content-card animate-up" style="margin-top:40px; padding: 20px;">
             <h4 style="margin-bottom:15px;"><i class="fas fa-comments"></i> သင်ခန်းစာ ဆွေးနွေးချက်များ</h4>
             <div id="comments-list" style="margin-bottom:20px; max-height:400px; overflow-y:auto; padding-right:10px;"></div>
@@ -529,66 +564,79 @@ async function renderDiscussion(lessonId) {
             </div>
         </div>
     `;
-    loadComments(lessonId);
+  loadComments(lessonId);
 }
 
 // ၁။ Comment တင်သည့် Function (userId မပါလျှင် Rule က လက်မခံပါ)
 function postComment(lessonId) {
-    const input = document.getElementById('comment-input');
-    const text = input.value.trim();
-    if (!text) return;
+  const input = document.getElementById("comment-input");
+  const text = input.value.trim();
+  if (!text) return;
 
-    db.collection('discussions').add({
-        lessonId: lessonId,
-        userId: currentUser.uid,   // <--- အရေးကြီးသည်
-        userName: currentUser.name,
-        text: text,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    }).then(() => {
-        input.value = '';
-    }).catch(err => {
-        alert("Comment ပေးပို့လို့မရပါ- " + err.message);
+  db.collection("discussions")
+    .add({
+      lessonId: lessonId,
+      userId: currentUser.uid, // <--- အရေးကြီးသည်
+      userName: currentUser.name,
+      text: text,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+    })
+    .then(() => {
+      input.value = "";
+    })
+    .catch((err) => {
+      alert("Comment ပေးပို့လို့မရပါ- " + err.message);
     });
 }
 
 // ၂။ Comment များ ပြန်ဖတ်သည့် Function
 function loadComments(lessonId) {
-    db.collection('discussions').where('lessonId', '==', lessonId).orderBy('timestamp', 'asc').onSnapshot(snap => {
-        const list = document.getElementById('comments-list');
-        list.innerHTML = '';
-        snap.forEach(doc => {
-            const c = doc.data();
-            const isMe = c.userId === currentUser.uid;
-            const canManage = isMe || currentUser.role === 'Teacher';
-              list.innerHTML += `
+  db.collection("discussions")
+    .where("lessonId", "==", lessonId)
+    .orderBy("timestamp", "asc")
+    .onSnapshot(
+      (snap) => {
+        const list = document.getElementById("comments-list");
+        list.innerHTML = "";
+        snap.forEach((doc) => {
+          const c = doc.data();
+          const isMe = c.userId === currentUser.uid;
+          const canManage = isMe || currentUser.role === "Teacher";
+          list.innerHTML += `
                 <div class="comment-bubble">
                     <div style="display:flex; justify-content:space-between;">
                         <small><strong>${c.userName}</strong></small>
-                        ${canManage ? `
+                        ${
+                          canManage
+                            ? `
                             <div class="msg-actions">
                                 <i class="fas fa-edit" onclick="editContent('discussions', '${doc.id}', '${c.text.replace(/'/g, "\\'")}')"></i>
                                 <i class="fas fa-trash" onclick="deleteContent('discussions', '${doc.id}')"></i>
-                            </div>` : ''}
+                            </div>`
+                            : ""
+                        }
                     </div>
                     <p>${c.text}</p>
                 </div>`;
-          });
-      }, error => {
-          // Error တက်ခဲ့လျှင် ဤနေရာတွင် သိနိုင်သည်
-          console.error("Comment load error:", error);
-          if (error.code === 'permission-denied') {
-              list.innerHTML = `<small style="color:grey">Comment များကို ဖတ်ရန် ခွင့်ပြုချက်မရှိပါ။</small>`;
-          }
-      });
+        });
+      },
+      (error) => {
+        // Error တက်ခဲ့လျှင် ဤနေရာတွင် သိနိုင်သည်
+        console.error("Comment load error:", error);
+        if (error.code === "permission-denied") {
+          list.innerHTML = `<small style="color:grey">Comment များကို ဖတ်ရန် ခွင့်ပြုချက်မရှိပါ။</small>`;
+        }
+      },
+    );
 }
 
 // Teacher's Grade Review Panel (ဆရာအတွက် စာစစ်ရန်)
 async function viewSubmissionDetail(id) {
-    const doc = await db.collection('submissions').doc(id).get();
-    const data = doc.data();
-    const body = document.getElementById('dynamic-body');
+  const doc = await db.collection("submissions").doc(id).get();
+  const data = doc.data();
+  const body = document.getElementById("dynamic-body");
 
-    body.innerHTML = `
+  body.innerHTML = `
         <div class="content-card animate-up">
             <h3>Grading: ${data.studentName}</h3>
             <p>Lesson: ${data.lessonTitle}</p>
@@ -604,80 +652,88 @@ async function viewSubmissionDetail(id) {
 
 // အမျိုးစုံသုံး (Universal) Edit/Delete Functions
 async function deleteContent(collection, id) {
-    if (confirm("ဤစာကို ဖျက်ရန် သေချာပါသလား?")) {
-        await db.collection(collection).doc(id).delete();
-    }
+  if (confirm("ဤစာကို ဖျက်ရန် သေချာပါသလား?")) {
+    await db.collection(collection).doc(id).delete();
+  }
 }
 
 async function editContent(collection, id, oldText) {
-    const newText = prompt("စာသားကို ပြင်ဆင်ပါ:", oldText);
-    if (newText && newText !== oldText) {
-        await db.collection(collection).doc(id).update({
-            text: newText,
-            edited: true
-        });
-    }
+  const newText = prompt("စာသားကို ပြင်ဆင်ပါ:", oldText);
+  if (newText && newText !== oldText) {
+    await db.collection(collection).doc(id).update({
+      text: newText,
+      edited: true,
+    });
+  }
 }
 
 async function submitFinalGrade(studentId, subId, subjectName) {
-    const scoreInput = document.getElementById('grade-input');
-    const score = parseInt(scoreInput.value);
-    const feedback = document.getElementById('teacher-feedback').value;
+  const scoreInput = document.getElementById("grade-input");
+  const score = parseInt(scoreInput.value);
+  const feedback = document.getElementById("teacher-feedback").value;
 
-    // Validation: အမှတ်မရိုက်ရသေးရင် တားမယ်
-    if (isNaN(score) || score < 0 || score > 100) {
-        return alert("ကျေးဇူးပြု၍ မှန်ကန်သော အမှတ် (၀ မှ ၁၀၀ ကြား) ရိုက်ထည့်ပါ။");
-    }
+  // Validation: အမှတ်မရိုက်ရသေးရင် တားမယ်
+  if (isNaN(score) || score < 0 || score > 100) {
+    return alert("ကျေးဇူးပြု၍ မှန်ကန်သော အမှတ် (၀ မှ ၁၀၀ ကြား) ရိုက်ထည့်ပါ။");
+  }
 
-    try {
-        // ၁။ ကျောင်းသားရဲ့ grades ထဲမှာ ဘာသာရပ်အမည်နဲ့ သွားသိမ်းမယ်
-        // subjectName က ဥပမာ - 'html', 'javascript' ဖြစ်ရပါမယ်
-        await db.collection('users').doc(studentId).set({
-            grades: { [subjectName.toLowerCase()]: score } 
-        }, { merge: true });
+  try {
+    // ၁။ ကျောင်းသားရဲ့ grades ထဲမှာ ဘာသာရပ်အမည်နဲ့ သွားသိမ်းမယ်
+    // subjectName က ဥပမာ - 'html', 'javascript' ဖြစ်ရပါမယ်
+    await db
+      .collection("users")
+      .doc(studentId)
+      .set(
+        {
+          grades: { [subjectName.toLowerCase()]: score },
+        },
+        { merge: true },
+      );
 
-        // ၂။ Submission status ကို 'graded' ပြောင်းပြီး မှတ်ချက်ပါ သိမ်းမယ်
-        await db.collection('submissions').doc(subId).update({ 
-            status: 'graded',
-            score: score,
-            teacherFeedback: feedback
-        });
+    // ၂။ Submission status ကို 'graded' ပြောင်းပြီး မှတ်ချက်ပါ သိမ်းမယ်
+    await db.collection("submissions").doc(subId).update({
+      status: "graded",
+      score: score,
+      teacherFeedback: feedback,
+    });
 
-        // ၃။ ကျောင်းသားဆီကို System Noti (Direct Message) ပို့မယ်
-        await db.collection('messages').add({
-            text: `🔔 အသိပေးချက်: သင်၏ ${subjectName} assignment အတွက် အမှတ်ထွက်ပါပြီ။ (ရမှတ်: ${score})။ Transcript တွင် စစ်ဆေးနိုင်ပါသည်။`,
-            senderId: currentUser.uid,
-            senderName: "LMS System",
-            receiverId: studentId,
-            type: "direct",
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        });
+    // ၃။ ကျောင်းသားဆီကို System Noti (Direct Message) ပို့မယ်
+    await db.collection("messages").add({
+      text: `🔔 အသိပေးချက်: သင်၏ ${subjectName} assignment အတွက် အမှတ်ထွက်ပါပြီ။ (ရမှတ်: ${score})။ Transcript တွင် စစ်ဆေးနိုင်ပါသည်။`,
+      senderId: currentUser.uid,
+      senderName: "LMS System",
+      receiverId: studentId,
+      type: "direct",
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+    });
 
-        alert("အမှတ်ပေးခြင်း အောင်မြင်ပါသည်။ ကျောင်းသားထံသို့ Noti ပို့ပြီးပါပြီ။");
-        renderAdminPanel(); // Panel သို့ ပြန်သွားမည်
-
-    } catch (error) {
-        console.error("Grading error:", error);
-        alert("အမှားတစ်ခု ဖြစ်သွားပါသည်- " + error.message);
-    }
+    alert("အမှတ်ပေးခြင်း အောင်မြင်ပါသည်။ ကျောင်းသားထံသို့ Noti ပို့ပြီးပါပြီ။");
+    renderAdminPanel(); // Panel သို့ ပြန်သွားမည်
+  } catch (error) {
+    console.error("Grading error:", error);
+    alert("အမှားတစ်ခု ဖြစ်သွားပါသည်- " + error.message);
+  }
 }
 
 // Gamification (Badges)
 function checkBadges() {
-    const doneCount = currentUser.completedLessons.length;
-    if (doneCount >= 1 && !currentUser.badges?.includes('First Step')) {
-        awardBadge('First Step');
-    }
-    if (doneCount >= 10 && !currentUser.badges?.includes('HTML Ninja')) {
-        awardBadge('HTML Ninja');
-    }
+  const doneCount = currentUser.completedLessons.length;
+  if (doneCount >= 1 && !currentUser.badges?.includes("First Step")) {
+    awardBadge("First Step");
+  }
+  if (doneCount >= 10 && !currentUser.badges?.includes("HTML Ninja")) {
+    awardBadge("HTML Ninja");
+  }
 }
 
 async function awardBadge(name) {
-    if(!currentUser.badges) currentUser.badges = [];
-    currentUser.badges.push(name);
-    alert(`🎊 ဂုဏ်ယူပါတယ်! သင် "${name}" Badge ရရှိသွားပါပြီ။`);
-    await db.collection('users').doc(currentUser.uid).update({ badges: currentUser.badges });
+  if (!currentUser.badges) currentUser.badges = [];
+  currentUser.badges.push(name);
+  alert(`🎊 ဂုဏ်ယူပါတယ်! သင် "${name}" Badge ရရှိသွားပါပြီ။`);
+  await db
+    .collection("users")
+    .doc(currentUser.uid)
+    .update({ badges: currentUser.badges });
 }
 
 // ==========================================
@@ -686,46 +742,49 @@ async function awardBadge(name) {
 
 // --- သင်ခန်းစာမာတိကာကို Database ပါ ဖတ်နိုင်အောင် ပြင်ဆင်ခြင်း ---
 async function renderCourseTree(filterCat) {
-    const body = document.getElementById('dynamic-body');
-    if (!body) return;
+  const body = document.getElementById("dynamic-body");
+  if (!body) return;
 
-    body.innerHTML = '<div id="course-outline"></div>';
-    const container = document.getElementById('course-outline');
+  body.innerHTML = '<div id="course-outline"></div>';
+  const container = document.getElementById("course-outline");
 
-    // ၁။ 🔥 အရေးကြီးသည် - filter မလုပ်ဘဲ courseData အားလုံးကို ယူသုံးမည်
-    // ဒါမှ Category ၃ ခုလုံး (Foundations, Technical, Full-Stack) အမြဲပေါ်နေမှာပါ
-    let displayData = JSON.parse(JSON.stringify(courseData)); 
+  // ၁။ 🔥 အရေးကြီးသည် - filter မလုပ်ဘဲ courseData အားလုံးကို ယူသုံးမည်
+  // ဒါမှ Category ၃ ခုလုံး (Foundations, Technical, Full-Stack) အမြဲပေါ်နေမှာပါ
+  let displayData = JSON.parse(JSON.stringify(courseData));
 
-    // ၂။ Dynamic Content (Firebase) မှ လာသော သင်ခန်းစာများကို ပေါင်းထည့်မည်
-    try {
-        const dynamicSnap = await db.collection('course_structure').get();
-        dynamicSnap.forEach(doc => {
-            const dl = doc.data();
-            let cat = displayData.find(c => c.category === dl.category);
-            if (cat) {
-                let mod = cat.modules.find(m => m.moduleTitle === dl.module);
-                if (mod && !mod.lessons.some(l => l.title === dl.title)) {
-                    mod.lessons.push({ title: dl.title, path: dl.path, type: dl.type });
-                }
-            }
-        });
-    } catch (e) { console.warn("Dynamic load failed"); }
+  // ၂။ Dynamic Content (Firebase) မှ လာသော သင်ခန်းစာများကို ပေါင်းထည့်မည်
+  try {
+    const dynamicSnap = await db.collection("course_structure").get();
+    dynamicSnap.forEach((doc) => {
+      const dl = doc.data();
+      let cat = displayData.find((c) => c.category === dl.category);
+      if (cat) {
+        let mod = cat.modules.find((m) => m.moduleTitle === dl.module);
+        if (mod && !mod.lessons.some((l) => l.title === dl.title)) {
+          mod.lessons.push({ title: dl.title, path: dl.path, type: dl.type });
+        }
+      }
+    });
+  } catch (e) {
+    console.warn("Dynamic load failed");
+  }
 
-    // ၃။ UI Rendering Logic
-    let fullHtml = "";
-    const completedList = currentUser.completedLessons || [];
+  // ၃။ UI Rendering Logic
+  let fullHtml = "";
+  const completedList = currentUser.completedLessons || [];
 
-    displayData.forEach((cat, catIdx) => {
-        const catBodyId = `cat-body-${catIdx}`;
-        
-        // 🔥 အဓိက logic - Dashboard ကနေ ရွေးလာတဲ့ Category ဖြစ်ရင် တန်းပွင့်နေအောင်လုပ်မည်
-        // ဒါမှမဟုတ် filterCat မပါဘဲ (မာတိကာ menu ကနေလာရင်) အကုန်ပိတ်ထားမည်
-        const isSelected = filterCat && cat.category.toLowerCase() === filterCat.toLowerCase();
-        const autoHeight = isSelected ? "max-height: 2000px;" : ""; 
-        const activeClass = isSelected ? "active" : "";
-        const openClass = isSelected ? "open" : "";
+  displayData.forEach((cat, catIdx) => {
+    const catBodyId = `cat-body-${catIdx}`;
 
-        fullHtml += `
+    // 🔥 အဓိက logic - Dashboard ကနေ ရွေးလာတဲ့ Category ဖြစ်ရင် တန်းပွင့်နေအောင်လုပ်မည်
+    // ဒါမှမဟုတ် filterCat မပါဘဲ (မာတိကာ menu ကနေလာရင်) အကုန်ပိတ်ထားမည်
+    const isSelected =
+      filterCat && cat.category.toLowerCase() === filterCat.toLowerCase();
+    const autoHeight = isSelected ? "max-height: 2000px;" : "";
+    const activeClass = isSelected ? "active" : "";
+    const openClass = isSelected ? "open" : "";
+
+    fullHtml += `
             <div class="category-wrapper">
                 <div class="category-header ${activeClass}" onclick="toggleCategoryAccordion(this, '${catBodyId}')">
                     <span><i class="fas fa-folder"></i> ${cat.category}</span>
@@ -734,45 +793,48 @@ async function renderCourseTree(filterCat) {
                 <div id="${catBodyId}" class="category-body ${openClass}" style="${autoHeight}">
         `;
 
-        cat.modules.forEach((mod, modIdx) => {
-            const modId = `mod-${catIdx}-${modIdx}`;
-            let lessonsHtml = "";
+    cat.modules.forEach((mod, modIdx) => {
+      const modId = `mod-${catIdx}-${modIdx}`;
+      let lessonsHtml = "";
 
-            mod.lessons.forEach((les, lesIdx) => {
-                const isDone = completedList.includes(les.title);
-                const originalCatIdx = courseData.findIndex(c => c.category === cat.category);
-                
-                lessonsHtml += `
-                    <div class="lesson-item ${isDone ? 'completed-green' : ''}" 
+      mod.lessons.forEach((les, lesIdx) => {
+        const isDone = completedList.includes(les.title);
+        const originalCatIdx = courseData.findIndex(
+          (c) => c.category === cat.category,
+        );
+
+        lessonsHtml += `
+                    <div class="lesson-item ${isDone ? "completed-green" : ""}" 
                          onclick="renderLessonContent(${originalCatIdx}, ${modIdx}, ${lesIdx})">
-                        <i class="${isDone ? 'fas fa-check-circle text-success' : 'far fa-circle'}" 
-                           style="color: ${isDone ? '#22c55e' : '#cbd5e1'}"></i>
+                        <i class="${isDone ? "fas fa-check-circle text-success" : "far fa-circle"}" 
+                           style="color: ${isDone ? "#22c55e" : "#cbd5e1"}"></i>
                         <span>${les.title}</span>
                         <small class="type-badge">${les.type}</small>
                     </div>`;
-            });
+      });
 
-            fullHtml += `
+      fullHtml += `
                 <div class="module-group animate-up">
                     <div class="module-title-header" onclick="toggleModuleAccordion(this, '${modId}')">
                         <span><i class="fas fa-chevron-right"></i> ${mod.moduleTitle}</span>
                     </div>
                     <div id="${modId}" class="lessons-list">${lessonsHtml}</div>
                 </div>`;
-        });
-
-        fullHtml += `</div></div>`; 
     });
 
-    container.innerHTML = fullHtml;
+    fullHtml += `</div></div>`;
+  });
 
-    // 🔥 Auto-scroll: Dashboard ကနေ လာတာဆိုရင် အဲ့ဒီပွင့်နေတဲ့ Category ဆီကို screen ရောက်သွားအောင်လုပ်မည်
-    if (filterCat) {
-        setTimeout(() => {
-            const activeHeader = document.querySelector('.category-header.active');
-            if (activeHeader) activeHeader.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 300);
-    }
+  container.innerHTML = fullHtml;
+
+  // 🔥 Auto-scroll: Dashboard ကနေ လာတာဆိုရင် အဲ့ဒီပွင့်နေတဲ့ Category ဆီကို screen ရောက်သွားအောင်လုပ်မည်
+  if (filterCat) {
+    setTimeout(() => {
+      const activeHeader = document.querySelector(".category-header.active");
+      if (activeHeader)
+        activeHeader.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 300);
+  }
 }
 
 // 🔥 Category ပိတ်/ဖွင့် လုပ်ပေးမည့် Function
@@ -783,107 +845,109 @@ async function renderCourseTree(filterCat) {
 // }
 
 function toggleCategoryAccordion(header, bodyId) {
-    const body = document.getElementById(bodyId);
-    header.classList.toggle('active');
+  const body = document.getElementById(bodyId);
+  header.classList.toggle("active");
 
-    if (body.style.maxHeight && body.style.maxHeight !== "0px") {
-        // ပိတ်မည်ဆိုလျှင် အမြင့်ကို ၀ ထားမည်
-        body.style.maxHeight = "0px";
-        body.classList.remove('open');
-    } else {
-        // ဖွင့်မည်ဆိုလျှင် scrollHeight (ရှိသမျှအမြင့်အကုန်) ကို တွက်ချက်၍ ထည့်ပေးမည်
-        body.classList.add('open');
-        body.style.maxHeight = body.scrollHeight + "px";
-    }
+  if (body.style.maxHeight && body.style.maxHeight !== "0px") {
+    // ပိတ်မည်ဆိုလျှင် အမြင့်ကို ၀ ထားမည်
+    body.style.maxHeight = "0px";
+    body.classList.remove("open");
+  } else {
+    // ဖွင့်မည်ဆိုလျှင် scrollHeight (ရှိသမျှအမြင့်အကုန်) ကို တွက်ချက်၍ ထည့်ပေးမည်
+    body.classList.add("open");
+    body.style.maxHeight = body.scrollHeight + "px";
+  }
 }
 
 async function renderLessonContent(catIdx, modIdx, lesIdx) {
-    const body = document.getElementById("dynamic-body");
-    const cat = courseData[catIdx];
-    const mod = cat.modules[modIdx];
-    const lesson = mod.lessons[lesIdx];
+  const body = document.getElementById("dynamic-body");
+  const cat = courseData[catIdx];
+  const mod = cat.modules[modIdx];
+  const lesson = mod.lessons[lesIdx];
 
-    // 🔥 ၁။ သင်ခန်းစာခေါင်းစဉ်ကို Header မှာ ချက်ချင်းပြောင်းမည်
-    const titleEl = document.getElementById('page-title');
-    if (titleEl) titleEl.innerText = lesson.title;
+  // 🔥 ၁။ သင်ခန်းစာခေါင်းစဉ်ကို Header မှာ ချက်ချင်းပြောင်းမည်
+  const titleEl = document.getElementById("page-title");
+  if (titleEl) titleEl.innerText = lesson.title;
 
-    body.innerHTML = '<div class="loader">Loading content...</div>';
+  body.innerHTML = '<div class="loader">Loading content...</div>';
 
-    const bc = `<div class="breadcrumbs"><span onclick="showSection('dashboard')">Home</span> / <span onclick="showSection('courses', '${cat.category}')">${cat.category}</span> / <span>${mod.moduleTitle}</span></div>`;
+  const bc = `<div class="breadcrumbs"><span onclick="showSection('dashboard')">Home</span> / <span onclick="showSection('courses', '${cat.category}')">${cat.category}</span> / <span>${mod.moduleTitle}</span></div>`;
 
-    // Pagination Logic
-    const paginationHtml = `
+  // Pagination Logic
+  const paginationHtml = `
         <div class="pagination no-print" style="display: flex; gap: 15px; margin-top: 30px;">
             <button class="menu-btn" onclick="goToLesson(${catIdx}, ${modIdx}, ${lesIdx - 1})" 
-                ${lesIdx === 0 ? 'disabled style="opacity:0.4; pointer-events:none;"' : ''}>
+                ${lesIdx === 0 ? 'disabled style="opacity:0.4; pointer-events:none;"' : ""}>
                 <i class="fas fa-arrow-left"></i> Prev
             </button>
             <button class="menu-btn" onclick="goToLesson(${catIdx}, ${modIdx}, ${lesIdx + 1})" 
-                ${lesIdx === mod.lessons.length - 1 ? 'disabled style="opacity:0.4; pointer-events:none;"' : ''}>
+                ${lesIdx === mod.lessons.length - 1 ? 'disabled style="opacity:0.4; pointer-events:none;"' : ""}>
                 Next <i class="fas fa-arrow-right"></i>
             </button>
         </div>`;
 
-    try {
-        const res = await fetch(`${lesson.path}?t=${new Date().getTime()}`);
-        if (!res.ok) throw new Error(`File not found`);
+  try {
+    const res = await fetch(`${lesson.path}?t=${new Date().getTime()}`);
+    if (!res.ok) throw new Error(`File not found`);
 
-        // 🔥 အကယ်၍ Firebase က ဖိုင်မရှိလို့ index.html ကို အစားထိုးပြလိုက်ရင် တားဆီးရန်
-        const contentType = res.headers.get("content-type");
-        if (lesson.type === 'quiz' && !contentType.includes("application/json")) {
-            throw new Error("JSON ဖိုင်မဟုတ်ဘဲ HTML ဒေတာများ ရောက်ရှိနေပါသည်။ လမ်းကြောင်း ပြန်စစ်ပါ။");
-        }
+    // 🔥 အကယ်၍ Firebase က ဖိုင်မရှိလို့ index.html ကို အစားထိုးပြလိုက်ရင် တားဆီးရန်
+    const contentType = res.headers.get("content-type");
+    if (lesson.type === "quiz" && !contentType.includes("application/json")) {
+      throw new Error(
+        "JSON ဖိုင်မဟုတ်ဘဲ HTML ဒေတာများ ရောက်ရှိနေပါသည်။ လမ်းကြောင်း ပြန်စစ်ပါ။",
+      );
+    }
 
-        if (lesson.type === "quiz") {
-            const quizData = await res.json();
-            renderQuizUI(quizData, bc, catIdx, modIdx, lesIdx);
-        } else if (lesson.type === "assignment") {
-            renderAssignmentUI(catIdx, modIdx, lesIdx, bc);
-        } else if (lesson.type === "project") {
-            renderProjectUI(catIdx, modIdx, lesIdx, bc);
-        } else {
-            const html = await res.text();
-            // အကယ်၍ html ထဲမှာ <!DOCTYPE html> ပါနေရင် ဒါဟာ သင်ခန်းစာဖိုင်မဟုတ်ဘဲ ပင်မ App ဖိုင်ဖြစ်နေလို့ပါ
-            if (html.includes("<!DOCTYPE html>") || html.trim() === "") {
-                throw new Error("သင်ခန်းစာ အချက်အလက်များ မရှိပါ။ ဖိုင်အမည်နှင့် လမ်းကြောင်းကို စစ်ဆေးပါ။");
-            }
-            body.innerHTML = `
+    if (lesson.type === "quiz") {
+      const quizData = await res.json();
+      renderQuizUI(quizData, bc, catIdx, modIdx, lesIdx);
+    } else if (lesson.type === "assignment") {
+      renderAssignmentUI(catIdx, modIdx, lesIdx, bc);
+    } else if (lesson.type === "project") {
+      renderProjectUI(catIdx, modIdx, lesIdx, bc);
+    } else {
+      const html = await res.text();
+      // အကယ်၍ html ထဲမှာ <!DOCTYPE html> ပါနေရင် ဒါဟာ သင်ခန်းစာဖိုင်မဟုတ်ဘဲ ပင်မ App ဖိုင်ဖြစ်နေလို့ပါ
+      if (html.includes("<!DOCTYPE html>") || html.trim() === "") {
+        throw new Error(
+          "သင်ခန်းစာ အချက်အလက်များ မရှိပါ။ ဖိုင်အမည်နှင့် လမ်းကြောင်းကို စစ်ဆေးပါ။",
+        );
+      }
+      body.innerHTML = `
                 ${bc}
                 <article class="content-card animate-up">
                     <div class="lesson-body">${html}</div>
                     ${paginationHtml} 
                 </article>`;
-            markLessonAsDone(lesson.title); 
-        }
-
-        // Article အတွက် Discussion Section
-        if (lesson.type === 'article') {
-            const discussionDiv = document.createElement('div');
-            discussionDiv.id = "discussion-area";
-            body.appendChild(discussionDiv);
-            renderDiscussion(lesson.title); 
-        }
-
-    } catch (e) {
-        console.error("Fetch Error:", e);
-        body.innerHTML = `${bc} <div class="error-msg"><h4>ဖိုင်ရှာမတွေ့ပါ။</h4><p>${lesson.path}</p></div>`;
+      markLessonAsDone(lesson.title);
     }
-    window.scrollTo({ top: 0, behavior: "smooth" });
-}
 
+    // Article အတွက် Discussion Section
+    if (lesson.type === "article") {
+      const discussionDiv = document.createElement("div");
+      discussionDiv.id = "discussion-area";
+      body.appendChild(discussionDiv);
+      renderDiscussion(lesson.title);
+    }
+  } catch (e) {
+    console.error("Fetch Error:", e);
+    body.innerHTML = `${bc} <div class="error-msg"><h4>ဖိုင်ရှာမတွေ့ပါ။</h4><p>${lesson.path}</p></div>`;
+  }
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
 
 // 🔥 ထပ်ခါတလဲလဲ မရေးရအောင် Helper function တစ်ခု ဆောက်လိုက်ပါ
 async function markLessonAsDone(lessonTitle) {
-    // Safety check: array မရှိသေးရင် အသစ်ဆောက်မယ်
-    if (!currentUser.completedLessons) currentUser.completedLessons = [];
-    
-    if (!currentUser.completedLessons.includes(lessonTitle)) {
-        currentUser.completedLessons.push(lessonTitle);
-        localStorage.setItem('currentUser', JSON.stringify(currentUser));
-        
-        // Cloud Sync လုပ်မယ်
-        await syncProgressToCloud();
-    }
+  // Safety check: array မရှိသေးရင် အသစ်ဆောက်မယ်
+  if (!currentUser.completedLessons) currentUser.completedLessons = [];
+
+  if (!currentUser.completedLessons.includes(lessonTitle)) {
+    currentUser.completedLessons.push(lessonTitle);
+    localStorage.setItem("currentUser", JSON.stringify(currentUser));
+
+    // Cloud Sync လုပ်မယ်
+    await syncProgressToCloud();
+  }
 }
 
 // Pagination အတွက် ကူညီပေးမည့် function
@@ -905,23 +969,24 @@ function goToLesson(catIdx, modIdx, lesIdx) {
 
 // 🔥 Module (သင်ခန်းစာစာရင်း) ပိတ်/ဖွင့် လုပ်ပေးမည့် Function (Smooth Version)
 function toggleModuleAccordion(header, targetId) {
-    const content = document.getElementById(targetId);
-    header.classList.toggle('active');
+  const content = document.getElementById(targetId);
+  header.classList.toggle("active");
 
-    if (content.style.maxHeight && content.style.maxHeight !== "0px") {
-        content.style.maxHeight = "0px";
-        content.classList.remove('show');
-    } else {
-        content.classList.add('show');
-        content.style.maxHeight = content.scrollHeight + "px";
-        
-        // --- အရေးကြီးသောအချက် ---
-        // အထဲက Module ပွင့်လာရင် အပြင်က Category Body ရဲ့ maxHeight ကိုပါ လိုက်တိုးပေးရမည်
-        const parentBody = content.closest('.category-body');
-        if (parentBody && parentBody.style.maxHeight !== "0px") {
-            parentBody.style.maxHeight = (parentBody.scrollHeight + content.scrollHeight) + "px";
-        }
+  if (content.style.maxHeight && content.style.maxHeight !== "0px") {
+    content.style.maxHeight = "0px";
+    content.classList.remove("show");
+  } else {
+    content.classList.add("show");
+    content.style.maxHeight = content.scrollHeight + "px";
+
+    // --- အရေးကြီးသောအချက် ---
+    // အထဲက Module ပွင့်လာရင် အပြင်က Category Body ရဲ့ maxHeight ကိုပါ လိုက်တိုးပေးရမည်
+    const parentBody = content.closest(".category-body");
+    if (parentBody && parentBody.style.maxHeight !== "0px") {
+      parentBody.style.maxHeight =
+        parentBody.scrollHeight + content.scrollHeight + "px";
     }
+  }
 }
 
 // ==========================================
@@ -929,22 +994,22 @@ function toggleModuleAccordion(header, targetId) {
 // ==========================================
 
 function renderQuizUI(data, bc, c, m, l) {
-    if (!currentUser.quizAttempts) currentUser.quizAttempts = {};
-    const attempts = currentUser.quizAttempts[data.id] || 0;
-    
-    // အကြိမ်ရေ ၃ ကြိမ်ပြည့်/မပြည့် စစ်ဆေးခြင်း
-    if(attempts >= 3 && currentUser.role !== 'Teacher') {
-        document.getElementById('dynamic-body').innerHTML = `
+  if (!currentUser.quizAttempts) currentUser.quizAttempts = {};
+  const attempts = currentUser.quizAttempts[data.id] || 0;
+
+  // အကြိမ်ရေ ၃ ကြိမ်ပြည့်/မပြည့် စစ်ဆေးခြင်း
+  if (attempts >= 3 && currentUser.role !== "Teacher") {
+    document.getElementById("dynamic-body").innerHTML = `
             ${bc}
             <div class="content-card error-msg animate-up">
                 <h3><i class="fas fa-lock"></i> Quiz ပိတ်သွားပါပြီ</h3>
                 <p>သင်သည် ဤ Quiz ကို ၃ ကြိမ်ဖြေဆိုပြီး ဖြစ်သောကြောင့် ထပ်မံဖြေဆိုခွင့် မရှိတော့ပါ။</p>
                 <button class="menu-btn" style="margin-top:15px" onclick="showSection('courses')">သင်ခန်းစာများသို့ ပြန်သွားရန်</button>
             </div>`;
-        return;
-    }
+    return;
+  }
 
-    let html = `${bc}
+  let html = `${bc}
         <div class="content-card animate-up">
             <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid #eee; padding-bottom:15px; margin-bottom:20px;">
                 <h3 style="margin:0;">${data.title}</h3>
@@ -952,146 +1017,169 @@ function renderQuizUI(data, bc, c, m, l) {
             </div>
             <form id="quiz-form">`;
 
-    data.questions.forEach((q, i) => {
-        html += `
+  data.questions.forEach((q, i) => {
+    html += `
             <div class="quiz-question-box" id="q-box-${i}">
                 <p><strong>${i + 1}. ${q.q}</strong></p>`;
-        
-        // --- ၁။ ပုံပါဝင်လျှင် ပြသရန် ---
-        if (q.image) {
-            html += `<div class="quiz-image-container"><img src="${q.image}" class="quiz-img"></div>`;
-        }
 
-        html += `<div class="options-area">`;
-        
-        if (q.type === 'single') {
-            q.options.forEach((opt, oi) => {
-                html += `<label class="quiz-opt"><input type="radio" name="q${i}" value="${oi}"> ${opt}</label>`;
-            });
-        } else if (q.type === 'multiple') {
-            // --- ၂။ Multiple Choice (Checkboxes) ---
-            q.options.forEach((opt, oi) => {
-                html += `<label class="quiz-opt"><input type="checkbox" name="q${i}" value="${oi}"> ${opt}</label>`;
-            });
-        } else if (q.type === 'short') {
-            html += `<input type="text" name="q${i}" class="edit-input" placeholder="အဖြေရိုက်ပါ" style="margin-top:10px; width:100%;">`;
-        }
+    // --- ၁။ ပုံပါဝင်လျှင် ပြသရန် ---
+    if (q.image) {
+      html += `<div class="quiz-image-container"><img src="${q.image}" class="quiz-img"></div>`;
+    }
 
-        html += `</div>
+    html += `<div class="options-area">`;
+
+    if (q.type === "single") {
+      q.options.forEach((opt, oi) => {
+        html += `<label class="quiz-opt"><input type="radio" name="q${i}" value="${oi}"> ${opt}</label>`;
+      });
+    } else if (q.type === "multiple") {
+      // --- ၂။ Multiple Choice (Checkboxes) ---
+      q.options.forEach((opt, oi) => {
+        html += `<label class="quiz-opt"><input type="checkbox" name="q${i}" value="${oi}"> ${opt}</label>`;
+      });
+    } else if (q.type === "short") {
+      html += `<input type="text" name="q${i}" class="edit-input" placeholder="အဖြေရိုက်ပါ" style="margin-top:10px; width:100%;">`;
+    }
+
+    html += `</div>
                 <div id="f-${i}" class="feedback-area" style="margin-top:10px; font-weight:bold;"></div>
             </div>`;
-    });
+  });
 
-    html += `</form>
+  html += `</form>
             <div style="margin-top:20px;">
-                <button class="save-btn" onclick="checkQuizResult('${data.id}', ${JSON.stringify(data).replace(/"/g, '&quot;')}, ${c}, ${m}, ${l})">
+                <button class="save-btn" onclick="checkQuizResult('${data.id}', ${JSON.stringify(data).replace(/"/g, "&quot;")}, ${c}, ${m}, ${l})">
                     <i class="fas fa-check-circle"></i> Submit Quiz
                 </button>
             </div>
         </div>`;
-    document.getElementById('dynamic-body').innerHTML = html;
+  document.getElementById("dynamic-body").innerHTML = html;
 }
 
 async function checkQuizResult(quizId, quizData, c, m, l) {
-    let score = 0;
-    const questions = quizData.questions;
+  let score = 0;
+  const questions = quizData.questions;
 
-    // ၁။ Safety Checks: လိုအပ်သော Object များ ရှိနေစေရန်
-    if (!currentUser.quizAttempts) currentUser.quizAttempts = {};
-    if (!currentUser.completedLessons) currentUser.completedLessons = [];
-    if (!currentUser.grades) currentUser.grades = {};
+  // ၁။ Safety Checks: လိုအပ်သော Object များ ရှိနေစေရန်
+  if (!currentUser.quizAttempts) currentUser.quizAttempts = {};
+  if (!currentUser.completedLessons) currentUser.completedLessons = [];
+  if (!currentUser.grades) currentUser.grades = {};
 
-    const currentAttempt = (currentUser.quizAttempts[quizId] || 0) + 1;
+  const currentAttempt = (currentUser.quizAttempts[quizId] || 0) + 1;
 
-    // ၂။ အဖြေစစ်ဆေးခြင်း (UI Feedback)
-    questions.forEach((q, i) => {
-        const feedbackEl = document.getElementById(`f-${i}`);
-        const qBox = document.getElementById(`q-box-${i}`);
-        const inputs = document.getElementsByName(`q${i}`);
-        let isCorrect = false;
+  // ၂။ အဖြေစစ်ဆေးခြင်း (UI Feedback)
+  questions.forEach((q, i) => {
+    const feedbackEl = document.getElementById(`f-${i}`);
+    const qBox = document.getElementById(`q-box-${i}`);
+    const inputs = document.getElementsByName(`q${i}`);
+    let isCorrect = false;
 
-        if (q.type === 'single') {
-            const sel = Array.from(inputs).find(r => r.checked);
-            if (sel && parseInt(sel.value) === q.correct) isCorrect = true;
-        } else if (q.type === 'multiple') {
-            const selected = Array.from(inputs).filter(cb => cb.checked).map(cb => parseInt(cb.value));
-            if (JSON.stringify(selected.sort()) === JSON.stringify(q.correct.sort())) isCorrect = true;
-        } else if (q.type === 'short') {
-            if (inputs[0].value.trim().toLowerCase() === q.correct.toLowerCase()) isCorrect = true;
-        }
-
-        if (isCorrect) {
-            score++;
-            feedbackEl.innerHTML = '<span class="text-success"><i class="fas fa-check"></i> Correct</span>';
-            if (qBox) qBox.style.borderColor = "#22c55e";
-        } else {
-            feedbackEl.innerHTML = '<span class="text-danger"><i class="fas fa-times"></i> Wrong</span>';
-            if (qBox) qBox.style.borderColor = "#ef4444";
-        }
-    });
-
-    // ၃။ 🔥 Transcript ထဲသို့ အမှတ်စာရင်း သွင်းခြင်း Logic
-    const courseId = currentUser.selectedCourseId;
-    // JSON ထဲတွင် subject: "html" စသဖြင့် ပါဝင်ရပါမည်။ မပါလျှင် quizId ကို သုံးမည်။
-    const subjectKey = (quizData.subject || quizId).toLowerCase();
-
-    if (courseId) {
-        if (!currentUser.grades[courseId]) currentUser.grades[courseId] = {};
-        
-        const oldScore = currentUser.grades[courseId][subjectKey] || 0;
-
-        // အမှတ်အသစ်က ပိုများမှသာ Update လုပ်မည် (Best Score Strategy)
-        if (score > oldScore) {
-            currentUser.grades[courseId][subjectKey] = score;
-            
-            // Cloud (Firebase) သို့ တိုက်ရိုက် Update လုပ်မည်
-            await db.collection('users').doc(currentUser.uid).set({
-                grades: {
-                    [courseId]: {
-                        [subjectKey]: score
-                    }
-                }
-            }, { merge: true });
-            
-            showToast(`ဘာသာရပ် ${subjectKey.toUpperCase()} အတွက် ရမှတ်အသစ် (${score}) ကို မှတ်တမ်းတင်လိုက်ပါပြီ။`, "success");
-        } else {
-            showToast(`ယခင်ရမှတ် (${oldScore}) က ပိုများနေသဖြင့် အမှတ်စာရင်းကို မပြောင်းလဲပါ။`);
-        }
+    if (q.type === "single") {
+      const sel = Array.from(inputs).find((r) => r.checked);
+      if (sel && parseInt(sel.value) === q.correct) isCorrect = true;
+    } else if (q.type === "multiple") {
+      const selected = Array.from(inputs)
+        .filter((cb) => cb.checked)
+        .map((cb) => parseInt(cb.value));
+      if (JSON.stringify(selected.sort()) === JSON.stringify(q.correct.sort()))
+        isCorrect = true;
+    } else if (q.type === "short") {
+      if (inputs[0].value.trim().toLowerCase() === q.correct.toLowerCase())
+        isCorrect = true;
     }
 
-    // ၄။ Attempt နှင့် Completion Update
-    currentUser.quizAttempts[quizId] = currentAttempt;
-    const lessonTitle = courseData[c].modules[m].lessons[l].title;
-    
-    if (score === questions.length || currentAttempt >= 3) {
-        if (!currentUser.completedLessons.includes(lessonTitle)) {
-            currentUser.completedLessons.push(lessonTitle);
-        }
+    if (isCorrect) {
+      score++;
+      feedbackEl.innerHTML =
+        '<span class="text-success"><i class="fas fa-check"></i> Correct</span>';
+      if (qBox) qBox.style.borderColor = "#22c55e";
+    } else {
+      feedbackEl.innerHTML =
+        '<span class="text-danger"><i class="fas fa-times"></i> Wrong</span>';
+      if (qBox) qBox.style.borderColor = "#ef4444";
     }
+  });
 
-    // Local Storage သိမ်းမည်
-    localStorage.setItem('currentUser', JSON.stringify(currentUser));
-    
-    // Cloud Sync (Completed Lessons & Attempts အတွက်)
-    await syncProgressToCloud(); 
+  // ၃။ 🔥 Transcript ထဲသို့ အမှတ်စာရင်း သွင်းခြင်း Logic
+  const courseId = currentUser.selectedCourseId;
+  // JSON ထဲတွင် subject: "html" စသဖြင့် ပါဝင်ရပါမည်။ မပါလျှင် quizId ကို သုံးမည်။
+  const subjectKey = (quizData.subject || quizId).toLowerCase();
 
-    // ၅။ အသိပေးချက်နှင့် Redirection
-    setTimeout(() => {
-        if (score === questions.length) {
-            alert(`ဂုဏ်ယူပါတယ်! အမှတ်ပြည့် (${score}/${questions.length}) ရရှိပါတယ်။`);
-            goToNextLesson(c, m, l);
-        } else if (currentAttempt >= 3) {
-            alert(`၃ ကြိမ်ဖြေဆိုမှု ပြီးဆုံးပါပြီ။ သင်၏နောက်ဆုံးရမှတ်မှာ (${score}/${questions.length}) ဖြစ်ပါသည်။`);
-            goToNextLesson(c, m, l);
-        } else {
-            const retry = confirm(`သင့်ရမှတ်မှာ (${score}/${questions.length}) ဖြစ်ပါသည်။ အကြိမ်ရေ ${(3 - currentAttempt)} ကြိမ် ကျန်ပါသေးသည်။ ထပ်မံဖြေဆိုလိုပါသလား?`);
-            if (retry) {
-                renderLessonContent(c, m, l);
-            } else {
-                goToNextLesson(c, m, l);
-            }
-        }
-    }, 800);
+  if (courseId) {
+    if (!currentUser.grades[courseId]) currentUser.grades[courseId] = {};
+
+    const oldScore = currentUser.grades[courseId][subjectKey] || 0;
+
+    // အမှတ်အသစ်က ပိုများမှသာ Update လုပ်မည် (Best Score Strategy)
+    if (score > oldScore) {
+      currentUser.grades[courseId][subjectKey] = score;
+
+      // Cloud (Firebase) သို့ တိုက်ရိုက် Update လုပ်မည်
+      await db
+        .collection("users")
+        .doc(currentUser.uid)
+        .set(
+          {
+            grades: {
+              [courseId]: {
+                [subjectKey]: score,
+              },
+            },
+          },
+          { merge: true },
+        );
+
+      showToast(
+        `ဘာသာရပ် ${subjectKey.toUpperCase()} အတွက် ရမှတ်အသစ် (${score}) ကို မှတ်တမ်းတင်လိုက်ပါပြီ။`,
+        "success",
+      );
+    } else {
+      showToast(
+        `ယခင်ရမှတ် (${oldScore}) က ပိုများနေသဖြင့် အမှတ်စာရင်းကို မပြောင်းလဲပါ။`,
+      );
+    }
+  }
+
+  // ၄။ Attempt နှင့် Completion Update
+  currentUser.quizAttempts[quizId] = currentAttempt;
+  const lessonTitle = courseData[c].modules[m].lessons[l].title;
+
+  if (score === questions.length || currentAttempt >= 3) {
+    if (!currentUser.completedLessons.includes(lessonTitle)) {
+      currentUser.completedLessons.push(lessonTitle);
+    }
+  }
+
+  // Local Storage သိမ်းမည်
+  localStorage.setItem("currentUser", JSON.stringify(currentUser));
+
+  // Cloud Sync (Completed Lessons & Attempts အတွက်)
+  await syncProgressToCloud();
+
+  // ၅။ အသိပေးချက်နှင့် Redirection
+  setTimeout(() => {
+    if (score === questions.length) {
+      alert(
+        `ဂုဏ်ယူပါတယ်! အမှတ်ပြည့် (${score}/${questions.length}) ရရှိပါတယ်။`,
+      );
+      goToNextLesson(c, m, l);
+    } else if (currentAttempt >= 3) {
+      alert(
+        `၃ ကြိမ်ဖြေဆိုမှု ပြီးဆုံးပါပြီ။ သင်၏နောက်ဆုံးရမှတ်မှာ (${score}/${questions.length}) ဖြစ်ပါသည်။`,
+      );
+      goToNextLesson(c, m, l);
+    } else {
+      const retry = confirm(
+        `သင့်ရမှတ်မှာ (${score}/${questions.length}) ဖြစ်ပါသည်။ အကြိမ်ရေ ${3 - currentAttempt} ကြိမ် ကျန်ပါသေးသည်။ ထပ်မံဖြေဆိုလိုပါသလား?`,
+      );
+      if (retry) {
+        renderLessonContent(c, m, l);
+      } else {
+        goToNextLesson(c, m, l);
+      }
+    }
+  }, 800);
 }
 
 function renderAssignmentUI(catIdx, modIdx, lesIdx, bc) {
@@ -1140,68 +1228,74 @@ function renderProjectUI(catIdx, modIdx, lesIdx, bc) {
 
 // --- Project Submit Logic (GitHub Link တင်ရန်) ---
 async function submitProjectDB(catIdx, modIdx, lesIdx) {
-    const link = document.getElementById("plink").value.trim();
-    const members = document.getElementById("pmembers").value.trim();
-    const lesson = courseData[catIdx].modules[modIdx].lessons[lesIdx];
+  const link = document.getElementById("plink").value.trim();
+  const members = document.getElementById("pmembers").value.trim();
+  const lesson = courseData[catIdx].modules[modIdx].lessons[lesIdx];
 
-    // --- ၁။ Validation အပိုင်း (Cleaned Version) ---
-    
-    // github.com သို့မဟုတ် github.io နှစ်ခုလုံးကို လက်ခံမည်
-    const isValidGithub = link.includes('github.com') || link.includes('github.io');
+  // --- ၁။ Validation အပိုင်း (Cleaned Version) ---
 
-    if (!isValidGithub) {
-        return alert("ကျေးဇူးပြု၍ မှန်ကန်သော GitHub Link (Repository သို့မဟုတ် Live Site) ကို ထည့်ပေးပါ။");
+  // github.com သို့မဟုတ် github.io နှစ်ခုလုံးကို လက်ခံမည်
+  const isValidGithub =
+    link.includes("github.com") || link.includes("github.io");
+
+  if (!isValidGithub) {
+    return alert(
+      "ကျေးဇူးပြု၍ မှန်ကန်သော GitHub Link (Repository သို့မဟုတ် Live Site) ကို ထည့်ပေးပါ။",
+    );
+  }
+
+  if (!members) {
+    return alert("အဖွဲ့ဝင်များ အမည်ကို အနည်းဆုံး တစ်ယောက် ထည့်ပေးပါ။");
+  }
+
+  // --- ၂။ Submission အပိုင်း ---
+  try {
+    // ခလုတ်ကို Loading ပြောင်းမည် (CSS class .save-btn ကို ရှာဖွေခြင်း)
+    const btn =
+      document.getElementById("upload-btn") ||
+      document.querySelector(".project-card .save-btn");
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
     }
 
-    if (!members) {
-        return alert("အဖွဲ့ဝင်များ အမည်ကို အနည်းဆုံး တစ်ယောက် ထည့်ပေးပါ။");
+    // Firestore: 'submissions' collection ထဲသို့ ပို့မည်
+    await db.collection("submissions").add({
+      type: "project",
+      studentId: currentUser.uid,
+      studentName: currentUser.name,
+      lessonTitle: lesson.title,
+      category: courseData[catIdx].category,
+      githubLink: link,
+      teamMembers: members,
+      status: "pending",
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+
+    // ၃။ သင်ခန်းစာ ပြီးမြောက်ကြောင်း မှတ်သားမည်
+    if (!currentUser.completedLessons.includes(lesson.title)) {
+      currentUser.completedLessons.push(lesson.title);
+      localStorage.setItem("currentUser", JSON.stringify(currentUser));
+      await syncProgressToCloud(); // Cloud သို့ Sync လုပ်မည်
     }
 
-    // --- ၂။ Submission အပိုင်း ---
-    try {
-        // ခလုတ်ကို Loading ပြောင်းမည် (CSS class .save-btn ကို ရှာဖွေခြင်း)
-        const btn = document.getElementById('upload-btn') || document.querySelector('.project-card .save-btn');
-        if (btn) {
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
-        }
+    alert("Project ကို အောင်မြင်စွာ ပေးပို့ပြီးပါပြီ။");
 
-        // Firestore: 'submissions' collection ထဲသို့ ပို့မည်
-        await db.collection("submissions").add({
-            type: "project",
-            studentId: currentUser.uid,
-            studentName: currentUser.name,
-            lessonTitle: lesson.title,
-            category: courseData[catIdx].category,
-            githubLink: link,
-            teamMembers: members,
-            status: "pending",
-            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-        });
+    // ၄။ နောက်စာမျက်နှာကို တန်းသွားမည်
+    goToNextLesson(catIdx, modIdx, lesIdx);
+  } catch (error) {
+    console.error("Submit Error:", error);
+    alert("Error submitting project: " + error.message);
 
-        // ၃။ သင်ခန်းစာ ပြီးမြောက်ကြောင်း မှတ်သားမည်
-        if (!currentUser.completedLessons.includes(lesson.title)) {
-            currentUser.completedLessons.push(lesson.title);
-            localStorage.setItem("currentUser", JSON.stringify(currentUser));
-            await syncProgressToCloud(); // Cloud သို့ Sync လုပ်မည်
-        }
-
-        alert("Project ကို အောင်မြင်စွာ ပေးပို့ပြီးပါပြီ။");
-
-        // ၄။ နောက်စာမျက်နှာကို တန်းသွားမည်
-        goToNextLesson(catIdx, modIdx, lesIdx);
-
-    } catch (error) {
-        console.error("Submit Error:", error);
-        alert("Error submitting project: " + error.message);
-        
-        // Error တက်ရင် ခလုတ်ကို ပြန်ဖွင့်မည်
-        const btn = document.getElementById('upload-btn') || document.querySelector('.project-card .save-btn');
-        if (btn) {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-upload"></i> Submit Project';
-        }
+    // Error တက်ရင် ခလုတ်ကို ပြန်ဖွင့်မည်
+    const btn =
+      document.getElementById("upload-btn") ||
+      document.querySelector(".project-card .save-btn");
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-upload"></i> Submit Project';
     }
+  }
 }
 
 // ==========================================
@@ -1209,41 +1303,54 @@ async function submitProjectDB(catIdx, modIdx, lesIdx) {
 // ==========================================
 // --- နာမည်အလိုက် အရောင်အမျိုးမျိုး ထုတ်ပေးမည့် Helper (ပိုလှစေရန်) ---
 function getAvatarColor(name) {
-    const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
-    let hash = 0;
-    for (let i = 0; i < name.length; i++) {
-        hash = name.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    return colors[Math.abs(hash) % colors.length];
+  const colors = [
+    "#3b82f6",
+    "#10b981",
+    "#f59e0b",
+    "#ef4444",
+    "#8b5cf6",
+    "#ec4899",
+  ];
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return colors[Math.abs(hash) % colors.length];
 }
 
 // Messaging Section ပြသခြင်း
 async function showMessages(targetUid = null, targetName = null) {
-    if (targetUid) { 
-        activeChatId = targetUid; 
-        activeChatName = "Chat: " + targetName; 
-    }
-    
-    await fetchStudentsFromDB(); 
+  if (targetUid) {
+    activeChatId = targetUid;
+    activeChatName = "Chat: " + targetName;
+  }
 
-    const body = document.getElementById('dynamic-body');
-    const isTeacher = currentUser.role === 'Teacher';
+  await fetchStudentsFromDB();
 
-    // ၁။ DM List Filtering
-    const visibleDMList = studentsList.filter(s => {
-        if (isTeacher) return true;
-        return s.batchId === currentUser.batchId && s.uid !== currentUser.uid;
-    });
+  const body = document.getElementById("dynamic-body");
+  const isTeacher = currentUser.role === "Teacher";
 
-    // ၂။ Groups Filtering
-    const allBatches = [...new Set(studentsList.map(s => s.batchId))].sort();
-    const myBatchList = isTeacher ? allBatches : (currentUser.batchId ? [currentUser.batchId] : []);
+  // ၁။ DM List Filtering
+  const visibleDMList = studentsList.filter((s) => {
+    if (isTeacher) return true;
+    return s.batchId === currentUser.batchId && s.uid !== currentUser.uid;
+  });
 
-    // ၃။ ဆရာများကို ရှာဖွေခြင်း
-    const teachers = allUsersList.filter(u => u.role === 'Teacher' && u.uid !== currentUser.uid);
+  // ၂။ Groups Filtering
+  const allBatches = [...new Set(studentsList.map((s) => s.batchId))].sort();
+  const myBatchList = isTeacher
+    ? allBatches
+    : currentUser.batchId
+      ? [currentUser.batchId]
+      : [];
 
-    // --- HTML Rendering ---
-    body.innerHTML = `
+  // ၃။ ဆရာများကို ရှာဖွေခြင်း
+  const teachers = allUsersList.filter(
+    (u) => u.role === "Teacher" && u.uid !== currentUser.uid,
+  );
+
+  // --- HTML Rendering ---
+  body.innerHTML = `
         <div class="messaging-layout fade-in animate-up">
             <div class="chat-sidebar">
                 <div class="chat-list-header" style="background: white; border-bottom: 1px solid var(--border-color); padding: 25px;">
@@ -1252,47 +1359,65 @@ async function showMessages(targetUid = null, targetName = null) {
                 <div class="chat-list" style="padding-top: 15px;">
                     
                     <div class="chat-list-divider" style="margin-left:20px; font-size:0.7rem; text-transform:uppercase; letter-spacing:1px; color:grey; margin-bottom:10px;">Channels</div>
-                    ${myBatchList.map(bid => `
-                        <div class="chat-item ${activeChatId === bid ? 'active' : ''}" onclick="switchChat('${bid}', 'Group: ${bid}')">
+                    ${myBatchList
+                      .map(
+                        (bid) => `
+                        <div class="chat-item ${activeChatId === bid ? "active" : ""}" onclick="switchChat('${bid}', 'Group: ${bid}')">
                             <i class="fas fa-hashtag" style="width:38px; text-align:center;"></i> 
                             <span>${bid}</span>
                         </div>
-                    `).join('')}
+                    `,
+                      )
+                      .join("")}
 
-                    ${!isTeacher ? `
+                    ${
+                      !isTeacher
+                        ? `
                         <div class="chat-list-divider" style="margin: 20px 0 10px 20px; font-size:0.7rem; text-transform:uppercase; color:grey;">Contact Tutor</div>
-                        ${teachers.map(t => {
+                        ${teachers
+                          .map((t) => {
                             const avatarColor = getAvatarColor(t.name);
-                            const teacherAvatarUI = (t.photo && t.photo.length > 5) 
-                            ? `<div class="user-avatar-mini"><img src="${t.photo}" onerror="this.style.display='none'; this.parentElement.innerText='${t.name.charAt(0)}'"></div>`
-                            : `<div class="user-avatar-mini" style="background-color: ${avatarColor}">${t.name.charAt(0)}</div>`;
+                            const teacherAvatarUI =
+                              t.photo && t.photo.length > 5
+                                ? `<div class="user-avatar-mini"><img src="${t.photo}" onerror="this.style.display='none'; this.parentElement.innerText='${t.name.charAt(0)}'"></div>`
+                                : `<div class="user-avatar-mini" style="background-color: ${avatarColor}">${t.name.charAt(0)}</div>`;
 
-                        return `
-                            <div class="chat-item ${activeChatId === t.uid ? 'active' : ''}" onclick="switchChat('${t.uid}', 'Tutor: ${t.name}')">
+                            return `
+                            <div class="chat-item ${activeChatId === t.uid ? "active" : ""}" onclick="switchChat('${t.uid}', 'Tutor: ${t.name}')">
                                 ${teacherAvatarUI}
                                 <span>${t.name} (Teacher)</span>
                             </div>`;
-                    }).join('')}
-                    ` : ''}
+                          })
+                          .join("")}
+                    `
+                        : ""
+                    }
 
                     <div class="chat-list-divider" style="margin: 20px 0 10px 20px; font-size:0.7rem; text-transform:uppercase; color:grey;">Direct Messages</div>
 
-                    ${visibleDMList.length > 0 ? visibleDMList.map(s => {
-                        const avatarColor = getAvatarColor(s.name);
-                        const isActive = activeChatId === s.uid;
-                        
-                        // 🔥 ဤနေရာတွင် Avatar Logic ကို အသေအချာ ပြင်လိုက်ပါပြီ
-                        const avatarUI = (s.photo && s.photo.length > 5) 
-                            ? `<div class="user-avatar-mini"><img src="${s.photo}" onerror="this.style.display='none'; this.parentElement.innerText='${s.name.charAt(0)}'"></div>`
-                            : `<div class="user-avatar-mini" style="background-color: ${avatarColor}">${s.name.charAt(0)}</div>`;
+                    ${
+                      visibleDMList.length > 0
+                        ? visibleDMList
+                            .map((s) => {
+                              const avatarColor = getAvatarColor(s.name);
+                              const isActive = activeChatId === s.uid;
 
-                        return `
-                            <div class="chat-item ${isActive ? 'active' : ''}" onclick="switchChat('${s.uid}', '${s.name}')">
+                              // 🔥 ဤနေရာတွင် Avatar Logic ကို အသေအချာ ပြင်လိုက်ပါပြီ
+                              const avatarUI =
+                                s.photo && s.photo.length > 5
+                                  ? `<div class="user-avatar-mini"><img src="${s.photo}" onerror="this.style.display='none'; this.parentElement.innerText='${s.name.charAt(0)}'"></div>`
+                                  : `<div class="user-avatar-mini" style="background-color: ${avatarColor}">${s.name.charAt(0)}</div>`;
+
+                              return `
+                            <div class="chat-item ${isActive ? "active" : ""}" onclick="switchChat('${s.uid}', '${s.name}')">
                                 ${avatarUI}
                                 <span>${s.name}</span>
                             </div>
                         `;
-                    }).join('') : '<p style="padding:15px; font-size:0.8rem; color:grey;">စကားပြောရန် လူမရှိသေးပါ။</p>'}
+                            })
+                            .join("")
+                        : '<p style="padding:15px; font-size:0.8rem; color:grey;">စကားပြောရန် လူမရှိသေးပါ။</p>'
+                    }
                 </div>
             </div>
             
@@ -1312,157 +1437,175 @@ async function showMessages(targetUid = null, targetName = null) {
                 </div>
             </div>
         </div>`;
-    loadMessages();
+  loadMessages();
 }
-
 
 // Chat ပြောင်းခြင်း (Group မှ DM သို့ သို့မဟုတ် အပြန်အလှန်)
 function switchChat(id, name) {
-    activeChatId = id;
-    activeChatName = name;
-    
-    // UI တစ်ခုလုံးကို ပြန်ဆွဲခိုင်းမှ Sidebar မှာ Active ဖြစ်တာ မှန်ပါမယ်
-    showMessages(); 
+  activeChatId = id;
+  activeChatName = name;
+
+  // UI တစ်ခုလုံးကို ပြန်ဆွဲခိုင်းမှ Sidebar မှာ Active ဖြစ်တာ မှန်ပါမယ်
+  showMessages();
 }
 
 function loadMessages() {
-    const display = document.getElementById('chat-display');
-    if (!display) return;
-    
-    // 🔥 ၃ ရက်စာတွက်ချက်ခြင်း ( 3 days * 24 hours * 60 min * 60 sec * 1000 ms )
-    const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
+  const display = document.getElementById("chat-display");
+  if (!display) return;
 
-    // Safety Check: ID မရှိရင် Query မလုပ်ပါ
-    if (!activeChatId || !currentUser.uid) {
-        console.warn("Chat ID သို့မဟုတ် User ID မရှိသေးပါ။");
-        display.innerHTML = '<div class="empty-msg">စာတိုများ ဖတ်ရန် အရင်ရွေးချယ်ပါ။</div>';
+  // 🔥 ၃ ရက်စာတွက်ချက်ခြင်း ( 3 days * 24 hours * 60 min * 60 sec * 1000 ms )
+  const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
+
+  // Safety Check: ID မရှိရင် Query မလုပ်ပါ
+  if (!activeChatId || !currentUser.uid) {
+    console.warn("Chat ID သို့မဟုတ် User ID မရှိသေးပါ။");
+    display.innerHTML =
+      '<div class="empty-msg">စာတိုများ ဖတ်ရန် အရင်ရွေးချယ်ပါ။</div>';
+    return;
+  }
+
+  let query;
+  if (activeChatId.includes("Batch")) {
+    // --- Group Chat ---
+    // 🔥 အရေးကြီးသည်- ကျောင်းသားမှာ batchId မရှိရင် Query ပိတ်သွားမှာဖြစ်လို့ Safety စစ်မည်
+    if (!currentUser.batchId) {
+      display.innerHTML =
+        '<div class="empty-msg">သင့်အား Batch သတ်မှတ်ပေးထားခြင်း မရှိသေးပါ။</div>';
+      return;
+    }
+    query = db
+      .collection("messages")
+      .where("batchId", "==", activeChatId)
+      .where("type", "==", "group")
+      .where("timestamp", ">=", threeDaysAgo) // ၃ ရက်ထက် ပိုဟောင်းတာတွေကို မယူတော့ပါ
+      .orderBy("timestamp", "asc");
+  } else {
+    // --- Direct Message ---
+    const combinedId = [currentUser.uid, activeChatId].sort().join("_");
+    query = db
+      .collection("messages")
+      .where("convoId", "==", combinedId)
+      .where("type", "==", "direct")
+      .where("timestamp", ">=", threeDaysAgo) // ၃ ရက်ထက် ပိုဟောင်းတာတွေကို မယူတော့ပါ
+      .orderBy("timestamp", "asc");
+  }
+
+  query.onSnapshot(
+    (snap) => {
+      display.innerHTML = "";
+
+      if (snap.empty) {
+        display.innerHTML =
+          '<div style="text-align:center; padding:20px; color:grey; font-size:0.8rem;">ယခင် ၃ ရက်အတွင်း ပေးပို့ထားသော စာများ မရှိပါ။</div>';
         return;
-    }
+      }
 
-    let query;
-    if (activeChatId.includes('Batch')) {
-        // --- Group Chat ---
-        // 🔥 အရေးကြီးသည်- ကျောင်းသားမှာ batchId မရှိရင် Query ပိတ်သွားမှာဖြစ်လို့ Safety စစ်မည်
-        if (!currentUser.batchId) {
-            display.innerHTML = '<div class="empty-msg">သင့်အား Batch သတ်မှတ်ပေးထားခြင်း မရှိသေးပါ။</div>';
-            return;
-        }
-        query = db.collection('messages')
-                  .where('batchId', '==', activeChatId)
-                  .where('type', '==', 'group')
-                  .where('timestamp', '>=', threeDaysAgo) // ၃ ရက်ထက် ပိုဟောင်းတာတွေကို မယူတော့ပါ
-                  .orderBy('timestamp', 'asc');
-    } else {
-        // --- Direct Message ---
-        const combinedId = [currentUser.uid, activeChatId].sort().join("_");
-        query = db.collection('messages')
-                  .where('convoId', '==', combinedId)
-                  .where('type', '==', 'direct')
-                  .where('timestamp', '>=', threeDaysAgo) // ၃ ရက်ထက် ပိုဟောင်းတာတွေကို မယူတော့ပါ
-                  .orderBy('timestamp', 'asc');
-    }
+      snap.forEach((doc) => {
+        const m = doc.data();
+        const isMe = m.senderId === currentUser.uid;
+        const canManage = isMe || currentUser.role === "Teacher";
 
-    query.onSnapshot(snap => {
-        display.innerHTML = '';
-
-            if (snap.empty) {
-            display.innerHTML = '<div style="text-align:center; padding:20px; color:grey; font-size:0.8rem;">ယခင် ၃ ရက်အတွင်း ပေးပို့ထားသော စာများ မရှိပါ။</div>';
-            return;
-        }
-
-            snap.forEach(doc => {
-            const m = doc.data();
-            const isMe = m.senderId === currentUser.uid;
-            const canManage = isMe || currentUser.role === 'Teacher';
-
-            display.innerHTML += `
-                <div class="message-bubble ${isMe ? 'me' : 'other'}">
+        display.innerHTML += `
+                <div class="message-bubble ${isMe ? "me" : "other"}">
                     <div class="msg-header" style="display:flex; justify-content:space-between; align-items:center;">
-                        <span style="font-size:0.7rem; opacity:0.8;">${isMe ? 'You' : m.senderName}</span>
-                        ${canManage ? `
+                        <span style="font-size:0.7rem; opacity:0.8;">${isMe ? "You" : m.senderName}</span>
+                        ${
+                          canManage
+                            ? `
                             <div class="msg-actions" style="margin-left:10px; display:flex; gap:8px; font-size:0.7rem; opacity:0.5;">
                                 <i class="fas fa-edit" style="cursor:pointer;" onclick="editMsg('${doc.id}', '${m.text.replace(/'/g, "\\'")}')" title="ပြင်မည်"></i>
                                 <i class="fas fa-trash-alt" style="cursor:pointer;" onclick="deleteMsg('${doc.id}')" title="ဖျက်မည်"></i>
                             </div>
-                        ` : ''}
+                        `
+                            : ""
+                        }
                     </div>
                     <div class="msg-text">${m.text}</div>
                 </div>`;
-        });
-        display.scrollTop = display.scrollHeight;
-
-        }, err => {
-            // အကယ်၍ Index အသစ်ဆောက်ရန် လိုအပ်ပါက console မှာ link ပေါ်လာပါမည်
-        console.error("Snapshot error:", error);
-        if (error.code === 'failed-precondition') {
-            display.innerHTML = '<div class="error-msg">Firebase Console တွင် Index အသစ်တစ်ခု ဆောက်ရန် လိုအပ်နေပါသည်။ Console (F12) ရှိ Link ကို နှိပ်ပေးပါ။</div>';
-        }
-    });
+      });
+      display.scrollTop = display.scrollHeight;
+    },
+    (err) => {
+      // အကယ်၍ Index အသစ်ဆောက်ရန် လိုအပ်ပါက console မှာ link ပေါ်လာပါမည်
+      console.error("Snapshot error:", error);
+      if (error.code === "failed-precondition") {
+        display.innerHTML =
+          '<div class="error-msg">Firebase Console တွင် Index အသစ်တစ်ခု ဆောက်ရန် လိုအပ်နေပါသည်။ Console (F12) ရှိ Link ကို နှိပ်ပေးပါ။</div>';
+      }
+    },
+  );
 }
 
 // Message ပို့ခြင်း
 function sendMessage() {
-    const input = document.getElementById('chat-input');
-    const text = input.value.trim();
-    if (!text) return;
+  const input = document.getElementById("chat-input");
+  const text = input.value.trim();
+  if (!text) return;
 
-    // အချက်အလက်များ ရှိမရှိ စစ်ဆေးပါ
-    if (!currentUser.uid || !currentUser.name) {
-        alert("User data missing! Please re-login.");
-        return;
-    }
+  // အချက်အလက်များ ရှိမရှိ စစ်ဆေးပါ
+  if (!currentUser.uid || !currentUser.name) {
+    alert("User data missing! Please re-login.");
+    return;
+  }
 
-    const msgData = {
-        text: text,
-        senderId: currentUser.uid,
-        senderName: currentUser.name,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-        type: activeChatId.includes('Batch') ? 'group' : 'direct'
-    };
+  const msgData = {
+    text: text,
+    senderId: currentUser.uid,
+    senderName: currentUser.name,
+    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+    type: activeChatId.includes("Batch") ? "group" : "direct",
+  };
 
-    if (msgData.type === 'group') {
-        msgData.batchId = activeChatId;
-    } else {
-        const combinedId = [currentUser.uid, activeChatId].sort().join("_");
-        msgData.convoId = combinedId; 
-        msgData.receiverId = activeChatId; // 🔥 ဒါလေး မပါရင် Permission Denied ဖြစ်ပါလိမ့်မည်
-    }
+  if (msgData.type === "group") {
+    msgData.batchId = activeChatId;
+  } else {
+    const combinedId = [currentUser.uid, activeChatId].sort().join("_");
+    msgData.convoId = combinedId;
+    msgData.receiverId = activeChatId; // 🔥 ဒါလေး မပါရင် Permission Denied ဖြစ်ပါလိမ့်မည်
+  }
 
-    db.collection('messages').add(msgData).then(() => {
-        console.log("Sent success!");
-        // 🔔 Direct message ဖြစ်ရင် receiver ရဲ့ bell တိုး
-        if (!activeChatId.includes('Batch')) {
-            db.collection("users")
-            .doc(activeChatId)
-            .update({
-                unreadCount: firebase.firestore.FieldValue.increment(1)
-            });
-        }
-    }).catch(e => alert("Error: " + e.message));
+  db.collection("messages")
+    .add(msgData)
+    .then(() => {
+      console.log("Sent success!");
+      // 🔔 Direct message ဖြစ်ရင် receiver ရဲ့ bell တိုး
+      if (!activeChatId.includes("Batch")) {
+        db.collection("users")
+          .doc(activeChatId)
+          .update({
+            unreadCount: firebase.firestore.FieldValue.increment(1),
+          });
+      }
+    })
+    .catch((e) => alert("Error: " + e.message));
 
-    input.value = '';
+  input.value = "";
 }
 
 async function deleteMsg(id) {
-    if (confirm("ဤစာတိုကို အပြီးဖျက်ရန် သေချာပါသလား?")) {
-        try {
-            await db.collection('messages').doc(id).delete();
-        } catch (e) { alert("Error: " + e.message); }
+  if (confirm("ဤစာတိုကို အပြီးဖျက်ရန် သေချာပါသလား?")) {
+    try {
+      await db.collection("messages").doc(id).delete();
+    } catch (e) {
+      alert("Error: " + e.message);
     }
+  }
 }
 
 // --- စာတို ပြင်ဆင်ရန် Function ---
 async function editMsg(id, oldText) {
-    const newText = prompt("စာသားကို ပြင်ဆင်ပါ:", oldText);
-    if (newText && newText.trim() !== "" && newText !== oldText) {
-        try {
-            await db.collection('messages').doc(id).update({
-                text: newText,
-                isEdited: true,
-                editedAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
-        } catch (e) { alert("Error: " + e.message); }
+  const newText = prompt("စာသားကို ပြင်ဆင်ပါ:", oldText);
+  if (newText && newText.trim() !== "" && newText !== oldText) {
+    try {
+      await db.collection("messages").doc(id).update({
+        text: newText,
+        isEdited: true,
+        editedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      alert("Error: " + e.message);
     }
+  }
 }
 
 // ==========================================
@@ -1471,59 +1614,64 @@ async function editMsg(id, oldText) {
 
 // Profile ပြသခြင်း (View Mode & Academic Info)
 function renderProfile() {
-    const body = document.getElementById("dynamic-body");
-    const enrolled = currentUser.enrolledCourses || [];
-    const isTeacher = currentUser.role === "Teacher";
-    const roleBadgeStyle = isTeacher ? "background:#ef4444; color:white;" : "background:#e2e8f0; color:black;";
+  const body = document.getElementById("dynamic-body");
+  const enrolled = currentUser.enrolledCourses || [];
+  const isTeacher = currentUser.role === "Teacher";
+  const roleBadgeStyle = isTeacher
+    ? "background:#ef4444; color:white;"
+    : "background:#e2e8f0; color:black;";
 
-    // ပိုက်ဆံမသွင်းရသေးသူများအတွက် Alert Box (Overwrite မဖြစ်အောင် Variable ထဲအရင်ထည့်မည်)
-    let unpaidAlert = "";
-    if (!isTeacher && enrolled.length === 0) {
-        unpaidAlert = `
+  // ပိုက်ဆံမသွင်းရသေးသူများအတွက် Alert Box (Overwrite မဖြစ်အောင် Variable ထဲအရင်ထည့်မည်)
+  let unpaidAlert = "";
+  if (!isTeacher && enrolled.length === 0) {
+    unpaidAlert = `
             <div class="tip-box animate-up" style="background:#fffbeb; border:1px solid #f59e0b; color:#92400e; margin-bottom:20px; padding:15px; border-radius:8px;">
                 <i class="fas fa-info-circle"></i> သင်တန်းများ စတင်လေ့လာရန် သင်တန်းအနည်းဆုံးတစ်ခု အရင်အပ်နှံရန် လိုအပ်ပါသည်။ 
                 <button class="save-btn" style="padding:4px 12px; margin-left:10px; font-size:0.8rem;" onclick="renderCourseSelection()">သင်တန်းအပ်ရန်</button>
             </div>`;
-    }
+  }
 
-    // တက်ရောက်နေသော သင်တန်းတစ်ခုချင်းစီအတွက် Achievement Cards များ တည်ဆောက်ခြင်း
-    let coursesHtml = "";
-    enrolled.forEach(courseId => {
-        const course = allCourses[courseId];
-        if (course) {
-            // ဤသင်တန်းအတွက် GPA တွက်ချက်ခြင်း
-            const courseGrades = currentUser.grades?.[courseId] || {};
-            const subjects = course.transcriptSubjects || lmsSettings.subjects;
-            let total = 0;
-            subjects.forEach(sub => total += (courseGrades[sub.toLowerCase()] || 0));
-            const gpa = subjects.length > 0 ? (total / subjects.length).toFixed(2) : 0;
-            const isEligible = subjects.length > 0 && gpa >= 75;
+  // တက်ရောက်နေသော သင်တန်းတစ်ခုချင်းစီအတွက် Achievement Cards များ တည်ဆောက်ခြင်း
+  let coursesHtml = "";
+  enrolled.forEach((courseId) => {
+    const course = allCourses[courseId];
+    if (course) {
+      // ဤသင်တန်းအတွက် GPA တွက်ချက်ခြင်း
+      const courseGrades = currentUser.grades?.[courseId] || {};
+      const subjects = course.transcriptSubjects || lmsSettings.subjects;
+      let total = 0;
+      subjects.forEach(
+        (sub) => (total += courseGrades[sub.toLowerCase()] || 0),
+      );
+      const gpa =
+        subjects.length > 0 ? (total / subjects.length).toFixed(2) : 0;
+      const isEligible = subjects.length > 0 && gpa >= 75;
 
-            coursesHtml += `
+      coursesHtml += `
                 <div class="content-card academic-card animate-up" style="margin-bottom:20px; border-left: 5px solid var(--primary);">
                     <h4 style="color:var(--primary); margin-bottom:10px;">🎓 ${course.title}</h4>
                     <div class="academic-box">
                         <div class="academic-item"><span>GPA:</span> <strong style="color:green">${gpa}</strong></div>
-                        <div class="academic-item"><span>Status:</span> <strong>${gpa >= 75 ? 'Completed' : 'Learning'}</strong></div>
+                        <div class="academic-item"><span>Status:</span> <strong>${gpa >= 75 ? "Completed" : "Learning"}</strong></div>
                     </div>
                     <div style="margin-top:15px; display:flex; gap:10px; flex-wrap:wrap;">
                         <button class="menu-btn" onclick="viewTranscript('${currentUser.uid}', false, '${courseId}')">View Transcript</button>
-                        <button class="menu-btn ${isEligible ? 'cert-gold' : 'disabled-btn'}" 
+                        <button class="menu-btn ${isEligible ? "cert-gold" : "disabled-btn"}" 
                                 onclick="${isEligible ? `viewCertificate('${currentUser.uid}', false, '${courseId}')` : "alert('GPA 75 ကျော်ရန် လိုအပ်သည်')"}">
                             Certificate
                         </button>
                     </div>
                 </div>`;
-        }
-    });
+    }
+  });
 
-    // အားလုံးကို စုစည်းပြီး တစ်ခါတည်း Render လုပ်ခြင်း
-    body.innerHTML = `
+  // အားလုံးကို စုစည်းပြီး တစ်ခါတည်း Render လုပ်ခြင်း
+  body.innerHTML = `
     ${unpaidAlert}
     <div class="profile-card-pro fade-in">
         <div class="profile-cover"></div>
         <div class="profile-header-main">
-            <img src="${currentUser.photo || '/assets/profiles/default.png'}" 
+            <img src="${currentUser.photo || "/assets/profiles/default.png"}" 
                 class="profile-large-avatar" 
                 onerror="this.src='https://placehold.co/150x150/003087/white?text=User'">
             <div class="profile-info-text">
@@ -1560,21 +1708,21 @@ function renderProfile() {
 
 // ကျောင်းသားအတွက် Profile ပြင်ဆင်သည့် Form (Edit Mode)
 function renderEditProfile() {
-    const body = document.getElementById("dynamic-body");
-    
-    // Safety check: currentUser ရှိမရှိ အရင်စစ်မည်
-    if (!currentUser) return alert("User not logged in!");
+  const body = document.getElementById("dynamic-body");
 
-    body.innerHTML = `
+  // Safety check: currentUser ရှိမရှိ အရင်စစ်မည်
+  if (!currentUser) return alert("User not logged in!");
+
+  body.innerHTML = `
         <div class="content-card animate-up" style="max-width: 800px; margin: 0 auto;">
             <h3 style="margin-bottom:20px;"><i class="fas fa-id-card"></i> Profile ပြင်ဆင်ခြင်း</h3>
             
             <div class="edit-grid">
                 <div class="edit-section">
                     <label>Profile Photo URL</label>
-                    <input type="text" id="edit-photo" class="edit-input" value="${currentUser.photo || ''}">
+                    <input type="text" id="edit-photo" class="edit-input" value="${currentUser.photo || ""}">
                     <label>အမည်</label>
-                    <input type="text" id="edit-name" class="edit-input" value="${currentUser.name || ''}">
+                    <input type="text" id="edit-name" class="edit-input" value="${currentUser.name || ""}">
                     <label>Portfolio Website</label>
                     <input type="text" id="edit-portfolio" class="edit-input" value="${currentUser.portfolio || ""}">
                     <label>GitHub Link</label>
@@ -1609,57 +1757,61 @@ function renderEditProfile() {
 
 // သိမ်းဆည်းရန် Function တစ်ခုတည်းသာ ထားပါမည်
 async function saveProfile() {
-    const updatedData = {
-        name: document.getElementById("edit-name").value,
-        photo: document.getElementById("edit-photo").value,
-        portfolio: document.getElementById("edit-portfolio").value,
-        linkedin: document.getElementById("edit-linkedin").value,
-        facebook: document.getElementById("edit-facebook").value,
-        youtube: document.getElementById("edit-youtube").value,
-        tiktok: document.getElementById("edit-tiktok").value,
-        instagram: document.getElementById("edit-instagram").value,
-        email: document.getElementById("edit-email").value,
-        github: document.getElementById("edit-github").value,
-        notes: document.getElementById("edit-notes").value,
-        skills: document.getElementById("edit-skills").value.split(",").map(s => s.trim()).filter(s => s !== "")
-    };
+  const updatedData = {
+    name: document.getElementById("edit-name").value,
+    photo: document.getElementById("edit-photo").value,
+    portfolio: document.getElementById("edit-portfolio").value,
+    linkedin: document.getElementById("edit-linkedin").value,
+    facebook: document.getElementById("edit-facebook").value,
+    youtube: document.getElementById("edit-youtube").value,
+    tiktok: document.getElementById("edit-tiktok").value,
+    instagram: document.getElementById("edit-instagram").value,
+    email: document.getElementById("edit-email").value,
+    github: document.getElementById("edit-github").value,
+    notes: document.getElementById("edit-notes").value,
+    skills: document
+      .getElementById("edit-skills")
+      .value.split(",")
+      .map((s) => s.trim())
+      .filter((s) => s !== ""),
+  };
 
-    try {
-        // ၁။ Firebase Cloud (Firestore) ထဲ သိမ်းမည်
-        if (currentUser.uid) {
-            await db.collection("users").doc(currentUser.uid).update(updatedData);
-            console.log("Cloud Update Success!");
-        }
-
-        // ၂။ လက်ရှိ App ထဲက variable ကို update လုပ်မည်
-        currentUser = { ...currentUser, ...updatedData };
-
-        // ၃။ LocalStorage ထဲ သိမ်းမည်
-        localStorage.setItem("currentUser", JSON.stringify(currentUser));
-
-        alert("အောင်မြင်စွာ သိမ်းဆည်းပြီးပါပြီ။");
-        renderProfile();
-        renderAuthFooter();
-
-    } catch (error) {
-        console.error("Save Error:", error);
-        alert("အချက်အလက်သိမ်းဆည်းရာတွင် အမှားတက်နေပါသည်- " + error.message);
+  try {
+    // ၁။ Firebase Cloud (Firestore) ထဲ သိမ်းမည်
+    if (currentUser.uid) {
+      await db.collection("users").doc(currentUser.uid).update(updatedData);
+      console.log("Cloud Update Success!");
     }
+
+    // ၂။ လက်ရှိ App ထဲက variable ကို update လုပ်မည်
+    currentUser = { ...currentUser, ...updatedData };
+
+    // ၃။ LocalStorage ထဲ သိမ်းမည်
+    localStorage.setItem("currentUser", JSON.stringify(currentUser));
+
+    alert("အောင်မြင်စွာ သိမ်းဆည်းပြီးပါပြီ။");
+    renderProfile();
+    renderAuthFooter();
+  } catch (error) {
+    console.error("Save Error:", error);
+    alert("အချက်အလက်သိမ်းဆည်းရာတွင် အမှားတက်နေပါသည်- " + error.message);
+  }
 }
 
 // Sidebar Footer Render (User Info & Logout)
 function renderAuthFooter() {
-    const authDiv = document.getElementById('auth-section');
-    if(!authDiv) return;
-    const isDark = document.body.classList.contains('dark-theme');
-    
-    // ပုံမရှိခဲ့ရင် ပြပေးမယ့် default icon တစ်ခု ထားပေးထားပါတယ်
-    const userImg = currentUser.photo || "https://placehold.co/100x100/003087/white?text=User";
+  const authDiv = document.getElementById("auth-section");
+  if (!authDiv) return;
+  const isDark = document.body.classList.contains("dark-theme");
 
-    authDiv.innerHTML = `
+  // ပုံမရှိခဲ့ရင် ပြပေးမယ့် default icon တစ်ခု ထားပေးထားပါတယ်
+  const userImg =
+    currentUser.photo || "https://placehold.co/100x100/003087/white?text=User";
+
+  authDiv.innerHTML = `
         <button onclick="toggleDarkMode()" class="theme-toggle-btn">
-            <i class="fas ${isDark ? 'fa-sun' : 'fa-moon'}"></i> 
-            <span>${isDark ? 'Light Mode' : 'Dark Mode'}</span>
+            <i class="fas ${isDark ? "fa-sun" : "fa-moon"}"></i> 
+            <span>${isDark ? "Light Mode" : "Dark Mode"}</span>
         </button>
         <div class="sidebar-user-info">
             <!-- <img> tag ထဲမှာ currentUser.photo ကို ထည့်လိုက်ပါပြီ -->
@@ -1673,111 +1825,133 @@ function renderAuthFooter() {
         </div>
     `;
 
-    // 🔥 Teacher ဖြစ်ရင် Sidebar က သော့တွေကို အမြဲဖြုတ်ထားမည်
-    if (currentUser.role === 'Teacher') {
-        setTimeout(() => {
-            document.querySelectorAll('.nav-links a').forEach(l => l.classList.remove('nav-locked'));
-        }, 100);
-    }
+  // 🔥 Teacher ဖြစ်ရင် Sidebar က သော့တွေကို အမြဲဖြုတ်ထားမည်
+  if (currentUser.role === "Teacher") {
+    setTimeout(() => {
+      document
+        .querySelectorAll(".nav-links a")
+        .forEach((l) => l.classList.remove("nav-locked"));
+    }, 100);
+  }
 }
 
 // Firebase Auth Login Function
 async function handleLogin() {
-    const email = document.getElementById("login-email").value.trim();
-    const password = document.getElementById("login-password").value.trim();
+  const email = document.getElementById("login-email").value.trim();
+  const password = document.getElementById("login-password").value.trim();
 
-    if (!email || !password) return alert("Email နှင့် Password ဖြည့်စွက်ပေးပါ။");
+  if (!email || !password) return alert("Email နှင့် Password ဖြည့်စွက်ပေးပါ။");
 
-    try {
-        const userCredential = await auth.signInWithEmailAndPassword(email, password);
-        const user = userCredential.user;
+  try {
+    const userCredential = await auth.signInWithEmailAndPassword(
+      email,
+      password,
+    );
+    const user = userCredential.user;
 
-        const userDoc = await db.collection("users").doc(user.uid).get();
+    const userDoc = await db.collection("users").doc(user.uid).get();
 
-        if (userDoc.exists) {
-            const userData = userDoc.data();
+    if (userDoc.exists) {
+      const userData = userDoc.data();
 
-            // Cloud ကလာတဲ့ Data အကုန်လုံးကို ပေါင်းစပ်မည်
-            currentUser = {
-                ...currentUser,   
-                ...userData,      
-                uid: user.uid,
-                isLoggedIn: true,
-                email: email
-            };
+      // Cloud ကလာတဲ့ Data အကုန်လုံးကို ပေါင်းစပ်မည်
+      currentUser = {
+        ...currentUser,
+        ...userData,
+        uid: user.uid,
+        isLoggedIn: true,
+        email: email,
+      };
 
-            // ၁။ LocalStorage တွင် အရင်သိမ်းမည်
-            localStorage.setItem("currentUser", JSON.stringify(currentUser));
+      // ၁။ LocalStorage တွင် အရင်သိမ်းမည်
+      localStorage.setItem("currentUser", JSON.stringify(currentUser));
 
-            // ၂။ UI ကို အရင်ပြောင်းမည်
-            document.getElementById("login-page").style.display = "none";
-            document.getElementById("app-wrapper").style.display = "flex";
+      // ၂။ UI ကို အရင်ပြောင်းမည်
+      document.getElementById("login-page").style.display = "none";
+      document.getElementById("app-wrapper").style.display = "flex";
 
-            // ၃။ သင်တန်းအခြေအနေအလိုက် လမ်းကြောင်းခွဲမည်
-            if (currentUser.enrolledCourses && currentUser.enrolledCourses.length > 0 || currentUser.role === 'Teacher') {
-                showSection("dashboard");
-                alert("မင်္ဂလာပါ " + currentUser.name);
-            } else {
-                renderPaymentPage();
-                document.getElementById('page-title').innerText = "သင်တန်းအပ်နှံရန်";
-            }
+      // ၃။ သင်တန်းအခြေအနေအလိုက် လမ်းကြောင်းခွဲမည်
+      if (
+        (currentUser.enrolledCourses &&
+          currentUser.enrolledCourses.length > 0) ||
+        currentUser.role === "Teacher"
+      ) {
+        showSection("dashboard");
+        alert("မင်္ဂလာပါ " + currentUser.name);
+      } else {
+        renderPaymentPage();
+        document.getElementById("page-title").innerText = "သင်တန်းအပ်နှံရန်";
+      }
 
-            // ၄။ Cloud Settings များကို Sync လုပ်မည်
-            syncLMSSettings();   
-            startLiveCountdown();
+      // ၄။ Cloud Settings များကို Sync လုပ်မည်
+      syncLMSSettings();
+      startLiveCountdown();
 
-            // ၅။ 🔥 Page ကို Reload လုပ်ချင်တယ်ဆိုရင် အားလုံးပြီးမှ လုပ်ရပါမယ် 
-            // (သို့မဟုတ်) Reload မလုပ်ဘဲ အပေါ်က UI ပြောင်းတဲ့အတိုင်းပဲ ထားတာက ပို smooth ဖြစ်ပါတယ်
-            // location.reload(); 
-
-        } else {
-            alert("Database ထဲတွင် အချက်အလက် ရှာမတွေ့ပါ။ Admin ကို ဆက်သွယ်ပါ။");
-        }
-    } catch (error) {
-        alert("Login မှားယွင်းနေပါသည်: " + error.message);
+      // ၅။ 🔥 Page ကို Reload လုပ်ချင်တယ်ဆိုရင် အားလုံးပြီးမှ လုပ်ရပါမယ်
+      // (သို့မဟုတ်) Reload မလုပ်ဘဲ အပေါ်က UI ပြောင်းတဲ့အတိုင်းပဲ ထားတာက ပို smooth ဖြစ်ပါတယ်
+      // location.reload();
+    } else {
+      alert("Database ထဲတွင် အချက်အလက် ရှာမတွေ့ပါ။ Admin ကို ဆက်သွယ်ပါ။");
     }
+  } catch (error) {
+    alert("Login မှားယွင်းနေပါသည်: " + error.message);
+  }
 }
 
 async function handleLogout() {
-    if (confirm("Logout ထွက်မှာ သေချာပါသလား?")) {
-        try {
-            await auth.signOut(); // 🔥 Firebase Auth ကပါ SignOut လုပ်မည်
-            localStorage.removeItem('currentUser');
-            localStorage.removeItem('dark-mode');
-            location.reload(); 
-        } catch (e) {
-            console.error("Sign out error", e);
-        }
+  if (confirm("Logout ထွက်မှာ သေချာပါသလား?")) {
+    try {
+      await auth.signOut(); // 🔥 Firebase Auth ကပါ SignOut လုပ်မည်
+      localStorage.removeItem("currentUser");
+      localStorage.removeItem("dark-mode");
+      location.reload();
+    } catch (e) {
+      console.error("Sign out error", e);
     }
+  }
 }
 
 // --- Transcript ပြသခြင်း ---
 function viewTranscript(uid, isAdminPreview = false, courseId) {
-    const student = (uid === currentUser.uid) ? currentUser : studentsList.find(s => s.uid === uid);
-    const cId = courseId || currentUser.selectedCourseId;
-    const course = allCourses[cId];
-    if (!student || !course) return alert("Data Error!");
+  const student =
+    uid === currentUser.uid
+      ? currentUser
+      : studentsList.find((s) => s.uid === uid);
+  const cId = courseId || currentUser.selectedCourseId;
+  const course = allCourses[cId];
+  if (!student || !course) return alert("Data Error!");
 
-    const body = document.getElementById('dynamic-body');
-    const backFunc = isAdminPreview ? `previewStudentAchievements('${uid}')` : "showSection('profile')";
-    const courseGrades = (student.grades && student.grades[cId]) ? student.grades[cId] : {};
-    
-    let totalScore = 0;
-    let rows = course.transcriptSubjects.map(sub => {
-        const score = courseGrades[sub.toLowerCase()] || 0;
-        totalScore += score;
-        const status = score >= 50 ? '<span style="color:green; font-weight:bold;">Pass</span>' : '<span style="color:red; font-weight:bold;">Fail</span>';
-        return `<tr>
+  const body = document.getElementById("dynamic-body");
+  const backFunc = isAdminPreview
+    ? `previewStudentAchievements('${uid}')`
+    : "showSection('profile')";
+  const courseGrades =
+    student.grades && student.grades[cId] ? student.grades[cId] : {};
+
+  let totalScore = 0;
+  let rows = course.transcriptSubjects
+    .map((sub) => {
+      const score = courseGrades[sub.toLowerCase()] || 0;
+      totalScore += score;
+      const status =
+        score >= 50
+          ? '<span style="color:green; font-weight:bold;">Pass</span>'
+          : '<span style="color:red; font-weight:bold;">Fail</span>';
+      return `<tr>
             <td style="text-align:left; padding:12px; border:1px solid #ddd;">${sub.toUpperCase()}</td>
             <td style="border:1px solid #ddd; text-align:center;">${score}</td>
             <td style="border:1px solid #ddd; text-align:center;">${status}</td>
         </tr>`;
-    }).join('');
+    })
+    .join("");
 
-    const gpa = course.transcriptSubjects.length > 0 ? (totalScore / course.transcriptSubjects.length).toFixed(2) : 0;
-    const issueDate = new Date().toLocaleDateString('en-GB');
+  const gpa =
+    course.transcriptSubjects.length > 0
+      ? (totalScore / course.transcriptSubjects.length).toFixed(2)
+      : 0;
+  const issueDate = new Date().toLocaleDateString("en-GB");
 
-    body.innerHTML = `
+  body.innerHTML = `
         <div class="transcript-outer-container animate-up">
             <div class="no-print" style="margin-bottom:20px; display:flex; justify-content:flex-end;">
                 <button class="menu-btn" onclick="${backFunc}"><i class="fas fa-arrow-left"></i> Back</button>
@@ -1833,98 +2007,111 @@ function viewTranscript(uid, isAdminPreview = false, courseId) {
 
 // --- ၁။ Global Settings Variables ---
 let lmsSettings = {
-    courseTitle: "Full-Stack Web Development",
-    instructorName: "Ashin",
-    announcement: "",
-    subjects: [] // ဘာသာရပ်များကို ဤနေရာတွင် စီမံမည်
+  courseTitle: "Full-Stack Web Development",
+  instructorName: "Ashin",
+  announcement: "",
+  subjects: [], // ဘာသာရပ်များကို ဤနေရာတွင် စီမံမည်
 };
 
 // Database မှ Settings များကို Sync လုပ်ခြင်း
 function syncLMSSettings() {
-    // ၁။ Announcement Sync (အားလုံးအတွက်)
-    db.collection('settings').doc('announcement').onSnapshot(doc => {
-        const bar = document.getElementById('announcement-bar');
-        const textEl = document.getElementById('announcement-text');
-        if (doc.exists && doc.data().text && doc.data().text.trim() !== "") {
-            if (textEl) textEl.innerText = doc.data().text;
-            if (bar) bar.style.display = 'flex';
-        } else {
-            if (bar) bar.style.display = 'none';
-        }
+  // ၁။ Announcement Sync (အားလုံးအတွက်)
+  db.collection("settings")
+    .doc("announcement")
+    .onSnapshot((doc) => {
+      const bar = document.getElementById("announcement-bar");
+      const textEl = document.getElementById("announcement-text");
+      if (doc.exists && doc.data().text && doc.data().text.trim() !== "") {
+        if (textEl) textEl.innerText = doc.data().text;
+        if (bar) bar.style.display = "flex";
+      } else {
+        if (bar) bar.style.display = "none";
+      }
     });
 
-    if (auth.currentUser) {
-        // ၂။ 🔥 User Data Sync (ပုံ၊ နာမည်၊ သင်တန်းအပ်မှုစာရင်း နှင့် Lock များ ဖြုတ်ခြင်း)
-        db.collection('users').doc(auth.currentUser.uid).onSnapshot(doc => {
-            if (doc.exists) {
-                const userData = doc.data();
-                
-                // Cloud က ဒေတာအသစ်ကို currentUser ထဲ ထည့်ပေါင်းမည်
-                currentUser = { 
-                    ...currentUser, 
-                    ...userData, 
-                    enrolledCourses: userData.enrolledCourses || [] 
-                };
-                
-                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+  if (auth.currentUser) {
+    // ၂။ 🔥 User Data Sync (ပုံ၊ နာမည်၊ သင်တန်းအပ်မှုစာရင်း နှင့် Lock များ ဖြုတ်ခြင်း)
+    db.collection("users")
+      .doc(auth.currentUser.uid)
+      .onSnapshot((doc) => {
+        if (doc.exists) {
+          const userData = doc.data();
 
-                // 🔥 အရေးကြီးဆုံး- Device အသစ်တွင် သော့ပုံစံ (Lock) များကို အလိုအလျောက် ဖြုတ်မည်
-                const isTeacher = currentUser.role === 'Teacher';
-                const hasCourse = currentUser.enrolledCourses.length > 0;
+          // Cloud က ဒေတာအသစ်ကို currentUser ထဲ ထည့်ပေါင်းမည်
+          currentUser = {
+            ...currentUser,
+            ...userData,
+            enrolledCourses: userData.enrolledCourses || [],
+          };
 
-                if (isTeacher || hasCourse) {
-                    // ဝယ်ထားသော သင်တန်းရှိလျှင် Sidebar Lock များကို ချက်ချင်းဖြုတ်မည်
-                    document.querySelectorAll('.nav-links a').forEach(l => l.classList.remove('nav-locked'));
-                } else {
-                    // သင်တန်းမရှိသေးလျှင် (သို့မဟုတ်) ပိုက်ဆံမသွင်းရသေးလျှင် Lock ပြန်ချမည်
-                    lockMenus(); 
-                }
+          localStorage.setItem("currentUser", JSON.stringify(currentUser));
 
-                // Sidebar အောက်ခြေပုံနှင့် နာမည်ကို Update လုပ်မည်
-                renderAuthFooter();
+          // 🔥 အရေးကြီးဆုံး- Device အသစ်တွင် သော့ပုံစံ (Lock) များကို အလိုအလျောက် ဖြုတ်မည်
+          const isTeacher = currentUser.role === "Teacher";
+          const hasCourse = currentUser.enrolledCourses.length > 0;
 
-                // ၃။ 🔥 သင်တန်းအလိုက် Zoom နှင့် Info ကို ဤနေရာ၌သာ Sync လုပ်မည် (Data ရောက်မှစစ်ရန်)
-                const cId = currentUser.selectedCourseId;
-                if (cId) {
-                    syncSpecificCourseData(cId);
-                }
-            }
-        });
-    }
+          if (isTeacher || hasCourse) {
+            // ဝယ်ထားသော သင်တန်းရှိလျှင် Sidebar Lock များကို ချက်ချင်းဖြုတ်မည်
+            document
+              .querySelectorAll(".nav-links a")
+              .forEach((l) => l.classList.remove("nav-locked"));
+          } else {
+            // သင်တန်းမရှိသေးလျှင် (သို့မဟုတ်) ပိုက်ဆံမသွင်းရသေးလျှင် Lock ပြန်ချမည်
+            lockMenus();
+          }
+
+          // Sidebar အောက်ခြေပုံနှင့် နာမည်ကို Update လုပ်မည်
+          renderAuthFooter();
+
+          // ၃။ 🔥 သင်တန်းအလိုက် Zoom နှင့် Info ကို ဤနေရာ၌သာ Sync လုပ်မည် (Data ရောက်မှစစ်ရန်)
+          const cId = currentUser.selectedCourseId;
+          if (cId) {
+            syncSpecificCourseData(cId);
+          }
+        }
+      });
+  }
 }
 
 // ၄။ 🔥 သင်တန်းတစ်ခုချင်းစီအတွက် Zoom နှင့် ဆရာအမည်များကို သီးသန့် Sync လုပ်မည့် Function
 function syncSpecificCourseData(courseId) {
-    // Course Info Sync
-    db.collection('settings').doc(`course_info_${courseId}`).onSnapshot(doc => {
-        if (doc.exists) {
-            lmsSettings = { ...lmsSettings, ...doc.data() };
-        }
+  // Course Info Sync
+  db.collection("settings")
+    .doc(`course_info_${courseId}`)
+    .onSnapshot((doc) => {
+      if (doc.exists) {
+        lmsSettings = { ...lmsSettings, ...doc.data() };
+      }
     });
 
-    // Zoom Config Sync
-    db.collection('settings').doc(`zoom_config_${courseId}`).onSnapshot(doc => {
+  // Zoom Config Sync
+  db.collection("settings")
+    .doc(`zoom_config_${courseId}`)
+    .onSnapshot(
+      (doc) => {
         if (doc.exists) {
-            const data = doc.data();
-            currentZoomLink = data.url || "";
-            if (data.startTime) nextClassTime = data.startTime.toDate();
-            
-            // Dashboard ကြည့်နေဆဲဖြစ်ပါက ချက်ချင်း Update လုပ်ခိုင်းမည်
-            const title = document.getElementById('page-title');
-            if (title && title.innerText.includes("Dashboard")) {
-                renderDashboard();
-            }
+          const data = doc.data();
+          currentZoomLink = data.url || "";
+          if (data.startTime) nextClassTime = data.startTime.toDate();
+
+          // Dashboard ကြည့်နေဆဲဖြစ်ပါက ချက်ချင်း Update လုပ်ခိုင်းမည်
+          const title = document.getElementById("page-title");
+          if (title && title.innerText.includes("Dashboard")) {
+            renderDashboard();
+          }
         }
-    }, err => console.log("Course sync error or access restricted."));
+      },
+      (err) => console.log("Course sync error or access restricted."),
+    );
 }
 
 // --- ၂။ Admin Panel: Announcement & Course Settings ပြင်သည့် UI ---
 function renderLMSEditor() {
-    const body = document.getElementById('dynamic-body');
-    const courseId = currentUser.selectedCourseId || "web";
-    const dateStr = nextClassTime ? nextClassTime.toISOString().slice(0, 16) : "";
+  const body = document.getElementById("dynamic-body");
+  const courseId = currentUser.selectedCourseId || "web";
+  const dateStr = nextClassTime ? nextClassTime.toISOString().slice(0, 16) : "";
 
-    body.innerHTML = `
+  body.innerHTML = `
         <div class="content-card animate-up" style="max-width: 850px; margin: auto;">
             <h3><i class="fas fa-cogs"></i> System Settings (${courseId.toUpperCase()})</h3>
             <p style="color:var(--text-muted)">ဤနေရာတွင် ပြင်ဆင်သမျှသည် <b>${courseId}</b> သင်တန်းအတွက်သာ သက်ရောက်မည်။</p>
@@ -1952,7 +2139,7 @@ function renderLMSEditor() {
 
             <!-- ၄။ Subjects Section -->
             <label style="margin-top:20px; display:block;">📚 Transcript ဘာသာရပ်စာရင်း (comma ခြားပါ)</label>
-            <input type="text" id="adm-subjects" class="edit-input" value="${lmsSettings.subjects.join(', ')}">
+            <input type="text" id="adm-subjects" class="edit-input" value="${lmsSettings.subjects.join(", ")}">
             
             <div style="margin-top:30px; display:flex; gap:10px;">
                 <button class="save-btn" onclick="saveLMSSettings()"><i class="fas fa-save"></i> Save for ${courseId}</button>
@@ -1962,58 +2149,70 @@ function renderLMSEditor() {
 }
 
 async function saveLMSSettings() {
-    const courseId = currentUser.selectedCourseId || "web";
-    const anno = document.getElementById('adm-anno').value;
-    const course = document.getElementById('adm-course').value;
-    const instructor = document.getElementById('adm-instructor').value;
-    const zoomUrl = document.getElementById('adm-zoom-url').value;
-    const zoomTime = document.getElementById('adm-zoom-time').value;
-    const subjects = document.getElementById('adm-subjects').value.split(',').map(s => s.trim().toLowerCase()).filter(s => s !== "");
+  const courseId = currentUser.selectedCourseId || "web";
+  const anno = document.getElementById("adm-anno").value;
+  const course = document.getElementById("adm-course").value;
+  const instructor = document.getElementById("adm-instructor").value;
+  const zoomUrl = document.getElementById("adm-zoom-url").value;
+  const zoomTime = document.getElementById("adm-zoom-time").value;
+  const subjects = document
+    .getElementById("adm-subjects")
+    .value.split(",")
+    .map((s) => s.trim().toLowerCase())
+    .filter((s) => s !== "");
 
-    try {
-        // အဆင့် ၁ - Firestore ထဲ သွားသိမ်းမည်
-        await db.collection('settings').doc('announcement').set({ text: anno });
-        await db.collection('settings').doc('course_info').set({
-            courseTitle: course,
-            instructorName: instructor,
-            subjects: subjects
-        });
-        await db.collection('settings').doc('zoom_config').set({
-            url: zoomUrl,
-            startTime: firebase.firestore.Timestamp.fromDate(new Date(zoomTime))
-        });
+  try {
+    // အဆင့် ၁ - Firestore ထဲ သွားသိမ်းမည်
+    await db.collection("settings").doc("announcement").set({ text: anno });
+    await db.collection("settings").doc("course_info").set({
+      courseTitle: course,
+      instructorName: instructor,
+      subjects: subjects,
+    });
+    await db
+      .collection("settings")
+      .doc("zoom_config")
+      .set({
+        url: zoomUrl,
+        startTime: firebase.firestore.Timestamp.fromDate(new Date(zoomTime)),
+      });
 
-        // အဆင့် ၂ - Local Variable များကိုပါ ချက်ချင်း Update လုပ်မည်
-        lmsSettings.announcement = anno;
-        lmsSettings.instructorName = instructor;
-        lmsSettings.courseTitle = course;
-        lmsSettings.subjects = subjects;
-        currentZoomLink = zoomUrl;
-        nextClassTime = new Date(zoomTime);
+    // အဆင့် ၂ - Local Variable များကိုပါ ချက်ချင်း Update လုပ်မည်
+    lmsSettings.announcement = anno;
+    lmsSettings.instructorName = instructor;
+    lmsSettings.courseTitle = course;
+    lmsSettings.subjects = subjects;
+    currentZoomLink = zoomUrl;
+    nextClassTime = new Date(zoomTime);
 
-        alert("အောင်မြင်စွာ Update လုပ်ပြီးပါပြီ။");
-        
-        // အဆင့် ၃ - Dashboard သို့ ပြန်သွားပြီး UI အားလုံးကို Update ဖြစ်စေမည်
-        showSection('dashboard');    
-    } catch (error) {
-        console.error("Save Settings Error:", error);
-        alert("သိမ်းဆည်း၍ မရပါ- " + error.message);
-    }
+    alert("အောင်မြင်စွာ Update လုပ်ပြီးပါပြီ။");
+
+    // အဆင့် ၃ - Dashboard သို့ ပြန်သွားပြီး UI အားလုံးကို Update ဖြစ်စေမည်
+    showSection("dashboard");
+  } catch (error) {
+    console.error("Save Settings Error:", error);
+    alert("သိမ်းဆည်း၍ မရပါ- " + error.message);
+  }
 }
 
 // --- ၃။ Dynamic Certificate (ID နှင့် Date ပါဝင်ခြင်း) ---
 function viewCertificate(uid, isAdminPreview = false, courseId) {
-    const student = (uid === currentUser.uid) ? currentUser : studentsList.find(s => s.uid === uid);
-    const cId = courseId || currentUser.selectedCourseId;
-    const course = allCourses[cId];
-    
-    if (!student || !course) return alert("Data Error!");
+  const student =
+    uid === currentUser.uid
+      ? currentUser
+      : studentsList.find((s) => s.uid === uid);
+  const cId = courseId || currentUser.selectedCourseId;
+  const course = allCourses[cId];
 
-    const body = document.getElementById('dynamic-body');
-    const backFunc = isAdminPreview ? `previewStudentAchievements('${uid}')` : "showSection('profile')";
-    const certId = `CERT-${cId.toUpperCase()}-${student.uid.substring(0, 5).toUpperCase()}`;
+  if (!student || !course) return alert("Data Error!");
 
-    body.innerHTML = `
+  const body = document.getElementById("dynamic-body");
+  const backFunc = isAdminPreview
+    ? `previewStudentAchievements('${uid}')`
+    : "showSection('profile')";
+  const certId = `CERT-${cId.toUpperCase()}-${student.uid.substring(0, 5).toUpperCase()}`;
+
+  body.innerHTML = `
         <div class="certificate-page-wrapper animate-up">
             <div class="certificate-frame shadow-lg">
                 <div class="cert-border">
@@ -2029,7 +2228,7 @@ function viewCertificate(uid, isAdminPreview = false, courseId) {
                             <p style="font-size:1.1rem; margin-top:20px;">has successfully completed the Professional Bootcamp in</p>
                             <!-- 🔥 သင်တန်းအလိုက် ဘွဲ့နာမည်ပြောင်းမည် -->
                             <h3 style="color:#003087; font-size:1.8rem; text-transform:uppercase;">${course.title}</h3>
-                            <p style="color:#64748b; font-size:1rem;">Issued on: <strong>${new Date().toLocaleDateString('en-GB')}</strong></p>
+                            <p style="color:#64748b; font-size:1rem;">Issued on: <strong>${new Date().toLocaleDateString("en-GB")}</strong></p>
                         </div>
 
                         <div class="cert-seal-wrapper">
@@ -2068,69 +2267,69 @@ function viewCertificate(uid, isAdminPreview = false, courseId) {
 // ==========================================
 
 window.onload = () => {
-    // ၁။ အခြေခံ UI Setup (Auth နဲ့ မဆိုင်တာတွေကို အရင်လုပ်မည်)
-    const yearEl = document.getElementById('current-year'); 
-    if(yearEl) yearEl.innerText = new Date().getFullYear();
-    if (localStorage.getItem('dark-mode') === 'true') document.body.classList.add('dark-theme');
+  // ၁။ အခြေခံ UI Setup (Auth နဲ့ မဆိုင်တာတွေကို အရင်လုပ်မည်)
+  const yearEl = document.getElementById("current-year");
+  if (yearEl) yearEl.innerText = new Date().getFullYear();
+  if (localStorage.getItem("dark-mode") === "true")
+    document.body.classList.add("dark-theme");
 
-    // ၂။ 🔥 Firebase Auth အခြေအနေကို စောင့်ကြည့်ခြင်း (အဓိက ဂိတ်ဝ)
-    auth.onAuthStateChanged((user) => {
-        if (user) {
-            // --- လူရှိလျှင် (Logged In) ---
-            currentUser.uid = user.uid;
-            currentUser.isLoggedIn = true;
+  // ၂။ 🔥 Firebase Auth အခြေအနေကို စောင့်ကြည့်ခြင်း (အဓိက ဂိတ်ဝ)
+  auth.onAuthStateChanged((user) => {
+    if (user) {
+      // --- လူရှိလျှင် (Logged In) ---
+      currentUser.uid = user.uid;
+      currentUser.isLoggedIn = true;
 
-            // 🔔 Bell listener (ဒီမှာထည့်)
-            db.collection("users")
-            .doc(currentUser.uid)
-            .onSnapshot(snap => {
-                if (!snap.exists) return;
-                const count = snap.data().unreadCount || 0;
-                updateBell(count);
-            });
+      // 🔔 Bell listener (ဒီမှာထည့်)
+      db.collection("users")
+        .doc(currentUser.uid)
+        .onSnapshot((snap) => {
+          if (!snap.exists) return;
+          const count = snap.data().unreadCount || 0;
+          updateBell(count);
+        });
 
-            // Cloud Data များကို စတင် Sync လုပ်မည်
-            syncLMSSettings(); 
-            syncZoomConfig();
-            initNotifications();
-            startLiveCountdown();
+      // Cloud Data များကို စတင် Sync လုပ်မည်
+      syncLMSSettings();
+      syncZoomConfig();
+      initNotifications();
+      startLiveCountdown();
+      initScrollToTop();
 
-            // UI ကို အရင်ဖော်မည်
-            document.getElementById('login-page').style.display = 'none';
-            document.getElementById('app-wrapper').style.display = 'flex';
+      // UI ကို အရင်ဖော်မည်
+      document.getElementById("login-page").style.display = "none";
+      document.getElementById("app-wrapper").style.display = "flex";
 
-            // ၃။ 🔥 Enrollment & Role အလိုက် လမ်းကြောင်းခွဲခြင်း
-            const enrolled = currentUser.enrolledCourses || [];
-            const isTeacher = currentUser.role === 'Teacher';
+      // ၃။ 🔥 Enrollment & Role အလိုက် လမ်းကြောင်းခွဲခြင်း
+      const enrolled = currentUser.enrolledCourses || [];
+      const isTeacher = currentUser.role === "Teacher";
 
-            if (!isTeacher && enrolled.length === 0) {
-                // (က) ကျောင်းသားဖြစ်ပြီး ဘယ်သင်တန်းမှ မရှိသေးလျှင် - Lock ချပြီး ရွေးခိုင်းမည်
-                lockMenus();
-                renderCourseSelection();
-                document.getElementById('page-title').innerText = "သင်တန်းများ ရွေးချယ်ရန်";
-            } 
-            else if (currentUser.selectedCourseId) {
-                // (ခ) သင်တန်းရှိပြီးသားဖြစ်ပြီး တစ်ခုခုကို ရွေးထားလျှင် - Dashboard သို့ တိုက်ရိုက်သွားမည်
-                // အရေးကြီးသည်- courseData ကို load အရင်လုပ်ပေးရမည်
-                if (allCourses[currentUser.selectedCourseId]) {
-                    courseData = allCourses[currentUser.selectedCourseId].data;
-                    showSection('dashboard');
-                } else {
-                    renderCourseSelection();
-                }
-            } 
-            else {
-                // (ဂ) သင်တန်းရှိသော်လည်း လက်ရှိလေ့လာမည့်သင်တန်း မရွေးရသေးလျှင်
-                renderCourseSelection();
-            }
-
+      if (!isTeacher && enrolled.length === 0) {
+        // (က) ကျောင်းသားဖြစ်ပြီး ဘယ်သင်တန်းမှ မရှိသေးလျှင် - Lock ချပြီး ရွေးခိုင်းမည်
+        lockMenus();
+        renderCourseSelection();
+        document.getElementById("page-title").innerText =
+          "သင်တန်းများ ရွေးချယ်ရန်";
+      } else if (currentUser.selectedCourseId) {
+        // (ခ) သင်တန်းရှိပြီးသားဖြစ်ပြီး တစ်ခုခုကို ရွေးထားလျှင် - Dashboard သို့ တိုက်ရိုက်သွားမည်
+        // အရေးကြီးသည်- courseData ကို load အရင်လုပ်ပေးရမည်
+        if (allCourses[currentUser.selectedCourseId]) {
+          courseData = allCourses[currentUser.selectedCourseId].data;
+          showSection("dashboard");
         } else {
-            // --- လူမရှိလျှင် (Logged Out) ---
-            currentUser.isLoggedIn = false;
-            document.getElementById('login-page').style.display = 'flex';
-            document.getElementById('app-wrapper').style.display = 'none';
+          renderCourseSelection();
         }
-    });
+      } else {
+        // (ဂ) သင်တန်းရှိသော်လည်း လက်ရှိလေ့လာမည့်သင်တန်း မရွေးရသေးလျှင်
+        renderCourseSelection();
+      }
+    } else {
+      // --- လူမရှိလျှင် (Logged Out) ---
+      currentUser.isLoggedIn = false;
+      document.getElementById("login-page").style.display = "flex";
+      document.getElementById("app-wrapper").style.display = "none";
+    }
+  });
 };
 
 function updateBell(count) {
@@ -2147,32 +2346,63 @@ function updateBell(count) {
 
 // Menu များကို Lock ချသည့် Function
 function lockMenus() {
-    const links = document.querySelectorAll('.nav-links a');
-    links.forEach(link => {
-        const text = link.innerText.toLowerCase();
-        // သင်ခန်းစာ၊ စာတို နှင့် resources တို့ကို lock class ထည့်မည်
-        if (text.includes('သင်ခန်းစာ') || text.includes('စာတို') || text.includes('resources') || text.includes('profile')) {
-            link.classList.add('nav-locked');
+  const links = document.querySelectorAll(".nav-links a");
+  links.forEach((link) => {
+    const text = link.innerText.toLowerCase();
+    // သင်ခန်းစာ၊ စာတို နှင့် resources တို့ကို lock class ထည့်မည်
+    if (
+      text.includes("သင်ခန်းစာ") ||
+      text.includes("စာတို") ||
+      text.includes("resources") ||
+      text.includes("profile")
+    ) {
+      link.classList.add("nav-locked");
+    }
+  });
+}
+
+// စာမျက်နှာ အောက်ကို ၃၀၀ pixel ရောက်မှ ခလုတ်ပေါ်စေရန်
+// window.onscroll = function () {
+//   const btn = document.getElementById("back-to-top");
+//   if (btn) {
+//     // စာမျက်နှာကို အောက်ကို ၃၀၀ pixel ကျော် ဆွဲလိုက်သလား စစ်ဆေးခြင်း
+//     if (
+//       document.body.scrollTop > 300 ||
+//       document.documentElement.scrollTop > 300
+//     ) {
+//       btn.style.display = "block"; // ပေါ်လာစေရန်
+//     } else {
+//       btn.style.display = "none"; // ပြန်ပျောက်သွားစေရန်
+//     }
+//   }
+// };
+
+function initScrollToTop() {
+    const btn = document.getElementById("back-to-top");
+    const container = document.getElementById("main-content"); // 🔥 စာတွေ scroll ဖြစ်နေတဲ့ div ID
+
+    if (!btn || !container) return;
+
+    // စာမျက်နှာ အောက်ဆွဲတာကို စစ်ဆေးမည်
+    container.addEventListener("scroll", () => {
+        // container.scrollTop က ၃၀၀ ကျော်ရင် ခလုတ်ပြမည်
+        if (container.scrollTop > 300) {
+            btn.style.display = "block";
+        } else {
+            btn.style.display = "none";
         }
     });
 }
 
-// စာမျက်နှာ အောက်ကို ၃၀၀ pixel ရောက်မှ ခလုတ်ပေါ်စေရန်
-window.onscroll = function() {
-    const btn = document.getElementById('back-to-top');
-    if (btn) {
-        // စာမျက်နှာကို အောက်ကို ၃၀၀ pixel ကျော် ဆွဲလိုက်သလား စစ်ဆေးခြင်း
-        if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
-            btn.style.display = "block"; // ပေါ်လာစေရန်
-        } else {
-            btn.style.display = "none";  // ပြန်ပျောက်သွားစေရန်
-        }
-    }
-};
-
-// Global Helpers
+// ခလုတ်နှိပ်ရင် အပေါ်ဆုံးပြန်တက်မည့် function
 function scrollToTop() {
-  window.scrollTo({ top: 0, behavior: "smooth" });
+    const container = document.getElementById("main-content");
+    if (container) {
+        container.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+    }
 }
 
 function closeAnnouncement() {
@@ -2184,27 +2414,27 @@ function closeAnnouncement() {
 // ==========================================
 
 async function renderAnalytics() {
-    const now = Date.now();
-    // 🔥 ၅ မိနစ်မပြည့်သေးရင် အဟောင်းကိုပဲ တန်းပေးမည် (Request ထပ်မလုပ်တော့ပါ)
-    if (cachedAnalyticsHtml !== "" && (now - lastAnalyticsTime < 300000)) {
-        return cachedAnalyticsHtml;
-    }
+  const now = Date.now();
+  // 🔥 ၅ မိနစ်မပြည့်သေးရင် အဟောင်းကိုပဲ တန်းပေးမည် (Request ထပ်မလုပ်တော့ပါ)
+  if (cachedAnalyticsHtml !== "" && now - lastAnalyticsTime < 300000) {
+    return cachedAnalyticsHtml;
+  }
 
-    try {
-        // တစ်ပြိုင်နက်တည်း တောင်းဆိုမည်
-        const [userSnap, paySnap, subSnap] = await Promise.all([
-            db.collection('users').where('role', '==', 'Student').get(),
-            db.collection('payments').where('status', '==', 'approved').get(),
-            db.collection('submissions').where('status', '==', 'pending').get()
-        ]);
+  try {
+    // တစ်ပြိုင်နက်တည်း တောင်းဆိုမည်
+    const [userSnap, paySnap, subSnap] = await Promise.all([
+      db.collection("users").where("role", "==", "Student").get(),
+      db.collection("payments").where("status", "==", "approved").get(),
+      db.collection("submissions").where("status", "==", "pending").get(),
+    ]);
 
-        let totalRevenue = 0;
-        paySnap.forEach(doc => {
-            totalRevenue += (parseInt(doc.data().coursePrice) || 50000);
-        });
+    let totalRevenue = 0;
+    paySnap.forEach((doc) => {
+      totalRevenue += parseInt(doc.data().coursePrice) || 50000;
+    });
 
-        // UI ကို တည်ဆောက်မည်
-        cachedAnalyticsHtml = `
+    // UI ကို တည်ဆောက်မည်
+    cachedAnalyticsHtml = `
             <div class="dashboard-grid animate-up" style="margin-bottom:30px;">
                 <div class="content-card" style="border-top: 4px solid #3b82f6;">
                     <small>စုစုပေါင်းကျောင်းသား</small>
@@ -2220,14 +2450,13 @@ async function renderAnalytics() {
                 </div>
             </div>
         `;
-        
-        lastAnalyticsTime = now;
-        return cachedAnalyticsHtml;
 
-    } catch (e) {
-        console.error("Analytics Error:", e);
-        return `<div class="error-msg">ကိန်းဂဏန်းများ တွက်ချက်၍မရပါ။</div>`;
-    }
+    lastAnalyticsTime = now;
+    return cachedAnalyticsHtml;
+  } catch (e) {
+    console.error("Analytics Error:", e);
+    return `<div class="error-msg">ကိန်းဂဏန်းများ တွက်ချက်၍မရပါ။</div>`;
+  }
 }
 
 // အစမ်းသုံးရန် ကျောင်းသားစာရင်း Data (တကယ်တမ်းတွင် Firestore မှ ဆွဲယူမည်)
@@ -2236,31 +2465,33 @@ let studentsList = [];
 // --- Admin Panel (Teacher သာ ဝင်နိုင်မည်) ---
 // --- ဆရာအတွက် Admin Panel (Academic Status ပြင်ဆင်ရန်) ---
 async function renderAdminPanel() {
-    const body = document.getElementById("dynamic-body");
-    const now = Date.now();
+  const body = document.getElementById("dynamic-body");
+  const now = Date.now();
 
-    // 🔥 ဒေတာအဟောင်းတွေ ရှိပြီးသားဖြစ်ပြီး ၅ မိနစ်မကျော်သေးရင် Loader မပြတော့ဘဲ တန်း Render လုပ်မည်
-    const isDataFresh = (studentsList.length > 0 && (now - lastFetchTime < 300000));
+  // 🔥 ဒေတာအဟောင်းတွေ ရှိပြီးသားဖြစ်ပြီး ၅ မိနစ်မကျော်သေးရင် Loader မပြတော့ဘဲ တန်း Render လုပ်မည်
+  const isDataFresh = studentsList.length > 0 && now - lastFetchTime < 300000;
 
-    if (!isDataFresh) {
-        body.innerHTML = `
+  if (!isDataFresh) {
+    body.innerHTML = `
             <div style="text-align:center; padding:50px;">
                 <div class="loader"></div>
                 <p style="margin-top:15px;">Cloud မှ အချက်အလက်များကို ရယူနေပါသည်...</p>
             </div>`;
-    }
+  }
 
-    try {
-        // Promise.all က Cache ရှိရင် ချက်ချင်း return ပြန်ပါလိမ့်မည်
-        const [unused, analyticsHtml] = await Promise.all([
-            fetchStudentsFromDB(), 
-            renderAnalytics()
-        ]);
+  try {
+    // Promise.all က Cache ရှိရင် ချက်ချင်း return ပြန်ပါလိမ့်မည်
+    const [unused, analyticsHtml] = await Promise.all([
+      fetchStudentsFromDB(),
+      renderAnalytics(),
+    ]);
 
-        const batchOptions = [...new Set(studentsList.map(s => s.batchId))].sort();
-        
-        // UI ကို ရေးဆွဲခြင်း
-        body.innerHTML = `
+    const batchOptions = [
+      ...new Set(studentsList.map((s) => s.batchId)),
+    ].sort();
+
+    // UI ကို ရေးဆွဲခြင်း
+    body.innerHTML = `
             <div class="admin-container fade-in">
                 <div class="admin-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:15px;">
                     <h3 style="margin:0;"><i class="fas fa-user-shield"></i> Admin Control Panel</h3>
@@ -2284,7 +2515,7 @@ async function renderAdminPanel() {
                         <span><strong>Batch ရွေးချယ်ရန်: </strong></span>
                         <select id="batch-select" class="edit-input" style="width:auto; display:inline-block; margin-left:10px;" onchange="filterStudentsByBatch(this.value)">
                             <option value="All">All Batches</option>
-                            ${batchOptions.map(b => `<option value="${b}">${b}</option>`).join('')}
+                            ${batchOptions.map((b) => `<option value="${b}">${b}</option>`).join("")}
                         </select>
                     </div>
                 </div>
@@ -2301,51 +2532,52 @@ async function renderAdminPanel() {
             </div>
         `;
 
-        filterStudentsByBatch("All"); 
-
-    } catch (error) {
-        body.innerHTML = `<div class="error-msg">Error: ${error.message}</div>`;
-    }
+    filterStudentsByBatch("All");
+  } catch (error) {
+    body.innerHTML = `<div class="error-msg">Error: ${error.message}</div>`;
+  }
 }
 
 async function fetchStudentsFromDB() {
-    const now = Date.now();
-    // 🔥 အကယ်၍ နောက်ဆုံးဖတ်ခဲ့တာ ၅ မိနစ် (၃၀၀,၀၀၀ မီလီစက္ကန့်) မကျော်သေးရင် Cloud ကနေ ထပ်မတောင်းပါ
-    // ဒါဟာ အဖွင့်အပိတ်ကို အမြန်ဆုံး ဖြစ်သွားစေပါတယ်
-    if (studentsList.length > 0 && (now - lastFetchTime < 300000)) {
-        console.log("Using cached data for speed...");
-        return;
-    }
+  const now = Date.now();
+  // 🔥 အကယ်၍ နောက်ဆုံးဖတ်ခဲ့တာ ၅ မိနစ် (၃၀၀,၀၀၀ မီလီစက္ကန့်) မကျော်သေးရင် Cloud ကနေ ထပ်မတောင်းပါ
+  // ဒါဟာ အဖွင့်အပိတ်ကို အမြန်ဆုံး ဖြစ်သွားစေပါတယ်
+  if (studentsList.length > 0 && now - lastFetchTime < 300000) {
+    console.log("Using cached data for speed...");
+    return;
+  }
 
-    try {
-        const snapshot = await db.collection('users').get();
-        studentsList = [];
-        allUsersList = [];
-        
-        snapshot.forEach(doc => {
-            const data = doc.data();
-            const userObj = {
-                uid: doc.id,
-                ...data,
-                name: data.name || "No Name",
-                batchId: data.batchId || "General",
-                attendance: data.attendance || "0%",
-                role: data.role || "Student",
-                photo: data.photo || "https://placehold.co/50"
-            };
-            
-            allUsersList.push(userObj);
-            if (data.role === 'Student') studentsList.push(userObj);
-        });
+  try {
+    const snapshot = await db.collection("users").get();
+    studentsList = [];
+    allUsersList = [];
 
-        lastFetchTime = now; // 🔥 အချိန်ကို မှတ်သားထားမည်
-        console.log("Students data synced from Cloud.");
-    } catch (e) { console.error("Fetch Error:", e); }
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+      const userObj = {
+        uid: doc.id,
+        ...data,
+        name: data.name || "No Name",
+        batchId: data.batchId || "General",
+        attendance: data.attendance || "0%",
+        role: data.role || "Student",
+        photo: data.photo || "https://placehold.co/50",
+      };
+
+      allUsersList.push(userObj);
+      if (data.role === "Student") studentsList.push(userObj);
+    });
+
+    lastFetchTime = now; // 🔥 အချိန်ကို မှတ်သားထားမည်
+    console.log("Students data synced from Cloud.");
+  } catch (e) {
+    console.error("Fetch Error:", e);
+  }
 }
 
 function renderLMSGuide() {
-    const body = document.getElementById('dynamic-body');
-    body.innerHTML = `
+  const body = document.getElementById("dynamic-body");
+  body.innerHTML = `
         <div class="content-card animate-up" style="max-width: 900px; margin: 0 auto;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
                 <h3><i class="fas fa-book"></i> LMS Admin User Guide</h3>
@@ -2577,7 +2809,10 @@ function filterStudentsByBatch(batchId) {
 
   tableBody.innerHTML = "";
 
-  const filtered = batchId === "All" ? studentsList : studentsList.filter((s) => s.batchId === batchId);
+  const filtered =
+    batchId === "All"
+      ? studentsList
+      : studentsList.filter((s) => s.batchId === batchId);
 
   filtered.forEach((student) => {
     // GPA တွက်ချက်ခြင်း
@@ -2611,19 +2846,20 @@ function filterStudentsByBatch(batchId) {
 
 // ဆရာမှ ကျောင်းသား၏ အောင်မြင်မှုများကို Demo ကြည့်ရန်
 function previewStudentAchievements(uid) {
-    const student = studentsList.find(s => s.uid === uid);
-    if (!student) return alert("ကျောင်းသား ရှာမတွေ့ပါ။");
+  const student = studentsList.find((s) => s.uid === uid);
+  if (!student) return alert("ကျောင်းသား ရှာမတွေ့ပါ။");
 
-    const body = document.getElementById('dynamic-body');
-    const enrolled = student.enrolledCourses || []; 
+  const body = document.getElementById("dynamic-body");
+  const enrolled = student.enrolledCourses || [];
 
-    let courseOptionsHtml = "";
-    
-    if (enrolled.length > 0) {
-        courseOptionsHtml = enrolled.map(cId => {
-            const course = allCourses[cId];
-            if (!course) return "";
-            return `
+  let courseOptionsHtml = "";
+
+  if (enrolled.length > 0) {
+    courseOptionsHtml = enrolled
+      .map((cId) => {
+        const course = allCourses[cId];
+        if (!course) return "";
+        return `
                 <div class="content-card animate-up" style="margin-bottom:15px; border-left:5px solid #f59e0b; padding: 20px;">
                     <h5 style="margin-bottom:10px;">${course.title}</h5>
                     <div style="display:flex; gap:10px;">
@@ -2636,12 +2872,13 @@ function previewStudentAchievements(uid) {
                         </button>
                     </div>
                 </div>`;
-        }).join('');
-    } else {
-        courseOptionsHtml = `<div class="academic-box" style="padding: 20px;">ဤကျောင်းသားသည် မည်သည့်သင်တန်းမှ အပ်နှံထားခြင်း မရှိသေးပါ။</div>`;
-    }
+      })
+      .join("");
+  } else {
+    courseOptionsHtml = `<div class="academic-box" style="padding: 20px;">ဤကျောင်းသားသည် မည်သည့်သင်တန်းမှ အပ်နှံထားခြင်း မရှိသေးပါ။</div>`;
+  }
 
-    body.innerHTML = `
+  body.innerHTML = `
         <div class="content-card animate-up">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
                 <h3><i class="fas fa-user-shield"></i> Admin Preview: ${student.name}</h3>
@@ -2656,18 +2893,22 @@ function previewStudentAchievements(uid) {
 
 // --- ကျောင်းသားတစ်ဦးချင်းစီကို အမှတ်သွင်းရန် Modal/Form ---
 function openGradeModal(studentUid) {
-    const student = studentsList.find(s => s.uid === studentUid);
-    const body = document.getElementById('dynamic-body');
-    const enrolled = student.enrolledCourses || [];
+  const student = studentsList.find((s) => s.uid === studentUid);
+  const body = document.getElementById("dynamic-body");
+  const enrolled = student.enrolledCourses || [];
 
-    let courseButtons = enrolled.map(cId => `
+  let courseButtons = enrolled
+    .map(
+      (cId) => `
         <button class="menu-btn" style="margin-bottom:10px; width:100%; text-align:left;" 
                 onclick="renderSubjectGrading('${studentUid}', '${cId}')">
             <i class="fas fa-book"></i> ${allCourses[cId].title}
         </button>
-    `).join('');
+    `,
+    )
+    .join("");
 
-    body.innerHTML = `
+  body.innerHTML = `
         <div class="content-card animate-up" style="max-width:550px; margin:auto;">
             <h3><i class="fas fa-user-edit"></i> Student Information: ${student.name}</h3>
             <hr><br>
@@ -2695,16 +2936,18 @@ function openGradeModal(studentUid) {
 
 // 🔥 Batch ကို Cloud (Firebase) ပေါ်မှာ Update လုပ်မည့် Function အသစ်
 async function updateStudentBatch(uid) {
-    const newBatch = document.getElementById('edit-batch-id').value.trim();
-    if (!newBatch) return alert("Batch အမည် ထည့်ပေးပါ။");
+  const newBatch = document.getElementById("edit-batch-id").value.trim();
+  if (!newBatch) return alert("Batch အမည် ထည့်ပေးပါ။");
 
-    try {
-        await db.collection('users').doc(uid).update({
-            batchId: newBatch
-        });
-        alert("Batch အမည်ကို " + newBatch + " သို့ ပြောင်းလဲပြီးပါပြီ။");
-        renderAdminPanel(); // List ကို ပြန်သွားမည်
-    } catch (e) { alert(e.message); }
+  try {
+    await db.collection("users").doc(uid).update({
+      batchId: newBatch,
+    });
+    alert("Batch အမည်ကို " + newBatch + " သို့ ပြောင်းလဲပြီးပါပြီ။");
+    renderAdminPanel(); // List ကို ပြန်သွားမည်
+  } catch (e) {
+    alert(e.message);
+  }
 }
 
 // --- ကျောင်းသားအတွက်: Transcript နှင့် Certificate ပြသခြင်း ---
@@ -2801,42 +3044,46 @@ async function editMessage(id, oldText) {
 // Admin Table ထဲက Message ခလုတ်ကို ပြင်ခြင်း
 // --- ဤ Function ကို အသစ်လဲလိုက်ပါ ---
 async function openDirectMessage(uid) {
-    // ၁။ အရင်ဆုံး ကိုယ့်စက်ထဲက list ထဲမှာ ရှာကြည့်မည်
-    let targetUser = (typeof allUsersList !== 'undefined' ? allUsersList.find(u => u.uid === uid) : null) || 
-                     (typeof studentsList !== 'undefined' ? studentsList.find(s => s.uid === uid) : null);
+  // ၁။ အရင်ဆုံး ကိုယ့်စက်ထဲက list ထဲမှာ ရှာကြည့်မည်
+  let targetUser =
+    (typeof allUsersList !== "undefined"
+      ? allUsersList.find((u) => u.uid === uid)
+      : null) ||
+    (typeof studentsList !== "undefined"
+      ? studentsList.find((s) => s.uid === uid)
+      : null);
 
-    // ၂။ 🔥 အကယ်၍ စက်ထဲမှာ ရှာမတွေ့ရင် Cloud (Firebase) ဆီကနေ တိုက်ရိုက်သွားယူမည်
-    if (!targetUser) {
-        try {
-            console.log("User not found locally, fetching from Cloud: ", uid);
-            const userDoc = await db.collection('users').doc(uid).get();
-            
-            if (userDoc.exists) {
-                targetUser = userDoc.data();
-                targetUser.uid = userDoc.id; // UID ကို ပြန်ထည့်ပေးရန်
-            }
-        } catch (error) {
-            console.error("Error fetching user detail:", error);
-        }
+  // ၂။ 🔥 အကယ်၍ စက်ထဲမှာ ရှာမတွေ့ရင် Cloud (Firebase) ဆီကနေ တိုက်ရိုက်သွားယူမည်
+  if (!targetUser) {
+    try {
+      console.log("User not found locally, fetching from Cloud: ", uid);
+      const userDoc = await db.collection("users").doc(uid).get();
+
+      if (userDoc.exists) {
+        targetUser = userDoc.data();
+        targetUser.uid = userDoc.id; // UID ကို ပြန်ထည့်ပေးရန်
+      }
+    } catch (error) {
+      console.error("Error fetching user detail:", error);
     }
+  }
 
-    // ၃။ အချက်အလက် ရပြီဆိုမှ Chat Window ကို ဖွင့်မည်
-    if (targetUser) {
-        activeChatId = uid;
-        activeChatName = "Chat: " + targetUser.name;
-        
-        // စာမျက်နှာကို Messages သို့ ပြောင်းမည်
-        showSection('messages');
-        
-        // Noti dropdown ဖွင့်ထားရင် ပိတ်လိုက်မည်
-        const dropdown = document.getElementById('noti-dropdown');
-        if (dropdown) dropdown.style.display = "none";
+  // ၃။ အချက်အလက် ရပြီဆိုမှ Chat Window ကို ဖွင့်မည်
+  if (targetUser) {
+    activeChatId = uid;
+    activeChatName = "Chat: " + targetUser.name;
 
-    } else {
-        // ဘာမှ ရှာမတွေ့ခဲ့လျှင်
-        alert("အသုံးပြုသူ အချက်အလက် ရှာမတွေ့ပါ။");
-        console.warn("UID not found in local or cloud:", uid);
-    }
+    // စာမျက်နှာကို Messages သို့ ပြောင်းမည်
+    showSection("messages");
+
+    // Noti dropdown ဖွင့်ထားရင် ပိတ်လိုက်မည်
+    const dropdown = document.getElementById("noti-dropdown");
+    if (dropdown) dropdown.style.display = "none";
+  } else {
+    // ဘာမှ ရှာမတွေ့ခဲ့လျှင်
+    alert("အသုံးပြုသူ အချက်အလက် ရှာမတွေ့ပါ။");
+    console.warn("UID not found in local or cloud:", uid);
+  }
 }
 
 async function updateGrades(studentUid) {
@@ -2884,47 +3131,50 @@ function loadGroupChat() {
 }
 
 async function submitGrades(uid) {
-    const gradeInput = document.getElementById('new-grade');
-    if (!gradeInput) return;
-    
-    const newGrade = parseInt(gradeInput.value); 
-    
-    if (isNaN(newGrade)) return alert("ကျေးဇူးပြု၍ အမှတ်ကို ဂဏန်းဖြင့် ရိုက်ထည့်ပါ။");
+  const gradeInput = document.getElementById("new-grade");
+  if (!gradeInput) return;
 
-    try {
-        await db.collection('users').doc(uid).update({
-            overallGrade: parseInt(newGrade) // String ကို Number အဖြစ် ပြောင်းပြီးမှ သိမ်းမည်
-        });
-        
-        alert("အမှတ်စာရင်း သိမ်းဆည်းပြီးပါပြီ။");
-        renderAdminPanel(); // Table ကို refresh လုပ်မည်
-    } catch (e) {
-        alert("Error: " + e.message);
-    }
+  const newGrade = parseInt(gradeInput.value);
+
+  if (isNaN(newGrade))
+    return alert("ကျေးဇူးပြု၍ အမှတ်ကို ဂဏန်းဖြင့် ရိုက်ထည့်ပါ။");
+
+  try {
+    await db
+      .collection("users")
+      .doc(uid)
+      .update({
+        overallGrade: parseInt(newGrade), // String ကို Number အဖြစ် ပြောင်းပြီးမှ သိမ်းမည်
+      });
+
+    alert("အမှတ်စာရင်း သိမ်းဆည်းပြီးပါပြီ။");
+    renderAdminPanel(); // Table ကို refresh လုပ်မည်
+  } catch (e) {
+    alert("Error: " + e.message);
+  }
 }
 
 // 🔥 studentUid ကို parameter အဖြစ် လက်ခံခိုင်းပါ
-async function saveAcademicStatus(studentUid) { 
+async function saveAcademicStatus(studentUid) {
   const newStatus = {
-        examDate: document.getElementById("adm-exam").value,
-        overallGrade: document.getElementById("adm-grade").value,
-        attendance: document.getElementById("adm-att").value,
-        batchId: document.getElementById("adm-batch").value
-    };
+    examDate: document.getElementById("adm-exam").value,
+    overallGrade: document.getElementById("adm-grade").value,
+    attendance: document.getElementById("adm-att").value,
+    batchId: document.getElementById("adm-batch").value,
+  };
 
-    try {
-        // Firestore ထဲ တိုက်ရိုက် Update လုပ်မည်
-        await db.collection('users').doc(studentUid).update(newStatus);
-        
-        alert("ကျောင်းသား၏ Academic Status ကို Cloud ပေါ်တွင် သိမ်းဆည်းပြီးပါပြီ။");
-        
-        // Admin Panel (ကျောင်းသားစာရင်း) သို့ ပြန်သွားမည်
-        renderAdminPanel(); 
-        
-    } catch (e) {
-        console.error("Update Error:", e);
-        alert("Error: " + e.message);
-    }
+  try {
+    // Firestore ထဲ တိုက်ရိုက် Update လုပ်မည်
+    await db.collection("users").doc(studentUid).update(newStatus);
+
+    alert("ကျောင်းသား၏ Academic Status ကို Cloud ပေါ်တွင် သိမ်းဆည်းပြီးပါပြီ။");
+
+    // Admin Panel (ကျောင်းသားစာရင်း) သို့ ပြန်သွားမည်
+    renderAdminPanel();
+  } catch (e) {
+    console.error("Update Error:", e);
+    alert("Error: " + e.message);
+  }
 }
 
 function toggleEditMode(isEdit) {
@@ -3054,23 +3304,26 @@ function goToNextLesson(catIdx, modIdx, lesIdx) {
 
 // --- ဆရာအတွက်: ကျောင်းသားများ တင်ထားသော Assignment များကို ဖတ်ရန် ---
 async function renderSubmissions() {
-    const body = document.getElementById('dynamic-body');
-    body.innerHTML = `<h3><i class="fas fa-file-signature"></i> Reviewing Submissions</h3><div class="loader">Loading...</div>`;
-    
-    try {
-        const snap = await db.collection('submissions').where('status', '==', 'pending').get();
-        let html = '<div class="dashboard-grid">';
-        
-        if (snap.empty) {
-            body.innerHTML = `<h3>Reviewing Submissions</h3><div class="content-card">စစ်ဆေးရန် မရှိသေးပါ။</div><br><button class="menu-btn" onclick="renderAdminPanel()">Back</button>`;
-            return;
-        }
+  const body = document.getElementById("dynamic-body");
+  body.innerHTML = `<h3><i class="fas fa-file-signature"></i> Reviewing Submissions</h3><div class="loader">Loading...</div>`;
 
-        snap.forEach(doc => {
-            const s = doc.data();
-            const previewText = (s.content || s.githubLink || "");
+  try {
+    const snap = await db
+      .collection("submissions")
+      .where("status", "==", "pending")
+      .get();
+    let html = '<div class="dashboard-grid">';
 
-            html += `
+    if (snap.empty) {
+      body.innerHTML = `<h3>Reviewing Submissions</h3><div class="content-card">စစ်ဆေးရန် မရှိသေးပါ။</div><br><button class="menu-btn" onclick="renderAdminPanel()">Back</button>`;
+      return;
+    }
+
+    snap.forEach((doc) => {
+      const s = doc.data();
+      const previewText = s.content || s.githubLink || "";
+
+      html += `
                 <div class="content-card animate-up">
                     <div style="display:flex; justify-content:space-between; align-items:start;">
                         <h5>${s.studentName}</h5>
@@ -3082,48 +3335,60 @@ async function renderSubmissions() {
                     <p style="margin:10px 0; font-size:0.9rem; opacity:0.8;">${previewText.substring(0, 40)}...</p>
                     <button class="save-btn" style="width:100%;" onclick="gradeThisSubmission('${doc.id}')">View & Grade</button>
                 </div>`;
-        });
-        body.innerHTML = html + '</div><br><button class="menu-btn" onclick="renderAdminPanel()">Back</button>';
-    } catch (err) { console.error(err); }
+    });
+    body.innerHTML =
+      html +
+      '</div><br><button class="menu-btn" onclick="renderAdminPanel()">Back</button>';
+  } catch (err) {
+    console.error(err);
+  }
 }
 
 // --- ၁။ ပြခန်းမှသာ ဖယ်ရှားခြင်း (Featured ကို false ပြောင်းခြင်း) ---
 async function removeFromShowcase(docId) {
-    if (confirm("ဤပရောဂျက်ကို Showcase ပြခန်းမှ ဖယ်ရှားလိုပါသလား? (ကျောင်းသား၏ အမှတ်စာရင်းကို မထိခိုက်ပါ)")) {
-        try {
-            await db.collection('submissions').doc(docId).update({
-                featured: false
-            });
-            showToast("ပြခန်းမှ ဖယ်ရှားပြီးပါပြီ။", "success");
-            renderShowcase(); // UI ကို Refresh လုပ်မည်
-        } catch (e) { alert(e.message); }
+  if (
+    confirm(
+      "ဤပရောဂျက်ကို Showcase ပြခန်းမှ ဖယ်ရှားလိုပါသလား? (ကျောင်းသား၏ အမှတ်စာရင်းကို မထိခိုက်ပါ)",
+    )
+  ) {
+    try {
+      await db.collection("submissions").doc(docId).update({
+        featured: false,
+      });
+      showToast("ပြခန်းမှ ဖယ်ရှားပြီးပါပြီ။", "success");
+      renderShowcase(); // UI ကို Refresh လုပ်မည်
+    } catch (e) {
+      alert(e.message);
     }
+  }
 }
 
 // --- ၂။ Submission ကို အပြီးဖျက်ခြင်း ---
 async function deleteSubmission(docId, fromShowcase = false) {
-    if (confirm("ဤပေးပို့မှုကို Database ထဲမှ အပြီးဖျက်ရန် သေချာပါသလား?")) {
-        try {
-            await db.collection('submissions').doc(docId).delete();
-            showToast("ဒေတာ အပြီးဖျက်ပြီးပါပြီ။", "success");
-            
-            // ဘယ်နေရာကနေ ဖျက်တာလဲအပေါ် မူတည်ပြီး UI ပြန်ပြမည်
-            if (fromShowcase) renderShowcase();
-            else renderSubmissions();
-        } catch (e) { alert(e.message); }
+  if (confirm("ဤပေးပို့မှုကို Database ထဲမှ အပြီးဖျက်ရန် သေချာပါသလား?")) {
+    try {
+      await db.collection("submissions").doc(docId).delete();
+      showToast("ဒေတာ အပြီးဖျက်ပြီးပါပြီ။", "success");
+
+      // ဘယ်နေရာကနေ ဖျက်တာလဲအပေါ် မူတည်ပြီး UI ပြန်ပြမည်
+      if (fromShowcase) renderShowcase();
+      else renderSubmissions();
+    } catch (e) {
+      alert(e.message);
     }
+  }
 }
 
 // တစ်ခုချင်းစီကို အမှတ်ပေးရန် UI
 async function gradeThisSubmission(docId) {
-    const doc = await db.collection('submissions').doc(docId).get();
-    const s = doc.data();
-    const body = document.getElementById('dynamic-body');
+  const doc = await db.collection("submissions").doc(docId).get();
+  const s = doc.data();
+  const body = document.getElementById("dynamic-body");
 
-    // 🔥 Project အမျိုးအစား ဖြစ်မှသာ Checkbox ကို ပြမည်
-    const isProject = s.type === 'project';
+  // 🔥 Project အမျိုးအစား ဖြစ်မှသာ Checkbox ကို ပြမည်
+  const isProject = s.type === "project";
 
-    body.innerHTML = `
+  body.innerHTML = `
         <div class="content-card animate-up" style="max-width:700px; margin:auto;">
             <h3>Grading: ${s.studentName}</h3>
             <p>Module: ${s.lessonTitle}</p>
@@ -3139,14 +3404,18 @@ async function gradeThisSubmission(docId) {
             <textarea id="teacher-feedback" class="edit-input" rows="2" placeholder="အကြံပြုချက်ရေးပါ"></textarea>
 
             <!-- 🔥 Showcase အတွက် Checkbox အသစ် -->
-            ${isProject ? `
+            ${
+              isProject
+                ? `
                 <div style="margin: 20px 0; padding: 10px; background: #f0fdf4; border: 1px dashed #22c55e; border-radius: 8px;">
                     <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
                         <input type="checkbox" id="add-to-showcase" style="width:20px; height:20px;">
                         <span style="font-weight:bold; color:#166534;">Featured in Showcase (ပြခန်းတွင် ဖော်ပြမည်)</span>
                     </label>
                 </div>
-            ` : ''}
+            `
+                : ""
+            }
             
             <div style="margin-top:20px; display:flex; gap:10px;">
                 <button class="save-btn" onclick="confirmGrade('${docId}', '${s.studentId}', '${s.lessonTitle}')">
@@ -3159,7 +3428,7 @@ async function gradeThisSubmission(docId) {
 }
 
 function renderAbout() {
-    document.getElementById('dynamic-body').innerHTML = `
+  document.getElementById("dynamic-body").innerHTML = `
         <div class="content-card animate-up" style="max-width: 800px; margin: auto; line-height: 1.8;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
                 <h3><i class="fas fa-graduation-cap"></i> ကျွန်ုပ်တို့အကြောင်း (About Us)</h3>
@@ -3180,7 +3449,7 @@ function renderAbout() {
 }
 
 function renderPrivacy() {
-    document.getElementById('dynamic-body').innerHTML = `
+  document.getElementById("dynamic-body").innerHTML = `
         <div class="content-card animate-up" style="max-width: 800px; margin: auto; line-height: 1.8;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
             <h3><i class="fas fa-user-shield"></i> ကိုယ်ရေးအချက်အလက် မူဝါဒ (Privacy Policy)</h3>
@@ -3208,182 +3477,200 @@ function renderPrivacy() {
 
 // --- ၁။ Global Variables (ဖိုင်အပေါ်ဆုံးတွင် ထားပါ) ---
 let unreadNotiCount = 0;
-const globalNotiSound = new Audio('/assets/noti-sound.mp3'); 
+const globalNotiSound = new Audio("/assets/noti-sound.mp3");
 
 function initNotifications() {
-    if (!currentUser.uid || !currentUser.isLoggedIn) return;
+  if (!currentUser.uid || !currentUser.isLoggedIn) return;
 
-    // 🔥 ၁ နာရီ နောက်ပြန်စစ်ဆေးခြင်း (အသံမြည်စေရန် သေချာသော နည်းလမ်း)
-    const startTime = new Date(Date.now() - 3600000); 
+  // 🔥 ၁ နာရီ နောက်ပြန်စစ်ဆေးခြင်း (အသံမြည်စေရန် သေချာသော နည်းလမ်း)
+  const startTime = new Date(Date.now() - 3600000);
 
-    // (က) Direct Messages Noti (မိမိထံ တိုက်ရိုက်လာသောစာ)
-    db.collection('messages')
-        .where('receiverId', '==', currentUser.uid)
-        .where('timestamp', '>', startTime)
-        .onSnapshot(snap => {
-            let newDocs = snap.docChanges().filter(c => c.type === "added");
-        newDocs.forEach(change => {
-                const msg = change.doc.data();
-                // ကိုယ့်စာကိုယ် Noti မပေးရန်
-                if (msg.senderId !== currentUser.uid) {
-                    triggerNotiUI(msg.senderName, msg.text, msg.senderId, 'direct');
-                }
-            });
-    }, err => console.log("DM Noti Restricted"));
+  // (က) Direct Messages Noti (မိမိထံ တိုက်ရိုက်လာသောစာ)
+  db.collection("messages")
+    .where("receiverId", "==", currentUser.uid)
+    .where("timestamp", ">", startTime)
+    .onSnapshot(
+      (snap) => {
+        let newDocs = snap.docChanges().filter((c) => c.type === "added");
+        newDocs.forEach((change) => {
+          const msg = change.doc.data();
+          // ကိုယ့်စာကိုယ် Noti မပေးရန်
+          if (msg.senderId !== currentUser.uid) {
+            triggerNotiUI(msg.senderName, msg.text, msg.senderId, "direct");
+          }
+        });
+      },
+      (err) => console.log("DM Noti Restricted"),
+    );
 
-    // (ခ) Group Messages Noti (မိမိ Batch ထဲသို့ ရောက်လာသောစာ)
-    if (currentUser.batchId && currentUser.batchId !== "Batch-Waiting") {
-        db.collection('messages')
-        .where('batchId', '==', currentUser.batchId)
-        .where('type', '==', 'group')
-        .where('timestamp', '>', startTime)
-        .onSnapshot(snap => {
-            let newDocs = snap.docChanges().filter(c => c.type === "added");
-            newDocs.forEach(change => {
-                const msg = change.doc.data();
-                    if (msg.senderId !== currentUser.uid) {
-                        triggerNotiUI(msg.senderName, msg.text, msg.batchId, 'group');
-                    }
-                });
-        }, err => console.log("Group Noti Restricted"));
-    }
+  // (ခ) Group Messages Noti (မိမိ Batch ထဲသို့ ရောက်လာသောစာ)
+  if (currentUser.batchId && currentUser.batchId !== "Batch-Waiting") {
+    db.collection("messages")
+      .where("batchId", "==", currentUser.batchId)
+      .where("type", "==", "group")
+      .where("timestamp", ">", startTime)
+      .onSnapshot(
+        (snap) => {
+          let newDocs = snap.docChanges().filter((c) => c.type === "added");
+          newDocs.forEach((change) => {
+            const msg = change.doc.data();
+            if (msg.senderId !== currentUser.uid) {
+              triggerNotiUI(msg.senderName, msg.text, msg.batchId, "group");
+            }
+          });
+        },
+        (err) => console.log("Group Noti Restricted"),
+      );
+  }
 }
 
 // --- ၃။ UI နှင့် အသံကို Update လုပ်ပေးမည့် တစ်ခုတည်းသော Function ---
 // --- Noti UI ကို Update လုပ်ပေးမည့် Function (အဆင့်မြှင့်တင်ထားသော Version) ---
 function triggerNotiUI(senderName, text, targetId, type) {
-    if (typeof unreadNotiCount === 'undefined') unreadNotiCount = 0;
-    unreadNotiCount++;
+  if (typeof unreadNotiCount === "undefined") unreadNotiCount = 0;
+  unreadNotiCount++;
 
-    const badge = document.getElementById('noti-badge');
-    const wrapper = document.querySelector('.notification-wrapper');
-    const bellIcon = document.querySelector('.notification-wrapper i');
-    const list = document.getElementById('noti-list');
+  const badge = document.getElementById("noti-badge");
+  const wrapper = document.querySelector(".notification-wrapper");
+  const bellIcon = document.querySelector(".notification-wrapper i");
+  const list = document.getElementById("noti-list");
 
-    if (wrapper) wrapper.style.display = "flex";
-    if (badge) {
-        badge.innerText = unreadNotiCount;
-        badge.style.display = "flex";
-    }
-    if (bellIcon) {
-        bellIcon.style.color = "#ef4444";
-        bellIcon.classList.add('fa-shake');
-    }
+  if (wrapper) wrapper.style.display = "flex";
+  if (badge) {
+    badge.innerText = unreadNotiCount;
+    badge.style.display = "flex";
+  }
+  if (bellIcon) {
+    bellIcon.style.color = "#ef4444";
+    bellIcon.classList.add("fa-shake");
+  }
 
-    if (list) {
-        // 🔥 အရင်ရှိပြီးသား စာရင်းထဲမှာ ဒီလူ (targetId) ပါပြီးသားလား စစ်မည်
-        // ပါပြီးသားဆိုရင် အဟောင်းကိုဖျက်ပြီး အသစ်ကို အပေါ်ဆုံးကပြမည် (Duplicate ကာကွယ်ရန်)
-        const existingItem = document.getElementById(`noti-item-${targetId}`);
-        if (existingItem) existingItem.remove();
+  if (list) {
+    // 🔥 အရင်ရှိပြီးသား စာရင်းထဲမှာ ဒီလူ (targetId) ပါပြီးသားလား စစ်မည်
+    // ပါပြီးသားဆိုရင် အဟောင်းကိုဖျက်ပြီး အသစ်ကို အပေါ်ဆုံးကပြမည် (Duplicate ကာကွယ်ရန်)
+    const existingItem = document.getElementById(`noti-item-${targetId}`);
+    if (existingItem) existingItem.remove();
 
-        // Noti တစ်ခုချင်းစီမှာ ID ပေးထားမည်
-        const item = document.createElement('div');
-        item.id = `noti-item-${targetId}`;
-        item.className = 'noti-item animate-up';
-        
-        // နှိပ်လိုက်ရင် သက်ဆိုင်ရာ Chat ဆီ တန်းသွားမည့် Logic
-        const chatAction = type === 'group' 
-            ? `switchChat('${targetId}', 'Group: ${targetId}')` 
-            : `openDirectMessage('${targetId}')`;
+    // Noti တစ်ခုချင်းစီမှာ ID ပေးထားမည်
+    const item = document.createElement("div");
+    item.id = `noti-item-${targetId}`;
+    item.className = "noti-item animate-up";
 
-        // 🔥 Safety Check: text မရှိရင် အလွတ်ထားမည် (error မတက်စေရန်)
-        const safeText = (text || "").substring(0, 15);
+    // နှိပ်လိုက်ရင် သက်ဆိုင်ရာ Chat ဆီ တန်းသွားမည့် Logic
+    const chatAction =
+      type === "group"
+        ? `switchChat('${targetId}', 'Group: ${targetId}')`
+        : `openDirectMessage('${targetId}')`;
 
-        item.innerHTML = `
+    // 🔥 Safety Check: text မရှိရင် အလွတ်ထားမည် (error မတက်စေရန်)
+    const safeText = (text || "").substring(0, 15);
+
+    item.innerHTML = `
             <div onclick="${chatAction}; toggleNotifications();">
-                <i class="fas ${type === 'group' ? 'fa-users' : 'fa-comment'}"></i>
+                <i class="fas ${type === "group" ? "fa-users" : "fa-comment"}"></i>
                 <span><strong>${senderName}:</strong> ${safeText}...</span>
             </div>
         `;
-        
-        // အသစ်ရောက်တာကို အပေါ်ဆုံးက ထည့်မည်
-        list.insertBefore(item, list.firstChild);
-    }
 
-    // အသံဖွင့်ခြင်း
-    if (typeof isAudioEnabled !== 'undefined' && isAudioEnabled && globalNotiSound) {
-        globalNotiSound.currentTime = 0;
-        globalNotiSound.play().catch(() => {});
-    }
+    // အသစ်ရောက်တာကို အပေါ်ဆုံးက ထည့်မည်
+    list.insertBefore(item, list.firstChild);
+  }
+
+  // အသံဖွင့်ခြင်း
+  if (
+    typeof isAudioEnabled !== "undefined" &&
+    isAudioEnabled &&
+    globalNotiSound
+  ) {
+    globalNotiSound.currentTime = 0;
+    globalNotiSound.play().catch(() => {});
+  }
 }
 
 // --- ၄။ Noti ဖွင့်ကြည့်လျှင် Reset လုပ်ခြင်း ---
 function toggleNotifications() {
-    const dropdown = document.getElementById('noti-dropdown');
-    const badge = document.getElementById('noti-badge');
-    const bellIcon = document.querySelector('.notification-wrapper i');
+  const dropdown = document.getElementById("noti-dropdown");
+  const badge = document.getElementById("noti-badge");
+  const bellIcon = document.querySelector(".notification-wrapper i");
 
-    if (dropdown.style.display === "block") {
-        dropdown.style.display = "none";
-    } else {
-        dropdown.style.display = "block";
-        // Noti ဖွင့်ကြည့်ပြီးရင် အနီရောင်တွေ ပြန်ဖြုတ်မည်
-        unreadNotiCount = 0;
-        if (badge) badge.style.display = "none";
-        if (bellIcon) {
-            bellIcon.style.color = "";
-            bellIcon.classList.remove('fa-shake');
-        }
+  if (dropdown.style.display === "block") {
+    dropdown.style.display = "none";
+  } else {
+    dropdown.style.display = "block";
+    // Noti ဖွင့်ကြည့်ပြီးရင် အနီရောင်တွေ ပြန်ဖြုတ်မည်
+    unreadNotiCount = 0;
+    if (badge) badge.style.display = "none";
+    if (bellIcon) {
+      bellIcon.style.color = "";
+      bellIcon.classList.remove("fa-shake");
     }
+  }
 }
 
 // --- ၂။ Global Search Logic ---
 function handleSearch(query) {
-    const dropdown = document.getElementById('search-results');
-    if (!query) { dropdown.style.display = "none"; return; }
-    
-    let results = [];
-    courseData.forEach((cat, ci) => {
-        cat.modules.forEach((mod, mi) => {
-            mod.lessons.forEach((les, li) => {
-                if (les.title.toLowerCase().includes(query.toLowerCase())) {
-                    results.push({ title: les.title, ci, mi, li });
-                }
-            });
-        });
-    });
+  const dropdown = document.getElementById("search-results");
+  if (!query) {
+    dropdown.style.display = "none";
+    return;
+  }
 
-    if (results.length > 0) {
-        dropdown.innerHTML = results.map(r => 
-            `<div class="noti-item" onclick="renderLessonContent(${r.ci}, ${r.mi}, ${r.li}); document.getElementById('search-results').style.display='none';">
+  let results = [];
+  courseData.forEach((cat, ci) => {
+    cat.modules.forEach((mod, mi) => {
+      mod.lessons.forEach((les, li) => {
+        if (les.title.toLowerCase().includes(query.toLowerCase())) {
+          results.push({ title: les.title, ci, mi, li });
+        }
+      });
+    });
+  });
+
+  if (results.length > 0) {
+    dropdown.innerHTML = results
+      .map(
+        (r) =>
+          `<div class="noti-item" onclick="renderLessonContent(${r.ci}, ${r.mi}, ${r.li}); document.getElementById('search-results').style.display='none';">
                 <i class="far fa-file-alt"></i> ${r.title}
-            </div>`
-        ).join('');
-        dropdown.style.display = "block";
-    } else {
-        dropdown.innerHTML = '<div class="noti-item">ရှာမတွေ့ပါ။</div>';
-        dropdown.style.display = "block";
-    }
+            </div>`,
+      )
+      .join("");
+    dropdown.style.display = "block";
+  } else {
+    dropdown.innerHTML = '<div class="noti-item">ရှာမတွေ့ပါ။</div>';
+    dropdown.style.display = "block";
+  }
 }
 
 // --- ၃။ Live Class Countdown Logic ---
 function startLiveCountdown() {
-    setInterval(() => {
-        if (!nextClassTime) return;
+  setInterval(() => {
+    if (!nextClassTime) return;
 
-        const now = new Date().getTime();
-        const diff = nextClassTime - now;
-        
-        const timerEl = document.getElementById('live-timer');
-        if (!timerEl) return;
+    const now = new Date().getTime();
+    const diff = nextClassTime - now;
 
-        if (diff <= 0) {
-            timerEl.innerHTML = "<span style='color:#22c55e'>အတန်းချိန် ရောက်ရှိနေပါပြီ။</span>";
-            return;
-        }
+    const timerEl = document.getElementById("live-timer");
+    if (!timerEl) return;
 
-        const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        const s = Math.floor((diff % (1000 * 60)) / 1000);
+    if (diff <= 0) {
+      timerEl.innerHTML =
+        "<span style='color:#22c55e'>အတန်းချိန် ရောက်ရှိနေပါပြီ။</span>";
+      return;
+    }
 
-        timerEl.innerHTML = `${h}h : ${m}m : ${s}s`;
-    }, 1000);
+    const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const s = Math.floor((diff % (1000 * 60)) / 1000);
+
+    timerEl.innerHTML = `${h}h : ${m}m : ${s}s`;
+  }, 1000);
 }
 
 // --- ၄။ Admin Content Manager (Teacher Only) ---
 function renderContentEditor() {
-    const body = document.getElementById('dynamic-body');
-    body.innerHTML = `
+  const body = document.getElementById("dynamic-body");
+  body.innerHTML = `
         <div class="content-card animate-up">
             <h3><i class="fas fa-plus-circle"></i> သင်ခန်းစာ အသစ်ထည့်သွင်းရန်</h3>
             <hr><br>
@@ -3422,31 +3709,33 @@ function renderContentEditor() {
 }
 
 async function saveNewLessonToCloud() {
-    const data = {
-        category: document.getElementById('new-cat').value,
-        module: document.getElementById('new-mod-name').value,
-        title: document.getElementById('new-les-title').value,
-        path: document.getElementById('new-les-path').value,
-        type: document.getElementById('new-type').value,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp() // အချိန်ပါ ထည့်သိမ်းမည်
-    };
+  const data = {
+    category: document.getElementById("new-cat").value,
+    module: document.getElementById("new-mod-name").value,
+    title: document.getElementById("new-les-title").value,
+    path: document.getElementById("new-les-path").value,
+    type: document.getElementById("new-type").value,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp(), // အချိန်ပါ ထည့်သိမ်းမည်
+  };
 
-    try {
-        await db.collection('course_structure').add(data);
-        alert("သင်ခန်းစာ အသစ်ကို Database ထဲသို့ ထည့်သွင်းပြီးပါပြီ။");
-        renderAdminPanel();
-    } catch (error) {
-        console.error("Save Error:", error);
-        alert("Permission Denied: သင်သည် ဆရာ (Teacher) အကောင့် ဖြစ်ရန် လိုအပ်ပါသည်။");
-    }
+  try {
+    await db.collection("course_structure").add(data);
+    alert("သင်ခန်းစာ အသစ်ကို Database ထဲသို့ ထည့်သွင်းပြီးပါပြီ။");
+    renderAdminPanel();
+  } catch (error) {
+    console.error("Save Error:", error);
+    alert(
+      "Permission Denied: သင်သည် ဆရာ (Teacher) အကောင့် ဖြစ်ရန် လိုအပ်ပါသည်။",
+    );
+  }
 }
 
 function renderZoomEditor() {
-    const body = document.getElementById('dynamic-body');
-    // လက်ရှိအချိန်ကို input format ပြောင်းရန်
-    const dateStr = nextClassTime ? nextClassTime.toISOString().slice(0, 16) : "";
+  const body = document.getElementById("dynamic-body");
+  // လက်ရှိအချိန်ကို input format ပြောင်းရန်
+  const dateStr = nextClassTime ? nextClassTime.toISOString().slice(0, 16) : "";
 
-    body.innerHTML = `
+  body.innerHTML = `
         <div class="content-card animate-up" style="max-width: 600px; margin: auto;">
             <h3><i class="fas fa-video"></i> Live Class စီမံခန့်ခွဲမှု</h3>
             <p>ဤနေရာတွင် ပြင်ဆင်လိုက်ပါက ကျောင်းသားအားလုံး၏ Dashboard တွင် ချက်ချင်းပြောင်းလဲသွားမည်။</p>
@@ -3467,93 +3756,110 @@ function renderZoomEditor() {
 }
 
 async function updateZoomToFirebase() {
-    const newUrl = document.getElementById('zoom-url-input').value;
-    const newTime = document.getElementById('zoom-time-input').value;
+  const newUrl = document.getElementById("zoom-url-input").value;
+  const newTime = document.getElementById("zoom-time-input").value;
 
-    if (!newUrl) return alert("Link ထည့်ပေးပါ");
+  if (!newUrl) return alert("Link ထည့်ပေးပါ");
 
-    try {
-        await db.collection('settings').doc('zoom_config').set({
-            url: newUrl,
-            startTime: firebase.firestore.Timestamp.fromDate(new Date(newTime)),
-            updatedBy: currentUser.name
-        });
-        alert("Zoom Config ကို အောင်မြင်စွာ Update လုပ်ပြီးပါပြီ။");
-        renderAdminPanel();
-    } catch (e) {
-        alert("Error: " + e.message);
-    }
+  try {
+    await db
+      .collection("settings")
+      .doc("zoom_config")
+      .set({
+        url: newUrl,
+        startTime: firebase.firestore.Timestamp.fromDate(new Date(newTime)),
+        updatedBy: currentUser.name,
+      });
+    alert("Zoom Config ကို အောင်မြင်စွာ Update လုပ်ပြီးပါပြီ။");
+    renderAdminPanel();
+  } catch (e) {
+    alert("Error: " + e.message);
+  }
 }
 
 // --- ဆရာက အမှတ်ပေးခြင်းကို အတည်ပြုသည့် Function ---
 async function confirmGrade(docId, studentId, lessonTitle) {
-    const scoreInput = document.getElementById('grade-score');
-    const feedbackInput = document.getElementById('teacher-feedback');
-    const showcaseCheckbox = document.getElementById('add-to-showcase');
+  const scoreInput = document.getElementById("grade-score");
+  const feedbackInput = document.getElementById("teacher-feedback");
+  const showcaseCheckbox = document.getElementById("add-to-showcase");
 
-    if (!scoreInput || !scoreInput.value) return alert("အမှတ် အရင်ထည့်ပါ။");
+  if (!scoreInput || !scoreInput.value) return alert("အမှတ် အရင်ထည့်ပါ။");
 
-    const score = parseInt(scoreInput.value);
-    const feedback = feedbackInput ? feedbackInput.value : "";
-    const isFeatured = showcaseCheckbox ? showcaseCheckbox.checked : false; 
+  const score = parseInt(scoreInput.value);
+  const feedback = feedbackInput ? feedbackInput.value : "";
+  const isFeatured = showcaseCheckbox ? showcaseCheckbox.checked : false;
 
-    try {
-        // 🔥 အဆင့် ၁- ဤ Submission ၏ မူရင်းအချက်အလက်ကို ပြန်ယူမည် (Course ID ရရန်)
-        const subDoc = await db.collection('submissions').doc(docId).get();
-        if (!subDoc.exists) throw new Error("Submission data not found!");
-        const subData = subDoc.data();
-        const originalCourseId = subData.courseId; // မူရင်းသင်တန်း ID (web သို့မဟုတ် python စသည်)
+  try {
+    // 🔥 အဆင့် ၁- ဤ Submission ၏ မူရင်းအချက်အလက်ကို ပြန်ယူမည် (Course ID ရရန်)
+    const subDoc = await db.collection("submissions").doc(docId).get();
+    if (!subDoc.exists) throw new Error("Submission data not found!");
+    const subData = subDoc.data();
+    const originalCourseId = subData.courseId; // မူရင်းသင်တန်း ID (web သို့မဟုတ် python စသည်)
 
-        // ၂။ ဘာသာရပ် Key ကို သတ်မှတ်ခြင်း
-        const titleLower = lessonTitle.toLowerCase();
-        const subjectKey = titleLower.includes('html') ? 'html' : 
-                         titleLower.includes('css') ? 'css' : 
-                         titleLower.includes('python') ? 'python' : 
-                         titleLower.includes('design') ? 'design' : 'javascript';
+    // ၂။ ဘာသာရပ် Key ကို သတ်မှတ်ခြင်း
+    const titleLower = lessonTitle.toLowerCase();
+    const subjectKey = titleLower.includes("html")
+      ? "html"
+      : titleLower.includes("css")
+        ? "css"
+        : titleLower.includes("python")
+          ? "python"
+          : titleLower.includes("design")
+            ? "design"
+            : "javascript";
 
-        // ၃။ ကျောင်းသား အမှတ်စာရင်းကို Update လုပ်မည် (မူရင်း Course ID အောက်တွင်သာ သိမ်းမည်)
-        await db.collection('users').doc(studentId).set({
-            grades: { 
-                [originalCourseId]: { 
-                    [subjectKey]: score 
-                } 
-            }
-        }, { merge: true });
+    // ၃။ ကျောင်းသား အမှတ်စာရင်းကို Update လုပ်မည် (မူရင်း Course ID အောက်တွင်သာ သိမ်းမည်)
+    await db
+      .collection("users")
+      .doc(studentId)
+      .set(
+        {
+          grades: {
+            [originalCourseId]: {
+              [subjectKey]: score,
+            },
+          },
+        },
+        { merge: true },
+      );
 
-        // ၄။ Submission status ကို 'graded' ပြောင်းပြီး Featured သိမ်းမည်
-        await db.collection('submissions').doc(docId).update({
-            status: "graded",
-            score: score,
-            featured: isFeatured,
-            teacherFeedback: feedback,
-            gradedAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
+    // ၄။ Submission status ကို 'graded' ပြောင်းပြီး Featured သိမ်းမည်
+    await db.collection("submissions").doc(docId).update({
+      status: "graded",
+      score: score,
+      featured: isFeatured,
+      teacherFeedback: feedback,
+      gradedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
 
-        // ၅။ ကျောင်းသားဆီ Noti ပို့မည်
-        await db.collection('messages').add({
-            text: `🔔 အမှတ်ထွက်ပါပြီ- ${lessonTitle} (ရမှတ်: ${score})။ Transcript တွင် စစ်ဆေးပါ။`,
-            senderId: currentUser.uid,
-            senderName: "Teacher (LMS)",
-            receiverId: studentId,
-            type: "direct",
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        });
+    // ၅။ ကျောင်းသားဆီ Noti ပို့မည်
+    await db.collection("messages").add({
+      text: `🔔 အမှတ်ထွက်ပါပြီ- ${lessonTitle} (ရမှတ်: ${score})။ Transcript တွင် စစ်ဆေးပါ။`,
+      senderId: currentUser.uid,
+      senderName: "Teacher (LMS)",
+      receiverId: studentId,
+      type: "direct",
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+    });
 
-        alert(isFeatured ? "အမှတ်ပေးပြီးပါပြီ။ Showcase ထဲသို့လည်း ထည့်သွင်းလိုက်ပါသည်။" : "အမှတ်ပေးခြင်း အောင်မြင်ပါသည်။");
-        renderAdminPanel(); 
-
-    } catch (error) {
-        console.error("Grading Error:", error);
-        alert("Error: " + error.message);
-    }
+    alert(
+      isFeatured
+        ? "အမှတ်ပေးပြီးပါပြီ။ Showcase ထဲသို့လည်း ထည့်သွင်းလိုက်ပါသည်။"
+        : "အမှတ်ပေးခြင်း အောင်မြင်ပါသည်။",
+    );
+    renderAdminPanel();
+  } catch (error) {
+    console.error("Grading Error:", error);
+    alert("Error: " + error.message);
+  }
 }
 
 // ကျောင်းသားကိုယ်တိုင် တင်ထားသမျှ Assignment/Project စာရင်းနှင့် အမှတ်ကိုကြည့်ရန်
 async function renderMySubmissions() {
-    const body = document.getElementById('dynamic-body');
-    if (!currentUser.uid) return alert("ကျေးဇူးပြု၍ အရင် Login ဝင်ပါ။");
+  const body = document.getElementById("dynamic-body");
+  if (!currentUser.uid) return alert("ကျေးဇူးပြု၍ အရင် Login ဝင်ပါ။");
 
-    body.innerHTML = `
+  body.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
             <h3><i class="fas fa-file-upload"></i> ကျွန်ုပ်၏ ပေးပို့မှုများ</h3>
             <button class="menu-btn" onclick="showSection('profile')"><i class="fas fa-arrow-left"></i> Back</button>
@@ -3561,62 +3867,70 @@ async function renderMySubmissions() {
         <div id="sub-loading" class="loader">Loading...</div>
     `;
 
-    try {
-        const snap = await db.collection('submissions')
-                             .where('studentId', '==', currentUser.uid)
-                             .orderBy('timestamp', 'desc')
-                             .get();
+  try {
+    const snap = await db
+      .collection("submissions")
+      .where("studentId", "==", currentUser.uid)
+      .orderBy("timestamp", "desc")
+      .get();
 
-        const loadingDiv = document.getElementById('sub-loading');
-        if (loadingDiv) loadingDiv.remove();
+    const loadingDiv = document.getElementById("sub-loading");
+    if (loadingDiv) loadingDiv.remove();
 
-        if (snap.empty) {
-            body.innerHTML += `<div class="content-card">တင်ထားသော Assignment မရှိသေးပါ။</div>`;
-            return;
-        }
+    if (snap.empty) {
+      body.innerHTML += `<div class="content-card">တင်ထားသော Assignment မရှိသေးပါ။</div>`;
+      return;
+    }
 
-        let html = '<div class="dashboard-grid">';
-        snap.forEach(doc => {
-            const s = doc.data();
-            const statusClass = s.status === 'graded' ? 'text-success' : 'text-warning';
-            const dateStr = s.timestamp ? s.timestamp.toDate().toLocaleDateString() : 'N/A';
-            
-            html += `
+    let html = '<div class="dashboard-grid">';
+    snap.forEach((doc) => {
+      const s = doc.data();
+      const statusClass =
+        s.status === "graded" ? "text-success" : "text-warning";
+      const dateStr = s.timestamp
+        ? s.timestamp.toDate().toLocaleDateString()
+        : "N/A";
+
+      html += `
                 <div class="content-card animate-up">
                     <div style="display:flex; justify-content:space-between; align-items:start;">
-                        <span class="badge-type" style="background:#e0f2fe; color:#0369a1;">${s.category || 'General'}</span>
+                        <span class="badge-type" style="background:#e0f2fe; color:#0369a1;">${s.category || "General"}</span>
                         <strong class="${statusClass}" style="font-size:0.8rem;">${s.status.toUpperCase()}</strong>
                     </div>
                     <h4 style="margin:10px 0;">${s.lessonTitle}</h4>
                     <p style="font-size:0.8rem; color:var(--text-muted);">တင်သည့်ရက်: ${dateStr}</p>
                     <hr style="margin:10px 0; border:0; border-top:1px solid #eee;">
                     
-                    ${s.status === 'graded' ? `
+                    ${
+                      s.status === "graded"
+                        ? `
                         <div class="academic-box" style="background:#f0fdf4; border-left:4px solid #22c55e; padding:10px; border-radius:5px;">
                             <p><strong>ရမှတ်:</strong> <span style="font-size:1.1rem; color:#16a34a;">${s.score} / 100</span></p>
                             <p style="font-size:0.85rem;"><strong>ဆရာ့မှတ်ချက်:</strong> ${s.teacherFeedback || "မှတ်ချက်မရှိပါ။"}</p>
                         </div>
-                    ` : `<p style="color:#f59e0b; font-size:0.9rem;"><i class="fas fa-clock"></i> ဆရာမှ စစ်ဆေးနေဆဲဖြစ်ပါသည်။</p>`}
+                    `
+                        : `<p style="color:#f59e0b; font-size:0.9rem;"><i class="fas fa-clock"></i> ဆရာမှ စစ်ဆေးနေဆဲဖြစ်ပါသည်။</p>`
+                    }
                     
                     <button class="save-btn" style="margin-top:15px; width:100%; font-size:0.85rem;" onclick="viewMySubmissionDetail('${doc.id}')">
                         <i class="fas fa-search-plus"></i> မူရင်းစာသား ပြန်ဖတ်ရန်
                     </button>
                 </div>`;
-        });
-        body.innerHTML += html + '</div>';
-    } catch (e) {
-        console.error("My Submissions Error:", e);
-        body.innerHTML += `<div class="error-msg">Error: ${e.message} <br> (Browser Console မှာ Index Link ပါက နှိပ်ပေးပါ)</div>`;
-    }
+    });
+    body.innerHTML += html + "</div>";
+  } catch (e) {
+    console.error("My Submissions Error:", e);
+    body.innerHTML += `<div class="error-msg">Error: ${e.message} <br> (Browser Console မှာ Index Link ပါက နှိပ်ပေးပါ)</div>`;
+  }
 }
 
 // ခလုတ်နှိပ်ရင် အသေးစိတ်စာသား ပြန်ပြမည့် Function
 async function viewMySubmissionDetail(docId) {
-    const doc = await db.collection('submissions').doc(docId).get();
-    const s = doc.data();
-    const body = document.getElementById('dynamic-body');
+  const doc = await db.collection("submissions").doc(docId).get();
+  const s = doc.data();
+  const body = document.getElementById("dynamic-body");
 
-    body.innerHTML = `
+  body.innerHTML = `
         <div class="content-card animate-up">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <h3>Submission Detail</h3>
@@ -3633,22 +3947,23 @@ async function viewMySubmissionDetail(docId) {
 
 // --- ကျောင်းသားကိုယ်တိုင် တင်ထားသော Assignment အသေးစိတ်ကို ပြန်ဖတ်ရန် ---
 async function viewMySubmissionDetail(docId) {
-    const body = document.getElementById('dynamic-body');
-    body.innerHTML = '<div class="loader">စာသားများကို ပြန်လည်ဖတ်ရှုနေသည်...</div>';
+  const body = document.getElementById("dynamic-body");
+  body.innerHTML =
+    '<div class="loader">စာသားများကို ပြန်လည်ဖတ်ရှုနေသည်...</div>';
 
-    try {
-        // Firestore မှ သက်ဆိုင်ရာ Submission ကို ဆွဲယူမည်
-        const doc = await db.collection('submissions').doc(docId).get();
-        
-        if (!doc.exists) {
-            alert("ရှာမတွေ့ပါ။");
-            renderMySubmissions();
-            return;
-        }
+  try {
+    // Firestore မှ သက်ဆိုင်ရာ Submission ကို ဆွဲယူမည်
+    const doc = await db.collection("submissions").doc(docId).get();
 
-        const s = doc.data();
+    if (!doc.exists) {
+      alert("ရှာမတွေ့ပါ။");
+      renderMySubmissions();
+      return;
+    }
 
-        body.innerHTML = `
+    const s = doc.data();
+
+    body.innerHTML = `
             <div class="content-card animate-up" style="max-width:850px; margin:auto;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
                     <h3><i class="fas fa-file-alt"></i> ${s.lessonTitle}</h3>
@@ -3662,55 +3977,62 @@ async function viewMySubmissionDetail(docId) {
                     ${s.content ? s.content : `<strong>GitHub Project Link:</strong> <a href="${s.githubLink}" target="_blank">${s.githubLink}</a>`}
                 </div>
 
-                ${s.status === 'graded' ? `
+                ${
+                  s.status === "graded"
+                    ? `
                     <div style="margin-top:30px; padding:20px; border:1px solid #22c55e; border-radius:12px; background:#f0fdf4;">
                         <h4 style="color:#166534; margin-bottom:10px;">ဆရာ့ထံမှ တုံ့ပြန်ချက် (Feedback)</h4>
                         <p><strong>ရမှတ်:</strong> ${s.score} / 100</p>
                         <p><strong>မှတ်ချက်:</strong> ${s.teacherFeedback || "မှတ်ချက်မရှိပါ။"}</p>
                     </div>
-                ` : ''}
+                `
+                    : ""
+                }
             </div>
         `;
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    } catch (error) {
-        console.error("Error loading submission detail:", error);
-        alert("ဖတ်မရပါ- " + error.message);
-        renderMySubmissions();
-    }
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  } catch (error) {
+    console.error("Error loading submission detail:", error);
+    alert("ဖတ်မရပါ- " + error.message);
+    renderMySubmissions();
+  }
 }
 
 async function renderPaymentPage(courseId) {
-    const body = document.getElementById('dynamic-body');
-    const course = allCourses[courseId];
+  const body = document.getElementById("dynamic-body");
+  const course = allCourses[courseId];
 
-    if (!course) return alert("Course not found!");
+  if (!course) return alert("Course not found!");
 
-    body.innerHTML = '<div class="loader">စစ်ဆေးနေသည်...</div>';
+  body.innerHTML = '<div class="loader">စစ်ဆေးနေသည်...</div>';
 
-    try {
-        // 🔥 နောက်ဆုံးတင်ထားတဲ့ ပေးချေမှုမှတ်တမ်းကို Firestore ကနေ တိုက်ရိုက်သွားစစ်မည်
-        const q = await db.collection('payments')
-                          .where('studentId', '==', auth.currentUser.uid)
-                          .where('courseId', '==', courseId)
-                          .orderBy('timestamp', 'desc').limit(1).get();
-        
-        let statusBanner = "";
-        if (!q.empty) {
-            const payData = q.docs[0].data();
-            if (payData.status === 'pending') {
-                statusBanner = `<div class="tip-box animate-up" style="background:#f0f9ff; border-left:5px solid #0ea5e9; padding:15px; margin-bottom:20px;">
+  try {
+    // 🔥 နောက်ဆုံးတင်ထားတဲ့ ပေးချေမှုမှတ်တမ်းကို Firestore ကနေ တိုက်ရိုက်သွားစစ်မည်
+    const q = await db
+      .collection("payments")
+      .where("studentId", "==", auth.currentUser.uid)
+      .where("courseId", "==", courseId)
+      .orderBy("timestamp", "desc")
+      .limit(1)
+      .get();
+
+    let statusBanner = "";
+    if (!q.empty) {
+      const payData = q.docs[0].data();
+      if (payData.status === "pending") {
+        statusBanner = `<div class="tip-box animate-up" style="background:#f0f9ff; border-left:5px solid #0ea5e9; padding:15px; margin-bottom:20px;">
                     <i class="fas fa-clock fa-spin"></i> သင်၏ပေးချေမှုကို ဆရာမှ စစ်ဆေးနေဆဲ ဖြစ်ပါသည်။ (Pending)
                 </div>`;
-            } else if (payData.status === 'rejected') {
-                statusBanner = `<div class="error-msg animate-up" style="background:#fff1f2; border:1px solid #fda4af; color:#9f1239; padding:20px; border-radius:12px; margin-bottom:20px;">
+      } else if (payData.status === "rejected") {
+        statusBanner = `<div class="error-msg animate-up" style="background:#fff1f2; border:1px solid #fda4af; color:#9f1239; padding:20px; border-radius:12px; margin-bottom:20px;">
                     <h4><i class="fas fa-exclamation-circle"></i> သင်တန်းအပ်နှံမှု အပယ်ခံရပါသည်</h4>
                     <p><strong>အကြောင်းရင်း:</strong> ${payData.rejectReason || "အချက်အလက် မစုံလင်ပါ။"}</p>
                     <small>ကျေးဇူးပြု၍ ပြန်လည်စစ်ဆေးပြီး အသစ်ပြန်တင်ပေးပါ။</small>
                 </div>`;
-            }
-        }
+      }
+    }
 
-        body.innerHTML = `
+    body.innerHTML = `
             <div class="content-card animate-up" style="max-width: 700px; margin: auto;">
                 <h2 style="text-align:center; color:var(--primary);">${course.title} အပ်နှံရန်</h2>
                 <p style="text-align:center;">သင်တန်းကြေး - <strong>${course.price}</strong></p>
@@ -3751,42 +4073,49 @@ async function renderPaymentPage(courseId) {
                 </button>
             </div>
         `;
-    } catch (e) { console.log(e); }
+  } catch (e) {
+    console.log(e);
+  }
 }
 
 function handleCardPayment() {
-    // 🔥 ဒီနေရာမှာ သင့်ရဲ့ တကယ့် Payment Link (ဥပမာ Stripe သို့မဟုတ် တခြား Checkout link) ကို ထည့်ရပါမယ်
-    const paymentLink = "https://buy.stripe.com/test_abc123"; // နမူနာ Link
-    
-    if (paymentLink === "https://buy.stripe.com/test_abc123") {
-        alert("Card Payment စနစ်ကို ချိတ်ဆက်နေဆဲဖြစ်ပါသည်။ လက်ရှိတွင် KPay ဖြင့်သာ အရင်ပေးချေပေးပါရန်။");
-    } else {
-        window.open(paymentLink, '_blank');
-    }
+  // 🔥 ဒီနေရာမှာ သင့်ရဲ့ တကယ့် Payment Link (ဥပမာ Stripe သို့မဟုတ် တခြား Checkout link) ကို ထည့်ရပါမယ်
+  const paymentLink = "https://buy.stripe.com/test_abc123"; // နမူနာ Link
+
+  if (paymentLink === "https://buy.stripe.com/test_abc123") {
+    alert(
+      "Card Payment စနစ်ကို ချိတ်ဆက်နေဆဲဖြစ်ပါသည်။ လက်ရှိတွင် KPay ဖြင့်သာ အရင်ပေးချေပေးပါရန်။",
+    );
+  } else {
+    window.open(paymentLink, "_blank");
+  }
 }
 
-
 async function submitPaymentRequest() {
-    const url = document.getElementById('payment-screenshot-url').value;
-    if (!url) return alert("Screenshot Link ထည့်ပေးပါ။");
+  const url = document.getElementById("payment-screenshot-url").value;
+  if (!url) return alert("Screenshot Link ထည့်ပေးပါ။");
 
-    try {
-        await db.collection('payments').add({
-            studentId: currentUser.uid,
-            studentName: currentUser.name,
-            screenshot: url,
-            status: "pending",
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        alert("စာရင်းသွင်းမှု တောင်းဆိုချက် ပို့ပြီးပါပြီ။ ဆရာမှ စစ်ဆေးပြီး ၁ နာရီအတွင်း သင်တန်း ဖွင့်လှစ်ပေးပါမည်။");
-        location.reload(); // Status ကို ပြန်စစ်ရန် reload လုပ်မည်
-    } catch (e) { alert(e.message); }
+  try {
+    await db.collection("payments").add({
+      studentId: currentUser.uid,
+      studentName: currentUser.name,
+      screenshot: url,
+      status: "pending",
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+    alert(
+      "စာရင်းသွင်းမှု တောင်းဆိုချက် ပို့ပြီးပါပြီ။ ဆရာမှ စစ်ဆေးပြီး ၁ နာရီအတွင်း သင်တန်း ဖွင့်လှစ်ပေးပါမည်။",
+    );
+    location.reload(); // Status ကို ပြန်စစ်ရန် reload လုပ်မည်
+  } catch (e) {
+    alert(e.message);
+  }
 }
 
 async function renderPaymentRequests() {
-    const body = document.getElementById('dynamic-body');
-    
-    body.innerHTML = `
+  const body = document.getElementById("dynamic-body");
+
+  body.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
             <h3><i class="fas fa-receipt"></i> ပေးချေမှု စစ်ဆေးရန်စာရင်း</h3>
             <button class="menu-btn" onclick="renderAdminPanel()"><i class="fas fa-arrow-left"></i> Back</button>
@@ -3794,25 +4123,30 @@ async function renderPaymentRequests() {
         <div id="payment-loading" class="loader">Loading...</div>
     `;
 
-    try {
-        // Pending ဖြစ်နေတဲ့ ပေးချေမှုတွေကိုပဲ ဆွဲယူမည်
-        const snap = await db.collection('payments').where('status', '==', 'pending').get();
+  try {
+    // Pending ဖြစ်နေတဲ့ ပေးချေမှုတွေကိုပဲ ဆွဲယူမည်
+    const snap = await db
+      .collection("payments")
+      .where("status", "==", "pending")
+      .get();
 
-        const loadingDiv = document.getElementById('payment-loading');
-        if (loadingDiv) loadingDiv.remove();
-        
-        if (snap.empty) {
-            body.innerHTML += `<div class="content-card">စစ်ဆေးရန် ပေးချေမှုအသစ် မရှိသေးပါ။</div>`;
-            return;
-        }
+    const loadingDiv = document.getElementById("payment-loading");
+    if (loadingDiv) loadingDiv.remove();
 
-        let html = '<div class="dashboard-grid">'; // ၃ ခုပြိုင်တူ ပေါ်မည့် Grid System
-        
-        snap.forEach(doc => {
-            const p = doc.data();
-            const date = p.timestamp ? p.timestamp.toDate().toLocaleDateString() : 'N/A';
-            
-            html += `
+    if (snap.empty) {
+      body.innerHTML += `<div class="content-card">စစ်ဆေးရန် ပေးချေမှုအသစ် မရှိသေးပါ။</div>`;
+      return;
+    }
+
+    let html = '<div class="dashboard-grid">'; // ၃ ခုပြိုင်တူ ပေါ်မည့် Grid System
+
+    snap.forEach((doc) => {
+      const p = doc.data();
+      const date = p.timestamp
+        ? p.timestamp.toDate().toLocaleDateString()
+        : "N/A";
+
+      html += `
                 <div class="content-card animate-up payment-req-card">
                     <div class="payment-card-header">
                         <div class="user-info-mini">
@@ -3845,136 +4179,161 @@ async function renderPaymentRequests() {
                     </div>
                 </div>
             `;
-        });
-        
-        body.innerHTML += html + '</div>';
-    } catch (e) {
-        console.error(e);
-        body.innerHTML += `<div class="error-msg">Error: ${e.message}</div>`;
-    }
+    });
+
+    body.innerHTML += html + "</div>";
+  } catch (e) {
+    console.error(e);
+    body.innerHTML += `<div class="error-msg">Error: ${e.message}</div>`;
+  }
 }
 
 async function approveStudent(payDocId, studentUid, courseId) {
-    try {
-        // ၁။ ကျောင်းသား၏ User document တွင် enrolledCourses စာရင်းထဲသို့ ထည့်ပေါင်းမည်
-        await db.collection('users').doc(studentUid).update({
-            enrolledCourses: firebase.firestore.FieldValue.arrayUnion(courseId)
-        });
-        
-        // ၂။ Payment status ကို Approved ပြောင်းမည်
-        await db.collection('payments').doc(payDocId).update({ status: 'approved' });
+  try {
+    // ၁။ ကျောင်းသား၏ User document တွင် enrolledCourses စာရင်းထဲသို့ ထည့်ပေါင်းမည်
+    await db
+      .collection("users")
+      .doc(studentUid)
+      .update({
+        enrolledCourses: firebase.firestore.FieldValue.arrayUnion(courseId),
+      });
 
-        alert("သင်တန်းဝင်ခွင့် ပေးလိုက်ပါပြီ။ ကျောင်းသားက အလိုအလျောက် စတင်လေ့လာနိုင်ပါပြီ။");
-        renderPaymentRequests(); // List ကို Update လုပ်မည်
-    } catch (e) {
-        alert("Approve Error: " + e.message);
-    }
+    // ၂။ Payment status ကို Approved ပြောင်းမည်
+    await db
+      .collection("payments")
+      .doc(payDocId)
+      .update({ status: "approved" });
+
+    alert(
+      "သင်တန်းဝင်ခွင့် ပေးလိုက်ပါပြီ။ ကျောင်းသားက အလိုအလျောက် စတင်လေ့လာနိုင်ပါပြီ။",
+    );
+    renderPaymentRequests(); // List ကို Update လုပ်မည်
+  } catch (e) {
+    alert("Approve Error: " + e.message);
+  }
 }
 
 async function handlePaymentUpload(courseId) {
-    const fileInput = document.getElementById('payment-file');
-    const btn = document.getElementById('upload-btn');
-    
-    // Safety check: သင်တန်း ID နဲ့ ဖိုင် ပါမပါ စစ်မည်
-    if (!courseId || !allCourses[courseId]) return alert("Invalid Course ID!");
-    // if (!courseId) return alert("Course ID is missing!");
-    if (fileInput.files.length === 0) return alert("ငွေလွှဲပုံ အရင်ရွေးပါ။");
+  const fileInput = document.getElementById("payment-file");
+  const btn = document.getElementById("upload-btn");
 
-    const file = fileInput.files[0];
-    if (file.size > 2 * 1024 * 1024) return alert("ပုံဆိုဒ် 2MB ထက် မကျော်ရပါ။");
+  // Safety check: သင်တန်း ID နဲ့ ဖိုင် ပါမပါ စစ်မည်
+  if (!courseId || !allCourses[courseId]) return alert("Invalid Course ID!");
+  // if (!courseId) return alert("Course ID is missing!");
+  if (fileInput.files.length === 0) return alert("ငွေလွှဲပုံ အရင်ရွေးပါ။");
 
-    try {
-        btn.disabled = true;
-        btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Uploading... Please wait`;
+  const file = fileInput.files[0];
+  if (file.size > 2 * 1024 * 1024) return alert("ပုံဆိုဒ် 2MB ထက် မကျော်ရပါ။");
 
-        // Firebase Storage သို့ တင်ခြင်း
-        const storageRef = firebase.storage().ref(`payments/${courseId}_${currentUser.uid}_${Date.now()}`);
-        const snapshot = await storageRef.put(file);
-        const downloadURL = await snapshot.ref.getDownloadURL();
+  try {
+    btn.disabled = true;
+    btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Uploading... Please wait`;
 
-        // Database ထဲသို့ ပို့မည်
-        await db.collection('payments').add({
-            studentId: currentUser.uid,
-            studentName: currentUser.name,
-            courseId: courseId, 
-            courseTitle: allCourses[courseId].title, // 🔥 အခုဆိုရင် currentId ရှိတဲ့အတွက် title ကို ဖတ်လို့ရပါပြီ
-            screenshot: downloadURL,
-            status: "pending",
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        });
+    // Firebase Storage သို့ တင်ခြင်း
+    const storageRef = firebase
+      .storage()
+      .ref(`payments/${courseId}_${currentUser.uid}_${Date.now()}`);
+    const snapshot = await storageRef.put(file);
+    const downloadURL = await snapshot.ref.getDownloadURL();
 
-        alert("ပေးချေမှု တင်ပြပြီးပါပြီ။ ဆရာမှ စစ်ဆေးပြီး အတည်ပြုပေးပါမည်။");
-        renderCourseSelection(); // အောင်မြင်ရင် သင်တန်းရွေးတဲ့နေရာ ပြန်သွားမည်
+    // Database ထဲသို့ ပို့မည်
+    await db.collection("payments").add({
+      studentId: currentUser.uid,
+      studentName: currentUser.name,
+      courseId: courseId,
+      courseTitle: allCourses[courseId].title, // 🔥 အခုဆိုရင် currentId ရှိတဲ့အတွက် title ကို ဖတ်လို့ရပါပြီ
+      screenshot: downloadURL,
+      status: "pending",
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+    });
 
-    } catch (e) {
-        console.error("Upload Error:", e);
-        alert("Upload Error: " + e.message);
-        // Error တက်ရင် ခလုတ်ကို ပြန်ပွင့်အောင်လုပ်မည်
-        btn.disabled = false;
-        btn.innerHTML = `<i class="fas fa-cloud-upload-alt"></i> ပြန်လည်ကြိုးစားမည်`;
-    }
+    alert("ပေးချေမှု တင်ပြပြီးပါပြီ။ ဆရာမှ စစ်ဆေးပြီး အတည်ပြုပေးပါမည်။");
+    renderCourseSelection(); // အောင်မြင်ရင် သင်တန်းရွေးတဲ့နေရာ ပြန်သွားမည်
+  } catch (e) {
+    console.error("Upload Error:", e);
+    alert("Upload Error: " + e.message);
+    // Error တက်ရင် ခလုတ်ကို ပြန်ပွင့်အောင်လုပ်မည်
+    btn.disabled = false;
+    btn.innerHTML = `<i class="fas fa-cloud-upload-alt"></i> ပြန်လည်ကြိုးစားမည်`;
+  }
 }
 
 // --- ၁။ Form အပြန်အလှန် ပြောင်းပေးမည့် function ---
 function toggleAuthMode(mode) {
-    const loginArea = document.getElementById('login-form-area');
-    const signupArea = document.getElementById('signup-form-area');
-    if (mode === 'signup') {
-        loginArea.style.display = 'none';
-        signupArea.style.display = 'block';
-    } else {
-        loginArea.style.display = 'block';
-        signupArea.style.display = 'none';
-    }
+  const loginArea = document.getElementById("login-form-area");
+  const signupArea = document.getElementById("signup-form-area");
+  if (mode === "signup") {
+    loginArea.style.display = "none";
+    signupArea.style.display = "block";
+  } else {
+    loginArea.style.display = "block";
+    signupArea.style.display = "none";
+  }
 }
 
 // --- ၂။ Sign Up (အကောင့်အသစ်ဖွင့်ခြင်း) Logic ---
 async function handleSignUp() {
-    const name = document.getElementById('signup-name').value.trim();
-    const email = document.getElementById('signup-email').value.trim();
-    const password = document.getElementById('signup-password').value.trim();
+  const name = document.getElementById("signup-name").value.trim();
+  const email = document.getElementById("signup-email").value.trim();
+  const password = document.getElementById("signup-password").value.trim();
 
-    if (!name || !email || !password) return alert("အချက်အလက်အားလုံး ဖြည့်စွက်ပေးပါ။");
-    if (password.length < 6) return alert("Password သည် အနည်းဆုံး ၆ လုံး ရှိရပါမည်။");
+  if (!name || !email || !password)
+    return alert("အချက်အလက်အားလုံး ဖြည့်စွက်ပေးပါ။");
+  if (password.length < 6)
+    return alert("Password သည် အနည်းဆုံး ၆ လုံး ရှိရပါမည်။");
 
-    try {
-        // 🔥 အရင်က ဒီနေရာမှာ ကုဒ်နှစ်ကြောင်း ထပ်နေပါတယ်၊ အခု တစ်ကြောင်းတည်းပဲ ထားလိုက်ပါပြီ
-        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-        const user = userCredential.user;
+  try {
+    // 🔥 အရင်က ဒီနေရာမှာ ကုဒ်နှစ်ကြောင်း ထပ်နေပါတယ်၊ အခု တစ်ကြောင်းတည်းပဲ ထားလိုက်ပါပြီ
+    const userCredential = await auth.createUserWithEmailAndPassword(
+      email,
+      password,
+    );
+    const user = userCredential.user;
 
-        // Firestore Database ထဲတွင် ကျောင်းသား Profile အစစ်ကို သိမ်းခြင်း
-        await db.collection('users').doc(user.uid).set({
-            uid: user.uid,
-            name: name,
-            email: email,
-            role: "Student",   
-            isPaid: false,     
-            photo: "https://placehold.co/150x150/003087/white?text=" + name.charAt(0),
-            skills: [],
-            notes: "",
-            completedLessons: [],
-            quizAttempts: {},
-            grades: {},
-            batchId: "Batch-Waiting"
-        });
+    // Firestore Database ထဲတွင် ကျောင်းသား Profile အစစ်ကို သိမ်းခြင်း
+    await db
+      .collection("users")
+      .doc(user.uid)
+      .set({
+        uid: user.uid,
+        name: name,
+        email: email,
+        role: "Student",
+        isPaid: false,
+        photo:
+          "https://placehold.co/150x150/003087/white?text=" + name.charAt(0),
+        skills: [],
+        notes: "",
+        completedLessons: [],
+        quizAttempts: {},
+        grades: {},
+        batchId: "Batch-Waiting",
+      });
 
-        alert("အကောင့်ဖွင့်ခြင်း အောင်မြင်ပါသည်။ သင်တန်းကြေးပေးသွင်းရန် အဆင့်သို့ ဆက်သွားပါမည်။");
-        
-        // LocalStorage ကို Update လုပ်ပြီး Page ကို Refresh လုပ်မည်
-        currentUser = { uid: user.uid, name: name, role: "Student", isPaid: false, isLoggedIn: true };
-        localStorage.setItem("currentUser", JSON.stringify(currentUser));
-        
-        location.reload(); 
+    alert(
+      "အကောင့်ဖွင့်ခြင်း အောင်မြင်ပါသည်။ သင်တန်းကြေးပေးသွင်းရန် အဆင့်သို့ ဆက်သွားပါမည်။",
+    );
 
-    } catch (error) {
-        console.error("SignUp Error:", error);
-        alert("Error: " + error.message);
-    }
+    // LocalStorage ကို Update လုပ်ပြီး Page ကို Refresh လုပ်မည်
+    currentUser = {
+      uid: user.uid,
+      name: name,
+      role: "Student",
+      isPaid: false,
+      isLoggedIn: true,
+    };
+    localStorage.setItem("currentUser", JSON.stringify(currentUser));
+
+    location.reload();
+  } catch (error) {
+    console.error("SignUp Error:", error);
+    alert("Error: " + error.message);
+  }
 }
 
 function renderCourseSelection() {
-    const body = document.getElementById('dynamic-body');
-    body.innerHTML = `
+  const body = document.getElementById("dynamic-body");
+  body.innerHTML = `
         <div class="welcome-banner fade-in" style="border-radius: 25px; padding: 40px; margin-bottom: 40px;">
             <h2 style="font-size: 2rem;">မင်္ဂလာပါ ${currentUser.name}! <span class="wave">👋</span></h2>
             <p style="font-size: 1.1rem; opacity: 0.9;">သင်တက်ရောက်လိုသော သင်တန်းကို ရွေးချယ်ပြီး ခရီးစဉ်အသစ်ကို စတင်လိုက်ပါ။</p>
@@ -3982,33 +4341,33 @@ function renderCourseSelection() {
         <div class="dashboard-grid animate-up" id="course-grid"></div>
     `;
 
-    const grid = document.getElementById('course-grid');
-    
-    // သင်တန်းအလိုက် အရောင်များ သတ်မှတ်ခြင်း
-    const courseColors = {
-        "web": "#1b7cd2e7",      // Blue
-        "python": "#10b981",   // Green
-        "design": "#8b5cf6"    // Purple
-    };
+  const grid = document.getElementById("course-grid");
 
-    for (let id in allCourses) {
-        const course = allCourses[id];
-        const isEnrolled = currentUser.enrolledCourses?.includes(id);
-        const isTeacher = currentUser.role === 'Teacher';
-        const hasAccess = isEnrolled || isTeacher;
-        const themeColor = courseColors[id] || "#475569";
+  // သင်တန်းအလိုက် အရောင်များ သတ်မှတ်ခြင်း
+  const courseColors = {
+    web: "#1b7cd2e7", // Blue
+    python: "#10b981", // Green
+    design: "#8b5cf6", // Purple
+  };
 
-        const card = document.createElement('div');
-        card.className = 'course-selection-card animate-up';
-        card.onclick = () => selectCourse(id);
-        
-        card.innerHTML = `
+  for (let id in allCourses) {
+    const course = allCourses[id];
+    const isEnrolled = currentUser.enrolledCourses?.includes(id);
+    const isTeacher = currentUser.role === "Teacher";
+    const hasAccess = isEnrolled || isTeacher;
+    const themeColor = courseColors[id] || "#475569";
+
+    const card = document.createElement("div");
+    card.className = "course-selection-card animate-up";
+    card.onclick = () => selectCourse(id);
+
+    card.innerHTML = `
             <div class="card-top-accent" style="background: ${themeColor}"></div>
             <div class="card-body-padding">
                 <!-- 🔥 Icon ကို Container နဲ့ အုပ်ပြီး အလယ်ပို့လိုက်ပါပြီ -->
                 <div style="display:flex; justify-content:center; margin-bottom:20px;">
                     <div class="course-icon-box" style="background: ${themeColor}15; color: ${themeColor}; margin: 0;">
-                        <i class="fas ${course.icon || 'fa-graduation-cap'}"></i>
+                        <i class="fas ${course.icon || "fa-graduation-cap"}"></i>
                     </div>
                 </div>
 
@@ -4019,106 +4378,120 @@ function renderCourseSelection() {
                 
                 <div style="flex: 1;">
                     <ul style="list-style: none; padding: 0;">
-                        ${course.benefits.map(b => `
+                        ${course.benefits
+                          .map(
+                            (b) => `
                             <li style="font-size: 0.85rem; margin-bottom: 8px; display: flex; align-items: center; gap: 10px;">
                                 <i class="fas fa-check-circle" style="color: ${themeColor};"></i> ${b}
                             </li>
-                        `).join('')}
+                        `,
+                          )
+                          .join("")}
                     </ul>
                 </div>
 
                 <div style="margin: 25px 0; display: flex; justify-content: space-between; align-items: center;">
                     <span style="font-size: 1.2rem; font-weight: 800; color: ${themeColor};">${course.price}</span>
-                    ${isEnrolled ? `<span style="font-size: 0.8rem; color: #22c55e; font-weight: bold;">Joined <i class="fas fa-check"></i></span>` : ''}
+                    ${isEnrolled ? `<span style="font-size: 0.8rem; color: #22c55e; font-weight: bold;">Joined <i class="fas fa-check"></i></span>` : ""}
                 </div>
 
-                <button class="course-card-btn ${hasAccess ? 'btn-joined' : 'btn-enroll-now'}" 
-                        style="${hasAccess ? 'background:#22c55e' : `background:${themeColor}`}">
-                    ${hasAccess 
-                        ? 'တက်ရောက်နေဆဲ <i class="fas fa-arrow-right"></i>' 
+                <button class="course-card-btn ${hasAccess ? "btn-joined" : "btn-enroll-now"}" 
+                        style="${hasAccess ? "background:#22c55e" : `background:${themeColor}`}">
+                    ${
+                      hasAccess
+                        ? 'တက်ရောက်နေဆဲ <i class="fas fa-arrow-right"></i>'
                         : '<i class="fas fa-shopping-cart"></i> Enroll Now'
                     }
                 </button>
             </div>
         `;
-        grid.appendChild(card);
-    }
+    grid.appendChild(card);
+  }
 }
 
 function selectCourse(id) {
-    // ပိုက်ဆံပေးပြီးသား သို့မဟုတ် ဆရာဖြစ်လျှင် Dashboard ပေးဝင်မည်
-    if (currentUser.enrolledCourses?.includes(id) || currentUser.role === 'Teacher') {
-        currentUser.selectedCourseId = id;
-        
-        // 🔥 အရေးကြီးဆုံးအချက် - ရွေးလိုက်တဲ့သင်တန်းရဲ့ data ကို ပင်မ courseData ထဲ ထည့်လိုက်ခြင်း
-        courseData = allCourses[id].data; 
-        
-        localStorage.setItem('currentUser', JSON.stringify(currentUser));
-        
-        // Lock များကို ဖြုတ်မည်
-        document.querySelectorAll('.nav-links a').forEach(l => l.classList.remove('nav-locked'));
-        
-        alert(`${allCourses[id].title} သို့ ဝင်ရောက်နေပါပြီ...`);
-        showSection('dashboard');
-    } else {
-        renderPaymentPage(id);
-    }
+  // ပိုက်ဆံပေးပြီးသား သို့မဟုတ် ဆရာဖြစ်လျှင် Dashboard ပေးဝင်မည်
+  if (
+    currentUser.enrolledCourses?.includes(id) ||
+    currentUser.role === "Teacher"
+  ) {
+    currentUser.selectedCourseId = id;
+
+    // 🔥 အရေးကြီးဆုံးအချက် - ရွေးလိုက်တဲ့သင်တန်းရဲ့ data ကို ပင်မ courseData ထဲ ထည့်လိုက်ခြင်း
+    courseData = allCourses[id].data;
+
+    localStorage.setItem("currentUser", JSON.stringify(currentUser));
+
+    // Lock များကို ဖြုတ်မည်
+    document
+      .querySelectorAll(".nav-links a")
+      .forEach((l) => l.classList.remove("nav-locked"));
+
+    alert(`${allCourses[id].title} သို့ ဝင်ရောက်နေပါပြီ...`);
+    showSection("dashboard");
+  } else {
+    renderPaymentPage(id);
+  }
 }
 
-function showToast(message, type = 'info') {
-    let container = document.querySelector('.toast-container');
-    if (!container) {
-        container = document.createElement('div');
-        container.className = 'toast-container';
-        document.body.appendChild(container);
-    }
-    const toast = document.createElement('div');
-    toast.className = 'toast animate-up';
-    const icon = type === 'success' ? 'fa-check-circle' : 'fa-info-circle';
-    toast.innerHTML = `<i class="fas ${icon}"></i> <span>${message}</span>`;
-    container.appendChild(toast);
-    setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 500); }, 3000);
+function showToast(message, type = "info") {
+  let container = document.querySelector(".toast-container");
+  if (!container) {
+    container = document.createElement("div");
+    container.className = "toast-container";
+    document.body.appendChild(container);
+  }
+  const toast = document.createElement("div");
+  toast.className = "toast animate-up";
+  const icon = type === "success" ? "fa-check-circle" : "fa-info-circle";
+  toast.innerHTML = `<i class="fas ${icon}"></i> <span>${message}</span>`;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.style.opacity = "0";
+    setTimeout(() => toast.remove(), 500);
+  }, 3000);
 }
 
 async function renderShowcase() {
-    const body = document.getElementById('dynamic-body');
-    if (!body) return;
+  const body = document.getElementById("dynamic-body");
+  if (!body) return;
 
-    body.innerHTML = `<h3><i class="fas fa-rocket"></i> Student Project Showcase</h3><div class="loader">Loading Projects...</div>`;
-    
-    try {
-        // ၁။ Database မှ Featured ဖြစ်သော Project များကို ဆွဲယူမည်
-        const snap = await db.collection('submissions')
-                             .where('type', '==', 'project')
-                             .where('status', '==', 'graded')
-                             .where('featured', '==', true)
-                             .orderBy('gradedAt', 'desc')
-                             .limit(12)
-                             .get();
+  body.innerHTML = `<h3><i class="fas fa-rocket"></i> Student Project Showcase</h3><div class="loader">Loading Projects...</div>`;
 
-        const isTeacher = currentUser.role === 'Teacher'; // ဆရာ ဟုတ်မဟုတ် စစ်မည်
+  try {
+    // ၁။ Database မှ Featured ဖြစ်သော Project များကို ဆွဲယူမည်
+    const snap = await db
+      .collection("submissions")
+      .where("type", "==", "project")
+      .where("status", "==", "graded")
+      .where("featured", "==", true)
+      .orderBy("gradedAt", "desc")
+      .limit(12)
+      .get();
 
-        if (snap.empty) {
-            body.innerHTML = `
+    const isTeacher = currentUser.role === "Teacher"; // ဆရာ ဟုတ်မဟုတ် စစ်မည်
+
+    if (snap.empty) {
+      body.innerHTML = `
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
                     <h3>Project Showcase</h3>
                     <button class="menu-btn" onclick="showSection('dashboard')"><i class="fas fa-home"></i> Back</button>
                 </div>
-                <div class="content-card">ပြသရန် ပရောဂျက်များ မရှိသေးပါ။ ${isTeacher ? 'ကျောင်းသားများ၏ Project ကို Grade ပေးစဉ် "Featured" ကို အမှန်ခြစ်ခဲ့မှ ဤနေရာတွင် ပေါ်လာမည်ဖြစ်သည်။' : ''}</div>
+                <div class="content-card">ပြသရန် ပရောဂျက်များ မရှိသေးပါ။ ${isTeacher ? 'ကျောင်းသားများ၏ Project ကို Grade ပေးစဉ် "Featured" ကို အမှန်ခြစ်ခဲ့မှ ဤနေရာတွင် ပေါ်လာမည်ဖြစ်သည်။' : ""}</div>
             `;
-            return;
-        }
+      return;
+    }
 
-        let html = `
+    let html = `
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
                 <h3><i class="fas fa-rocket"></i> Student Project Showcase</h3>
                 <button class="menu-btn" onclick="showSection('dashboard')"><i class="fas fa-home"></i> Back</button>
             </div>
             <div class="dashboard-grid">`;
 
-        snap.forEach(doc => {
-            const p = doc.data();
-            html += `
+    snap.forEach((doc) => {
+      const p = doc.data();
+      html += `
                 <div class="topic-card animate-up" style="text-align:left; padding:20px; display:flex; flex-direction:column;">
                     <div style="font-size:2rem; margin-bottom:15px; color:var(--primary);"><i class="fas fa-laptop-code"></i></div>
                     <h4 style="margin-bottom:5px;">${p.studentName}</h4>
@@ -4130,7 +4503,9 @@ async function renderShowcase() {
                     </button>
 
                     <!-- 🔥 ဆရာအတွက်သာ ပေါ်မည့် စီမံခန့်ခွဲမှု ခလုတ်များ -->
-                    ${isTeacher ? `
+                    ${
+                      isTeacher
+                        ? `
                         <div style="margin-top:15px; display:flex; gap:5px;">
                             <button class="menu-btn" style="background:#f59e0b; flex:1; font-size:0.75rem; padding:8px 5px;" 
                                     onclick="removeFromShowcase('${doc.id}')" title="ပြခန်းမှသာ ဖယ်ရှားမည်">
@@ -4141,15 +4516,16 @@ async function renderShowcase() {
                                 <i class="fas fa-trash"></i> Delete
                             </button>
                         </div>
-                    ` : ''}
+                    `
+                        : ""
+                    }
                 </div>`;
-        });
-        
-        body.innerHTML = html + '</div>';
+    });
 
-    } catch (e) {
-        console.error("Showcase Error Details:", e);
-        body.innerHTML = `
+    body.innerHTML = html + "</div>";
+  } catch (e) {
+    console.error("Showcase Error Details:", e);
+    body.innerHTML = `
             <div class="error-msg animate-up">
                 <h4><i class="fas fa-exclamation-triangle"></i> ပြခန်းကို ဖွင့်၍မရပါ။</h4>
                 <p>${e.message}</p>
@@ -4158,31 +4534,36 @@ async function renderShowcase() {
                 <br><br>
                 <button class="menu-btn" onclick="showSection('dashboard')">Back to Home</button>
             </div>`;
-    }
+  }
 }
 
 // --- သင်တန်းအလိုက် ဘာသာရပ်များကို အမှတ်သွင်းရန် UI ပြသခြင်း ---
 function renderSubjectGrading(uid, courseId) {
-    const student = studentsList.find(s => s.uid === uid);
-    const course = allCourses[courseId];
-    const body = document.getElementById('dynamic-body');
-    
-    if (!student || !course) return alert("Data Error: မရနိုင်ပါ");
+  const student = studentsList.find((s) => s.uid === uid);
+  const course = allCourses[courseId];
+  const body = document.getElementById("dynamic-body");
 
-    // လက်ရှိ ရှိပြီးသား အမှတ်များကို ယူမည် (မရှိရင် ၀ ထားမည်)
-    const currentGrades = (student.grades && student.grades[courseId]) ? student.grades[courseId] : {};
+  if (!student || !course) return alert("Data Error: မရနိုင်ပါ");
 
-    // ဘာသာရပ်အလိုက် Input များ တည်ဆောက်ခြင်း
-    let inputsHtml = course.transcriptSubjects.map(sub => `
+  // လက်ရှိ ရှိပြီးသား အမှတ်များကို ယူမည် (မရှိရင် ၀ ထားမည်)
+  const currentGrades =
+    student.grades && student.grades[courseId] ? student.grades[courseId] : {};
+
+  // ဘာသာရပ်အလိုက် Input များ တည်ဆောက်ခြင်း
+  let inputsHtml = course.transcriptSubjects
+    .map(
+      (sub) => `
         <div class="academic-item" style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #eee;">
-            <span style="text-transform:uppercase; font-weight:bold;">${sub.replace('_', ' ')}:</span>
+            <span style="text-transform:uppercase; font-weight:bold;">${sub.replace("_", " ")}:</span>
             <input type="number" id="gr-${sub.toLowerCase()}" class="edit-input" 
                    style="width:100px; text-align:center;" 
                    value="${currentGrades[sub.toLowerCase()] || 0}" min="0" max="100">
         </div>
-    `).join('');
+    `,
+    )
+    .join("");
 
-    body.innerHTML = `
+  body.innerHTML = `
         <div class="content-card animate-up" style="max-width: 600px; margin: auto;">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <h3><i class="fas fa-edit"></i> ${course.title}</h3>
@@ -4207,31 +4588,72 @@ function renderSubjectGrading(uid, courseId) {
 
 // --- အမှတ်အားလုံးကို စုစည်းပြီး Cloud သို့ သိမ်းဆည်းခြင်း ---
 async function saveMultiCourseGrades(uid, courseId) {
-    const course = allCourses[courseId];
-    const newGrades = {};
+  const course = allCourses[courseId];
+  const newGrades = {};
+
+  // UI ထဲက ရိုက်ထားတဲ့ အမှတ်တွေကို loop ပတ်ပြီး ယူမည်
+  course.transcriptSubjects.forEach((sub) => {
+    const val = document.getElementById("gr-" + sub.toLowerCase()).value;
+    newGrades[sub.toLowerCase()] = parseInt(val) || 0;
+  });
+
+  try {
+    // 🔥 အမှတ်စာရင်းကို grades -> courseId -> subject ပုံစံဖြင့် Cloud မှာ သိမ်းမည်
+    await db
+      .collection("users")
+      .doc(uid)
+      .set(
+        {
+          grades: {
+            [courseId]: newGrades,
+          },
+        },
+        { merge: true },
+      );
+
+    alert("အောင်မြင်စွာ သိမ်းဆည်းပြီးပါပြီ။");
+
+    // Data အသစ်များကို ပြန်ဆွဲထုတ်ရန် fetch ပြန်ခေါ်မည်
+    await fetchStudentsFromDB();
+    renderAdminPanel();
+  } catch (error) {
+    console.error("Save Grade Error:", error);
+    alert("Error: " + error.message);
+  }
+}
+
+function toggleAccordion(id) {
+  var x = document.getElementById(id);
+  if (x.style.display === "none" || x.style.display === "") {
+    x.style.display = "block";
+  } else {
+    x.style.display = "none";
+  }
+}
+
+// အဖြေကို ပိတ်/ဖွင့် လုပ်ပေးမည့် function
+function togglePauseAnswer(btn, answerId) {
+    const answerDiv = document.getElementById(answerId);
     
-    // UI ထဲက ရိုက်ထားတဲ့ အမှတ်တွေကို loop ပတ်ပြီး ယူမည်
-    course.transcriptSubjects.forEach(sub => {
-        const val = document.getElementById('gr-' + sub.toLowerCase()).value;
-        newGrades[sub.toLowerCase()] = parseInt(val) || 0;
-    });
+    if (answerDiv.style.display === "none") {
+        answerDiv.style.display = "block";
+        btn.innerHTML = "Hide Answer";
+    } else {
+        answerDiv.style.display = "none";
+        btn.innerHTML = "Show Answer";
+    }
+}
 
-    try {
-        // 🔥 အမှတ်စာရင်းကို grades -> courseId -> subject ပုံစံဖြင့် Cloud မှာ သိမ်းမည်
-        await db.collection('users').doc(uid).set({
-            grades: {
-                [courseId]: newGrades
-            }
-        }, { merge: true });
+// Pro Tip ကို ပိတ်/ဖွင့် လုပ်ပေးမည့် function
+function toggleProTipPro(pillId, boxId) {
+    const pill = document.getElementById(pillId);
+    const box = document.getElementById(boxId);
 
-        alert("အောင်မြင်စွာ သိမ်းဆည်းပြီးပါပြီ။");
-        
-        // Data အသစ်များကို ပြန်ဆွဲထုတ်ရန် fetch ပြန်ခေါ်မည်
-        await fetchStudentsFromDB(); 
-        renderAdminPanel();
-
-    } catch (error) {
-        console.error("Save Grade Error:", error);
-        alert("Error: " + error.message);
+    if (box.style.display === "none" || box.style.display === "") {
+        box.style.display = "block";
+        pill.style.display = "none";
+    } else {
+        box.style.display = "none";
+        pill.style.display = "inline-flex";
     }
 }
