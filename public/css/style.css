@@ -9,7 +9,7 @@
   --glass-bg: rgba(255, 255, 255, 0.8);
   --sidebar-bg: #1e293b;
   --main-bg: #f1f5f9; /* Light Mode နောက်ခံ */
-  --card-bg: #ffffff; /* Light Mode Card */
+  --card-bg: #f4f8f8; /* Light Mode Card */
   --text-main: #1e293b; /* Light Mode စာသားအနက် */
   --text-muted: #64748b;
   --border-color: #e2e8f0;
@@ -17,6 +17,10 @@
   --text-light: #f1f5f9;
   --text-color: #1e293b;
   --border-color: #e2e8f0;
+
+  --card-bg-dynamic: #ffffff;
+    --text-main-dynamic: #1e293b;
+    --border-dynamic: #e2e8f0;
 }
 
 /* Dark Theme Variables */
@@ -347,7 +351,7 @@ body {
 }
 
 /* Cards & Containers များ (ပုံသေ 'white' မသုံးဘဲ variable သုံးရပါမည်) */
-.content-card,
+
 .topic-card,
 .module-group,
 .top-nav,
@@ -355,6 +359,22 @@ body {
   background-color: var(--card-bg) !important;
   color: var(--text-main) !important;
   border-color: var(--border-color) !important;
+}
+
+.content-card {
+    /* 🔥 !important များကို ဖြုတ်လိုက်ပါ သို့မဟုတ် JS variable ကို သုံးပါ */
+    background-color: var(--card-bg-dynamic) !important;
+    color: var(--text-main-dynamic) !important;
+    border: 1px solid var(--border-dynamic) !important;
+    
+    transition: background 0.5s ease; /* အရောင်ပြောင်းရင် ညင်သာစေရန် */
+}
+
+/* Dark Mode မှာတော့ မျက်စိအေးအောင် ပုံသေပဲ ထားသင့်ပါတယ် */
+body.dark-theme .content-card {
+    background-color: var(--card-bg) !important;
+    color: var(--text-main) !important;
+    border-color: var(--border-color) !important;
 }
 
 /* Dashboard Cards များ စာဖတ်ရ ရှင်းလင်းစေရန် */

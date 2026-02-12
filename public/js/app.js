@@ -2295,6 +2295,7 @@ window.onload = () => {
       initNotifications();
       startLiveCountdown();
       initScrollToTop();
+      applyWeeklyTheme();
 
       // UI ကို အရင်ဖော်မည်
       document.getElementById("login-page").style.display = "none";
@@ -4686,3 +4687,35 @@ function toggleDeepDive(clickedElement) {
         body.style.paddingBottom = "0px";
     }
 }
+
+// --- အပတ်စဉ် အရောင်ပြောင်းလဲပေးမည့် စနစ် ---
+function applyWeeklyTheme() {
+    // ၁။ အရောင်အတွဲ ၇ မျိုး (Background, Text, Border)
+    const themes = [
+        { bg: "#f0f7ff", text: "#1e3a8a", border: "#bfdbfe" }, // Week 1: Blue
+        { bg: "#f0fdf4", text: "#166534", border: "#bbf7d0" }, // Week 2: Green
+        { bg: "#fffbeb", text: "#92400e", border: "#fef3c7" }, // Week 3: Amber
+        { bg: "#faf5ff", text: "#6b21a8", border: "#f3e8ff" }, // Week 4: Purple
+        { bg: "#fff1f2", text: "#9f1239", border: "#ffe4e6" }, // Week 5: Rose
+        { bg: "#f8fafc", text: "#334155", border: "#e2e8f0" }, // Week 6: Slate
+        { bg: "#fdf4ff", text: "#86198f", border: "#fae8ff" }  // Week 7: Fuchsia
+    ];
+
+    // ၂။ ၇ ရက်တစ်ခါ ပြောင်းလဲမည့် Index ကို တွက်ချက်ခြင်း
+    // (Unix Timestamp ကို ၇ ရက်စာ စက္ကန့်နဲ့ စားလိုက်တာပါ)
+    const weekIndex = Math.floor(Date.now() / (1000 * 60 * 60 * 24 * 7)) % themes.length;
+    const currentTheme = themes[weekIndex];
+
+    // ၃။ CSS Variables များကို Update လုပ်ခြင်း
+    // အကယ်၍ Dark Mode ဖွင့်ထားရင်တော့ ဒါကို မလုပ်ခိုင်းတာ ပိုကောင်းပါတယ် (မျက်စိမကျိန်းစေရန်)
+    if (!document.body.classList.contains('dark-theme')) {
+        const root = document.documentElement;
+        root.style.setProperty('--card-bg-dynamic', currentTheme.bg);
+        root.style.setProperty('--text-main-dynamic', currentTheme.text);
+        root.style.setProperty('--border-dynamic', currentTheme.border);
+        console.log("Weekly Theme Applied:", weekIndex);
+    }
+}
+
+// ဤ function ကို window.onload ထဲတွင် ထည့်ခေါ်ပေးပါ
+// window.onload = () => { ... applyWeeklyTheme(); }
