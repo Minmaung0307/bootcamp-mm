@@ -4,17 +4,14 @@
 
 /* --- 1. Lesson Header Banner --- */
 .lesson-banner {
-  position: relative;
-  width: 100%;
-  height: 270px !important;
-  background-color: #2b4c61;
-  border-radius: 12px;
-  overflow: hidden;
-  margin-bottom: 40px;
-  /* display: flex; */
-  display: block; /* Flex ကို ဖျက်ပြီး block ထားပါမည် */
-  /* align-items: flex-end; */
-  /* margin-bottom: 75px !important; */
+    position: relative;
+    width: 100% !important;
+    height: 270px !important;
+    background-color: #2b4c61;
+    margin: 0 0 50px 0 !important;
+    border-radius: 0 !important; /* ဘေးအပြည့်ကပ်ရန် */
+    display: block;
+    overflow: hidden;
 }
 
 .banner-bg-icons {
@@ -23,11 +20,11 @@
   left: 0;
   width: 100%;
   /* height: 100%; */
-  height: 180px; /* 🔥 Bar ရဲ့ အပေါ်မှာပဲ ရှိနေစေရန် အမြင့်ကို ကန့်သတ်လိုက်ပါသည် */
+  height: 120px; /* 🔥 Bar ရဲ့ အပေါ်မှာပဲ ရှိနေစေရန် အမြင့်ကို ကန့်သတ်လိုက်ပါသည် */
   display: flex;
   justify-content: space-around;
   align-items: center;
-  padding: 0 5%;
+  /* padding: 0 5%; */
   z-index: 1;
 }
 
@@ -159,18 +156,18 @@
 */
 
 .lesson-info-bar {
-  position: absolute !important;
-  bottom: 0 !important; /* 🔥 အောက်ခြေမှာ ကပ်ထားမည် */
-  left: 0;
-  background-color: #ced4da;
-  width: 95%;
-  height: 70px;
-  border-top-right-radius: 50px;
-  border-bottom-right-radius: 50px;
-  margin-bottom: 20px; /* Banner အောက်ခြေကနေ အနည်းငယ် ကွာစေရန် */
-  display: flex;
-  align-items: center;
-  z-index: 5; /* Icon များရဲ့ အပေါ်မှာ ရှိနေစေရန် */
+    position: absolute !important;
+    bottom: 20px !important; /* အောက်ခြေမှ အနည်းငယ်ခွာမည် */
+    left: 0;
+    background-color: #ced4da;
+    width: 92% !important;   /* ညာဘက်ကို အနည်းငယ်ချန်ထားမည် */
+    height: 70px;
+    border-top-right-radius: 50px;
+    border-bottom-right-radius: 50px;
+    display: flex;
+    align-items: center;
+    padding-left: 20px;
+    z-index: 5;
 }
 
 .lesson-id-badge {
@@ -210,10 +207,13 @@
 /* .lesson-body p { text-indent: 30px; } */
 
 .article-content {
-  padding: 0 40px 60px 40px !important; /* ဘယ်ညာကို 40px စီ ပုံသေထားပါမည် */
-  max-width: 1100px;
-  margin: 0 auto;
-  line-height: 1.8;
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    line-height: 1.8;
+    overflow-x: hidden; /* ဘေးကို လျှံမထွက်စေရန် */
 }
 
 /* တစ်ခါတလေ Article မဟုတ်ဘဲ ရိုးရိုး body သုံးထားခဲ့ရင်ပါ အဆင်ပြေစေရန် */
@@ -397,10 +397,15 @@ body.dark-theme .lms-table th {
 /* --- 3. Important / Warning Callout --- */
 .important-callout {
   display: flex;
-  margin: 30px 0;
+  /* margin: 30px 0;
   padding-left: 15px;
-  border-left: 5px solid #3498db;
+  border-left: 5px solid #3498db; */
   background-color: rgba(52, 152, 219, 0.05);
+  border: 2px solid #0077b6;
+  padding: 20px 15px 10px 15px;
+  margin: 25px 0;
+  border-radius: 0px;
+  position: relative;
 }
 
 .important-container {
@@ -429,6 +434,7 @@ body.dark-theme .lms-table th {
   font-size: 16px;
   line-height: 1.6;
   color: #333;
+  margin-top: 5px;
 }
 
 .important-body {
@@ -450,6 +456,21 @@ body.dark-theme .important-label {
 }
 body.dark-theme .important-body {
   background-color: rgba(0, 115, 177, 0.1);
+}
+
+.pro-tip {
+  background-color: #f1f1f1;
+  border-left: 5px solid #0077b6;
+  padding: 15px;
+  margin: 15px 0;
+  border-radius: 5px;
+}
+.deep-dive {
+  background-color: #005682;
+  color: white;
+  padding: 15px;
+  margin: 15px 0;
+  border-radius: 5px;
 }
 
 /* --- 4. Code & Terminal Windows --- */
@@ -549,25 +570,44 @@ body.dark-theme .important-body {
 }
 
 .accordion-body {
-  display: none;
-  padding: 20px;
-  background: rgba(0, 0, 0, 0.03);
-  border-radius: 12px;
-  margin-bottom: 20px;
-  border: 1px dashed var(--border-color);
-  overflow: hidden;
+  display: block !important; /* 🔥 display: none လုံးဝ မသုံးရပါ */
+    max-height: 0;             /* အစပိုင်းတွင် အမြင့်ကို ပိတ်ထားမည် */
+    overflow: hidden;          /* အထဲကစာများကို ဖျောက်ထားမည် */
+    transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1); /* ပွင့်ကျလာမည့် Animation */
+    background-color: #f8fafc;
+    border-radius: 0 0 12px 12px;
+    padding: 0 25px;           /* ဘေး padding သာ ထားမည် */
+}
+
+/* ပွင့်နေချိန်မှာ padding ပြန်ထည့်ရန် logic (optional padding) */
+.accordion-body p {
+    padding: 20px 0;
+    margin: 0;
 }
 
 .deep-dive-btn {
+  user-select: none;
   background: #003087;
   color: white;
+  width: 100%;
   padding: 15px;
   border-radius: 8px;
+  display: flex;
+    justify-content: space-between;
+    align-items: center;
   text-align: center;
   font-weight: bold;
   cursor: pointer;
   margin: 20px 0;
+  /* margin-top: 30px; */
   transition: 0.3s;
+}
+
+.deep-dive-btn p { margin: 0; color: white !important; }
+
+/* မျှားလေး လှည့်ရန် transition ထည့်ခြင်း */
+.deep-dive-btn i {
+    transition: transform 0.3s ease;
 }
 
 .deep-dive-btn:hover {
@@ -623,9 +663,128 @@ body.dark-theme .important-body {
 /* ဖုန်းမှာကြည့်ရင်တော့ အပြည့်ပြန်ဖြစ်စေရန် (Responsive) */
 @media (max-width: 768px) {
   .video-lesson-container {
-    max-width: 100%; /* ဖုန်းမှာတော့ မျက်နှာပြင်အပြည့် ပြန်ပြမည် */
-    padding: 0 10px;
-  }
+        /* 🔥 အရေးကြီးဆုံးအချက်: Desktop က 650px ကန့်သတ်ချက်ကို ဖြုတ်လိုက်ပါပြီ */
+        max-width: 100% !important; 
+        width: 100% !important;
+        margin: 20px 0 !important; /* ဘေး margin များကို ဖြုတ်မည် */
+        padding: 0 !important;
+    }
+
+    .video-wrapper {
+        width: 100% !important;
+        /* ဖုန်းမှာ ဘောင်အမည်းတွေ ပါမနေစေရန် ၁၆:၉ အချိုးကို အသေထိန်းထားသည် */
+        padding-bottom: 56.25% !important; 
+        border-radius: 8px !important; /* ဖုန်းမှာ ထောင့်ဝိုင်းကို အနည်းငယ် လျှော့လိုက်သည် */
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1) !important;
+    }
+
+    /* Video Guide Label လေးကို ဘေးကပ်မနေအောင် ညှိခြင်း */
+    .video-tag-label {
+        margin-left: 10px !important;
+        font-size: 0.8rem !important;
+        padding: 4px 10px !important;
+    }
+
+   .article-content section {
+        /* ဖုန်းမှာတော့ ၁၀% က များလွန်းလို့ ၅% သို့မဟုတ် 20px ပဲ ချန်ပါမည် */
+        padding: 40px 20px !important; 
+    }
+
+    .lesson-banner {
+        height: 175px !important; 
+        margin-bottom: 30px !important;
+    }
+
+    .lesson-id-badge {
+        width: 60px !important;
+        height: 60px !important;
+        border-width: 5px !important; /* ဘောင်အထူးကို လျှော့မည် */
+        font-size: 1.1rem !important;
+        top: -5px !important;
+    }
+
+    .lesson-banner-title {
+        margin-left: 70px !important; /* Badge သေးသွား၍ စာသားကို ဘယ်ဘက်တိုးမည် */
+        font-size: 1rem !important;    /* စာလုံးဆိုဒ်ကို ဖုန်းနှင့်အံကိုက် ညှိမည် */
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis; /* စာသားအရမ်းရှည်ရင် အစက်လေးတွေပြမည် */
+        padding-right: 15px;
+    }
+
+    .lesson-info-bar {
+        height: 50px !important; /* အမြင့်လျှော့မည် */
+        bottom: 10px !important;
+        width: 100% !important;
+    }
+
+    .icon-circle {
+        width: 45px !important;   /* အရွယ်အစား သေးလိုက်မည် */
+        height: 45px !important;
+        font-size: 1.1rem !important;
+        flex: 0 0 auto !important; /* 🔥 ပုံမရှည်သွားအောင် တားဆီးခြင်း */
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2) !important;
+    }
+
+    .icon-circle:nth-child(odd) { top: -20px !important; }
+    .icon-circle:nth-child(even) { top: 15px !important; }
+
+    .article-content > p, .article-content > h2, .article-content > h3 {
+        margin-left: 20px;
+        margin-right: 20px;
+    }
+
+    /* ၁။ Pause Box ပြင်ဆင်ချက် */
+    .pause-box {
+        margin: 40px 15px 20px 25px !important; /* ဘယ်ဘက် margin ကို နည်းနည်းချန်မည် */
+        padding: 25px 15px 15px 35px !important; /* အတွင်းနေရာလွတ်ကို ညှိမည် */
+    }
+
+    .pause-icon-badge {
+        width: 50px !important;  /* အိုင်ကွန်ဆိုဒ်ကို ၇၀ မှ ၅၀ သို့ လျှော့မည် */
+        height: 50px !important;
+        left: -20px !important;  /* အပြင်ထွက်နေမှုကို -၃၅ မှ -၂၀ သို့ လျှော့မည် */
+        top: -20px !important;
+        font-size: 1.5rem !important; /* ပုံသဏ္ဌာန်မပျက်စေရန် */
+    }
+
+    /* ၂။ Nerd Note Box ပြင်ဆင်ချက် */
+    .nerd-note-box {
+        margin: 35px 15px 20px 25px !important;
+        padding: 20px 15px 15px 35px !important;
+    }
+
+    .nerd-icon-badge {
+        width: 45px !important;
+        height: 45px !important;
+        left: -20px !important;
+        font-size: 1.2rem !important;
+    }
+
+    /* ၃။ Important Box ပြင်ဆင်ချက် */
+    .important-container {
+        margin: 35px 15px 20px 15px !important;
+    }
+
+    .important-label {
+        top: -15px !important;
+        left: 10px !important;
+        font-size: 0.8rem !important;
+        padding: 3px 10px !important;
+    }
+
+    /* ၄။ Pro Tip (Diamond) Fix */
+    .tip-diamond-badge {
+        width: 55px !important;
+        height: 55px !important;
+        left: -20px !important;
+        font-size: 1.5rem !important;
+        border-width: 3px !important;
+    }
+
+    .pro-tip-expanded-box {
+        padding: 30px 15px 20px 40px !important;
+    }
 }
 
 /* --- 8. Download Links --- */
@@ -807,6 +966,7 @@ body.dark-theme .category-body {
   font-size: 0.95rem;
   border-bottom: 1px solid rgba(0, 0, 0, 0.03);
   transition: 0.2s;
+  cursor: pointer;
 }
 
 .lesson-item span {
@@ -923,213 +1083,350 @@ body.dark-theme .module-title-header {
 
 /* --- Nerd Note Container --- */
 .nerd-note-box {
-    position: relative; /* 🔥 Icon ကို နေရာချရန် အခြေခံ */
-    background-color: #f9f9f9;
-    border-left: 10px solid #4caf50; /* ဘယ်ဘက်ဘောင် အထူး */
-    padding: 25px 25px 20px 45px;    /* ဘယ်ဘက်တွင် Icon အတွက် နေရာပိုချန်ထားသည် */
-    margin: 40px 0;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  position: relative; /* 🔥 Icon ကို နေရာချရန် အခြေခံ */
+  background-color: #f9f9f9;
+  border-left: 10px solid #4caf50; /* ဘယ်ဘက်ဘောင် အထူး */
+  padding: 25px 25px 20px 45px; /* ဘယ်ဘက်တွင် Icon အတွက် နေရာပိုချန်ထားသည် */
+  margin: 40px 0;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 /* 🔥 ဘောင်ပေါ်တွင် ဖြတ်တင်မည့် Circular Icon */
 .nerd-icon-badge {
-    position: absolute;
-    left: -30px; /* 🔥 ဘောင်ကို ဖြတ်ထွက်သွားစေရန် အနှုတ်တန်ဖိုးသုံးသည် */
-    top: 20px;   /* အပေါ်မှ အကွာအဝေး */
-    width: 50px;
-    height: 50px;
-    background-color: #4caf50;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 1.4rem;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  position: absolute;
+  left: -30px; /* 🔥 ဘောင်ကို ဖြတ်ထွက်သွားစေရန် အနှုတ်တန်ဖိုးသုံးသည် */
+  top: 20px; /* အပေါ်မှ အကွာအဝေး */
+  width: 50px;
+  height: 50px;
+  background-color: #4caf50;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.4rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .nerd-note-box h4 {
-    color: #333;
-    text-transform: uppercase;
-    margin-bottom: 10px;
-    font-size: 1.1rem;
-    letter-spacing: 1px;
+  color: #333;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  font-size: 1.1rem;
+  letter-spacing: 1px;
 }
 
 .nerd-note-box p {
-    margin: 0;
-    line-height: 1.7;
-    color: #444;
+  margin: 0;
+  line-height: 1.7;
+  color: #444;
 }
 
 /* Dark Mode အတွက် */
 body.dark-theme .nerd-note-box {
-    background-color: #1e293b;
-    border-color: #4caf50;
+  background-color: #1e293b;
+  border-color: #4caf50;
 }
 
 /* --- Pause Box Container --- */
 .pause-box {
-    position: relative; /* 🔥 အိုင်ကွန်ကို နေရာချရန် အခြေခံ */
-    background-color: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 30px 25px 20px 45px; /* ဘယ်ဘက်တွင် အိုင်ကွန်အတွက် နေရာချန်ထားသည် */
-    margin: 50px 0 30px 0;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+  position: relative; /* 🔥 အိုင်ကွန်ကို နေရာချရန် အခြေခံ */
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 30px 25px 20px 45px; /* ဘယ်ဘက်တွင် အိုင်ကွန်အတွက် နေရာချန်ထားသည် */
+  margin: 50px 0 30px 0;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
 }
 
 /* 🔥 ထောင့်စွန်းတွင် တင်မည့် Question Mark Badge */
 .pause-icon-badge {
-    position: absolute;
-    left: -35px; /* 🔥 ဘောင်အပြင်ဘက်ကို ထွက်စေရန် */
-    top: -25px;  /* 🔥 အပေါ်ဘောင်ကို ဖြတ်တက်စေရန် */
-    width: 70px;
-    height: 70px;
-    background-color: #0073b1; /* အပြာရောင် */
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 2.5rem;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-    z-index: 10;
+  position: absolute;
+  left: -35px; /* 🔥 ဘောင်အပြင်ဘက်ကို ထွက်စေရန် */
+  top: -25px; /* 🔥 အပေါ်ဘောင်ကို ဖြတ်တက်စေရန် */
+  width: 70px;
+  height: 70px;
+  background-color: #0073b1; /* အပြာရောင် */
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 2.5rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  z-index: 10;
 }
 
 .pause-box h4 {
-    color: #334155;
-    text-transform: uppercase;
-    font-size: 1.2rem;
-    margin-bottom: 15px;
-    letter-spacing: 1px;
+  color: #334155;
+  text-transform: uppercase;
+  font-size: 1.2rem;
+  margin-bottom: 15px;
+  letter-spacing: 1px;
 }
 
 /* အဖြေပြသမည့် ဧရိယာ */
 .answer-content {
-    margin-top: 15px;
-    padding: 15px;
-    background: #fff;
-    border-left: 4px solid #0073b1;
-    border-radius: 4px;
-    font-style: italic;
-    color: #475569;
+  margin-top: 15px;
+  padding: 15px;
+  background: #fff;
+  border-left: 4px solid #0073b1;
+  border-radius: 4px;
+  font-style: italic;
+  color: #475569;
 }
 
 /* Show/Hide Link Style */
 .toggle-answer-link {
-    display: inline-block;
-    margin-top: 15px;
-    color: #0073b1;
-    font-weight: bold;
-    text-decoration: underline;
-    cursor: pointer;
-    transition: 0.2s;
+  display: inline-block;
+  margin-top: 15px;
+  color: #0073b1;
+  font-weight: bold;
+  text-decoration: underline;
+  cursor: pointer;
+  transition: 0.2s;
 }
 
 .toggle-answer-link:hover {
-    color: #0056b3;
+  color: #0056b3;
 }
 
 /* --- Pro Tip Wrapper --- */
 .pro-tip-wrapper {
-    position: relative;
-    margin: 60px 0 40px 20px; /* ဘယ်ဘက် icon အတွက် နေရာချန်ထားသည် */
+  position: relative;
+  margin: 60px 0 40px 20px; /* ဘယ်ဘက် icon အတွက် နေရာချန်ထားသည် */
 }
 
 /* --- 🔥 အဆင့်မြင့် Diamond Badge (Pill ရော Box ရောမှာ အတူတူသုံးမည်) --- */
 .tip-diamond-badge {
+  position: absolute;
+  left: -35px; /* 🔥 ဘောင်အပြင်ဘက်ကို ထွက်နေစေရန် ပုံသေထားသည် */
+  top: -15px; /* 🔥 အပေါ်ဘောင်မှာ တင်နေစေရန် */
+  width: 85px; /* 🔥 ပိုကြီးသော အရွယ်အစား */
+  height: 85px;
+  background-color: #0073b1;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 2.8rem; /* 🔥 Icon အကြီးကြီး */
+  box-shadow: 4px 4px 15px rgba(0, 0, 0, 0.2);
+  border: 5px solid #f1f5f9; /* နောက်ခံနဲ့ တူသော ဘောင်ဖြူ */
+  z-index: 100;
+  transition: none !important; /* 🔥 လုံးဝ မလှုပ်စေရန် */
+}
+
+.pro-tip-pill {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  background-color: #dee4ec; /* ပုံထဲကလို ခဲရောင်ဖျော့ */
+  border-radius: 50px 15px 15px 50px; /* ဘယ်ဘက်ကို ပိုထောင့်စွန်းအောင်လုပ်သည် */
+  padding: 15px 40px 15px 65px; /* 🔥 ဘယ်ဘက်မှာ Icon အတွက် နေရာအများကြီး ချန်ထားသည် */
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  min-height: 60px;
+  position: relative;
+}
+
+.pro-tip-pill span {
+  color: #004d85;
+  font-weight: 800;
+  text-decoration: underline;
+  font-size: 1.2rem;
+  letter-spacing: 1px;
+}
+
+.pro-tip-expanded-box {
+  display: none; /* အစပိုင်းတွင် ပိတ်ထားမည် */
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 15px;
+  /* 🔥 စာသားတွေ စိန်ပုံအောက် မရောက်အောင် padding ကို အသေအချာ ညှိထားပါသည် */
+  padding: 35px 30px 30px 70px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.pro-tip-expanded-box h5 {
+  color: #004d85;
+  text-decoration: underline;
+  text-transform: uppercase;
+  font-weight: 800;
+  font-size: 1.2rem;
+  margin-bottom: 20px;
+  cursor: pointer;
+}
+
+.pro-tip-expanded-box p {
+  margin: 0;
+  line-height: 1.8;
+  color: #334155;
+  font-size: 1.1rem;
+}
+
+/* --- Simple Code Snippet Box --- */
+.code-snippet-box {
+  background-color: #f6f3f2; /* 🔥 ပုံထဲကလို ခပ်ဖျော့ဖျော့ နောက်ခံအရောင် */
+  border: 1px solid #a0a0a0; /* 🔥 ပါးလွှာသော ဘောင်ခဲရောင် */
+  border-radius: 10px; /* 🔥 ထောင့်ဝိုင်းလေးများ */
+  padding: 15px; /* 🔥 အတွင်းဘက် နေရာလွတ် */
+  margin: 20px 0;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05); /* အနည်းငယ် ချိုင့်ဝင်နေသော ခံစားချက်ပေးရန် */
+}
+
+.code-snippet-box pre {
+  font-family: "Courier New", Courier, monospace; /* 🔥 Terminal စာလုံးပုံစံ */
+  font-size: 1rem;
+  color: #000; /* စာသား အနက်ရောင် */
+  margin: 0;
+  white-space: pre-wrap; /* စာကြောင်းရှည်ရင် အလိုအလျောက် အောက်ဆင်းရန် */
+  line-height: 1.6; /* စာကြောင်းအကွာအဝေး */
+}
+
+/* Dark Mode အတွက် ချိန်ညှိခြင်း */
+body.dark-theme .code-snippet-box {
+  background-color: #1e293b;
+  border-color: #475569;
+}
+body.dark-theme .code-snippet-box pre {
+  color: #f1f5f9;
+}
+
+/* --- On The Job Callout Box --- */
+.otj-container {
+    position: relative;
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 35px 30px 25px 30px;
+    margin: 50px 0 30px 0;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05); /* ပုံထဲကလို shadow အိအိလေး */
+}
+
+/* ON THE JOB Label */
+.otj-label {
     position: absolute;
-    left: -35px; /* 🔥 ဘောင်အပြင်ဘက်ကို ထွက်နေစေရန် ပုံသေထားသည် */
-    top: -15px;  /* 🔥 အပေါ်ဘောင်မှာ တင်နေစေရန် */
-    width: 85px;  /* 🔥 ပိုကြီးသော အရွယ်အစား */
-    height: 85px;
-    background-color: #0073b1;
+    top: -16px;      /* အပေါ်ဘောင်ပေါ် တင်ရန် */
+    left: 15px;
+    background-color: white;
+    color: #0073b1;  /* အပြာရောင် */
+    border: 2px solid #e2e8f0;
+    padding: 4px 15px;
+    font-weight: 800;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-radius: 4px;
+    z-index: 10;
+}
+
+/* အစိမ်းရောင် လက်ဝါးပုံ Icon Badge */
+.otj-icon-badge {
+    position: absolute;
+    top: -30px;      /* Label ထက် ပိုမြင့်စေရန် */
+    left: 140px;     /* Label ဘေးမှာ ကပ်လျက်ရှိစေရန် */
+    width: 65px;
+    height: 65px;
+    background-color: #58a65c; /* အစိမ်းရောင် */
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
-    font-size: 2.8rem; /* 🔥 Icon အကြီးကြီး */
-    box-shadow: 4px 4px 15px rgba(0,0,0,0.2);
-    border: 5px solid #f1f5f9; /* နောက်ခံနဲ့ တူသော ဘောင်ဖြူ */
-    z-index: 100;
-    transition: none !important; /* 🔥 လုံးဝ မလှုပ်စေရန် */
+    font-size: 1.8rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border: 5px solid white; /* Box နဲ့ ခွဲခြားရန် ဘောင်ဖြူပတ်ထားသည် */
+    z-index: 11;
 }
 
-.pro-tip-pill {
-  width: 100%;
-    display: inline-flex;
-    align-items: center;
-    background-color: #dee4ec; /* ပုံထဲကလို ခဲရောင်ဖျော့ */
-    border-radius: 50px 15px 15px 50px; /* ဘယ်ဘက်ကို ပိုထောင့်စွန်းအောင်လုပ်သည် */
-    padding: 15px 40px 15px 65px; /* 🔥 ဘယ်ဘက်မှာ Icon အတွက် နေရာအများကြီး ချန်ထားသည် */
-    cursor: pointer;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-    min-height: 60px;
-    position: relative;
-}
-
-.pro-tip-pill span {
-    color: #004d85;
-    font-weight: 800;
-    text-decoration: underline;
-    font-size: 1.2rem;
-    letter-spacing: 1px;
-}
-
-.pro-tip-expanded-box {
-    display: none; /* အစပိုင်းတွင် ပိတ်ထားမည် */
-    background-color: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 15px;
-    /* 🔥 စာသားတွေ စိန်ပုံအောက် မရောက်အောင် padding ကို အသေအချာ ညှိထားပါသည် */
-    padding: 35px 30px 30px 70px; 
-    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-}
-
-.pro-tip-expanded-box h5 {
-    color: #004d85;
-    text-decoration: underline;
-    text-transform: uppercase;
-    font-weight: 800;
-    font-size: 1.2rem;
-    margin-bottom: 20px;
-    cursor: pointer;
-}
-
-.pro-tip-expanded-box p {
+.otj-container p {
     margin: 0;
     line-height: 1.8;
     color: #334155;
-    font-size: 1.1rem;
-}
-
-/* --- Simple Code Snippet Box --- */
-.code-snippet-box {
-    background-color: #f6f3f2; /* 🔥 ပုံထဲကလို ခပ်ဖျော့ဖျော့ နောက်ခံအရောင် */
-    border: 1px solid #a0a0a0; /* 🔥 ပါးလွှာသော ဘောင်ခဲရောင် */
-    border-radius: 10px;        /* 🔥 ထောင့်ဝိုင်းလေးများ */
-    padding: 15px;        /* 🔥 အတွင်းဘက် နေရာလွတ် */
-    margin: 20px 0;
-    box-shadow: inset 0 1px 3px rgba(0,0,0,0.05); /* အနည်းငယ် ချိုင့်ဝင်နေသော ခံစားချက်ပေးရန် */
-}
-
-.code-snippet-box pre {
-    font-family: 'Courier New', Courier, monospace; /* 🔥 Terminal စာလုံးပုံစံ */
     font-size: 1rem;
-    color: #000;               /* စာသား အနက်ရောင် */
-    margin: 0;
-    white-space: pre-wrap;     /* စာကြောင်းရှည်ရင် အလိုအလျောက် အောက်ဆင်းရန် */
-    line-height: 1.6;          /* စာကြောင်းအကွာအဝေး */
 }
 
-/* Dark Mode အတွက် ချိန်ညှိခြင်း */
-body.dark-theme .code-snippet-box {
+/* စာသားထဲက စာလုံးအထူများအတွက် */
+.otj-container strong {
+    color: #1e293b;
+    font-weight: 700;
+}
+
+/* Dark Mode အတွက် ညှိခြင်း */
+body.dark-theme .otj-container {
     background-color: #1e293b;
-    border-color: #475569;
+    border-color: #334155;
 }
-body.dark-theme .code-snippet-box pre {
-    color: #f1f5f9;
+body.dark-theme .otj-label {
+    background-color: #1e293b;
+    border-color: #334155;
 }
+
+/* --- ၁။ အလိုအလျောက် Section အရောင်ပြောင်းစနစ် --- */
+
+/* --- ၂။ Section တစ်ခုချင်းစီအတွက် အခြေခံ အပြင်အဆင် --- */
+.article-content section {
+    width: 100% !important;
+    /* ကွန်ပျူတာမှာ ဘေးကို ၁၀% စီ နေရာချန်မည် */
+    padding: 60px 10% !important; 
+    margin: 0 !important;
+    box-sizing: border-box;
+    display: block;
+    position: relative;
+}
+
+.article-content > p, 
+.article-content > h2, 
+.article-content > h3,
+.article-content > .code-window,
+.article-content > .important-container {
+    margin-left: 10% !important;
+    margin-right: 10% !important;
+}
+
+/* --- ၃။ စာဖတ်လို့ကောင်းသော အရောင် ၅ မျိုး Cycle Logic (၅ ခုတစ်ပတ်) --- */
+
+/* (၁) အဖြူရောင် - White */
+.article-content section:nth-of-type(5n+1) {
+    background-color: #ffffff !important;
+}
+
+/* (၂) အပြာနုရောင် - Soft Blue */
+.article-content section:nth-of-type(5n+2) {
+    background-color: #f0f9ff !important;
+}
+
+/* (၃) အဝါနုရောင် - Soft Yellow/Cream */
+.article-content section:nth-of-type(5n+3) {
+    background-color: #fffdf0 !important;
+}
+
+/* (၄) အစိမ်းနုရောင် - Soft Green/Mint */
+.article-content section:nth-of-type(5n+4) {
+    background-color: #f0fdf4 !important;
+}
+
+/* (၅) ပန်းရောင်နု - Soft Pink/Rose */
+.article-content section:nth-of-type(5n+5) {
+    background-color: #fff1f2 !important;
+}
+
+/* --- ၄။ Dark Mode Compatibility --- */
+body.dark-theme .article-content section {
+    border-bottom: 1px solid #334155;
+}
+body.dark-theme .article-content section:nth-of-type(odd),
+body.dark-theme .article-content section:nth-of-type(even) {
+    background-color: var(--card-bg) !important; /* Dark mode မှာတော့ မျက်စိမပင်ပန်းအောင် တစ်ရောင်တည်းထားခြင်းက ပိုကောင်းပါသည် */
+}
+
+/* --- ၂။ ဘယ်ညာခွဲချင်တဲ့အခါမှသာ သုံးမည့် Class (Optional) --- */
+.split {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    flex-wrap: wrap;
+}
+.split > div { flex: 1; min-width: 300px; }

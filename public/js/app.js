@@ -4645,15 +4645,44 @@ function togglePauseAnswer(btn, answerId) {
 }
 
 // Pro Tip ကို ပိတ်/ဖွင့် လုပ်ပေးမည့် function
-function toggleProTipPro(pillId, boxId) {
-    const pill = document.getElementById(pillId);
-    const box = document.getElementById(boxId);
+function toggleProTipPro(clickedElement) {
+    // ၁။ အနှိပ်ခံလိုက်ရတဲ့ element ရဲ့ အပြင်ဘက်ဆုံးက 'pro-tip-wrapper' ကို အရင်ရှာမည်
+    const wrapper = clickedElement.closest('.pro-tip-wrapper');
+    
+    // ၂။ အဲ့ဒီ wrapper ထဲမှာပဲ ရှိတဲ့ pill နဲ့ box ကို ရှာမည်
+    const pill = wrapper.querySelector('.pro-tip-pill');
+    const box = wrapper.querySelector('.pro-tip-expanded-box');
 
+    // ၃။ ပိတ်/ဖွင့် လုပ်ဆောင်ခြင်း
     if (box.style.display === "none" || box.style.display === "") {
         box.style.display = "block";
         pill.style.display = "none";
     } else {
         box.style.display = "none";
         pill.style.display = "inline-flex";
+    }
+}
+
+// Deep Dive ကို ID မလိုဘဲ ပိတ်/ဖွင့် လုပ်ပေးမည့် function
+function toggleDeepDive(clickedElement) {
+    // ၁။ ခလုတ်ရဲ့ ချက်ချင်းအောက်မှာရှိတဲ့ div ကို ရှာမည်
+    const body = clickedElement.nextElementSibling;
+    const icon = clickedElement.querySelector('i');
+
+    // ၂။ ပိတ်/ဖွင့် Logic (scrollHeight ကို အသုံးချခြင်း)
+    if (!body.style.maxHeight || body.style.maxHeight === "0px") {
+        // ဖွင့်မည်
+        body.style.maxHeight = body.scrollHeight + "px";
+        if (icon) icon.style.transform = "rotate(180deg)";
+        
+        // 🔥 အကယ်၍ အထဲမှာ စာတွေအများကြီးပါရင် padding လေးထည့်ပေးရန်
+        body.style.paddingTop = "10px";
+        body.style.paddingBottom = "20px";
+    } else {
+        // ပိတ်မည်
+        body.style.maxHeight = "0px";
+        if (icon) icon.style.transform = "rotate(0deg)";
+        body.style.paddingTop = "0px";
+        body.style.paddingBottom = "0px";
     }
 }

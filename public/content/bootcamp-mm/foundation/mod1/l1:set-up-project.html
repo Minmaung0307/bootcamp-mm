@@ -6,17 +6,24 @@
             <img src="/assets/icons/html-logo.png" alt="HTML">
         </div> -->
       <div class="icon-circle"><i class="fas fa-code"></i></div>
-      <div class="icon-circle"><i class="fas fa-laptop-code"></i></div>
+      <!-- <div class="icon-circle"><i class="fas fa-laptop-code"></i></div>
       <div class="icon-circle"><i class="fas fa-project-diagram"></i></div>
-      <div class="icon-circle"><i class="fas fa-database"></i></div>
+      <div class="icon-circle"><i class="fas fa-database"></i></div> -->
       <div class="icon-circle"><i class="fab fa-js"></i></div>
-      <div class="icon-circle"><i class="fab fa-react"></i></div>
+      <div class="icon-circle"><i class="fab fa-html5"></i></div>
+      <div class="icon-circle"><i class="fab fa-css3-alt"></i></div>
+      <div class="icon-circle"><i class="fab fa-git-alt"></i></div>
+      <div class="icon-circle"><i class="fas fa-terminal"></i></div>
+      <!-- <div class="icon-circle"><i class="fab fa-react"></i></div> -->
     </div>
     <div class="lesson-info-bar">
       <div class="lesson-id-badge">1.1</div>
       <div class="lesson-banner-title">Set Up the Project</div>
     </div>
   </div>
+
+<div class="article-content">
+  <section>
 
   <h1>Introduction</h1>
   <p>
@@ -181,14 +188,15 @@
   <div class="important-container animate-up">
     <div class="important-label">IMPORTANT</div>
     <div class="important-body">
-        <p>
-            ဒီ <strong>boot camp</strong> မှာ အောင်မြင်ဖို့အတွက် <strong>code</strong> တွေကို 
-            <strong>copy/paste</strong> မလုပ်ဘဲ တစ်ကြောင်းချင်းစီ ကိုယ်တိုင် လက်နဲ့ ရိုက်ရေးပါ။ 
-            ဒါမှသာ ကျွမ်းကျင်တဲ့ <strong>coder</strong> တစ်ယောက်ဖြစ်ဖို့ လိုအပ်တဲ့ 
-            <strong>muscle memory</strong> ကို အမြန်ဆုံး တည်ဆောက်နိုင်မှာပါ။
-        </p>
+      <p>
+        ဒီ <strong>boot camp</strong> မှာ အောင်မြင်ဖို့အတွက်
+        <strong>code</strong> တွေကို <strong>copy/paste</strong> မလုပ်ဘဲ
+        တစ်ကြောင်းချင်းစီ ကိုယ်တိုင် လက်နဲ့ ရိုက်ရေးပါ။ ဒါမှသာ ကျွမ်းကျင်တဲ့
+        <strong>coder</strong> တစ်ယောက်ဖြစ်ဖို့ လိုအပ်တဲ့
+        <strong>muscle memory</strong> ကို အမြန်ဆုံး တည်ဆောက်နိုင်မှာပါ။
+      </p>
     </div>
-</div>
+  </div>
   <p>
     <strong>Terminal</strong> ဒါမှမဟုတ် <strong>Git Bash</strong> ကို
     စဖွင့်လိုက်ရင် ပုံမှန်အားဖြင့် ကိုယ့်ရဲ့
@@ -214,16 +222,16 @@
   <div class="nerd-note-box animate-up">
     <!-- ဘောင်ပေါ်မှာ တင်မည့် အဝိုင်းလေး -->
     <div class="nerd-icon-badge">
-        <i class="fas fa-glasses"></i>
+      <i class="fas fa-glasses"></i>
     </div>
-    
+
     <h4>Nerd Note</h4>
     <p>
-        ကွန်ပျူတာ စဖွင့်လိုက်ရင် မြင်ရတဲ့ <strong>Desktop</strong> ဆိုတာ တကယ်တော့ 
-        မင်းရဲ့ <strong>User Directory</strong> ထဲမှာ ရှိတဲ့ 
-        <strong>Desktop</strong> ဆိုတဲ့ <strong>Folder</strong> လေးပါပဲ။
+      ကွန်ပျူတာ စဖွင့်လိုက်ရင် မြင်ရတဲ့ <strong>Desktop</strong> ဆိုတာ တကယ်တော့
+      မင်းရဲ့ <strong>User Directory</strong> ထဲမှာ ရှိတဲ့
+      <strong>Desktop</strong> ဆိုတဲ့ <strong>Folder</strong> လေးပါပဲ။
     </p>
-</div>
+  </div>
 
   <p>
     အခု <strong>Desktop</strong> ပေါ်ကို CLI ကနေ သွားကြည့်ရအောင်။ အောက်က
@@ -231,43 +239,51 @@
     <strong>Enter</strong> ခေါက်ပါ -
   </p>
 
-      <div class="code-snippet-box animate-up">
-    <pre>cd Desktop
-pwd</pre>
-</div>
+  <div class="code-snippet-box animate-up">
+    <pre>
+cd Desktop
+pwd</pre
+    >
+  </div>
 
   <div class="pause-box animate-up">
     <!-- ထောင့်တွင် တင်မည့် Question Mark -->
     <div class="pause-icon-badge">
-        <i class="fas fa-question-circle"></i>
+      <i class="fas fa-question-circle"></i>
     </div>
-    
+
     <h4>PAUSE</h4>
     <p><code>cd</code> ဆိုတာ ဘာကို ဆိုလိုတာလို့ ထင်လဲ?</p>
 
     <!-- 🔥 အဖြေကို ဤနေရာတွင် ထည့်ပါ (အစပိုင်းတွင် display:none ထားမည်) -->
-    <div id="ans-cd-01" class="answer-content" style="display: none;">
-        အဖြေ - <code>cd</code> ဆိုတာ <strong>Change Directory</strong> ကို ပြောတာပါ။ 
-        Folder တစ်ခုကနေ တစ်ခုကို ကူးပြောင်းဖို့ သုံးပါတယ်။
+    <div id="ans-cd-01" class="answer-content" style="display: none">
+      အဖြေ - <code>cd</code> ဆိုတာ <strong>Change Directory</strong> ကို
+      ပြောတာပါ။ Folder တစ်ခုကနေ တစ်ခုကို ကူးပြောင်းဖို့ သုံးပါတယ်။
     </div>
 
     <!-- ပိတ်/ဖွင့် လုပ်မည့် ခလုတ် -->
-    <a href="javascript:void(0)" class="toggle-answer-link" onclick="togglePauseAnswer(this, 'ans-cd-01')">
-        Show Answer
+    <a
+      href="javascript:void(0)"
+      class="toggle-answer-link"
+      onclick="togglePauseAnswer(this, 'ans-cd-01')"
+    >
+      Show Answer
     </a>
-</div>
+  </div>
 
   <p>
     အခု အောက်ကအတိုင်း ထပ်ရိုက်ကြည့်ပါ။ <code>pwd</code> မှာ ဘာတွေပြလဲဆိုတာ
     သတိထားကြည့်နော် -
   </p>
 
-    <div class="code-snippet-box animate-up">
-    <pre>cd ..
+  <div class="code-snippet-box animate-up">
+    <pre>
+cd ..
 pwd
 cd Desktop
-pwd</pre>
-</div>
+pwd</pre
+    >
+  </div>
 
   <p>
     ဒါကြောင့် <code>cd ..</code> လို့ ရိုက်ရင် အနောက်ကို တစ်ဆင့် (ဒါမှမဟုတ်
@@ -284,9 +300,11 @@ pwd</pre>
   </p>
 
   <div class="code-snippet-box animate-up">
-    <pre>mkdir projects
-ls</pre>
-</div>
+    <pre>
+mkdir projects
+ls</pre
+    >
+  </div>
 
   <p>
     <code>mkdir</code> ဆိုတာ <strong>"Make Directory"</strong> ပါ။ Folder
@@ -301,17 +319,18 @@ ls</pre>
     </div>
 
     <!-- ၁။ ပိတ်ထားစဉ် Pill -->
-    <div id="tip-pill-01" class="pro-tip-pill animate-up" onclick="toggleProTipPro('tip-pill-01', 'tip-box-01')">
+    <div class="pro-tip-pill animate-up" onclick="toggleProTipPro(this)">
         <span>SHOW PRO TIP</span>
     </div>
 
     <!-- ၂။ ပွင့်နေစဉ် Box -->
-    <div id="tip-box-01" class="pro-tip-expanded-box">
-        <h5 onclick="toggleProTipPro('tip-pill-01', 'tip-box-01')">HIDE PRO TIP</h5>
+    <div class="pro-tip-expanded-box">
+        <h5 onclick="toggleProTipPro(this)">HIDE PRO TIP</h5>
         <p>
-            Terminal ထဲမှာ ရိုက်ထားသမျှကို ရှင်းလင်းချင်ရင် <code>clear</code> လို့ ရိုက်နိုင်ပါတယ်။ 
-            ဒါဟာ အလုပ်တွေကို ဖျက်ပစ်တာ မဟုတ်ဘဲ မျက်နှာပြင်ကို ရှင်းလင်းသွားစေတာ ဖြစ်ပါတယ်။
-        </p>
+        Terminal ထဲမှာ ရိုက်ထားသမျှကို ရှင်းလင်းချင်ရင် <code>clear</code> လို့
+        ရိုက်နိုင်ပါတယ်။ ဒါဟာ အလုပ်တွေကို ဖျက်ပစ်တာ မဟုတ်ဘဲ မျက်နှာပြင်ကို
+        ရှင်းလင်းသွားစေတာ ဖြစ်ပါတယ်။
+      </p>
     </div>
 </div>
 
@@ -330,10 +349,12 @@ ls</pre>
   </p>
 
   <div class="code-snippet-box animate-up">
-    <pre>cd projects
+    <pre>
+cd projects
 mkdir run-buddy
 cd run-buddy
-pwd</pre>
+pwd</pre
+    >
   </div>
 
   <p>
@@ -341,10 +362,12 @@ pwd</pre>
     ဆောက်ကြည့်ရအောင် -
   </p>
   <div class="code-snippet-box animate-up">
-    <pre>touch hello.txt
+    <pre>
+touch hello.txt
 touch index.html
-ls</pre>
-</div>
+ls</pre
+    >
+  </div>
 
   <p>
     <code>touch</code> ဆိုတာ <strong>File</strong> အသစ်တွေ ဆောက်ဖို့ သုံးတာပါ။
@@ -354,18 +377,23 @@ ls</pre>
   <div class="important-container animate-up">
     <div class="important-label">IMPORTANT</div>
     <div class="important-body">
-        <p>ဖိုင်နာမည်ပေးတဲ့အခါ <strong>Lowercase</strong> (စာလုံးအသေး) တွေပဲ သုံးဖို့ သေချာပါစေ။ <code>index.html</code> နဲ့ <code>Index.html</code> ဟာ မတူပါဘူး။</p>
+      <p>
+        ဖိုင်နာမည်ပေးတဲ့အခါ <strong>Lowercase</strong> (စာလုံးအသေး) တွေပဲ
+        သုံးဖို့ သေချာပါစေ။ <code>index.html</code> နဲ့
+        <code>Index.html</code> ဟာ မတူပါဘူး။
+      </p>
     </div>
   </div>
-
 
   <p>
     စာသားဖိုင်က မလိုတော့ဘူးဆိုရင် <code>rm</code> command နဲ့ ဖျက်လို့ရပါတယ်။
   </p>
   <div class="code-snippet-box animate-up">
-    <pre>rm hello.txt
-ls</pre>
-</div>
+    <pre>
+rm hello.txt
+ls</pre
+    >
+  </div>
   <p>
     <code>rm</code> ဆိုတာ <strong>Remove</strong> ကို ပြောတာပါ။ ဒါဆိုရင် ဖိုင်က
     အပြီးပျက်သွားပါလိမ့်မယ်။
@@ -381,20 +409,13 @@ ls</pre>
     <li><code>touch [နာမည်]</code>: File အသစ် ဆောက်ပါ။</li>
     <li><code>rm [နာမည်]</code>: File ကို ဖျက်ပါ။</li>
   </ul>
-  <div class="deep-dive-btn" onclick="toggleAccordion('dive-1')">
-    DEEP DIVE <i class="fas fa-chevron-down"></i>
-  </div>
-  <div id="dive-1" class="accordion-body">
-    <div
-      style="
-        /* background-color: #005682; */
-        color: white;
-        padding: 15px;
-        margin: 15px 0;
-        border-radius: 5px;
-      "
-    >
-      <p><strong>🌊 DEEP DIVE</strong></p>
+
+  <div class="deep-dive-btn" onclick="toggleDeepDive(this)">
+    <p><strong>DEEP DIVE</strong></p>
+    <i class="fas fa-chevron-down"></i>
+</div>
+<div class="accordion-body">
+      <p><strong>DEEP DIVE</strong></p>
       <p>
         အောက်မှာပေးထားတဲ့ တခြားအသုံးဝင်တဲ့ <strong>Commands</strong> တွေက
         ဘာတွေလုပ်ပေးနိုင်သလဲဆိုတာကို အင်တာနက်မှာ ရှာဖွေပြီး ထပ်မံလေ့လာကြည့်ပါ -
@@ -426,10 +447,302 @@ ls</pre>
         </li>
       </ul>
     </div>
-  </div>
+</div>
 
   <p>
     <strong>Command Line</strong> အခြေခံတွေ သိသွားပြီဆိုတော့
     <strong>HTML</strong> တွေ စထည့်ဖို့ အဆင်သင့် ဖြစ်ပါပြီ!
   </p>
+
+  <h1>HTML အနည်းငယ် ထည့်သွင်းခြင်း</h1>
+  <p>
+    <strong>HTML (Hypertext Markup Language)</strong> ဆိုတာ Website တစ်ခုရဲ့
+    အခြေခံ အဆောက်အအုံ (<strong>Structure</strong>) ပါပဲ။
+    <strong>Run Buddy</strong> ရဲ့ အစိတ်အပိုင်းတွေ ဖြစ်တဲ့
+    <strong>Header</strong>၊ <strong>Sign-up Form</strong> နဲ့
+    <strong>Trainer</strong> ပုံတွေ အားလုံးကို
+    <strong>HTML element</strong> တွေနဲ့ပဲ တည်ဆောက်သွားမှာပါ။ ဒီအချက်အလက်
+    အားလုံးကို ကျွန်တော်တို့ ခုနက ဆောက်ခဲ့တဲ့ <code>index.html</code> ဖိုင်ထဲမှာ
+    ထည့်ရေးမှာ ဖြစ်ပါတယ်။
+  </p>
+  <p>
+    အခု <code>run-buddy</code> <strong>Folder</strong> တစ်ခုလုံးကို
+    <strong>Visual Studio Code (VS Code)</strong> ထဲမှာ အောက်ပါ နည်းလမ်းတွေနဲ့
+    ဖွင့်လိုက်ရအောင် -
+  </p>
+  <ul>
+    <li>
+      <strong>Folder</strong> ကို <strong>VS Code</strong> ထဲ ဆွဲထည့်လိုက်ပါ။
+    </li>
+    <li>
+      <strong>VS Code Menu</strong> ကနေ <strong>File > Open Folder</strong> ကို
+      သွားပါ။
+    </li>
+    <li>
+      <strong>Command Line</strong> ကနေ ဖွင့်မယ်ဆိုရင် <code>run-buddy</code>
+      <strong>Directory</strong> ထဲမှာ <code>code .</code> လို့ ရိုက်လိုက်ပါ။
+    </li>
+  </ul>
+
+  <div class="important-container animate-up">
+  <div class="important-label">IMPORTANT</div>
+  <div class="important-body">
+    <p>
+        <strong>macOS</strong> သုံးတဲ့သူတွေအနေနဲ့ <code>code</code> command ကို
+        <strong>Enable</strong> အရင်လုပ်ဖို့ လိုနိုင်ပါတယ်။
+      </p>
+  </div>
+</div>
+
+  <p>
+    ဘယ်ဘက်က <strong>Explorer</strong> မှာ <code>index.html</code> ကို နှိပ်ပြီး
+    ညာဘက်ခြမ်းမှာ <strong>Code</strong> တွေ စရေးလို့ ရပါပြီ။
+  </p>
+
+<div class="pro-tip-wrapper">
+    <!-- 🔥 စိန်ပုံ Badge (၎င်းကို အပြင်မှာ ထားလိုက်သည့်အတွက် လုံးဝ မလှုပ်တော့ပါ) -->
+    <div class="tip-diamond-badge">
+        <i class="fas fa-gem"></i>
+    </div>
+
+    <!-- ၁။ ပိတ်ထားစဉ် Pill -->
+    <div class="pro-tip-pill animate-up" onclick="toggleProTipPro(this)">
+        <span>SHOW PRO TIP</span>
+    </div>
+
+    <!-- ၂။ ပွင့်နေစဉ် Box -->
+    <div class="pro-tip-expanded-box">
+        <h5 onclick="toggleProTipPro(this)">HIDE PRO TIP</h5>
+        <p>
+      <strong>VS Code</strong> မှာ <strong>Built-in Terminal</strong> ပါပါတယ်။
+      ဖွင့်ချင်ရင် ဘယ်ဘက်က <strong>Explorer</strong> ပေါ်မှာ
+      <strong>Right-click</strong> နှိပ်ပြီး
+      <strong>Open in Terminal</strong> ကို ရွေးလိုက်ပါ။
+    </p>
+    </div>
+</div>
+
+
+  <p>
+    အခု <strong>VS Code</strong> ရဲ့ ညာဘက်ခြမ်းမှာ အောက်ပါ
+    <strong>Code</strong> တွေကို (ကူးမထည့်ဘဲ) ကိုယ်တိုင် ရိုက်ထည့်ကြည့်ပါ -
+  </p>
+
+  <div class="code-snippet-box animate-up">
+    <pre>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8" /&gt;
+    &lt;title&gt;Run Buddy&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;h1&gt;RUN BUDDY&lt;/h1&gt;
+    What We Do
+  &lt;/body&gt;
+&lt;/html&gt;</pre>
+</div>
+
+  
+  <p>
+    <strong>Webpage</strong> ပထမဆုံး စလုပ်ပြီးပြီနော်!
+    <strong>Browser</strong> မှာ မကြည့်ခင် ဖိုင်ကို အရင်
+    <strong>Save</strong> ဖို့ လိုပါတယ်။ ဖိုင်နာမည် ဘေးမှာ အဖြူစက်လေး ပြနေရင်
+    <strong>Save</strong> ရဦးမယ်လို့ အဓိပ္ပာယ်ရပါတယ်။
+  </p>
+
+  <div class="pro-tip-wrapper">
+    <!-- 🔥 စိန်ပုံ Badge (၎င်းကို အပြင်မှာ ထားလိုက်သည့်အတွက် လုံးဝ မလှုပ်တော့ပါ) -->
+    <div class="tip-diamond-badge">
+        <i class="fas fa-gem"></i>
+    </div>
+
+    <!-- ၁။ ပိတ်ထားစဉ် Pill -->
+    <div class="pro-tip-pill animate-up" onclick="toggleProTipPro(this)">
+        <span>SHOW PRO TIP</span>
+    </div>
+
+    <!-- ၂။ ပွင့်နေစဉ် Box -->
+    <div class="pro-tip-expanded-box">
+        <h5 onclick="toggleProTipPro(this)">HIDE PRO TIP</h5>
+        <p>
+      ဖိုင် <strong>Save</strong> ဖို့ <strong>Keyboard Shortcut</strong> ကို
+      သုံးပါ။ <strong>Windows</strong> မှာ <strong>Ctrl+S</strong>၊
+      <strong>macOS</strong> မှာ <strong>Command+S</strong> ပါ။
+    </p>
+    </div>
+</div>
+
+
+  <p>
+    အခု <strong>Google Chrome</strong> မှာ ဒီဖိုင်ကို ဖွင့်ကြည့်ပါ။
+    စာသားလေးတွေပဲ ပါတဲ့ ရိုးရိုးရှင်းရှင်း Website လေးတစ်ခု ပေါ်လာပါလိမ့်မယ်။
+  </p>
+  <h2>HTML Elements များကို မိတ်ဆက်ခြင်း</h2>
+  <p>
+    ကျွန်တော်တို့ ရေးလိုက်တဲ့ <strong>Code</strong> တွေကို ပြန်ကြည့်ရအောင်။
+    <strong>HTML code</strong> တွေမှာ များသောအားဖြင့်
+    <strong>Opening Tag</strong> (ဥပမာ- <code>&lt;title&gt;</code>) နဲ့
+    <strong>Closing Tag</strong> (ဥပမာ- <code>&lt;/title&gt;</code>) ဆိုပြီး
+    ပါပါတယ်။ အဲ့ဒီ <strong>Tags</strong> နှစ်ခုကြားထဲမှာ ရှိသမျှ အရာအားလုံးကို
+    အဲ့ဒီ <strong>Element</strong> က ထိန်းချုပ်သွားမှာပါ။
+  </p>
+  <h3>The &lt;h1&gt; Element</h3>
+  <p>
+    <code>&lt;h1&gt;</code> ဆိုတာ <strong>"Level 1 Heading"</strong> ပါ။
+    စာသားတွေကို အကြီးဆုံးနဲ့ အမဲဆုံး ပြပေးပါတယ်။ အရေးကြီးပုံအလိုက်
+    <code>&lt;h2&gt;</code>၊ <code>&lt;h3&gt;</code> စသဖြင့်
+    <code>&lt;h6&gt;</code> အထိ သုံးနိုင်ပါတယ်။
+  </p>
+
+<div class="deep-dive-btn" onclick="toggleDeepDive(this)">
+    <p><strong>DEEP DIVE</strong></p>
+    <i class="fas fa-chevron-down"></i>
+</div>
+<div class="accordion-body">
+    <p>
+    To learn more, refer to the <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/Heading_Elements" target="_blank">MDN Web Docs on HTML section heading elements</a></p>
+</div>
+
+<div id="dive-1" class="accordion-body">
+  <p>
+      <code>&lt;h1&gt;RUN BUDDY&lt;/h1&gt;</code> ကို
+      <code>&lt;h2&gt;</code> ဒါမှမဟုတ် <code>&lt;h3&gt;</code> ပြောင်းကြည့်ပြီး
+      <strong>Browser</strong> မှာ <strong>Refresh</strong> လုပ်ကြည့်ပါ။
+      စာလုံးလေးတွေ သေးသွားတာကို တွေ့ရပါလိမ့်မယ်။
+    </p>
+</div>
+
+  <h3>
+    The &lt;html&gt;, &lt;head&gt;, &lt;title&gt;, and &lt;meta charset&gt;
+    Elements
+  </h3>
+  <p>
+    <strong>HTML Page</strong> တစ်ခုလုံးကို <code>&lt;html&gt;</code>
+    <strong>Element</strong> ထဲမှာ ထည့်ရပါတယ်။
+    <code>&lt;!DOCTYPE html&gt;</code> ကတော့ <strong>Browser</strong> ကို ဒါဟာ
+    <strong>HTML5</strong> ဖြစ်ကြောင်း ပြောပြတာပါ။
+  </p>
+  <ul>
+    <li>
+      <code>&lt;head&gt;</code>: <strong>Browser</strong> အတွက် လိုအပ်တဲ့
+      <strong>Information</strong> တွေ ထည့်တဲ့နေရာ (Website ပေါ်မှာ
+      တိုက်ရိုက်မပြပါ)။
+    </li>
+    <li>
+      <code>&lt;body&gt;</code>: Website ပေါ်မှာ တကယ်ပြမယ့်
+      <strong>Content</strong> တွေ အကုန်လုံး ထည့်တဲ့နေရာ။
+    </li>
+    <li>
+      <code>&lt;title&gt;</code>: Website ရဲ့ နာမည်ကို
+      <strong>Browser Tab</strong> မှာ ပြပေးတာပါ။
+    </li>
+    <li>
+      <code>&lt;meta charset="UTF-8"&gt;</code>: Website မှာ
+      <strong>Emoji</strong> တွေနဲ့ ဘာသာစကားအစုံကို <strong>Browser</strong> က
+      မှန်မှန်ကန်ကန် ဖတ်နိုင်အောင်လို့ပါ။
+    </li>
+  </ul>
+
+  <div class="deep-dive-btn" onclick="toggleDeepDive(this)" style="margin-top:20px;">
+    <p><strong>DEEP DIVE: MORE TOOLS</strong></p>
+    <i class="fas fa-chevron-down"></i>
+</div>
+<div class="accordion-body">
+    <p>To learn more, refer to the <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Guides/Quirks_mode_and_standards_mode" target="_blank">MDN Web Docs on quirks mode and standards mode</a></p>
+</div>
+
+<div class="important-container animate-up">
+  <div class="important-label">IMPORTANT</div>
+  <div class="important-body">
+    <p>
+        သင်ခန်းစာတွေမှာ ပါတဲ့ <strong>Assessments</strong> တွေကို သေချာဖြေပါ။
+        ဒါမှ ကိုယ်သင်ယူခဲ့တာတွေကို ဘယ်လောက် မှတ်မိလဲဆိုတာ သိနိုင်မှာပါ။
+      </p>
+  </div>
+</div>
+
+<h3>&lt;html lang="en"&gt; နှင့် &lt;meta charset="UTF-8" /&gt; အကြောင်း</h3>
+<p>ကျွန်တော်တို့ မပြောရသေးတဲ့ ကျန်ရှိနေတဲ့ အချက် ၂ ခုအကြောင်း ဆက်ကြည့်ရအောင်။ ဖွင့်ထားတဲ့ <code>&lt;html&gt;</code> tag ကို <code>&lt;html lang="en"&gt;</code> လို့ ရေးထားတာ သတိထားမိမှာပါ။ ဒါက ဒီ website ရဲ့ အဓိကဘာသာစကားဟာ <strong>English</strong> ဖြစ်တယ်လို့ <strong>browser</strong> ကို ပြောပြလိုက်တာပါ။</p>
+
+<p>နောက်တစ်ခုကတော့ <code>&lt;head&gt;</code> ထဲမှာရှိတဲ့ <code>&lt;meta charset="UTF-8" /&gt;</code> ပါ။ ဒါကို <strong>meta tag</strong> လို့ ခေါ်ပါတယ်။ <strong>meta tags</strong> တွေဟာ <strong>browser</strong> ကို website ရဲ့ အချက်အလက်တွေ (ဥပမာ - စာသားတွေကို ဘယ်လိုပြမလဲ၊ <strong>search engine optimization</strong> ခေါ်တဲ့ ရှာဖွေရလွယ်အောင် ဘယ်လိုလုပ်မလဲ) ဆိုတာတွေကို အပိုဆောင်း ပြောပြပေးတာပါ။</p>
+
+<div class="deep-dive-btn" onclick="toggleDeepDive(this)" style="margin-top:20px;">
+    <p><strong>DEEP DIVE: MORE TOOLS</strong></p>
+    <i class="fas fa-chevron-down"></i>
+</div>
+<div class="accordion-body">
+    <p>To learn more, refer to this <a href="https://devhints.io/html-meta" target="_blank">HTML meta tags cheat sheet</a></p>
+</div>
+
+<p><strong>charset meta tag</strong> က အရမ်းအရေးကြီးပါတယ်။ သူက website မှာ ဘယ်လို စာလုံးတွေ၊ ကိန်းဂဏန်းတွေနဲ့ သင်္ကေတ (<strong>characters</strong>) တွေကို သုံးမလဲဆိုတာ သတ်မှတ်ပေးတာပါ။ <strong>UTF-8</strong> ဟာ ဘာသာစကားအစုံက သင်္ကေတတွေတင်မကဘဲ <strong>emojis</strong> တွေကိုပါ ကောင်းကောင်း ဖော်ပြပေးနိုင်ပါတယ်။</p>
+<div style="background-color: #f1f1f1; border-left: 5px solid #0077b6; padding: 15px; margin: 15px 0; border-radius: 5px;">
+
+<strong>💡 အပျော်သဘော စမ်းကြည့်ရအောင်</strong>
+<p>ဒီ emoji (🏃) လေးကို <code>index.html</code> ရဲ့ <code>&lt;body&gt;</code> ထဲမှာ ကူးထည့်ကြည့်ပါ။ <strong>browser</strong> မှာ ပုံမှန်အတိုင်း ပေါ်လာပါလိမ့်မယ်။ ဒါပေမဲ့ <strong>meta tag</strong> ကို <code>&lt;meta charset="ASCII" /&gt;</code> လို့ ပြောင်းလိုက်ရင်တော့ အဲ့ဒီ emoji က ပေါ်မှာ မဟုတ်တော့ပါဘူး။ ဘာလို့လဲဆိုတော့ <strong>ASCII</strong> စနစ်မှာ <strong>emojis</strong> တွေ မပါဝင်လို့ပါ။ ဒါကြောင့် အမြဲတမ်း <strong>UTF-8</strong> ကိုပဲ သုံးတာ အကောင်းဆုံးပါ။</p>
+</div>
+
+<div class="deep-dive-btn" onclick="toggleDeepDive(this)" style="margin-top:20px;">
+    <p><strong>DEEP DIVE: MORE TOOLS</strong></p>
+    <i class="fas fa-chevron-down"></i>
+</div>
+<div class="accordion-body">
+    <p>To learn more, refer to this <a href="https://www.w3.org/International/questions/qa-what-is-encoding" target="_blank">W3C article on character encoding for beginners</a></p>
+</div>
+
+<p>ဒီ code တွေဟာ <strong>boilerplate</strong> တွေပါပဲ။ ဆိုလိုတာက website တိုင်းမှာ ဒီပုံစံအတိုင်း အခြေခံ <strong>structure</strong> နဲ့ပဲ စရတာပါ။ <code>DOCTYPE</code>၊ <code>&lt;html&gt;</code> element၊ <code>&lt;head&gt;</code> element စတာတွေ အမြဲတမ်း ပါနေရမှာ ဖြစ်ပါတယ်။ ဒါတွေကို ခဏခဏ ကိုယ်တိုင် ရိုက်ကြည့်တာက အကောင်းဆုံးဖြစ်ပေမဲ့ နောက်ပိုင်း <strong>projects</strong> အသစ်တွေမှာတော့ အဆင်သင့် <strong>copy/paste</strong> လုပ်ပြီး သုံးလို့ရပါတယ်။</p>
+
+  <div class="pro-tip-wrapper">
+    <!-- 🔥 စိန်ပုံ Badge (၎င်းကို အပြင်မှာ ထားလိုက်သည့်အတွက် လုံးဝ မလှုပ်တော့ပါ) -->
+    <div class="tip-diamond-badge">
+        <i class="fas fa-gem"></i>
+    </div>
+
+    <!-- ၁။ ပိတ်ထားစဉ် Pill -->
+    <div class="pro-tip-pill animate-up" onclick="toggleProTipPro(this)">
+        <span>SHOW PRO TIP</span>
+    </div>
+
+    <!-- ၂။ ပွင့်နေစဉ် Box -->
+    <div class="pro-tip-expanded-box">
+        <h5 onclick="toggleProTipPro(this)">HIDE PRO TIP</h5>
+        <p>
+      <strong>Code</strong> ရေးတဲ့အခါ တစ်ကြောင်းချင်းစီကို စနစ်တကျ
+      <strong>Indent</strong> (စာကြောင်း အဝင်အထွက်) လုပ်ပြီး ရေးဖို့
+      အရေးကြီးပါတယ်။ ဒါမှ ကိုယ်တိုင်ရော၊ တခြားသူတွေပါ ဖတ်ရတာ လွယ်ကူမှာပါ။
+    </p>
+    </div>
+</div>
+
+<h3>Introducing Git</h3>
+<p>Code တွေကို စနစ်တကျ စီမံခန့်ခွဲဖို့အတွက် အရေးကြီးတဲ့ <strong>version control</strong> စနစ်တစ်ခုဖြစ်တဲ့ <strong>Git</strong> အကြောင်း ပြောပြပေးပါမယ်။ <strong>Git</strong> ဟာ ကမ္ဘာပေါ်မှာ အသုံးအများဆုံး <strong>version control system</strong> တစ်ခုပါ။</p>
+
+<p><strong>Git</strong> က မင်းရဲ့ အလုပ်တွေကို "Save Points" အနေနဲ့ မှတ်ထားပေးနိုင်ပါတယ်။ ဒါကို <strong>commits</strong> လို့ ခေါ်ပါတယ်။ အလုပ်တစ်ခု ပြီးတိုင်း <strong>commit</strong> လုပ်ထားတဲ့ အလေ့အကျင့်က အရမ်းကောင်းပါတယ်။ လိုအပ်လာရင် အရင်ဗားရှင်း အဟောင်းဆီကို ပြန်သွားလို့ ရလို့ပါ။</p>
+
+
+<div class="otj-container animate-up">
+    <!-- အပေါ်ဘောင်ပေါ်က စာသား -->
+    <div class="otj-label">ON THE JOB</div>
+
+    <!-- ဘေးက လက်ဝါးပုံ အဝိုင်းလေး -->
+    <div class="otj-icon-badge">
+        <i class="fas fa-hands-helping"></i>
+    </div>
+
+    <!-- စာသား ကိုယ်ထည် -->
+    <p>
+        As a software developer, you'll hear the term <strong>production</strong> a lot. 
+        This refers to the live version of your app or website that users are currently using. 
+        Sometimes bad code can make it to production. When this happens, the best course of action is to immediately undo it. 
+        With Git, an older (working) version of the codebase can be pushed to production...
+    </p>
+</div>
+
+<p><strong>Git ကို ဘာကြောင့် သုံးသင့်တာလဲ?</strong></p>
+<ul>
+<li><strong>Data မပျောက်အောင် ကာကွယ်ပေးခြင်း:</strong> ကိုယ့်ရဲ့ <strong>commits</strong> တွေကို <strong>remote location</strong> (အင်တာနက်ပေါ်က သိမ်းဆည်းရာနေရာ) ဆီ <strong>push</strong> လုပ်ထားနိုင်ပါတယ်။ ဒါဆိုရင် ကိုယ့်စက် ပျက်သွားရင်တောင် <strong>Code</strong> တွေ မပျောက်တော့ပါဘူး။</li>
+<li><strong>Teamwork အဆင်ပြေစေခြင်း:</strong> Developer အချင်းချင်း <strong>Code</strong> တွေ မျှဝေတဲ့အခါ တစ်ယောက်ရေးတာကို တစ်ယောက်က မတော်တဆ ဖျက်မိတာမျိုး မဖြစ်အောင် ကာကွယ်ပေးပါတယ်။</li>
+<li><strong>Branches နှင့် Merging:</strong> <strong>Codebase</strong> တစ်ခုတည်းကနေ ဗားရှင်းခွဲ (<strong>branches</strong>) တွေ ခွဲထုတ်ပြီး အလုပ်လုပ်လို့ ရပါတယ်။ အားလုံးပြီးလို့ ပြန်ပေါင်း (<strong>merge</strong>) တဲ့အခါ <strong>Code</strong> တွေ ထပ်နေရင်လည်း <strong>Git</strong> က <strong>conflicts</strong> အနေနဲ့ သတိပေးမှာ ဖြစ်ပါတယ်။</li>
+</ul>
+
+<p><strong>Git</strong> ကို လေ့လာရတာ အစပိုင်းမှာ နည်းနည်း ခက်နိုင်ပေမဲ့ ခဏခဏ သုံးကြည့်ရင် ကျွမ်းကျင်လာမှာပါ။ သင်တန်းပြီးတဲ့အခါ မင်းဟာ <strong>Git workflow</strong> ကို ကောင်းကောင်း နားလည်နေပါလိမ့်မယ်။</p>
 </div>
