@@ -546,6 +546,7 @@ body.dark-theme .important-body {
 
 /* --- 6. Accordions (Hint & Deep Dive) --- */
 .lms-accordion {
+  width: 100%;
   background: var(--card-bg);
   border: 1px solid var(--border-color);
   border-radius: 50px;
@@ -557,27 +558,41 @@ body.dark-theme .important-body {
   margin: 15px 0;
   font-weight: bold;
   color: var(--primary);
+  transition: 0.3s;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
 }
 
 .lms-accordion i {
+  width: 100%;
   background: var(--primary);
   color: white;
-  width: 30px;
-  height: 30px;
+  width: 35px;
+    height: 35px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-right: 12px;
+}
+
+.lms-accordion span {
+    color: #004d85;
+    font-weight: 800;
+    text-decoration: underline;
+    font-size: 0.9rem;
 }
 
 .accordion-body {
-  display: block !important; /* 🔥 display: none လုံးဝ မသုံးရပါ */
+  /* display: block !important;  */  /* 🔥 display: none လုံးဝ မသုံးရပါ */
+  display: none;
     max-height: 0;             /* အစပိုင်းတွင် အမြင့်ကို ပိတ်ထားမည် */
     overflow: hidden;          /* အထဲကစာများကို ဖျောက်ထားမည် */
     transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1); /* ပွင့်ကျလာမည့် Animation */
     background-color: #f8fafc;
     border-radius: 0 0 12px 12px;
     padding: 0 25px;           /* ဘေး padding သာ ထားမည် */
+    border-left: 5px solid #0073b1;
+    margin-bottom: 20px;
 }
 
 /* ပွင့်နေချိန်မှာ padding ပြန်ထည့်ရန် logic (optional padding) */
@@ -585,6 +600,10 @@ body.dark-theme .important-body {
     padding: 20px 0;
     margin: 0;
 }
+
+/* Dark mode compatibility */
+body.dark-theme .lms-accordion { background: #1e293b; border-color: #334155; }
+body.dark-theme .accordion-body { background: rgba(255, 255, 255, 0.05); }
 
 .deep-dive-btn {
   user-select: none;
@@ -1287,6 +1306,13 @@ body.dark-theme .nerd-note-box {
   font-size: 1.1rem;
 }
 
+.article-content a {
+    text-decoration: none !important;
+    border-bottom: 1px solid var(--primary); /* စာသားအောက်မှာပဲ မျဉ်းတားမည် */
+    display: inline !important; /* 🔥 တစ်ကြောင်းလုံး မျဉ်းမတားစေရန် inline ထားရမည် */
+    color: var(--primary);
+}
+
 /* --- Simple Code Snippet Box --- */
 .code-snippet-box {
   background-color: #f6f3f2; /* 🔥 ပုံထဲကလို ခပ်ဖျော့ဖျော့ နောက်ခံအရောင် */
@@ -1300,11 +1326,27 @@ body.dark-theme .nerd-note-box {
 .code-snippet-box pre {
   font-family: "Courier New", Courier, monospace; /* 🔥 Terminal စာလုံးပုံစံ */
   font-size: 1rem;
-  color: #000; /* စာသား အနက်ရောင် */
+  color: #2d3436; 
   margin: 0;
   white-space: pre-wrap; /* စာကြောင်းရှည်ရင် အလိုအလျောက် အောက်ဆင်းရန် */
   line-height: 1.6; /* စာကြောင်းအကွာအဝေး */
+  text-decoration: none !important; /* 🔥 မျဉ်းသားခြင်းကို ပိတ်မည် */
+    border: none !important;
 }
+
+/* code box ထဲမှာ ရှိသမျှ span တွေ link တွေကို underline ဖြုတ်မည် */
+.code-snippet-box pre span,
+.code-snippet-box pre a,
+.code-snippet-box pre * {
+    text-decoration: none !important;
+    border-bottom: none !important;
+    display: inline !important; /* 🔥 အရေးကြီးသည် */
+    box-shadow: none !important;
+}
+
+.code-tag { color: #d63384; font-weight: bold; }
+.code-comment { color: #636e72; font-style: italic; }
+.code-string { color: #0984e3; }
 
 /* Dark Mode အတွက် ချိန်ညှိခြင်း */
 body.dark-theme .code-snippet-box {
@@ -1505,4 +1547,73 @@ body.dark-theme .legacy-lore-box {
 body.dark-theme .lore-badge {
     background-color: #1e293b;
     border-color: #334155;
+}
+
+/* --- Connect the Dots Box Style --- */
+.connect-dots-container {
+    position: relative;          /* အဝိုင်းလေးကို နေရာချရန် အခြေခံ */
+    background-color: #f8fafc;   /* နောက်ခံ ခဲရောင်နု */
+    border-left: 12px solid #58a65c; /* ဘယ်ဘက်က အစိမ်းရောင်လိုင်းအထူး */
+    padding: 30px 25px 20px 30px;
+    margin: 50px 0 30px 0;       /* အပေါ်က အဝိုင်းအတွက် နေရာချန်ထားခြင်း */
+    border-radius: 0 8px 8px 0;  /* ညာဘက်ထောင့်များကိုသာ ဝိုင်းမည် */
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+}
+
+/* ထောင့်က အစိမ်းရောင် အဝိုင်းလေး */
+.floating-dot {
+    position: absolute;
+    top: -22px;      /* အပေါ်ဘောင်ကို ဖြတ်တက်ရန် */
+    left: -26px;     /* ဘယ်ဘက်ဘောင်အထူးပေါ်တွင် တင်ရန် */
+    width: 44px;
+    height: 44px;
+    background-color: #58a65c; /* အစိမ်းရောင် */
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+/* အဝိုင်းထဲက အဖြူရောင် အစက်လေး (Pseudo-element သုံးထားသည်) */
+.floating-dot::after {
+    content: "";
+    width: 14px;
+    height: 14px;
+    background-color: white;
+    border-radius: 50%;
+}
+
+.connect-dots-container h4 {
+    color: #475569;
+    font-weight: 800;
+    font-size: 0.95rem;
+    margin-bottom: 15px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.connect-dots-container p {
+    margin: 0;
+    line-height: 1.8;
+    color: #334155;
+}
+
+/* --- Inline Code Style (<a> စာသားလေးအတွက်) --- */
+code {
+    background-color: #ffffff;
+    color: #c0392b;
+    border: 1px solid #ddd;
+    padding: 2px 6px;
+    border-radius: 6px;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+/* Dark Mode အတွက် ချိန်ညှိချက် */
+body.dark-theme .connect-dots-container {
+    background-color: #1e293b;
+    border-left-color: #4caf50;
+}
+body.dark-theme .floating-dot::after {
+    background-color: #1e293b; /* Dark mode တွင် အထဲကအစက်ကို နောက်ခံအရောင်ပြောင်းမည် */
 }

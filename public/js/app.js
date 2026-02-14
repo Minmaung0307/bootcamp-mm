@@ -4623,13 +4623,26 @@ async function saveMultiCourseGrades(uid, courseId) {
   }
 }
 
-function toggleAccordion(id) {
-  var x = document.getElementById(id);
-  if (x.style.display === "none" || x.style.display === "") {
-    x.style.display = "block";
-  } else {
-    x.style.display = "none";
-  }
+// --- Upgraded Hint Accordion ---
+function toggleAccordion(btn, id) {
+    const el = document.getElementById(id);
+    const span = btn.querySelector('span'); // ခလုတ်ထဲက စာသားကိုယူမည်
+
+    if (!el.style.maxHeight || el.style.maxHeight === "0px") {
+        // ပွင့်လာစေရန်
+        el.style.display = "block";
+        el.style.maxHeight = el.scrollHeight + "px";
+        el.style.padding = "20px";
+        span.innerText = "HIDE HINT"; // 🔥 စာသားပြောင်းမည်
+        btn.classList.add('active');
+    } else {
+        // ပိတ်သွားစေရန်
+        el.style.maxHeight = "0px";
+        el.style.padding = "0 20px";
+        span.innerText = "SHOW HINT"; // 🔥 စာသားမူလအတိုင်းပြန်ထားမည်
+        btn.classList.remove('active');
+        setTimeout(() => { if(el.style.maxHeight === "0px") el.style.display = "none"; }, 400);
+    }
 }
 
 // အဖြေကို ပိတ်/ဖွင့် လုပ်ပေးမည့် function
