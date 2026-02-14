@@ -20,4 +20,316 @@
     </div>
   </div>
 
+  <section>
+    <h1>1.2.1: Introduction</h1>
+    <p>ရှေ့မဆက်ခင် ကိုယ့်ကိုယ်ကိုယ် ချီးကျူးလိုက်ပါဦး! Website တစ်ခုလုံး တည်ဆောက်နိုင်ဖို့အတွက် မင်းအများကြီး ပြင်ဆင်ပြီးသွားပါပြီ။</p>
+
+    <p>ပြီးခဲ့တဲ့ သင်ခန်းစာမှာ မင်းလုပ်ခဲ့တဲ့ အရေးကြီးဆုံး အဆင့်တစ်ခုကတော့ <strong>content</strong> အမျိုးမျိုးကို ထည့်ဖို့အတွက် <strong>"containers"</strong> (ခေါ်) <strong>divs</strong> တွေကို တည်ဆောက်ခဲ့တာပါ။ ဒီသင်ခန်းစာမှာတော့ အဲ့ဒီ <strong>divs</strong> တွေကြောင့် တစ်ခုနဲ့တစ်ခု ရောကုန်မှာ မစိုးရိမ်ရဘဲ <strong>section</strong> တစ်ခုချင်းစီကို စိတ်ကြိုက် <strong>content</strong> တွေ၊ <strong>style</strong> တွေ ဘယ်လိုထည့်မလဲဆိုတာကို တွေ့ရမှာပါ။</p>
+
+    <p>အောက်ကပုံကတော့ အခုထိ မင်းတည်ဆောက်ထားတဲ့ ပုံစံပါ -</p>
+
+    <img
+      src="assets/bootcamp-mm/050-html-screenshot.jpg"
+      class="lms-img img-m"
+      alt="Dashboard Preview"
+    />
+
+    <p><em>(အဖြူရောင်နောက်ခံမှာ စာသားတွေပဲ ပါဝင်တဲ့ Run Buddy Layout ပုံ)</em></p>
+    <h2>ဒီသင်ခန်းစာကနေ ဘာတွေတတ်မြောက်မလဲ?</h2>
+    <p>အခုရှိနေတဲ့ ဒီဇိုင်းကို အခြေခံပြီး အောက်ပါအချက်တွေကို လုပ်ဆောင်သွားမှာပါ -</p>
+    <ul>
+      <li><strong>HTML</strong> နဲ့ <strong>CSS documents</strong> တွေကို ချိတ်ဆက်ဖို့ <strong>relative paths</strong> တွေကို သုံးမယ်။</li>
+      <li>သတ်မှတ်ထားတဲ့ <strong>HTML elements</strong> တွေကို <strong>style</strong> သတ်မှတ်ပေးဖို့ <strong>CSS selectors</strong> တွေကို သုံးမယ်။</li>
+      <li><strong>Webpage</strong> တစ်ခုအတွက် <strong>header</strong> နဲ့ <strong>footer components</strong> တွေကို တည်ဆောက်မယ်။</li>
+      <li><strong>HTML elements</strong> တွေအကြောင်း အသေးစိတ် အချက်အလက်တွေ ဖော်ပြဖို့ <strong>HTML attributes</strong> တွေကို သုံးမယ်။</li>
+    </ul>
+  </section>
+
+  <section>
+   <h1>1.2.2: Preview</h1>
+    <p>ဒီသင်ခန်းစာမှာ Website ရဲ့ <strong>header</strong> နဲ့ <strong>footer</strong> ကို <strong>content</strong> တွေထည့်ပြီး <strong>style</strong> ပြင်သွားမှာပါ။ အားလုံးပြီးသွားရင်တော့ <strong>landing page</strong> က အရင်ကပြထားတဲ့ ပုံစံအတိုင်း ဖြစ်သွားပါလိမ့်မယ်။</p>
+
+    <p><em>(Header နဲ့ Footer ကို Style သွင်းပြီးသား Run Buddy Landing Page ပုံ)</em></p>
+    <p>ပုံမှန်အားဖြင့် Website တစ်ခုရဲ့ <strong>header</strong> နဲ့ <strong>footer</strong> ဟာ <strong>style</strong> ပုံစံချင်း တူတတ်တာကြောင့် တစ်ခါတည်း တွဲလုပ်တာက ပိုအဆင်ပြေပါတယ်။ သူတို့ဟာ Website တိုင်းရဲ့ အဓိကကျတဲ့ နေရာတွေ (anchors) ဖြစ်ပြီး <strong>branding</strong> (အမှတ်တံဆိပ်) နဲ့ <strong>navigation</strong> (မီနူးများ) ကို ပြသပေးတဲ့ အရေးကြီးတဲ့ အစိတ်အပိုင်းတွေပဲ ဖြစ်ပါတယ်။</p>
+
+    <p>ဒါကို လုပ်ဆောင်ဖို့အတွက် အောက်ပါအဆင့်တွေကို လိုက်နာသွားပါမယ် -</p>
+    <ul>
+      <li><strong>Header ထဲကို content ထည့်ခြင်း:</strong> HTML page ရဲ့ section တစ်ခုချင်းစီအတွက် <strong>navigation links</strong> တွေကို ထည့်ပါမယ်။</li>
+      <li><strong>CSS basics ကို လေ့လာခြင်း:</strong> <strong>Cascading Style Sheets (CSS)</strong> က HTML ကို ဘယ်လို လှပအောင် လုပ်ပေးလဲဆိုတာနဲ့ သူ့ရဲ့ <strong>syntax</strong> (ရေးသားပုံစံ) ကို သင်ယူပါမယ်။</li>
+      <li><strong>Style sheet ကို တည်ဆောက်ခြင်း:</strong> Run Buddy ရဲ့ အပြင်အဆင်ကို ပြောင်းလဲပေးမယ့် <strong>CSS rules</strong> တွေ ထည့်ဖို့ <strong>style sheet</strong> တစ်ခု ဆောက်ပါမယ်။</li>
+      <li><strong>အခြေခံ CSS styles များ ထည့်သွင်းခြင်း:</strong> Header အတွက် စတင်ရေးသားပြီး <strong>CSS Box Model</strong> က element တွေရဲ့ <strong>margins, borders</strong> နဲ့ <strong>padding</strong> တွေကို ဘယ်လို ထိန်းချုပ်လဲဆိုတာ လေ့လာပါမယ်။</li>
+      <li><strong>အသေးစိတ် CSS styles များ ထည့်သွင်းခြင်း:</strong> Header ကို mock-up ပုံစံအတိုင်း ဖြစ်သွားအောင် အသေးစိတ် <strong>CSS rules</strong> တွေ သုံးပါမယ်။</li>
+      <li><strong>Footer အတွက် HTML ကို ပြင်ဆင်ခြင်း:</strong> Footer ရဲ့ <strong>structure</strong> ကို HTML နဲ့ ရေးပါမယ်။</li>
+      <li><strong>Footer ကို Design ဆွဲခြင်း:</strong> <strong>CSS rules</strong> တွေကို သုံးပြီး Footer ကို mock-up အတိုင်း လှပအောင် လုပ်ပါမယ်။</li>
+    </ul>
+    <p>ဒါတွေအားလုံးက လက်တွေ့လုပ်ကြည့်မှ ပိုတတ်မှာဖြစ်လို့ အခုပဲ စတင်လိုက်ရအောင်!</p>
+  </section>
+
+  <section>
+    <h3>1.2.3: Header ထဲကို Content ထည့်ခြင်း</h3>
+    <p>အခု ကျွန်တော်တို့ <code>&lt;header&gt;</code> <strong>element</strong> ထဲကို ခေတ်မီ Website တိုင်းမှာ ပါလေ့ရှိတဲ့ <strong>Branding</strong> နဲ့ <strong>Navigation</strong> ဆိုတဲ့ အရေးကြီးတဲ့ အပိုင်းနှစ်ခုကို စပြီး ထည့်ပါမယ်။</p>
+
+    <p>ဒီအစိတ်အပိုင်းနှစ်ခုကို <strong>header</strong> နဲ့ <strong>footer</strong> တွေမှာ အမြဲထည့်လေ့ရှိပါတယ်။ ဒါမှ Website ရဲ့ ဘယ်စာမျက်နှာကိုပဲရောက်ရောက် ပုံစံတစ်မျိုးတည်း (<strong>uniform</strong>) ဖြစ်နေမှာပါ။ ဥပမာ - မင်းရင်းနှီးတဲ့ Website တစ်ခုရဲ့ အပေါ်ဆုံးပိုင်းဟာ ဘယ်စာမျက်နှာသွားသွား ပုံစံတူနေတာကို တွေ့ရပါလိမ့်မယ်။ အဲ့ဒါဟာ <strong>branding</strong> ပါပဲ။ တခြားစာမျက်နှာကို သွားချင်ရင် ရှာရမယ့် မီနူး (<strong>menu</strong>) ကလည်း အပေါ် ဒါမှမဟုတ် အောက်မှာပဲ ရှိနေမှာပါ။ အဲ့ဒါကတော့ <strong>navigation</strong> ပါ။</p>
+
+    <h3>Add Branding (အမှတ်တံဆိပ် ထည့်ခြင်း)</h3>
+    <p><strong>Branding</strong> ဆိုတာ ကုမ္ပဏီတစ်ခုရဲ့ <strong>logo</strong>၊ အရောင်တွေနဲ့ အထွေထွေဟန်ပန် (<strong>brand</strong>) ကို ဆိုလိုတာပါ။ ဥပမာ - <strong>Amazon</strong> ရဲ့ လိမ္မော်ရောင်မြှားကို မြင်တာနဲ့ ဒါ Amazon ပဲဆိုတာ သိနိုင်သလိုမျိုးပေါ့။</p>
+
+    <p>ကျွန်တော်တို့ Lesson 1 တုန်းက <code>&lt;header&gt;</code> ထဲမှာ <code>&lt;h1&gt;RUN BUDDY&lt;/h1&gt;</code> ထည့်ခဲ့တာဟာ <strong>branding</strong> ကို စတင်လုပ်ဆောင်ခဲ့တာပါပဲ။ ဒါကြောင့် Website ရဲ့ အပေါ်ဆုံးမှာ <strong>Run Buddy</strong> ဆိုတဲ့ နာမည်ကို အမြဲပေါ်နေစေမှာ ဖြစ်ပါတယ်။ ဒီသင်ခန်းစာရဲ့ နောက်ပိုင်းမှာတော့ ဒါကို <strong>CSS style</strong> တွေနဲ့ ပိုလှအောင် ပြင်သွားပါမယ်။</p>
+
+    <h3>Add Navigation</h3>
+    <p>Branding အတွက် Content တွေ ထည့်ပြီးပြီဆိုတော့ <strong>Navigation</strong> (မီနူး) ပိုင်းကို သွားရအောင်။</p>
+
+    <p><strong>VS Code</strong> ထဲမှာ <code>index.html</code> ကိုဖွင့်ပြီး <code>&lt;h1&gt;</code> ရဲ့ အောက်၊ ပိတ်ထားတဲ့ <code>&lt;/header&gt;</code> tag ရဲ့ အပေါ်မှာ <code>&lt;nav&gt;</code> နဲ့ <code>&lt;/nav&gt;</code> ကို ထည့်ပေးပါ။</p>
+
+    <p>ရေးပြီးရင် အောက်က <strong>HTML</strong> ပုံစံအတိုင်း ဖြစ်နေရပါမယ် -</p>
+
+    <pre style="background-color: #2d2d2d; color: #f8f8f2; padding: 15px; border-radius: 5px; font-family: monospace;">
+    &lt;header&gt;
+    &lt;h1&gt;RUN BUDDY&lt;/h1&gt;
+    &lt;nav&gt;&lt;/nav&gt;
+    &lt;/header&gt;
+    </pre>
+
+    <p><code>&lt;nav&gt;</code> element ဆိုတာ <strong>HTML5</strong> ကနေ စတင်မိတ်ဆက်ပေးခဲ့တဲ့ <strong>semantic element</strong> တစ်ခုပါ။ <strong>Semantic elements</strong> တွေဟာ သူတို့ထဲမှာ ဘယ်လိုအချက်အလက်တွေ ပါဝင်လဲဆိုတာကို အမည်အားဖြင့် ဖော်ပြပေးနိုင်တဲ့အတွက် <strong>Accessibility</strong> နဲ့ <strong>SEO</strong> အတွက် အများကြီး အထောက်အကူဖြစ်စေပါတယ်။</p>
+
+    <ul>
+      <li><strong>Accessibility:</strong> ဒါကတော့ အမြင်အာရုံ ဒါမှမဟုတ် အကြားအာရုံ ချို့တဲ့သူတွေအတွက် <strong>screen readers</strong> လိုမျိုး အထောက်အကူပြု နည်းပညာတွေကနေ Website ရဲ့ အကြောင်းအရာကို သေသေချာချာ ရှင်းပြနိုင်အောင် <strong>HTML elements</strong> တွေကို စနစ်တကျ ရေးသားတဲ့ နည်းလမ်းပါ။</li>
+      <li><strong>SEO (Search Engine Optimization):</strong> Website ကို လူကြည့်များအောင်နဲ့ <strong>Google</strong> လိုမျိုး <strong>search engine</strong> တွေမှာ ရှာလိုက်ရင် ထိပ်ဆုံးမှာ ပေါ်လာအောင် လုပ်တဲ့ လုပ်ငန်းစဉ်ပါ။</li>
+    </ul>
+
+    <div class="deep-dive-btn" onclick="toggleDeepDive(this)" style="margin-top:20px;">
+        <p><strong>DEEP DIVE</strong></p>
+        <i class="fas fa-chevron-down"></i>
+    </div>
+    <div class="accordion-body">
+        <p>Website တွေမှာ <strong>Accessibility</strong> ကောင်းအောင် လုပ်ဖို့ နည်းလမ်းတွေ အများကြီး ရှိတဲ့အထဲက အလွယ်ဆုံးကတော့ <strong>HTML5</strong> ရဲ့ <strong>semantic elements</strong> တွေကို သုံးတာပါပဲ။ <strong>HTML5</strong> မတိုင်ခင်တုန်းကတော့ Website တစ်ခုလုံးမှာရှိတဲ့ <strong>Content</strong> တွေ အကုန်လုံးအတွက် <code>&lt;div&gt;</code> element တစ်ခုတည်းကိုပဲ သုံးခဲ့ကြပါတယ်။ ဒါကြောင့် <strong>Developers</strong> တွေဟာ <strong>screen readers</strong> တွေ အဓိပ္ပာယ်ဖော်နိုင်ဖို့ အပင်ပန်းခံပြီး သီးသန့် လုပ်ဆောင်ပေးခဲ့ရပါတယ်။</p>
+
+        <p>အခုတော့ <code>&lt;header&gt;</code>, <code>&lt;footer&gt;</code>, နဲ့ <code>&lt;nav&gt;</code> တို့ဟာ <code>&lt;div&gt;</code> လိုပဲ အလုပ်လုပ်ပေမဲ့ သူတို့ထဲမှာ ဘာတွေပါဝင်လဲဆိုတာကို <strong>Browser</strong> ကို တိုက်ရိုက်ပြောပြနိုင်တဲ့ အဓိပ္ပာယ်ရှိတဲ့ နာမည်တွေ ပါဝင်လာပါတယ်။</p>
+    </div>
+
+    <h3>Navigation ကို List နဲ့ စီစဉ်ခြင်း</h3>
+    <p>Navigation ကို စီစဉ်တဲ့နေရာမှာ link တွေကို စာရင်း (list) အနေနဲ့ ပြတာက လူသုံးအများဆုံး နည်းလမ်းတစ်ခုပါ။</p>
+
+    <p>မင်းစောစောက ဆောက်ခဲ့တဲ့ <code>&lt;nav&gt;</code> tag ရဲ့ အနောက်မှာ အောက်က <strong>code</strong> တွေကို ရိုက်ထည့်လိုက်ပါ -</p>
+
+    <pre style="background-color: #2d2d2d; color: #f8f8f2; padding: 15px; border-radius: 5px; font-family: monospace;">
+    &lt;!-- Unordered list element --&gt;
+    &lt;ul&gt;
+    &lt;!-- List item element--&gt;
+    &lt;li&gt;
+    &lt;!-- Anchor element --&gt;
+    &lt;a href="#what-we-do"&gt;What We Do&lt;/a&gt;
+    &lt;/li&gt;
+    &lt;li&gt;
+    &lt;a href="#what-you-do"&gt;What You Do&lt;/a&gt;
+    &lt;/li&gt;
+    &lt;li&gt;
+    &lt;a href="#your-trainers"&gt;Your Trainers&lt;/a&gt;
+    &lt;/li&gt;
+    &lt;li&gt;
+    &lt;a href="#reach-out"&gt;Reach Out&lt;/a&gt;
+    &lt;/li&gt;
+    &lt;/ul&gt;
+    </pre>
+
+    <p>အခုရေးလိုက်တဲ့ <strong>Code</strong> တွေက ဘာတွေလဲဆိုတာ တစ်ခုချင်းစီ ခွဲကြည့်ရအောင်။</p>
+
+    <h3>HTML ရဲ့ List အမျိုးအစားများ</h3>
+    <p>HTML မှာ စာရင်း (List) ပြချင်ရင် အမျိုးအစား ၂ ခု ရှိပါတယ် -</p>
+    <ul>
+      <li><strong>Ordered lists (`&lt;ol&gt;`)</strong>: နံပါတ်စဉ်တွေ (1, 2, 3) နဲ့ အစဉ်လိုက် ပြချင်တဲ့အခါ သုံးပါတယ်။</li>
+      <li><strong>Unordered lists (`&lt;ul&gt;`)</strong>: နံပါတ်စဉ် မလိုဘဲ အစက်လေးတွေ (bullet points) ဒါမှမဟုတ် လေးထောင့်ကွက်လေးတွေနဲ့ပဲ စာရင်းပြချင်ရင် သုံးပါတယ်။</li>
+    </ul>
+
+    <p>ဒီ <strong>List</strong> တွေထဲမှာ ပါဝင်မယ့် အချက်အလက် တစ်ခုချင်းစီကိုတော့ <strong>List item (`&lt;li&gt;`)</strong> tag နဲ့ ရေးရပါတယ်။</p>
+
+    <h3>Parent/Child Relationship (မိဘနှင့် သားသမီး ဆက်နွယ်မှု)</h3>
+    <p>HTML မှာ <strong>Parent/Child relationship</strong> ဆိုတာ ရှိပါတယ်။</p>
+    <ul>
+      <li><code>&lt;ul&gt;</code> ဒါမှမဟုတ် <code>&lt;ol&gt;</code> က <strong>Parent</strong> (မိဘ) ဖြစ်ပါတယ်။</li>
+      <li>သူ့ထဲမှာ ထည့်ထားတဲ့ <code>&lt;li&gt;</code> ကတော့ <strong>Child</strong> (သားသမီး) ဖြစ်ပါတယ်။</li>
+    </ul>
+
+    <p>ဆိုလိုတာက <code>&lt;li&gt;</code> (သားသမီး) တွေကို <strong>Parent</strong> ရဲ့ tag အဖွင့်နဲ့ အပိတ်ကြားထဲမှာပဲ စနစ်တကျ ထည့်သွင်း (nest) ရမှာဖြစ်ပါတယ်။</p>
+
+    <h3>Anchor Elements (<a>) နှင့် Attributes</h3>
+    <p><code>&lt;li&gt;</code> element ထဲမှာ ကြိုက်တဲ့အရာကို ထည့်လို့ရပါတယ်။ အခုကတော့ တစ်နေရာကနေ တစ်နေရာကို ချိတ်ဆက်ပေးမယ့် <strong>Anchor element (<code>&lt;a&gt;</code>)</strong> ကို သုံးပြီး <strong>Links</strong> တွေ ဖန်တီးလိုက်တာပါ။ ဒီ link တွေကို နှိပ်လိုက်ရင် အောက်ပါနေရာတွေကို ရောက်သွားနိုင်ပါတယ် -</p>
+
+    <ul>
+      <li>ဒီစာမျက်နှာထဲက တခြားနေရာတစ်ခု။</li>
+      <li>ကိုယ့် website ထဲမှာရှိတဲ့ တခြား HTML page တစ်ခု။</li>
+      <li>တခြား website တစ်ခုခု (ဥပမာ - Google)။</li>
+    </ul>
+
+    <div style="background-color: #e8f4fd; padding: 15px; border-radius: 5px; border-left: 5px solid #2196f3; margin: 15px 0;">
+    <strong>Connect the Dots</strong>
+    <p>HTML (Hypertext Markup Language) ရဲ့ "Hypertext" ဆိုတာ တခြားဆီကို ချိတ်ဆက်ပေးထားတဲ့ စာသားကို ပြောတာပါ။ ဒါကြောင့် <code>&lt;a&gt;</code> tag ဟာ HTML ရဲ့ အနှစ်သာရတစ်ခုလို့ ပြောလို့ရပါတယ်။</p>
+    </div>
+
+    <p>အောက်က <strong>Code</strong> နမူနာကို ကြည့်ပါ -</p>
+
+    <pre style="background-color: #2d2d2d; color: #f8f8f2; padding: 15px; border-radius: 5px;">
+    &lt;!-- Google ကို သွားမယ့် link --&gt;
+    &lt;a href="https://google.com"&gt;Go to Google&lt;/a&gt;
+    <!-- ကိုယ့် website ထဲက တခြား page ကို သွားမယ့် link -->
+    <a href="./privacy-policy.html">View Our Privacy Policy</a>
+    </pre>
+
+    <h3>Attributes (ဂုဏ်သတ္တိများ)</h3>
+    <p>အပေါ်က code မှာ <code>href=</code> ဆိုတာကို သတိထားမိမှာပါ။ ဒါကို <strong>HTML Attribute</strong> လို့ ခေါ်ပါတယ်။ <strong>Attributes</strong> တွေဟာ HTML element တစ်ခုကို -</p>
+
+    <ul>
+      <li>သီးသန့် နာမည်ပေးဖို့ (Identity)။</li>
+      <li>တခြား element တွေနဲ့ ချိတ်ဆက်ဖို့။</li>
+      <li><strong>CSS</strong> သုံးပြီး ဒီဇိုင်းပြင်ဖို့အတွက် သုံးပါတယ်။</li>
+    </ul>
+
+    <p>အချို့ element တွေအတွက် attributes တွေက မရှိမဖြစ် လိုအပ်ပါတယ်။ ဥပမာ - <code>&lt;a&gt;</code> tag မှာ <code>href</code> (သွားရမယ့် လိပ်စာ) မပါရင် link က အလုပ်လုပ်မှာ မဟုတ်ပါဘူး။</p>
+
+    <p>အသုံးအများဆုံး <strong>Attributes</strong> များမှာ -</p>
+    <ul>
+      <li><strong>id:</strong> Element တစ်ခုချင်းစီကို ပေးတဲ့ သီးသန့်နာမည်ပါ။ Page တစ်ခုလုံးမှာ တစ်ခုပဲ ရှိရပါမယ်။ (Unique identifier)</li>
+      <li><strong>class:</strong> Element အုပ်စုလိုက်ကို နာမည်ပေးတာပါ။ ပုံစံတူချင်တဲ့ နေရာတွေမှာ နာမည်တစ်ခုတည်းကို အကြိမ်ကြိမ် ပြန်သုံးလို့ ရပါတယ်။</li>
+      <li><strong>title:</strong> Mouse ကို link ပေါ် တင်ထားလိုက်တဲ့အခါ ပေါ်လာမယ့် စာတိုလေး (Tool-tip) ကို သတ်မှတ်တာပါ။</li>
+    </ul>
+
+    <div class="deep-dive-btn" onclick="toggleDeepDive(this)" style="margin-top:20px;">
+        <p><strong>DEEP DIVE</strong></p>
+        <i class="fas fa-chevron-down"></i>
+    </div>
+    <div class="accordion-body">
+        <p><strong>HTML attributes</strong> တွေအကြောင်း ပိုသိချင်ရင် <strong>MDN Web Docs</strong> မှာ သွားရောက်ဖတ်ရှုနိုင်ပါတယ်။ ဒီစာမျက်နှာကို <strong>Bookmark</strong> လုပ်ထားဖို့လည်း အကြံပြုပါရစေ။</p>
+    </div>
+
+    <h3>Internal Links (စာမျက်နှာအတွင်း ခုန်ကူးခြင်း)</h3>
+    <p>ကျွန်တော်တို့ <strong>Navigation</strong> မှာ ထည့်ခဲ့တဲ့ <code>href</code> <strong>attributes</strong> တွေက လက်ရှိ <strong>page</strong> ထဲမှာတင် တစ်နေရာကနေ တစ်နေရာကို ခုန်ကူး (Jump) ဖို့ သုံးတာပါ။</p>
+
+    <ul>
+      <li><code>href="#what-we-do"</code> လို့ ရေးလိုက်ရင် <strong>Browser</strong> က အဲ့ဒီ <code>&lt;a&gt;</code> ကို နှိပ်လိုက်တဲ့အခါ စာမျက်နှာထဲမှာ <code>id="what-we-do"</code> လို့ ပေးထားတဲ့ <strong>Element</strong> ကို လိုက်ရှာပါလိမ့်မယ်။</li>
+      <li>မှတ်ထားရမှာက Link ချိတ်တဲ့အခါ <strong>Hashtag (#)</strong> လေးကို နာမည်ရှေ့မှာ ထည့်ပေးရမှာပါ။ (အဲ့ဒီ <code>id</code> တွေကိုတော့ မကြာခင်မှာ ထည့်သွားပါမယ်။)</li>
+    </ul>
+
+    <h3>Branding ကို Link ချိတ်ခြင်း</h3>
+    <p><strong>Website</strong> တိုင်းမှာ လုပ်လေ့ရှိတဲ့ <strong>Best Practice</strong> တစ်ခုကတော့ Website ရဲ့ <strong>Branding/Logo</strong> ကို နှိပ်လိုက်ရင် <strong>Homepage</strong> ကို ပြန်ရောက်သွားအောင် လုပ်တာပါ။ ဒါကြောင့် <code>&lt;h1&gt;</code> ထဲက စာသားကို အောက်ပါအတိုင်း <code>&lt;a&gt;</code> နဲ့ ပတ်လိုက်ရအောင် -</p>
+
+    <pre style="background-color: #2d2d2d; color: #f8f8f2; padding: 15px; border-radius: 5px; font-family: monospace;">
+    &lt;h1&gt;
+    &lt;a href="/"&gt;RUN BUDDY&lt;/a&gt;
+    &lt;/h1&gt;
+    </pre>
+
+    <p>ဒီမှာ သုံးထားတဲ့ <strong>Forward slash ("/")</strong> ဆိုတာ <strong>Project</strong> တစ်ခုလုံးရဲ့ အမြင့်ဆုံး <strong>Directory</strong> (Main Folder) ကို ကိုယ်စားပြုပါတယ်။ အသုံးပြုသူက ဒါကို နှိပ်လိုက်ရင် <strong>Main Folder</strong> ဆီကို ရောက်သွားမှာဖြစ်ပြီး၊ ဖိုင်နာမည် သီးသန့်မပါတဲ့အတွက် <strong>index.html</strong> ဖိုင်ကပဲ အလိုအလျောက် ပွင့်လာမှာ ဖြစ်ပါတယ်။</p>
+
+    <div class="callout-box">
+      <div class="callout-icon bg-rewind"><i class="fas fa-backward"></i></div>
+      <div class="callout-content">
+        <h4>REWIND</h4>
+        <p>အရင်သင်ခန်းစာမှာ ပြောခဲ့တာကို ပြန်သတိရကြည့်ပါ။ ကွန်ပျူတာဟာ ဖိုင်နာမည် တိတိကျကျ မပါရင် <strong>"index" page</strong> ကိုပဲ အရင်ဆုံး ရှာဖွေပေးတာပါ။ ဒါကြောင့်ပဲ <strong>Web development</strong> မှာ <strong>Homepage</strong> ရဲ့ ဖိုင်နာမည်ကို <strong>index.html</strong> လို့ ပေးရတာ ဖြစ်ပါတယ်။</p>
+      </div>
+    </div>
+
+    <p>အခုဆိုရင် မင်းရဲ့ <code>&lt;header&gt;</code> ထဲက <strong>Code</strong> တွေဟာ အောက်ပါအတိုင်း ဖြစ်နေပါပြီ။ မင်းတို့ အဆင်သင့်ဖြစ်ပြီဆိုရင် ဒီ <strong>Landing page</strong> ကို လှပအောင် စပြီး ပြင်ဆင်ကြရအောင်!</p>
+
+    <p>အခုဆိုရင် မင်းရဲ့ <code>&lt;header&gt;</code> ထဲမှာ <strong>Branding</strong> (စာသား link) နဲ့ <strong>Navigation</strong> (မီနူးစာရင်း) တွေ ပြည့်ပြည့်စုံစုံ ပါသွားပါပြီ။ <strong>Code</strong> ပုံစံကတော့ အောက်ပါအတိုင်း ဖြစ်နေရပါမယ် -</p>
+
+    <pre style="background-color: #2d2d2d; color: #f8f8f2; padding: 15px; border-radius: 5px; font-family: monospace;">
+    &lt;header&gt;
+    &lt;h1&gt;
+    &lt;a href="/"&gt;RUN BUDDY&lt;/a&gt;
+    &lt;/h1&gt;
+    &lt;nav&gt;
+    &lt;ul&gt;
+    &lt;li&gt;&lt;a href="#what-we-do"&gt;What We Do&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href="#what-you-do"&gt;What You Do&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href="#your-trainers"&gt;Your Trainers&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href="#reach-out"&gt;Reach Out&lt;/a&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+    &lt;/nav&gt;
+    &lt;/header&gt;
+    </pre>
+
+    <div class="deep-dive-btn" onclick="toggleDeepDive(this)" style="margin-top:20px;">
+        <p><strong>DEEP DIVE</strong></p>
+        <i class="fas fa-chevron-down"></i>
+    </div>
+    <div class="accordion-body">
+      <p>အခုသုံးခဲ့တဲ့ <strong>HTML elements</strong> တွေအကြောင်း အသေးစိတ်ကို <strong>MDN Web Docs</strong> မှာ ဖတ်ရှုနိုင်ပါတယ် -</p>
+      <ul>
+        <li><a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/a" target="_blank"><strong>Anchor element (&lt;a&gt;)</strong></a></li>
+        <li><a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/Heading_Elements" target="_blank"><strong>Heading elements (&lt;h1&gt;–&lt;h6&gt;)</strong></a></li>
+        <li><a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/nav" target="_blank"><strong>Navigation element (&lt;nav&gt;)</strong></a></li>
+        <li><a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/ul" target="_blank"><strong>Unordered list element (&lt;ul&gt;)</strong></a></li>
+        <li><a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/li" target="_blank"><strong>List item element (&lt;li&gt;)</strong></a></li>
+      </ul>
+    </div>
+
+    <h2>Commit to Git and Push to GitHub</h2>
+    <p>အလုပ်တွေ တော်တော်လေး လုပ်ပြီးသွားပြီဖြစ်လို့ အခုလုပ်ထားတာတွေကို မပျောက်အောင် <strong>GitHub</strong> ပေါ် <strong>Push</strong> လုပ်ပြီး သိမ်းလိုက်ရအောင်။</p>
+
+    <h3>Git Commands များ ပြန်လည်နွေးထည့်ခြင်း</h3>
+    <p><strong>Terminal</strong> သို့မဟုတ် <strong>Git Bash</strong> ကိုဖွင့်ပြီး အောက်ပါ <strong>commands</strong> တွေကို အစဉ်လိုက် ရိုက်ထည့်ပါ -</p>
+
+    <ol>
+      <li>
+      <strong><code>git add -A</code></strong> သို့မဟုတ် <strong><code>git add .</code></strong> :
+      <p>ပြင်ဆင်လိုက်တဲ့ <strong>Code</strong> တွေနဲ့ ဖိုင်အသစ်တွေကို <strong>Git</strong> က မှတ်သားနိုင်အောင် လုပ်တာဖြစ်ပါတယ်။</p>
+      </li>
+      <li>
+      <strong><code>git commit -m "add navigation and branding links"</code></strong> :
+      <p>ဘာတွေ ပြောင်းလဲလိုက်လဲဆိုတာကို <strong>note</strong> ရေးပြီး မှတ်တိုင် (<strong>save point</strong>) တစ်ခု အနေနဲ့ သိမ်းလိုက်တာပါ။</p>
+      </li>
+      <li>
+      <strong><code>git push origin main</code></strong> :
+      <p>ကိုယ့်စက်ထဲက <strong>Code</strong> တွေကို <strong>GitHub remote server</strong> ပေါ် တင်လိုက်တာ ဖြစ်ပါတယ်။</p>
+      </li>
+    </ol>
+
+    <p>ဒါဆိုရင် မင်းရဲ့ အလုပ်တွေဟာ အင်တာနက်ပေါ်မှာ လုံလုံခြုံခြုံ ရှိသွားပါပြီ!</p>
+
+    <div class="lms-accordion" onclick="toggleAccordion('hint-1')">
+      <i class="fas fa-comment-dots"></i> <span>SHOW HINT</span>
+    </div>
+    <div id="hint-1" class="accordion-body">
+      <p><strong>git add</strong> နဲ့ <strong>git commit</strong> command နှစ်ခုဟာ locally မှာ ကိုယ်ဘာတွေသိမ်းမယ်ဆိုတာနဲ့ ဘာကြောင့်သိမ်းတယ်ဆိုတာကို Git ကို အရင်ပြောပြတာပါ။ GitHub ပေါ် <strong>push</strong> မလုပ်ခင် ဒီအဆင့်နှစ်ခုကို (ဒီအတိုင်းအစဉ်လိုက်) အရင်ဆုံး လုပ်ရပါမယ်။</p>
+    </div>
+
+    <ul>
+      <li><strong>git push origin main:</strong> မင်းရဲ့ နောက်ဆုံး <strong>commit</strong> ထဲက <strong>code</strong> တွေနဲ့ ဖိုင်အပြောင်းအလဲ အားလုံးကို GitHub ပေါ် တင်ပေးမယ့် command ပါ။</li>
+    </ul>
+
+    <p>အခုဆိုရင် မင်းရဲ့ <strong>code</strong> တွေဟာ ကိုယ့်စက် (locally) မှာရော GitHub (remotely) မှာပါ လုံခြုံသွားပါပြီ။ မင်းရဲ့ GitHub Pages link ဖြစ်တဲ့ <code>&lt;username&gt;.github.io/run-buddy</code> မှာ သွားကြည့်ရင် Browser ထဲမှာ HTML အသစ်တွေ ဘယ်လိုပေါ်နေလဲဆိုတာ မြင်ရပါလိမ့်မယ်။</p>
+
+    <div class="deep-dive-btn" onclick="toggleDeepDive(this)" style="margin-top:20px;">
+        <p><strong>DEEP DIVE</strong></p>
+        <i class="fas fa-chevron-down"></i>
+    </div>
+    <div class="accordion-body">
+        <p>ကျွန်တော်တို့ <strong>href</strong> တွေမှာ <code>#</code> သင်္ကေတကို သုံးခဲ့တာ သတိထားမိမှာပါ။ ဒါကို programmer တွေက <strong>octothorpe</strong> လို့ ခေါ်ကြပါတယ်။ ဒါဟာ စာမျက်နှာတစ်ခုထဲမှာတင် သတ်မှတ်ထားတဲ့ နေရာကို ခုန်ကူးဖို့ သုံးတာပါ။</p>
+    </div>
+
+    <h2>Website ရဲ့ အသွင်အပြင် (Looks Matter)</h2>
+    <p>အခုထိ ကျွန်တော်တို့ သုံးခဲ့တဲ့ <strong>HTML elements</strong> တွေက အဓိက အချက်နှစ်ချက်ကိုပဲ လုပ်ပေးနိုင်ပါသေးတယ် -</p>
+
+    <ul>
+      <li><strong>Organizing content:</strong> အချက်အလက်တွေကို စနစ်တကျ စီစဉ်ပေးတာ (ဥပမာ- <code>&lt;h1&gt;</code> tags ကြားထဲက စာသားများ)။</li>
+      <li><strong>Providing interactivity:</strong> <strong>Interactivity</strong> (အပြန်အလှန် တုံ့ပြန်မှု) ပေးတာ (ဥပမာ- link တွေကို နှိပ်ရင် တခြားနေရာရောက်အောင် လုပ်ပေးတာ)။</li>
+    </ul>
+
+    <p>ဒါပေမဲ့ အရေးကြီးတာ တစ်ခု ကျန်ပါသေးတယ်၊ အဲ့ဒါက Website ကို <strong>ကြည့်ကောင်းအောင် (Look Good)</strong> လုပ်ဖို့ပါ။</p>
+
+    <p>အရင်တုန်းကတော့ Website ရဲ့ ဒီဇိုင်းပိုင်းကိုပါ <strong>HTML</strong> ကပဲ အကုန်လုပ်ခဲ့ရတာပါ။ အဲ့ဒီတုန်းက <strong>Developers</strong> တွေမှာ ရွေးချယ်စရာ သိပ်မရှိပါဘူး။ စာလုံးအရောင်ပြောင်းတာ၊ နောက်ခံအရောင်ထည့်တာနဲ့ ပုံတွေကို အကြီးအသေးလုပ်တာလောက်ပဲ လုပ်လို့ရပါတယ်။</p>
+
+    <p>ခက်ခဲတဲ့ ဒီဇိုင်းတွေဆိုရင် ပုံတစ်ပုံလုံးကို အပိုင်းအစလေးတွေ အများကြီး ညှပ်၊ ပြီးမှ <strong>HTML table element</strong> ထဲမှာ ပြန်စီပြီး Website ပေါ်မှာ ပုံဖော်ခဲ့ရတာပါ။ ဒါဟာ Microsoft Excel ရဲ့ ဆဲလ်ကွက်တွေထဲမှာ ပုံစုတ်လေးတွေကို လိုက်စီနေရသလိုမျိုး အရမ်းကို ပင်ပန်းတဲ့ အလုပ်ပါ။</p>
+
+    <div class="legacy-lore-box">
+        <!-- အပေါ်ထောင့်က Label လေး -->
+        <div class="lore-badge">LEGACY LORE</div>
+        
+        <!-- အတွင်းစာသား -->
+        <p>အရင်ခေတ်က Website ဒီဇိုင်းတွေက အခုခေတ်နဲ့ယှဉ်ရင် အရမ်းကို ကြည့်ရဆိုးပါတယ်။ ဒါကြောင့်ပဲ ခေတ်မီတဲ့ <strong>Web design</strong> တွေအတွက် <strong>Best practices</strong> (အကောင်းဆုံး လုပ်ဆောင်နည်းတွေ) ပေါ်ပေါက်လာရတာပါ။</p>
+    </div>
+
+    <p><strong>Developer</strong> တွေက ဒီဇိုင်းကို ပိုပြီး ထိန်းချုပ်ချင်လာတဲ့အခါ <strong>HTML</strong> တစ်ခုတည်းနဲ့ မလုံလောက်တော့ဘူးဆိုတာ သိလာကြပါတယ်။ ဒါကြောင့် <strong>HTML</strong> ဆီက ဒီဇိုင်းပိုင်းဆိုင်ရာ ဝန်ထုပ်ဝန်ပိုးတွေကို ခွဲဝေယူဖို့ Language အသစ်တစ်ခု ပေါ်လာခဲ့ပါတယ်၊ အဲ့ဒါကတော့ <strong>CSS</strong> ပဲ ဖြစ်ပါတယ်။</p>
+  </section>
+
 </div>
