@@ -867,36 +867,627 @@
           <strong>Element</strong> တစ်ခု ထပ်ပါနေရင်
           <strong>Indent</strong> (စာကြောင်းအဝင်အထွက်) လုပ်ပေးရပါတယ်။
         </p>
+
+        <h3>Code ကို သပ်သပ်ရပ်ရပ် ရေးသားခြင်း</h3>
+        <p>
+          တကယ်တော့ <strong>HTML</strong> ကို အောက်ကပုံစံအတိုင်း ရေးရင်လည်း
+          <strong>Browser</strong> က အလုပ်လုပ်ပါတယ် -
+        </p>
+        <pre><code>&lt;!DOCTYPE html&gt; &lt;html lang="en"&gt; &lt;head&gt; &lt;meta charset="UTF-8" /&gt;
+        &lt;title&gt;Run Buddy&lt;/title&gt; &lt;/head&gt; &lt;body&gt; &lt;h1&gt;RUN BUDDY&lt;/h1&gt; What We Do &lt;/body&gt;
+        &lt;/html&gt;</code></pre>
+
+        <p>
+          ဒါပေမဲ့ ဒီလိုရေးတာဟာ ဘာတွေရေးထားမှန်း သိဖို့
+          <strong>Sense</strong> လုပ်ရတာ တော်တော်ခက်ပါတယ်။ ဒါကြောင့်
+          <strong>Code</strong> ရေးတဲ့အခါ အမြဲတမ်း
+          <strong>Legible</strong> ဖြစ်အောင် (ဖတ်ရတာ ရှင်းလင်းနေအောင်) ရေးဖို့
+          အလေ့အကျင့် လုပ်ထားပါ။
+        </p>
+        <p>ဒီလိုရေးခြင်းအားဖြင့် -</p>
+
+        <ul>
+          <li>
+            ကိုယ့် <strong>Project</strong> မှာ ဝိုင်းလုပ်မယ့် တခြား
+            <strong>Developers</strong> တွေ ဖတ်ရတာ လွယ်ကူစေပါတယ်။
+          </li>
+          <li>
+            နောက်ရက်မှာ ကိုယ့် <strong>Code</strong> ကို ပြန်ကြည့်တဲ့အခါ
+            ဘာတွေလုပ်ထားသလဲဆိုတာ ချက်ချင်း နားလည်စေပါတယ်။
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h1>Introducing Git</h1>
+    <p><strong>Codebases</strong> တွေကို စနစ်တကျ စီမံခန့်ခွဲဖို့အတွက် <strong>version control</strong> အကြောင်း သိထားဖို့ လိုပါတယ်။ <strong>Git</strong> ဟာ ကမ္ဘာပေါ်မှာ အသုံးအများဆုံး <strong>version control system</strong> တစ်ခုပါပဲ။</p>
+
+    <p><strong>Git</strong> က မင်းရဲ့ အလုပ်တွေကို "Save Points" အနေနဲ့ မှတ်ထားပေးနိုင်ပါတယ်။ ဒါကို <strong>commits</strong> လို့ ခေါ်ပါတယ်။ အလုပ်တစ်ခုကို အပိုင်းလိုက် ပြီးသွားတိုင်း <strong>commit</strong> လုပ်ထားတဲ့ အလေ့အကျင့်က အရမ်းကောင်းပါတယ်။ ဒါမှသာ အပြောင်းအလဲ မှတ်တမ်း (<strong>history</strong>) ရှိနေမှာဖြစ်ပြီး လိုအပ်ရင် အရင်ဗားရှင်း အဟောင်းဆီကို ပြန်သွား (<strong>revert</strong>) လို့ ရမှာပါ။</p>
+
+    <div class="otj-container animate-up">
+      <!-- အပေါ်ဘောင်ပေါ်က စာသား -->
+      <div class="otj-label">ON THE JOB</div>
+
+      <!-- ဘေးက လက်ဝါးပုံ အဝိုင်းလေး -->
+      <div class="otj-icon-badge">
+          <i class="fas fa-hands-helping"></i>
       </div>
 
-      <h3>Code ကို သပ်သပ်ရပ်ရပ် ရေးသားခြင်း</h3>
+      <!-- စာသား ကိုယ်ထည် -->
       <p>
-        တကယ်တော့ <strong>HTML</strong> ကို အောက်ကပုံစံအတိုင်း ရေးရင်လည်း
-        <strong>Browser</strong> က အလုပ်လုပ်ပါတယ် -
+      <strong>Software developer</strong> တစ်ယောက်အနေနဲ့ <strong>production</strong> ဆိုတဲ့ စကားလုံးကို ခဏခဏ ကြားရပါလိမ့်မယ်။ ဒါကတော့ <strong>users</strong> တွေ လက်ရှိ တကယ်သုံးနေတဲ့ <strong>live version</strong> (လက်ရှိသုံးနေတဲ့ website/app) ကို ပြောတာပါ။ တစ်ခါတလေမှာ ကုဒ်အမှားတွေ <strong>production</strong> ပေါ် ပါသွားတတ်ပါတယ်။ အဲ့ဒီလိုဖြစ်ရင် <strong>Git</strong> ကို သုံးပြီး အရင် အလုပ်လုပ်နေတဲ့ ဗားရှင်းအဟောင်းဆီ ချက်ချင်း ပြန်ပြောင်းလိုက်လို့ ရပါတယ်။
       </p>
-      <pre><code>&lt;!DOCTYPE html&gt; &lt;html lang="en"&gt; &lt;head&gt; &lt;meta charset="UTF-8" /&gt;
-      &lt;title&gt;Run Buddy&lt;/title&gt; &lt;/head&gt; &lt;body&gt; &lt;h1&gt;RUN BUDDY&lt;/h1&gt; What We Do &lt;/body&gt;
-      &lt;/html&gt;</code></pre>
+    </div>
 
-      <p>
-        ဒါပေမဲ့ ဒီလိုရေးတာဟာ ဘာတွေရေးထားမှန်း သိဖို့
-        <strong>Sense</strong> လုပ်ရတာ တော်တော်ခက်ပါတယ်။ ဒါကြောင့်
-        <strong>Code</strong> ရေးတဲ့အခါ အမြဲတမ်း
-        <strong>Legible</strong> ဖြစ်အောင် (ဖတ်ရတာ ရှင်းလင်းနေအောင်) ရေးဖို့
-        အလေ့အကျင့် လုပ်ထားပါ။
-      </p>
-      <p>ဒီလိုရေးခြင်းအားဖြင့် -</p>
+    <p><strong>Git</strong> ကို သုံးရတဲ့ တခြား အကျိုးကျေးဇူးတွေကတော့ -</p>
+    <ul>
+      <li><strong>Remote location</strong> (အင်တာနက်ပေါ်က သိမ်းဆည်းရာနေရာ) ဆီ <strong>commits</strong> တွေကို <strong>push</strong> လုပ်ထားနိုင်ပါတယ်။ ဒါဆိုရင် မင်းရဲ့ ကွန်ပျူတာ ပျက်သွားရင်တောင် <strong>code</strong> တွေ မပျောက်တော့ပါဘူး။ စက်တစ်လုံးကနေ တစ်လုံး ပြောင်းသုံးရတာလည်း လွယ်သွားပါတယ်။</li>
+      <li>အဖွဲ့လိုက် (<strong>team</strong>) အလုပ်လုပ်တဲ့အခါမှာလည်း အရမ်းအသုံးဝင်ပါတယ်။ <strong>Git</strong> သာ မရှိရင် <strong>developer</strong> အချင်းချင်း <strong>code</strong> တွေ မျှဝေတဲ့အခါ တစ်ယောက်ရေးတာကို တစ်ယောက်က မတော်တဆ ဖျက်မိတာမျိုး၊ ထပ်ရေးမိတာမျိုးတွေ ဖြစ်ပြီး တိုင်ပတ်နေပါလိမ့်မယ်။</li>
+      <li><strong>Git</strong> ကို သုံးပြီး <strong>codebase</strong> တစ်ခုတည်းကနေ ဗားရှင်းခွဲ (<strong>branches</strong>) တွေ ခွဲထုတ်ပြီး အလုပ်လုပ်လို့ ရပါတယ်။ အားလုံးပြီးလို့ ပြန်ပေါင်း (<strong>merge</strong>) တဲ့အခါ <strong>code</strong> တွေ ထပ်နေရင်လည်း <strong>Git</strong> က <strong>conflicts</strong> အနေနဲ့ သတိပေးမှာ ဖြစ်လို့ ပြန်ပြင်ဖို့ အခွင့်အရေး ရပါတယ်။</li>
+    </ul>
+
+    <div class="deep-dive-btn" onclick="toggleDeepDive(this)" style="margin-top:20px;">
+        <p><strong>DEEP DIVE</strong></p>
+        <i class="fas fa-chevron-down"></i>
+    </div>
+    <div class="accordion-body">
+        <p>ပိုပြီး အသေးစိတ် သိချင်ရင် Git အဖွဲ့က ဖန်တီးထားတဲ့ <strong>Git Basics video</strong> ကို ကြည့်ရှုနိုင်ပါတယ်။</p>
+    </div>
+
+    <p>အမှန်အတိုင်း ပြောရရင် <strong>Git</strong> ကို စသင်ခါစမှာ ခက်တယ်လို့ ခံစားရနိုင်ပါတယ်။ အခုချက်ချင်း နားမလည်သေးရင်လည်း စိတ်မပူပါနဲ့ဦး။ နောက်အပတ်တွေမှာ <strong>Git</strong> ကို အများကြီး ထပ်လေ့ကျင့်ရမှာ ဖြစ်လို့ သင်တန်းပြီးတဲ့အခါ မင်းဟာ <strong>Git workflow</strong> ကို ကောင်းကောင်းကြီး ကျွမ်းကျင်သွားမှာပါ!</p>
+
+    <h3>Create a Run Buddy Git Repository</h3>
+    <p>အခု <strong>Run Buddy</strong> folder ကို <strong>Git repository</strong> အဖြစ် ပြောင်းကြရအောင်။ ဒါဟာ ရိုးရိုး folder တစ်ခုကို <strong>version control</strong> (ဗားရှင်း ထိန်းချုပ်မှု) လုပ်နိုင်စွမ်းရှိတဲ့ folder အဖြစ် ပြောင်းလဲလိုက်တာပါ။</p>
+
+    <div class="important-container animate-up">
+      <div class="important-label">IMPORTANT</div>
+      <div class="important-body">
+        <p>
+        ပုံမှန်အားဖြင့် <strong>local Git</strong> မှာ <strong>default branch</strong> နာမည်က <code>master</code> ဖြစ်နေတတ်ပါတယ်။ ဒါပေမဲ့ <strong>GitHub</strong> က အခုနောက်ပိုင်း <code>main</code> ကိုပဲ အသုံးပြုတော့တာကြောင့် ကျွန်တော်တို့ စက်ထဲက <strong>Git setting</strong> ကိုလည်း <code>main</code> ဖြစ်အောင် ပြင်ပေးဖို့ လိုပါတယ်။
+        </p>
+
+        <p><strong>macOS</strong> သုံးတဲ့သူတွေအနေနဲ့ <strong>Git version 2.28</strong> နဲ့အထက် ဖြစ်ဖို့ လိုပါတယ်။ ဒါကြောင့် အောက်က <strong>command</strong> ကို အရင်ရိုက်ပြီး <strong>update</strong> လုပ်ပေးပါ (Windows သုံးသူတွေ လုပ်စရာမလိုပါ) -</p>
+        <pre><code># macOS သုံးသူများသာ ရိုက်ရန်
+        brew install git</code></pre>
+
+        <p><strong>macOS</strong> ရော <strong>Windows</strong> အသုံးပြုသူပါ အောက်က <strong>command</strong> ကို ရိုက်ပြီး <strong>default branch</strong> ကို <code>main</code> အဖြစ် သတ်မှတ်လိုက်ပါ -</p>
+
+        <pre><code>git config --global init.defaultBranch main</code></pre>
+        <p>ဒီ <strong>command</strong> ရိုက်လို့ ဘာစာမှ ထပ်မတက်လာဘဲ အောက်ကြောင်းဆင်းသွားရင် အောင်မြင်သွားပါပြီ။</p>
+      </div>
+    </div>
+
+
+    <p>အခု <strong>command line</strong> မှာ <code>run-buddy</code> folder ထဲ ရောက်နေပြီဆိုရင် အောက်ကအတိုင်း ရိုက်လိုက်ပါ -</p>
+    <pre><code>git init</code></pre>
+    
+    <p>ဒါဆိုရင် <strong>"Initialized empty Git repository"</strong> ဆိုတဲ့ စာသားလေး ပေါ်လာပါလိမ့်မယ်။ အကယ်၍ <code>git</code> ဆိုတဲ့ စကားလုံးကို မသိဘူးလို့ ပြနေရင်တော့ <strong>Git website</strong> ကနေ <strong>Git</strong> ကို <strong>install</strong> လုပ်ထားဖို့ လိုပါမယ်။</p>
+
+    <p>ဘာမှ ထူးမခြားနားဘူးလို့ ထင်ရပေမဲ့ တကယ်တော့ <code>run-buddy</code> folder ထဲမှာ <code>.git</code> ဆိုတဲ့ <strong>hidden folder</strong> (ဖျောက်ထားတဲ့ ဖိုင်တွဲ) လေးတစ်ခု ဆောက်လိုက်တာပါ။ ဒါကို မျက်စိနဲ့ မြင်ချင်ရင်တော့ အောက်က <strong>command</strong> ကို ရိုက်ကြည့်ပါ -</p>
+
+    <pre><code>ls -a</code></pre>
+
+    <p>ဒီ <code>ls -a</code> က ဖျောက်ထားတဲ့ ဖိုင်တွေပါ အကုန်ပြပေးတာပါ။ ဖိုင်နာမည် ရှေ့မှာ <code>.</code> (အစက်) ပါရင် အဲ့ဒါ <strong>hidden file</strong> ပါ။ ဒီ <code>.git</code> folder က <strong>repository</strong> တစ်ခုလုံးရဲ့ အချက်အလက်တွေကို သိမ်းထားတာဖြစ်လို့ ကျွန်တော်တို့ သွားမပြင်တာ အကောင်းဆုံးပါပဲ။</p>
+
+
+
+    <h3>Try Some Git Commands</h3>
+    <p><strong>Git repository</strong> ဆောက်ပြီးပြီဆိုရင် ကျွန်တော်တို့ရဲ့ <strong>Code</strong> တွေ ပြောင်းလဲမှုကို စတင်စောင့်ကြည့် (<strong>track</strong>) လို့ရပါပြီ။ အရင်ဆုံး <code>git status</code> ဆိုတဲ့ <strong>command</strong> ကို ရိုက်ကြည့်ပါ။ အောက်ပါအတိုင်း တွေ့ရပါလိမ့်မယ် -</p>
+
+    <div class="important-container animate-up">
+      <div class="important-label">IMPORTANT</div>
+      <div class="important-body">
+        <p><strong>macOS</strong> သုံးတဲ့သူတွေအနေနဲ့ <code>.DS_Store</code> ဆိုတဲ့ဖိုင်ကိုပါ တွေ့နေရရင် လောလောဆယ် လျစ်လျူရှုထားလိုက်ပါ။ ဒါကို နောက်ပိုင်းမှာ ဘယ်လိုဖျောက်ရမလဲဆိုတာ သင်ပေးပါမယ်။</p>
+      </div>
+    </div>
+
+    <p><code>git status</code> ဆိုတာ နောက်ဆုံးအကြိမ် <strong>Commit</strong> လုပ် (သိမ်းဆည်း) ပြီးကတည်းက ဘယ်ဖိုင်တွေ ပြောင်းလဲသွားလဲဆိုတာကို အမြန်စစ်ဆေးပေးတဲ့ <strong>command</strong> ပါ။ အခုဆိုရင် <strong>Git</strong> က <code>index.html</code> ကို <strong>Untracked files</strong> (စောင့်ကြည့်ခြင်းမခံရသေးတဲ့ဖိုင်) စာရင်းထဲမှာ ပြနေပါလိမ့်မယ်။ <strong>Git</strong> ရဲ့ သဘောက ကျွန်တော်တို့က "စောင့်ကြည့်ပေးပါ" လို့ ပြောတဲ့ဖိုင်ကိုပဲ သူက ဂရုစိုက်တာပါ။</p>
+
+    <p>ကျွန်တော်တို့က <code>index.html</code> ကို <strong>Git</strong> ထဲ ထည့်ချင်တာဖြစ်လို့ အောက်ပါအတိုင်း ရိုက်ထည့်လိုက်ပါ -</p>
+
+    <div class="code-snippet-box animate-up">
+      <pre>git add index.html
+
+      git status</pre>
+    </div>
+
+    <p><code>git add</code> ဆိုတာကတော့ ဖိုင်တွေကို <strong>Staging</strong> (စင်မြင့်ထက်) ပေါ်တင်ပေးလိုက်တာပါ။ ဇာတ်ပွဲမစခင် မင်းသား၊ မင်းသမီးတွေကို စင်နောက်မှာ အသင့်ပြင်ခိုင်းထားတဲ့ ပုံစံမျိုးပေါ့။ <strong>Git</strong> အခေါ်အဝေါ်အရဆိုရင်တော့ ကျွန်တော်တို့က <strong>Commit</strong> (တကယ်မသိမ်းရသေးဘူး)၊ ဒါပေမဲ့ ဘာတွေကို သိမ်းမယ်ဆိုတာ <strong>Git</strong> ကို အသိပေးလိုက်တာ ဖြစ်ပါတယ်။</p>
+
+    <div class="important-container animate-up">
+      <div class="important-label">IMPORTANT</div>
+      <div class="important-body">
+        <p><code>git add</code> လုပ်လိုက်တဲ့အခါ ဘာစာသားမှ ပေါ်လာမှာမဟုတ်ဘဲ နောက်ထပ် <strong>command</strong> ရိုက်ဖို့ နေရာပဲ ပြန်ပေါ်လာပါလိမ့်မယ်။ အမှားတစ်ခုခုရှိမှသာ <strong>Git</strong> က စာပြမှာဖြစ်လို့ ဘာမှမပြရင် အောင်မြင်တယ်လို့ မှတ်ယူနိုင်ပါတယ်။</p>
+      </div>
+    </div>
+
+    <h3>Make Your First Git Commit</h3>
+    <p>အခု <code>git status</code> ကို ပြန်ရိုက်ကြည့်ရင် <code>index.html</code> ဟာ <strong>"Changes to be committed"</strong> (သိမ်းဆည်းဖို့ အဆင်သင့်ဖြစ်နေတဲ့ ပြောင်းလဲမှုများ) ဆိုတဲ့ စာရင်းထဲကို ရောက်သွားတာ တွေ့ရပါမယ်။</p>
+
+    <p>ဒါကို တကယ် သိမ်းဆည်း (<strong>Commit</strong>) ဖို့အတွက် အောက်ပါ <strong>Command</strong> ကို ရိုက်ထည့်လိုက်ပါ -</p>
+
+    <div class="code-snippet-box animate-up">
+      <pre>git commit -m "page template"</pre>
+    </div>
+
+    <p><code>git commit</code> ဆိုတာ <strong>Staging</strong> ထဲမှာ ရှိသမျှ အရာအားလုံးကို တကယ် သိမ်းဆည်းလိုက်တာ ဖြစ်ပါတယ်။ <code>-m "message"</code> အပိုင်းကတော့ ဒီတစ်ခါ သိမ်းလိုက်တဲ့ <strong>Code</strong> ထဲမှာ ဘာတွေ ပြင်ဆင်ထားသလဲဆိုတာကို အကျဉ်းချုပ် ရေးပေးတာ ဖြစ်ပါတယ်။</p>
+
+    <div class="pro-tip-wrapper">
+      <!-- 🔥 စိန်ပုံ Badge (၎င်းကို အပြင်မှာ ထားလိုက်သည့်အတွက် လုံးဝ မလှုပ်တော့ပါ) -->
+      <div class="tip-diamond-badge">
+          <i class="fas fa-gem"></i>
+      </div>
+
+      <!-- ၁။ ပိတ်ထားစဉ် Pill -->
+      <div class="pro-tip-pill animate-up" onclick="toggleProTipPro(this)">
+          <span>SHOW PRO TIP</span>
+      </div>
+
+      <!-- ၂။ ပွင့်နေစဉ် Box -->
+      <div class="pro-tip-expanded-box">
+          <h5 onclick="toggleProTipPro(this)">HIDE PRO TIP</h5>
+          <p><strong>Commit</strong> တိုင်းမှာ ဘာတွေပြင်လိုက်လဲဆိုတာ ရှင်းပြဖို့ <strong>Message</strong> ပါရပါမယ်။ အကယ်လို့ <code>-m "..."</code> အပိုင်းကို ထည့်ဖို့ မေ့သွားရင် ထွက်ရခက်တဲ့ <strong>Prompt</strong> (စာရိုက်မျက်နှာပြင်) ကြီးထဲ ရောက်သွားတတ်လို့ သတိထားပါ!</p>
+      </div>
+    </div>
+
+    <p>ပထမဆုံးအကြိမ် <strong>Commit</strong> လုပ်တာဆိုရင် <strong>Git</strong> က "မင်း ဘယ်သူလဲ?" (Identify yourself) ဆိုပြီး အောက်ပါအတိုင်း နာမည်နဲ့ <strong>Email</strong> မေးပါလိမ့်မယ် -</p>
+
+    <div style="background-color: #2d2d2d; color: #f8f8f2; padding: 15px; border-radius: 5px; font-family: monospace; margin: 15px 0;">
+    git config --global user.name "Your Name"<br>
+    git config --global user.email "you@example.com"
+    </div>
+
+    <p>ဒါက ပုံမှန်ပါပဲ။ <strong>Terminal</strong> က ခိုင်းတဲ့အတိုင်း ကိုယ့်နာမည်နဲ့ <strong>Email</strong> ကို အရင် သတ်မှတ်ပေးလိုက်ပါ။ ပြီးရင်တော့ <code>git commit -m "page template"</code> ကို ပြန်ရိုက်ပါ။</p>
+
+    <p><strong>Terminal</strong> ထဲမှာ <strong>"1 file changed, 11 insertions"</strong> ဆိုတဲ့ စာသားလေး ပေါ်လာပြီဆိုရင် မင်းရဲ့ ပထမဆုံး <strong>Commit</strong> ကို အောင်အောင်မြင်မြင် လုပ်ဆောင်နိုင်ခဲ့ပါပြီ! အခု လုပ်ငန်းစဉ်ကို နောက်တစ်ခါ ထပ်ပြီး လေ့ကျင့်ကြည့်ရအောင်။</p>
+
+    <h3>Commit နောက်တစ်ခု ထပ်လုပ်ကြည့်ရအောင်</h3>
+    <p>အခု <code>index.html</code> ဖိုင်ထဲက <code>&lt;body&gt;</code> <strong>Element</strong> ထဲမှာ အောက်ကစာသားလေးတွေကို ပြင်ပြီး ရိုက်ထည့်လိုက်ပါ -</p>
+
+    <div class="code-snippet-box animate-up">
+      <pre>
+        &lt;body&gt;<br>
+          &nbsp;&nbsp;&lt;h1&gt;RUN BUDDY&lt;/h1&gt;
+          &nbsp;&nbsp;What We Do What You Do Your Trainers Reach Out
+        &lt;/body&gt;
+      </pre>
+    </div>
+
+    <p>ပြီးရင် <code>git status</code> ကို ပြန်ရိုက်ကြည့်ပါ။ <code>index.html</code> ဖိုင်ကို <strong>Modified</strong> (ပြင်ဆင်ထားသည်) ဆိုပြီး ပြနေပါလိမ့်မယ်။ ဒါပေမဲ့ ဒါဟာ <strong>Staging</strong> ထဲ မရောက်သေးတဲ့အတွက် အောက်ပါအတိုင်း အဆင့်ဆင့် ပြန်လုပ်ပေးရပါမယ် -</p>
+
+    <div class="code-snippet-box animate-up">
+      <pre>git add index.html
+    git commit -m "add more link text"
+      </pre>
+    </div>
+
+    <p>အခုဆိုရင် ကျွန်တော်တို့ <strong>Commit</strong> ၂ ခု လုပ်ပြီးသွားပါပြီ။ ကိုယ်လုပ်ခဲ့သမျှ မှတ်တမ်းတွေကို ပြန်ကြည့်ချင်ရင် <code>git log</code> ဆိုတဲ့ <strong>Command</strong> ကို ရိုက်ကြည့်ပါ။ ဘယ်သူ၊ ဘယ်နေ့၊ ဘာ <strong>Message</strong> နဲ့ <strong>Commit</strong> လုပ်ခဲ့လဲဆိုတာ အကုန်တွေ့ရပါလိမ့်မယ်။</p>
+
+    <div class="important-container animate-up">
+      <div class="important-label">IMPORTANT</div>
+      <div class="important-body">
+        <p><code>git log</code> ကြည့်နေတဲ့ <strong>Window</strong> ထဲကနေ ပြန်ထွက်ချင်ရင် ကိုယ့် <strong>Keyboard</strong> က <code>q</code> အက္ခရာလေးကို နှိပ်လိုက်ရုံပါပဲ။</p>
+      </div>
+    </div>
+
+    <p>နောက်ပိုင်း တခြား <strong>Developers</strong> တွေနဲ့ စုပေါင်းပြီး <strong>App</strong> အကြီးကြီးတွေ ရေးတဲ့အခါ ဒီ <strong>Git</strong> ဟာ ဘယ်လောက်တောင် အသုံးဝင်မလဲဆိုတာ စဉ်းစားကြည့်ပါ။ တကယ်ကို အားကိုးရတဲ့ <strong>Tool</strong> တစ်ခုပါပဲ!</p>
+  </section>
+
+  <section>
+    <h3>စာမျက်နှာကို Outline ဆွဲခြင်း</h3>
+    <p><strong>Git</strong> အကြောင်းကို နောက်ပိုင်းမှာ ထပ်ပြီး လေ့ကျင့်ဖို့ အခွင့်အရေး ရဦးမှာပါ။ အခုတော့ <strong>HTML</strong> တည်ဆောက်တဲ့အပိုင်းကို ပြန်သွားကြရအောင်။</p>
+    <p><strong>Run Buddy</strong> က ပေးထားတဲ့ <strong>landing page</strong> ရဲ့ <strong>design mock-up</strong> (ဒီဇိုင်းပုံစံကြမ်း) ကို မှတ်မိသေးတယ်မလား? အောက်ကပုံမှာ ပြထားတဲ့ <strong>mock-up</strong> ကို တစ်ခါလောက် ပြန်ကြည့်ပြီး သေချာ လေ့လာကြည့်လိုက်ပါ -</p>
+
+    <p><strong>Coding</strong> တန်းမရေးခင်မှာ ကိုယ်ဘာတွေ ရေးရမလဲဆိုတာကို <strong>Outline</strong> အရင်ဆွဲထားတာက အချိန်ကုန်သက်သာစေသလို အမှားလည်း နည်းစေပါတယ်။</p>
+
+    <h3>HTML ကို သေတ္တာ (Boxes) တွေလို စဉ်းစားခြင်း</h3>
+    <p>အရောင်စုံ၊ ပုံစံစုံနဲ့ ရှိနေတဲ့ <strong>Design</strong> တစ်ခုကို <strong>raw HTML</strong> အဖြစ် ပြောင်းဖို့ဆိုတာ အစပိုင်းမှာ တုန်လှုပ်စရာ ကောင်းနိုင်ပါတယ်။ ဒါကြောင့် <strong>Coding</strong> တန်းမရေးခင် စာမျက်နှာကို <strong>Outline</strong> (ပုံကြမ်း) အရင်ဆွဲဖို့က အရမ်းအရေးကြီးပါတယ်။</p>
+
+    <p><strong>Developer</strong> တွေအနေနဲ့ အစီအစဉ်မရှိဘဲ <strong>Coding</strong> တန်းရေးတာကို ရှောင်ရပါမယ်။ <strong>HTML</strong> ရဲ့ သဘောတရားက တကယ်တော့ တစ်ခုထဲမှာ တစ်ခုထပ်နေတဲ့ ဒါမှမဟုတ် ဘေးချင်းယှဉ်နေတဲ့ <strong>Boxes</strong> (သေတ္တာ) တွေနဲ့ တူပါတယ်။</p>
+    <p>အပေါ်ကပုံထဲမှာ <strong><div></strong> <strong>elements</strong> တွေကို သုံးထားတာ တွေ့ရပါမယ် -</p>
+
+    <ul>
+      <li><strong><div></strong> ဆိုတာ <strong>"Content Division"</strong> လို့ အဓိပ္ပာယ်ရပြီး သက်ဆိုင်ရာ အချက်အလက်တွေကို စုစည်းထားတဲ့ <strong>Container</strong> (ပုံး) တစ်ခုလိုပါပဲ။</li>
+      <li><strong>Box 1</strong> နဲ့ <strong>Box 2</strong> က တစ်ခုပေါ်တစ်ခု ထပ်မနေပါဘူး၊ သီးခြားစီ ရှိနေတဲ့ <strong>Content</strong> တွေပါ။ ဥပမာ- Box 1 က ကြော်ငြာဖြစ်ပြီး Box 2 က <strong>Navigation bar</strong> (မီနူးဘား) ဖြစ်နိုင်ပါတယ်။</li>
+      <li>ဒီ <strong>Boxes</strong> တွေထဲမှာ နောက်ထပ် <strong>Boxes</strong> တွေ ထပ်ထည့်လို့ရပါတယ်။ ဥပမာ- <strong>Box 3</strong> ဆိုတဲ့ အစုအဝေးထဲမှာ <strong>Box 4</strong> နဲ့ <strong>5</strong> ဆိုတဲ့ <strong>Links</strong> လေးတွေကို ထည့်ထားတာမျိုးပါ။</li>
+    </ul>
+
+    <p><strong>Box 3</strong> ကို မသုံးဘဲ <strong>Box 4</strong> နဲ့ <strong>5</strong> ကို <strong>Box 2</strong> ထဲ တန်းထည့်လို့ မရဘူးလားဆိုရင် ရပါတယ်။ ဒါပေမဲ့ အုပ်စုတူတဲ့ <strong>Content</strong> တွေကို စုစည်းထားခြင်းက <strong>Code</strong> ကို ပိုပြီး သေသပ်စေသလို ရှုပ်ထွေးတဲ့ <strong>Information</strong> တွေကို စနစ်တကျ ဖြစ်စေပါတယ်။</p>
+
+    <div class="pause-box animate-up">
+      <!-- ထောင့်တွင် တင်မည့် Question Mark -->
+      <div class="pause-icon-badge">
+          <i class="fas fa-question-circle"></i>
+      </div>
+      
+      <h4>PAUSE</h4>
+      <p>ဘာကြောင့် nested &lt;div&gt; တွေကို indent လုပ်ဖို့ လိုတာလဲ?</p>
+
+      <!-- 🔥 အဖြေကို ဤနေရာတွင် ထည့်ပါ (အစပိုင်းတွင် display:none ထားမည်) -->
+      <div id="ans-cd-01" class="answer-content" style="display: none;">
+          <p><strong>nested &lt;div&gt;</strong> (တစ်ခုထဲမှာ တစ်ခု ထပ်နေတဲ့ tag) တွေကို <strong>indent</strong> လုပ်ပြီး (အထဲကို နည်းနည်းဝင်ပြီး) ရေးရတာဟာ <strong>code</strong> တွေကို ပြန်ဖတ်တဲ့အခါ ပိုပြီး <strong>readable</strong> ဖြစ်အောင် (မျက်စိထဲမှာ ရှင်းရှင်းလင်းလင်း မြင်သာအောင်) လို့ ဖြစ်ပါတယ်။</p>
+      </div>
+
+      <!-- ပိတ်/ဖွင့် လုပ်မည့် ခလုတ် -->
+      <a href="javascript:void(0)" class="toggle-answer-link" onclick="togglePauseAnswer(this, 'ans-cd-01')">
+          Show Answer
+      </a>
+    </div>
+
+    <h1>Layout ကို အပိုင်းလိုက် ခွဲခြားခြင်း</h1>
+    <p>ကျွန်တော်တို့ <strong>Mock-up</strong> ပုံကို ကြည့်ပြီး <strong>Logical boxes</strong> ဒါမှမဟုတ် <strong>Containers</strong> တွေအဖြစ် ဘယ်လို ခွဲထုတ်မလဲဆိုတာ စဉ်းစားကြည့်ရအောင်။ တချို့ <strong>Containers</strong> တွေက တခြား <strong>Boxes</strong> တွေကို စုစည်းပေးဖို့သက်သက်ပဲ သုံးတာမျိုးလည်း ရှိနိုင်ပါတယ်။ ဒါကို အခုချက်ချင်း နားမလည်သေးရင်လည်း စိတ်မပူပါနဲ့၊ <strong>Apps</strong> တွေ အများကြီး ဆောက်ကြည့်လေလေ <strong>Layout</strong> ချရတာ ပိုကျွမ်းကျင်လာလေလေ ဖြစ်မှာပါ။</p>
+
+    <h2>လက်တွေ့ လေ့ကျင့်ခန်း</h2>
+    <p>အခုပဲ ခဲတံနဲ့ စက္ကူတစ်ရွက်ယူပြီး <strong>Mock-up</strong> ထဲက ကျန်တဲ့ အပိုင်းတွေကို ကိုယ်တိုင် <strong>Outline</strong> ဆွဲကြည့်ပါ။ ကွန်ပျူတာရှေ့က ခဏဖယ်ပြီး လက်နဲ့တကယ် ဆွဲကြည့်တာက ပြဿနာတွေကို ရှုထောင့်အသစ်ကနေ မြင်နိုင်ဖို့ အများကြီး အထောက်အကူပြုပါတယ်။</p>
+
+    <div class="otj-container animate-up">
+      <!-- အပေါ်ဘောင်ပေါ်က စာသား -->
+      <div class="otj-label">ON THE JOB</div>
+
+      <!-- ဘေးက လက်ဝါးပုံ အဝိုင်းလေး -->
+      <div class="otj-icon-badge">
+          <i class="fas fa-hands-helping"></i>
+      </div>
+
+      <!-- စာသား ကိုယ်ထည် -->
+      <p>လုပ်ငန်းခွင်မှာ <strong>Team</strong> တွေဟာ <strong>Code</strong> တစ်ကြောင်းမှ မရေးခင် <strong>Project</strong> တစ်ခုကို ရက်ပေါင်းများစွာ ဒါမှမဟုတ် သီတင်းပတ်နဲ့ချီပြီး စီစဉ် (<strong>Planning</strong>) လေ့ရှိပါတယ်။ စက္ကူပေါ်မှာ ပုံဆွဲတာဟာ အချိန်ဖြုန်းတာ မဟုတ်ဘဲ ရေရှည်မှာ အချိန်ကုန်သက်သာစေသလို ပြဿနာတွေကိုလည်း ကြိုတင်ကာကွယ်နိုင်ပါတယ်။</p>
+    </div>
+
+    <p>ဆွဲထားတဲ့ <strong>Outline</strong> ကို အနားမှာ အသင့်ထားပါ။ ကျွန်တော်တို့ ရေးမယ့် <strong>Code</strong> နဲ့ တစ်ထပ်တည်း မကျရင်လည်း ပြဿနာမရှိပါဘူး။ <strong>Webpage</strong> တစ်ခုကို ဆောက်ဖို့ နည်းလမ်းတွေ အများကြီး ရှိလို့ပါ။</p>
+
+    <h2>&lt;div&gt; Element ရဲ့ အားနည်းချက်</h2>
+    <p>ကျွန်တော်တို့ <code>&lt;div&gt;</code> အကြောင်း သိထားပြီးပြီဆိုတော့ <code>index.html</code> ကို အောက်ကပုံစံအတိုင်း ပြင်ရေးချင်စိတ် ပေါက်လာနိုင်ပါတယ် -</p>
+
+    <div class="code-snippet-box animate-up">
+      <pre>&lt;body&gt;
+  &lt;div&gt;
+    &lt;h1&gt;RUN BUDDY&lt;/h1&gt;
+  &lt;/div&gt;
+&lt;/body&gt;</pre>
+    </div>
+
+    <p>ဒါက အစကောင်းတစ်ခုပါ။ ကုမ္ပဏီနာမည်နဲ့ <strong>Navigation links</strong> တွေဟာ <code>&lt;div&gt;</code> ဆိုတဲ့ <strong>Box</strong> ထဲမှာ ရှိမယ်ဆိုတာ သိနိုင်ပါတယ်။ ဒါပေမဲ့ <code>&lt;div&gt;</code> ရဲ့ ပြဿနာက သူက အရမ်း <strong>Generic</strong> ဖြစ်လွန်းတာ (တိမ်လွန်းတာ) ပါပဲ။</p>
+
+
+    <h3>"Div Soup" ဆိုတာ ဘာလဲ?</h3>
+    <p>အကယ်လို့ ကျွန်တော်တို့ရဲ့ <strong>Layout</strong> က အရမ်းရှုပ်ထွေးပြီး နေရာတိုင်းမှာ <code>&lt;div&gt;</code> တွေပဲ သုံးထားမယ်ဆိုရင် ဘယ်ဟာက ဘာအတွက်လဲဆိုတာ တစ်ချက်ကြည့်ရုံနဲ့ သိဖို့ အရမ်းခက်သွားပါလိမ့်မယ်။ အောက်က ဥပမာကို ကြည့်ပါ -</p>
+
+    <div class="code-snippet-box animate-up">
+      <pre>
+&lt;div&gt;
+  &lt;div&gt;
+    &lt;div&gt;Search&lt;/div&gt;
+    &lt;div&gt;
+      &lt;div&gt;John Smith&lt;/div&gt;
+      &lt;div&gt;Jane Doe&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div&gt;
+    &lt;div&gt;Chat&lt;/div&gt;
+    &lt;div&gt;
+      &lt;div&gt;
+        &lt;div&gt;Message 1&lt;/div&gt;
+        &lt;div&gt;5:00pm&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+    </div>
+
+    <div class="nerd-note-box animate-up">
+      <!-- ဘောင်ပေါ်မှာ တင်မည့် အဝိုင်းလေး -->
+      <div class="nerd-icon-badge">
+          <i class="fas fa-glasses"></i>
+      </div>
+      <h4>Nerd Note</h4>
+      <p>ဒီလိုမျိုး <code>&lt;div&gt;</code> တွေပဲ အထပ်ထပ်အခါခါ သုံးထားတဲ့ <strong>Code</strong> တွေကို <strong>Developers</strong> တွေက <strong>"Div Soup"</strong> လို့ ခေါ်ကြပါတယ်။ ဒါဟာ ဖတ်ရခက်စေလို့ တတ်နိုင်သမျှ ရှောင်ရမယ့် အရာပါ။</p>
+    </div>
+
+    <h3>0.3.5: Semantic Elements များ</h3>
+    <p>HTML5 မှာ <code>&lt;div&gt;</code> တွေချည်းပဲ သုံးမယ့်အစား ပိုပြီး အဓိပ္ပာယ်ပေါ်လွင်စေတဲ့ <strong>Semantic elements</strong> တွေကို မိတ်ဆက်ပေးခဲ့ပါတယ်။ အောက်က <strong>Code</strong> ကို ပြန်ပြင်ရေးထားတာ ကြည့်ကြည့်ပါ -</p>
+
+    <div class="code-snippet-box animate-up">
+      <pre>&lt;body&gt;
+      &lt;header&gt;
+        &lt;h1&gt;RUN BUDDY&lt;/h1&gt;
+      &lt;/header&gt;
+    &lt;/body&gt;</pre>
+    </div>
+
+    <div class="deep-dive-btn" onclick="toggleDeepDive(this)" style="margin-top:20px;">
+      <p><strong>DEEP DIVE</strong></p>
+      <i class="fas fa-chevron-down"></i>
+    </div>
+    <div class="accordion-body">
+        <p>ပိုပြီး အသေးစိတ်လေ့လာချင်ရင် <strong>HTML5</strong> နဲ့ ပတ်သက်တဲ့ <strong><a href="https://developer.mozilla.org/en-US/docs/Glossary/HTML5" target="_blank" rel="noopener noreferrer">MDN Web Docs on HTML5</a></strong> မှာ သွားရောက်ဖတ်ရှုနိုင်ပါတယ်။</p>
+    </div>
+
+    <p>ဒီ <strong>Code</strong> အပိုင်းအစက ဘာကို ဆိုလိုတာလဲဆိုတာ ဇဝေဇဝါ ဖြစ်စရာ လိုသေးလား? မလိုတော့ပါဘူး! ဒါဟာ Website ရဲ့ ထိပ်ပိုင်း (<strong>Header</strong>) ဖြစ်တယ်ဆိုတာ <code>&lt;header&gt;</code> <strong>element</strong> ကို ကြည့်တာနဲ့ တန်းသိနိုင်ပါတယ်။</p>
+
+    <p>နည်းပညာပိုင်းအရ ပြောရရင် <code>&lt;header&gt;</code> ဟာ <code>&lt;div&gt;</code> နဲ့ အလုပ်လုပ်ပုံ အတူတူပါပဲ။ ဒါပေမဲ့ သူ့ကို သုံးရတဲ့ ရည်ရွယ်ချက်က <strong>Code</strong> ဖတ်မယ့် <strong>Developers</strong> တွေတင်မကဘဲ <strong>Search Engines</strong> (Google လိုမျိုး) ကပါ Website ရဲ့ ဘယ်အပိုင်းက ပိုအရေးကြီးလဲဆိုတာကို လွယ်လွယ်ကူကူ ခွဲခြားသိမြင်နိုင်စေဖို့ ဖြစ်ပါတယ်။</p>
+
+    <p>ကျွန်တော်တို့ <strong>Layout</strong> ရဲ့ အောက်ဆုံးအပိုင်းမှာလည်း သိသိသာသာ ကွဲပြားတဲ့ <strong>Footer</strong> အပိုင်း ရှိပါတယ်။ အဲ့ဒါအတွက်လည်း <strong>Semantic element</strong> ရှိပါတယ် -</p>
+
+    <div class="code-snippet-box animate-up">
+      <pre>
+&lt;footer&gt;
+  &lt;h2&gt;❤️ Made with love by Run Buddy.&lt;/h2&gt;
+&lt;/footer&gt;</pre>
+    </div>
+
+    <p>တကယ်လို့ ကိုယ်သုံးချင်တဲ့ အပိုင်းအတွက် ကိုက်ညီမယ့် <strong>Semantic elements</strong> ရှာမတွေ့ဘူးဆိုရင်တော့ <code>&lt;div&gt;</code> ကိုပဲ ပြန်သုံးလို့ ရပါတယ်။ ဒါပေမဲ့ အခုလောလောဆယ် ကျွန်တော်တို့ Website ရဲ့ အပိုင်းတွေကို ခွဲခြားဖို့ <code>&lt;section&gt;</code> <strong>element</strong> ကို သုံးကြည့်ရအောင်။</p>
+
+    <div class="important-container animate-up">
+      <div class="important-label">IMPORTANT</div>
+      <div class="important-body">
+        <p>ဒီသင်ခန်းစာမှာ ပါတဲ့ <strong>Code</strong> တွေကို <strong>Copy-Paste</strong> မလုပ်ပါနဲ့! ကိုယ်တိုင် လက်နဲ့ လိုက်ရိုက်ဖို့ ထပ်ပြီး သတိပေးပါရစေ။</p>
+      </div>
+    </div>
+
+    <p>အခု <code>index.html</code> ထဲက <code>&lt;body&gt;</code> <strong>tags</strong> ကြားထဲမှာ Website ရဲ့ <strong>Outline</strong> ကို အောက်ပါအတိုင်း <strong>Section</strong> တွေခွဲပြီး ရေးလိုက်ရအောင် -</p>
+
+    <h3>Website ရဲ့ Outline ဆွဲခြင်း</h3>
+    <p>ကဲ... အခု <code>index.html</code> ထဲက <code>&lt;body&gt;</code> tag ကြားမှာ အောက်က <strong>Code</strong> တွေကို ရိုက်ထည့်လိုက်ရအောင်။ ဒါဟာ ကျွန်တော်တို့ Website ရဲ့ အရိုးစု (<strong>Structure</strong>) ကို တည်ဆောက်တာပါပဲ။</p>
+
+    <div class="code-snippet-box animate-up">
+      <pre>
+&lt;!-- navigation --&gt;
+&lt;header&gt;
+  &lt;h1&gt;RUN BUDDY&lt;/h1&gt;
+&lt;/header&gt;
+
+&lt;!-- hero/jumbotron --&gt;
+&lt;section&gt;
+&lt;/section&gt;
+
+&lt;!-- "what we do" section --&gt;
+&lt;section&gt;
+  &lt;h2&gt;What We Do&lt;/h2&gt;
+&lt;/section&gt;
+
+&lt;!-- "what you do" section --&gt;
+&lt;section&gt;
+  &lt;h2&gt;What You Do&lt;/h2&gt;
+&lt;/section&gt;
+
+&lt;!-- "meet the trainers" section --&gt;
+&lt;section&gt;
+  &lt;h2&gt;Meet The Trainers&lt;/h2&gt;
+&lt;/section&gt;
+
+&lt;!-- "reach out" section --&gt;
+&lt;section&gt;
+  &lt;h2&gt;Reach Out&lt;/h2&gt;
+&lt;/section&gt;
+
+&lt;!-- footer --&gt;
+&lt;footer&gt;
+  &lt;h2&gt;❤️ Made with love by Run Buddy.&lt;/h2&gt;
+&lt;/footer&gt;</pre>
+    </div>
+
+    <div class="pro-tip-wrapper">
+      <!-- 🔥 စိန်ပုံ Badge (၎င်းကို အပြင်မှာ ထားလိုက်သည့်အတွက် လုံးဝ မလှုပ်တော့ပါ) -->
+      <div class="tip-diamond-badge">
+          <i class="fas fa-gem"></i>
+      </div>
+
+      <!-- ၁။ ပိတ်ထားစဉ် Pill -->
+      <div class="pro-tip-pill animate-up" onclick="toggleProTipPro(this)">
+          <span>SHOW PRO TIP</span>
+      </div>
+
+      <!-- ၂။ ပွင့်နေစဉ် Box -->
+      <div class="pro-tip-expanded-box">
+          <h5 onclick="toggleProTipPro(this)">HIDE PRO TIP</h5>
+          <p>ဒီမှာ အသစ်တစ်ခု တွေ့ပါလိမ့်မယ်။ အဲ့ဒါကတော့ <code>&lt;!-- --&gt;</code> ပါ။ ဒါကို <strong>Code Comment</strong> လို့ ခေါ်ပါတယ်။ ဒါတွေဟာ <strong>Browser</strong> မှာ ပေါ်မှာ မဟုတ်ဘဲ <strong>Developer</strong> တွေ <strong>Code</strong> ကို ပြန်ဖတ်တဲ့အခါ မှတ်သားရလွယ်အောင် မှတ်စုရေးတဲ့ နေရာဖြစ်ပါတယ်။</p>
+      </div>
+    </div>
+
+    <p>အခု <strong>Save</strong> လိုက်ပါ၊ ပြီးရင် <strong>Browser</strong> ကို <strong>Refresh</strong> လုပ်ပြီး ကြည့်လိုက်ပါ။ Website က အဖြူရောင်နောက်ခံမှာ စာသားတွေပဲ ရှိနေဦးမှာမို့လို့ သိပ်ပြီးတော့ မလှသေးပါဘူး။ ဒါပေမဲ့ မစိုးရိမ်ပါနဲ့၊ ကျွန်တော်တို့ အရေးကြီးတဲ့ အခြေခံ (<strong>Groundwork</strong>) ကို ချလိုက်တာဖြစ်လို့ နောက်ထပ်အဆင့်တွေမှာ ပြင်ရတာ ပိုလွယ်သွားပါလိမ့်မယ်။</p>
+  </section>
+
+  <section>
+    <h2>Save Your Progress with Git</h2>
+    <p>အလုပ်လုပ်တဲ့ <strong>Workflow</strong> ထဲမှာ <strong>Git</strong> ကို ခဏခဏ <strong>Commit</strong> လုပ်တဲ့ အလေ့အကျင့် ရှိထားဖို့ လိုပါတယ်။ ဒါမှ ကိုယ့်ရဲ့ အလုပ်တွေ မတော်တဆ မပျောက်ပျက်မှာဖြစ်သလို၊ လိုအပ်ရင် အရင်က သိမ်းခဲ့တဲ့ <strong>"Save point"</strong> ကိုလည်း ပြန်သွားနိုင်မှာပါ။ အခုဆိုရင် Website ရဲ့ အခြေခံ <strong>Structure</strong> ကို အကြမ်းဖျင်း ဆွဲပြီးပြီဖြစ်လို့ <strong>Commit</strong> လုပ်ဖို့ အကောင်းဆုံး အချိန်ပါပဲ။</p>
+
+    <h3>.gitignore ဖိုင် ဖန်တီးခြင်း</h3>
+    <p><strong>Commit</strong> မလုပ်ခင်မှာ <strong>Project</strong> ထဲမှာ ဖိုင်အသစ်တစ်ခု အရင်ဆောက်ရအောင် -</p>
+
+    <div class="code-snippet-box animate-up">
+      <pre>touch .gitignore</pre>
+    </div>
+
+
+    <p>ကျွန်တော်တို့က <strong>Git</strong> ကို "ဒီဖိုင်တွေကိုတော့ စာရင်းထဲမသွင်းနဲ့ (မမှတ်နဲ့)" လို့ ပြောချင်တဲ့အခါ <strong>.gitignore</strong> ဖိုင်ကို သုံးပါတယ်။ <strong>Developers</strong> တွေဟာ တစ်ခါတလေ ဖိုင်တွေအကုန်လုံးကို <strong>Automatically commit</strong> လုပ်တတ်ကြတယ်။ အဲ့ဒီအခါ မလိုလားအပ်တဲ့ ဖိုင်တွေပါသွားပြီး <strong>Project</strong> ကို ရှုပ်ထွေးစေတတ်ပါတယ်။</p>
+
+    <p>ဥပမာ - <strong>macOS</strong> မှာဆိုရင် <strong>Folder</strong> တိုင်းမှာ <strong>.DS_Store</strong> ဆိုတဲ့ ဖိုင်လေးက အလိုလို ပါနေတတ်ပါတယ်။ ဒါဟာ <strong>Git</strong> ထဲ ပါသွားရင် အလုပ်လုပ်ရတာ စိတ်အနှောင့်အယှက် ဖြစ်စေပါတယ်။ <strong>Windows</strong> သုံးတဲ့သူတွေကတော့ အဲ့ဒီပြဿနာကို သိသာအောင် <code>touch .DS_Store</code> ဆိုပြီး ဖိုင်အသစ်တစ်ခု စမ်းဆောက်ကြည့်လို့ ရပါတယ်။</p>
+
+    <div class="important-container animate-up">
+      <div class="important-label">IMPORTANT</div>
+      <div class="important-body">
+        <p>မင်းက <strong>Windows</strong> သုံးတာပဲဖြစ်ဖြစ် <strong>.gitignore</strong> ထဲမှာ <strong>.DS_Store</strong> ကို ထည့်ထားတာ အကောင်းဆုံးပါပဲ။ ဘာလို့လဲဆိုတော့ တခြား <strong>macOS</strong> သုံးတဲ့သူတွေနဲ့ အလုပ်တွဲလုပ်တဲ့အခါ <strong>Conflict</strong> (ပြဿနာ) မတက်အောင် ကြိုတင်ကာကွယ်ထားတာ ဖြစ်ပါတယ်။</p>
+      </div>
+    </div>
+
+    <h3>Staging နှင့် Commit လုပ်ခြင်း</h3>
+      <p>အခုဆိုရင် အားလုံးဆီမှာ <code>.gitignore</code> ဖိုင် ရှိနေပြီဆိုတော့ အဲ့ဒီဖိုင်ကို <strong>VS Code</strong> မှာ ဖွင့်လိုက်ပါ။ ပြီးရင် အထဲမှာ <code>.DS_Store</code> လို့ ရိုက်ထည့်ပြီး <strong>Save</strong> လိုက်ပါ။ ပြီးရင် <strong>Command Line</strong> မှာ <code>git status</code> လို့ ပြန်ရိုက်ကြည့်လိုက်ပါ။</p>
+
+      <p>အခုကြည့်လိုက်ရင် <strong>Git</strong> က <code>.DS_Store</code> ဖိုင်ကို စာရင်းထဲမှာ မပြတော့ဘဲ လျစ်လျူရှုလိုက်တာ (ignored) ကို တွေ့ရပါမယ်။ အခု <strong>Git</strong> က မြင်နေရတဲ့ဖိုင်တွေကတော့ -</p>
 
       <ul>
-        <li>
-          ကိုယ့် <strong>Project</strong> မှာ ဝိုင်းလုပ်မယ့် တခြား
-          <strong>Developers</strong> တွေ ဖတ်ရတာ လွယ်ကူစေပါတယ်။
-        </li>
-        <li>
-          နောက်ရက်မှာ ကိုယ့် <strong>Code</strong> ကို ပြန်ကြည့်တဲ့အခါ
-          ဘာတွေလုပ်ထားသလဲဆိုတာ ချက်ချင်း နားလည်စေပါတယ်။
-        </li>
+        <li><strong>Modified file:</strong> <code>index.html</code> (ကျွန်တော်တို့ <strong>Semantic elements</strong> တွေ ထည့်ပြီး ပြင်ထားတဲ့ဖိုင်)</li>
+        <li><strong>Untracked file:</strong> <code>.gitignore</code> (အခုမှ အသစ်ဆောက်လိုက်တဲ့ဖိုင်)</li>
       </ul>
+
+      <p>ဒီဖိုင်နှစ်ခုလုံးကို <strong>Staging</strong> ထဲ တစ်ခါတည်း ထည့်ဖို့အတွက် အောက်ပါ <strong>Command</strong> နှစ်ခုထဲက တစ်ခုခုကို သုံးနိုင်ပါတယ် -</p>
+
+      <pre style="background-color: #2d2d2d; color: #f8f8f2; padding: 15px; border-radius: 5px; font-family: monospace; margin: 15px 0;">
+      git add .
+      </pre>
+      <p>ဒါမှမဟုတ်</p>
+      <pre style="background-color: #2d2d2d; color: #f8f8f2; padding: 15px; border-radius: 5px; font-family: monospace; margin: 15px 0;">
+      git add -A
+      </pre>
+
+      <p>ဘယ်တစ်ခုကို သုံးရမလဲဆိုတာ သိဖို့ သူတို့ရဲ့ ကွာခြားချက်ကို ကြည့်ရအောင် -</p>
+      <ul>
+        <li><strong><code>git add .</code></strong> : အခု လက်ရှိရောက်နေတဲ့ <strong>Directory</strong> နဲ့ သူ့အောက်မှာရှိတဲ့ <strong>Subdirectories</strong> ထဲက ပြင်ထားတဲ့ဖိုင်တွေ၊ ဖိုင်အသစ်တွေ အကုန်လုံးကို ထည့်ပေးတာပါ။</li>
+        <li><strong><code>git add -A</code></strong> : <strong>Project</strong> တစ်ခုလုံးမှာ ရှိသမျှ အပြောင်းအလဲ အားလုံးကို <strong>Stage</strong> လုပ်ပေးတာပါ။</li>
+      </ul>
+
+      <p>ဒီ <strong>Command</strong> တွေက ဖိုင်အများကြီးကို တစ်ခါတည်း <strong>Stage</strong> လုပ်ချင်တဲ့အခါ အရမ်းအသုံးဝင်ပါတယ်။ ဒါပေမဲ့ <strong>.gitignore</strong> ဖိုင်ကို အရင်သေချာ မပြင်ထားဘဲ သုံးမိရင် မလိုလားအပ်တဲ့ ဖိုင်တွေပါ <strong>Git</strong> ထဲ ပါသွားတတ်လို့ သတိထားရပါမယ်။</p>
+
+      <p>အားလုံး <strong>Stage</strong> လုပ်ပြီးပြီဆိုရင်တော့ အောက်ပါ <strong>Command</strong> နဲ့ <strong>Commit</strong> လုပ်လိုက်ရအောင် -</p>
+
+      <pre style="background-color: #2d2d2d; color: #f8f8f2; padding: 15px; border-radius: 5px; font-family: monospace; margin: 15px 0;">
+      git commit -m "html outline and gitignore"
+      </pre>
+  </section>
+
+  <section>
+    <h1>Publish with GitHub Pages</h1>
+    <p>အရမ်းကောင်းပါတယ်—မင်းကြိုးစားထားသမျှတွေကို <strong>Git</strong> ထဲမှာ သိမ်းဆည်းပြီးသွားပါပြီ။ ဒါပေမဲ့ ပြဿနာတစ်ခုရှိတာက ဒီ <strong>Commits</strong> တွေက မင်းရဲ့ <strong>Local Computer</strong> (ကိုယ့်စက်) ထဲမှာပဲ ရှိနေတာပါ။ အကယ်လို့ မတော်တဆ ကော်ဖီမှောက်ကျတာပဲဖြစ်ဖြစ်၊ လျှပ်စစ်ရှော့ခ်ဖြစ်တာပဲဖြစ်ဖြစ် ဖြစ်ခဲ့ရင် မင်းလုပ်ထားသမျှတွေ အကုန်ပျောက်သွားပါလိမ့်မယ်။ အဲ့ဒါဆိုရင် <strong>Run Buddy</strong> ကုမ္ပဏီက စိတ်ဆိုးမှာ သေချာပါတယ်။</p>
+
+    <p>ဒါကြောင့် ကိုယ့်ရဲ့ <strong>Repository</strong> ကို လုံခြုံစိတ်ချရတဲ့ <strong>Remote location</strong> (အဝေးက သိမ်းဆည်းရာနေရာ) တစ်ခုမှာ သိမ်းထားနိုင်ရင် ပိုမကောင်းဘူးလား? အဲ့ဒီအတွက် <strong>GitHub</strong> က ကူညီပေးမှာပါ။</p>
+    <p><strong>GitHub</strong> ဆိုတာ <strong>Git repositories</strong> တွေကို လက်ခံသိမ်းဆည်းပေးတဲ့ <strong>Website</strong> တစ်ခုပါ။ ဒါဟာ အခမဲ့ဖြစ်ပြီး <strong>Developers</strong> တွေကြားမှာ အရမ်းခေတ်စားတာကြောင့် အကောင့်တစ်ခုရှိနေဖို့ လိုပါတယ်။</p>
+
+    <div class="important-container animate-up">
+      <div class="important-label">IMPORTANT</div>
+      <div class="important-body">
+        <p>လူအများစု မှားတတ်တာက <strong>Git</strong> နဲ့ <strong>GitHub</strong> ကို အတူတူပဲလို့ ထင်နေကြတာပါ။ <strong>Git</strong> ဆိုတာက မင်းရဲ့ ကွန်ပျူတာထဲမှာ <strong>Install</strong> လုပ်ထားတဲ့ <strong>Version Control Software</strong> ဖြစ်ပြီး <strong>GitHub</strong> ကတော့ အဲ့ဒီ <strong>Repositories</strong> တွေကို အင်တာနက်ပေါ်မှာ တင်ထားလို့ရတဲ့ ဝန်ဆောင်မှု (<strong>Service</strong>) ဖြစ်ပါတယ်။ <strong>GitHub</strong> အပြင် တခြား ဝန်ဆောင်မှုတွေလည်း ရှိပါသေးတယ်။</p>
+      </div>
     </div>
+
+    <p>ကဲ... အခု ကျွန်တော်တို့ ဆောက်ထားတဲ့ <strong>Run Buddy webpage</strong> ကို <strong>GitHub</strong> ပေါ် ဘယ်လိုတင်မလဲ ကြည့်ရအောင်။ ပထမဆုံး အဆင့်အနေနဲ့ <strong>GitHub</strong> ပေါ်မှာ <strong>Remote repository</strong> အသစ်တစ်ခု အရင်ဆောက်ရပါမယ်။ ပြီးမှ ကိုယ့်စက်ထဲက <strong>Project</strong> နဲ့ ချိတ်ဆက်မှာပါ။</p>
+
+    <p><strong>GitHub</strong> ကို <strong>Login</strong> ဝင်ပြီးရင် အောက်ပါပုံမှာ ပြထားတဲ့အတိုင်း <strong>"New"</strong> ဆိုတဲ့ ခလုတ်လေးကို နှိပ်လိုက်ပါ။</p>
+
+    <h3>GitHub Repository အသစ်ဆောက်ခြင်း</h3>
+    <p><strong>"New"</strong> ခလုတ်ကို နှိပ်ပြီးရင် <strong>Repository</strong> အသစ်ဆောက်မယ့် စာမျက်နှာကို ရောက်သွားပါမယ်။ အဲ့ဒီမှာ အောက်ပါအတိုင်း လုပ်ဆောင်ပါ -</p>
+
+    <ol>
+      <li><strong>Repository name</strong> နေရာမှာ <code>run-buddy</code> လို့ အမည်ပေးပါ။</li>
+      <li>တခြား <strong>Options</strong> တွေကို ဘာမှမပြင်ဘဲ <strong>"Create repository"</strong> ခလုတ်ကို နှိပ်လိုက်ပါ။</li>
+    </ol>
+
+    <p>စာမျက်နှာအသစ်မှာ <strong>Quick Setup</strong> ဆိုတဲ့ <strong>Banner</strong> လေး ပေါ်လာပါလိမ့်မယ်။ အဲ့ဒီမှာ <strong>SSH</strong> ဆိုတာကို ရွေးပေးပါ။ လင့်ခ် (Link) က <code>git@github.com:username/run-buddy.git</code> ဆိုတဲ့ ပုံစံမျိုး ဖြစ်နေပါလိမ့်မယ်။</p>
+
+    <div class="important-container animate-up">
+      <div class="important-label">IMPORTANT</div>
+      <div class="important-body">
+        <p>အကယ်လို့ <strong>Prework</strong> တုန်းက <strong>SSH keys</strong> တွေ သေချာလုပ်ခဲ့ရင် ဒီ <strong>SSH</strong> option ကိုပဲ သုံးပါ။ မလုပ်ရသေးရင်တော့ ရှေ့မဆက်ခင် <strong>SSH</strong> အရင်ပြင်ဆင်ထားဖို့ အထူးအကြံပြုပါတယ်။ <a href="https://docs.github.com/en/authentication/connecting-to-github-with-ssh/about-ssh" target="_blank">GitHub tutorials on using SSH</a></p>
+      </div>
+    </div>
+
+    <h3>Local Project နှင့် GitHub ကို ချိတ်ဆက်ခြင်း</h3>
+    <p>အခု <strong>GitHub</strong> ပေါ်မှာ <strong>Remote repository</strong> ဆောက်ပြီးပြီဆိုတော့ ကိုယ့်စက်ထဲက <strong>Project</strong> နဲ့ ချိတ်ဖို့ လိုပါပြီ။ <strong>GitHub</strong> ကရတဲ့ <strong>Link</strong> ကို <strong>Copy</strong> ကူးပြီး <strong>Terminal</strong> (သို့မဟုတ် Git Bash) မှာ အောက်ပါအတိုင်း ရိုက်ပါ -</p>
+
+    <pre style="background-color: #2d2d2d; color: #f8f8f2; padding: 15px; border-radius: 5px; font-family: monospace; margin: 15px 0;">
+    git remote add origin [GitHub ကရတဲ့ Link ကို ဒီမှာထည့်ပါ]
+    git remote -v
+    </pre>
+
+    <p>ဒုတိယ <strong>Command</strong> ဖြစ်တဲ့ <code>git remote -v</code> ကတော့ ကိုယ့် <strong>Project</strong> မှာ <strong>Remote link</strong> ချိတ်မိသွားပြီလားဆိုတာကို ပြန်စစ်တာပါ။ ဒီနေရာမှာ ကျွန်တော်တို့ ချိတ်လိုက်တဲ့လင့်ခ်ကို <code>origin</code> လို့ အမည်ပေးထားပါတယ်။ ဒီနာမည်က အရမ်းအရေးကြီးပါတယ်။ နောက်ပိုင်း <strong>Code</strong> တွေ တင်တဲ့အခါ ဒီနာမည်ကိုပဲ သုံးရမှာမို့လို့ပါ။</p>
+
+    <h3>Code များကို GitHub ပေါ်သို့ တင်ခြင်း (Push)</h3>
+    <p>အားလုံးအဆင်သင့်ဖြစ်ပြီဆိုရင် ကိုယ့်စက်ထဲက <strong>Code</strong> တွေကို <strong>GitHub</strong> ပေါ် တကယ်တင်ဖို့ အောက်ပါအတိုင်း ရိုက်ထည့်လိုက်ပါ -</p>
+
+    <pre style="background-color: #2d2d2d; color: #f8f8f2; padding: 15px; border-radius: 5px; font-family: monospace; margin: 15px 0;">
+    git push origin main
+    </pre>
+
+    <p><strong>SSH</strong> ကို သုံးထားတယ်ဆိုရင် <strong>Git</strong> က မင်းရဲ့ <strong>SSH passphrase</strong> ကို တောင်းပါလိမ့်မယ်။ ပထမဆုံးအကြိမ် <strong>Push</strong> လုပ်တာဆိုရင် သင့်ကွန်ပျူတာက <strong>GitHub website</strong> ကို ယုံကြည်ရပါသလားလို့ မေးပါလိမ့်မယ်။ အဲ့ဒီအခါ <code>yes</code> လို့ ရိုက်ထည့်ပေးလိုက်ပါ။</p>
+
+    <p><code>git push origin main</code> ဆိုတာ <strong>"ငါ့စက်ထဲက main branch မှာရှိတဲ့ code တွေကို origin (GitHub) ဆီကို ပို့ပေးပါ"</strong> လို့ ခိုင်းလိုက်တာ ဖြစ်ပါတယ်။</p>
+
+    <p><code>yes</code> လို့ ရိုက်ပေးလိုက်ပါ၊ ကျွန်တော်တို့ သူတို့ကို ယုံကြည်လို့ရပါတယ်။ အကယ်လို့ <code>HTTPS</code> လင့်ခ်ကို သုံးမယ်ဆိုရင်တော့ <code>GitHub</code> ပေါ် <code>Code</code> တင်တိုင်း (Push လုပ်တိုင်း) သင့်ရဲ့ <code>username</code> နဲ့ <code>password</code> ကို အမြဲတမ်း ရိုက်နေရမှာပါ။ ဒါကြောင့် <code>SSH</code> ကို သုံးတာက ပိုပြီး အဆင်ပြေပါတယ်။</p>
+
+    <p>တကယ်တော့ <strong>git push origin main</strong> က ဘာလုပ်ပေးတာလဲ? <strong>git push</strong> ဆိုတဲ့ <strong>Command</strong> က ကိုယ့်စက်ထဲမှာ သိမ်းထားတဲ့ <strong>Local Commits</strong> တွေကို <strong>Remote location</strong> (ဒီနေရာမှာတော့ <strong>GitHub</strong>) ဆီကို ပို့ပေးလိုက်တာပါ။ လက်ရှိမှာတော့ ကျွန်တော်တို့ဆီမှာ <strong>Main Branch</strong> တစ်ခုပဲ ရှိပါသေးတယ်။</p>
+
+    <div class="legacy-lore-box">
+        <!-- အပေါ်ထောင့်က Label လေး -->
+        <div class="lore-badge">LEGACY LORE</div>
+        
+        <!-- အတွင်းစာသား -->
+        <p>အရင်တုန်းကတော့ <strong>Codebase</strong> တစ်ခုရဲ့ အဓိကအပိုင်းကို <strong>master</strong> လို့ပဲ ခေါ်ခဲ့ကြပါတယ်။ ဒါပေမဲ့ အခုနောက်ပိုင်းမှာတော့ <strong>main</strong> ဆိုတဲ့ အသုံးအနှုန်းက ပိုပြီး ခေတ်စားလာပါတယ်။ <strong>GitHub</strong> ကလည်း <strong>default</strong> အနေနဲ့ <strong>main</strong> ကိုပဲ သုံးသလို ကျွန်တော်တို့ သင်တန်းမှာလည်း <strong>main</strong> ကိုပဲ သုံးသွားမှာပါ။ ဒါပေမဲ့ အပြင်လောကမှာ ဝါရင့် <strong>Coders</strong> တွေက <strong>"master branch"</strong> လို့ ပြောနေကြတာကိုလည်း ကြားရနိုင်တယ်ဆိုတာ သိထားပေးပါ။</p>
+    </div>
+
+    <p>အခု <strong>Browser</strong> ထဲက မင်းရဲ့ <strong>GitHub Repository</strong> ကို သွားပြီး <strong>Refresh</strong> လုပ်ကြည့်လိုက်ပါ။ မင်းတင်လိုက်တဲ့ ဖိုင် ၂ ဖိုင်နဲ့ <strong>Commits</strong> မှတ်တမ်းတွေကို တွေ့ရပါလိမ့်မယ်။ ဒါဟာ တခြား ကွန်ပျူတာတစ်လုံးကနေပဲဖြစ်ဖြစ်၊ တခြား <strong>Developers</strong> တွေနဲ့ပဲဖြစ်ဖြစ် ဒီ <strong>Project</strong> ကို ဆက်လုပ်လို့ရသွားပြီဆိုတဲ့ အဓိပ္ပာယ်ပါ။</p>
+
+    <h3>အမြဲတမ်း သုံးရမည့် Git Routine</h3>
+    <p>အခုကစပြီး မင်းပြင်လိုက်တဲ့ <strong>Code</strong> တွေ <strong>GitHub</strong> ပေါ် အမြဲရောက်နေစေဖို့ အောက်ပါ <strong>Commands</strong> ၃ ခုကို အလွတ်ကျက်ထားဖို့ လိုပါတယ် -</p>
+
+    <ol>
+      <li><strong>git add -A</strong> (ပြင်ထားသမျှ အကုန်လုံးကို စင်ပေါ်တင်မယ်)</li>
+      <li><strong>git commit -m "လုပ်ခဲ့တဲ့အလုပ်အကြောင်း ရေးရန်"</strong> (မှတ်တိုင်အဖြစ် သိမ်းဆည်းမယ်)</li>
+      <li><strong>git push origin main</strong> (GitHub ပေါ် တင်လိုက်မယ်)</li>
+    </ol>
+
+    <h2>Website ကို Live လွှင့်ခြင်း (GitHub Pages)</h2>
+    <p><strong>GitHub</strong> ရဲ့ အလန်းဆုံးအချက်ကတော့ ကိုယ့်ရဲ့ <strong>HTML Project</strong> တွေကို <strong>Live Website</strong> အဖြစ် အခမဲ့ တင်ပေးတာပါပဲ။ <strong>Hosting</strong> အတွက် ပိုက်ဆံပေးစရာ မလိုတော့ဘူးပေါ့။</p>
+
+    <p>ကျွန်တော်တို့ရဲ့ <strong>Run Buddy</strong> တိုးတက်မှုတွေကို တကယ့် <strong>Website</strong> လင့်ခ်အနေနဲ့ ကြည့်လို့ရအောင် အောက်ပါအတိုင်း လုပ်ဆောင်ပါ -</p>
+
+    <ol>
+      <li>ကိုယ့်ရဲ့ <strong>Repository</strong> စာမျက်နှာမှာရှိတဲ့ <strong>Settings</strong> tab ကို နှိပ်ပါ။</li>
+      <li>စာမျက်နှာရဲ့ ဘယ်ဘက်ခြမ်းမှာရှိတဲ့ <strong>Pages</strong> ဆိုတဲ့ tab ကို ရှာပြီး နှိပ်ပါ။</li>
+    </ol>
+
+    <h3>GitHub Pages နဲ့ Live လွှင့်ခြင်း</h3>
+    <p><strong>GitHub Pages</strong> မှာ <strong>Source</strong> ကို <strong>"main branch"</strong> လို့ ရွေးပေးလိုက်တာဟာ GitHub ကို "ငါ့ရဲ့ <code>main branch</code> ထဲက <code>code</code> တွေကို သုံးပြီး <code>website</code> လွှင့်ပေးပါ" လို့ ပြောလိုက်တာ ဖြစ်ပါတယ်။ ဒါဆိုရင် GitHub က မင်းရဲ့ <code>website</code> လိပ်စာကို <code>https://&lt;your-username&gt;.github.io/run-buddy/</code> ဆိုပြီး ပြပေးပါလိမ့်မယ်။</p>
+
+    <p>ဒါက တကယ် <strong>live</strong> ဖြစ်ဖို့ တစ်မိနစ်လောက် ကြာတတ်တာမို့လို့ ခဏစောင့်ပြီးမှ အဲ့ဒီ <code>link</code> ကို ဖွင့်ကြည့်ပါ။ ဖွင့်ကြည့်လိုက်တဲ့အခါ မင်းရဲ့ <strong>Run Buddy webpage</strong> က အင်တာနက်ပေါ်မှာ တကယ် ရှိနေတာကို တွေ့ရပါလိမ့်မယ်။</p>
+
+    <p>နောက်ပိုင်းမှာ ဒီ <strong>project</strong> ကို ပြင်ဆင်ပြီး <strong>GitHub</strong> ပေါ် <strong>push</strong> လုပ်လိုက်တိုင်း ဒီ <strong>live link</strong> က အလိုအလျောက် <strong>update</strong> ဖြစ်သွားမှာပါ။ တကယ့်ကို အဆင်ပြေတဲ့ ဝန်ဆောင်မှုပါပဲ။</p>
+
+    <div class="otj-container animate-up">
+      <!-- အပေါ်ဘောင်ပေါ်က စာသား -->
+      <div class="otj-label">ON THE JOB</div>
+
+      <!-- ဘေးက လက်ဝါးပုံ အဝိုင်းလေး -->
+      <div class="otj-icon-badge">
+          <i class="fas fa-hands-helping"></i>
+      </div>
+
+      <!-- စာသား ကိုယ်ထည် -->
+      <p><strong>Recruiters</strong> (အလုပ်ရှာပေးသူများ) နဲ့ <strong>Hiring Managers</strong> (အလုပ်ခန့်သူများ) အတွက် <strong>GitHub</strong> ဟာ အရမ်းအရေးကြီးပါတယ်။ မင်းရဲ့ <strong>coding</strong> လက်ရာတွေ၊ အလုပ်လုပ်ပုံတွေနဲ့ <strong>README</strong> ဖိုင်တွေကို ကြည့်ပြီး မင်းရဲ့ အရည်အချင်းကို အကဲဖြတ်ကြတာပါ။ ဒါကြောင့် <strong>GitHub profile</strong> ကောင်းကောင်းရှိဖို့ အခုကတည်းက ကြိုးစားပါ။</p>
+    </div>
+
+    <h3>index.html ရဲ့ အရေးပါပုံ</h3>
+    <p>မင်းရဲ့ <code>link</code> ကို ကြည့်ရင် <code>index.html</code> လို့ အနောက်မှာ ထည့်ရေးစရာမလိုဘဲ Website ပွင့်လာတာကို သတိထားမိမှာပါ။ ဒါဟာ <strong>Server</strong> တွေက ဖိုင်နာမည် သီးသန့်မဖော်ပြထားရင် <code>index.html</code> ကို <strong>default</strong> (အခြေခံဖိုင်) အနေနဲ့ အလိုအလျောက် ရှာဖွေပေးလို့ ဖြစ်ပါတယ်။</p>
+
+    <p>ဥပမာ - <code>something.com/contact.html</code> လို့ ရိုက်ရင်တော့ <code>contact.html</code> ဖိုင်ကို ပြပေးမယ်။ ဒါပေမဲ့ <code>something.com</code> လို့ပဲ ရိုက်ရင်တော့ <strong>Server</strong> က <code>index.html</code> ကိုပဲ ရှာပြီး ပြပေးမှာပါ။ ဒါကြောင့် <strong>Project</strong> တိုင်းမှာ <code>index.html</code> ဖိုင် ပါဖို့က အရမ်းအရေးကြီးပါတယ်။</p>
+  </section>
+
+  <section>
+    <h2>Reflection (ပြန်လည်သုံးသပ်ခြင်း)</h2>
+    <p>ဒီသင်ခန်းစာမှာ ကျွန်တော်တို့ <strong>Run Buddy</strong> အတွက် အခြေခံဖိုင်တွေ၊ Folder တွေဆောက်တာ၊ <strong>Git workflow</strong> သုံးတာနဲ့ <strong>GitHub repo</strong> ချိတ်ဆက်တာတွေကို အဓိကထား လုပ်ဆောင်ခဲ့ပါတယ်။ အခုကြည့်ရင် သိပ်မသိသာသေးဘူး ထင်ရပေမဲ့ တကယ်တော့ မင်းတို့ အများကြီး လုပ်ဆောင်နိုင်ခဲ့ပါပြီ -</p>
+
+    <ul>
+      <li><strong>HTML structure</strong> တစ်ခု အသင့်ဖြစ်နေပြီဖြစ်လို့ နောက်သင်ခန်းစာတွေမှာ အချက်အလက်တွေနဲ့ အလှဆင်ဖို့ပဲ လိုတော့တယ်။</li>
+      <li><strong>Git</strong> ကိုသုံးပြီး ကိုယ့်ရဲ့ <strong>code</strong> ပြောင်းလဲမှုတွေကို ကိုယ့်စက်ထဲမှာရော <strong>GitHub</strong> ပေါ်မှာပါ စနစ်တကျ သိမ်းဆည်းတတ်သွားပြီ။</li>
+      <li><strong>GitHub Pages</strong> ကိုသုံးပြီး ကိုယ့်ရဲ့ <strong>Website</strong> ကို အင်တာနက်ပေါ်မှာ <strong>Live</strong> လွှင့်ထားနိုင်ပြီ။</li>
+    </ul>
+
+    <h3>ဒီသင်ခန်းစာမှာ ဘာတွေတတ်မြောက်ခဲ့လဲ?</h3>
+    <p>ဒီသင်ခန်းစာကို လေ့လာပြီးနောက်မှာ မင်းတို့အနေနဲ့ အောက်ပါအချက်တွေကို လုပ်ဆောင်နိုင်သွားပါပြီ -</p>
+
+    <ul>
+      <li><code>touch</code> နဲ့ <code>mkdir</code> command တွေကို သုံးပြီး ဖိုင်တွေ၊ <strong>folders</strong> တွေ ဆောက်တတ်လာတယ်။</li>
+      <li><code>cd</code> နဲ့ <code>cd ..</code> ကို သုံးပြီး <strong>folder</strong> တွေထဲ သွားလာတတ်လာတယ်။</li>
+      <li><code>&lt;html&gt;</code>, <code>&lt;head&gt;</code>, နဲ့ <code>&lt;body&gt;</code> တို့နဲ့ <strong>HTML structure</strong> ကို ချတတ်လာတယ်။</li>
+      <li><code>&lt;div&gt;</code>, <code>&lt;section&gt;</code>, <code>&lt;header&gt;</code>, နဲ့ <code>&lt;footer&gt;</code> တို့ကို သုံးပြီး <strong>content</strong> တွေကို အပိုင်းလိုက် ခွဲတတ်လာတယ်။</li>
+      <li><strong>Git</strong> မှာ <code>git add</code> နဲ့ <strong>Stage</strong> လုပ်တတ်လာတယ်။</li>
+      <li><code>git commit -m ""</code> နဲ့ <strong>Commit</strong> လုပ်ပြီး <code>git push origin main</code> နဲ့ <strong>GitHub</strong> ပေါ် <strong>Code</strong> တွေ တင်တတ်လာတယ်။</li>
+    </ul>
+
+    <p>နောက်သင်ခန်းစာမှာတော့ <strong>HTML</strong> အကြောင်းကို ပိုပြီး အသေးစိတ် လေ့လာသွားမှာဖြစ်သလို၊ Website ရဲ့ <strong>Elements</strong> တွေကို ပိုလှလာအောင် ပြင်ဆင်သွားကြမှာပါ။ ဒီ <strong>Module</strong> အဆုံးမှာတော့ မင်းတို့ဟာ လှပတဲ့ Website တွေကို ကိုယ်တိုင် တည်ဆောက်နိုင်တဲ့အထိ တတ်မြောက်သွားပါလိမ့်မယ်။ အရင်ဆုံး ဒီ <strong>landing page</strong> ကို အပြီးသတ်ကြရအောင်!</p>
+
+    <h3>Lesson Code Snapshot</h3>
+    <p>ဒီသင်ခန်းစာအတွက် ကိုယ်ရေးထားတဲ့ <strong>code</strong> တွေကို မူရင်း <strong><a href="/content/bootcamp-mm/foundation/mod1/1.1.zip" download
+        >code snapshot <i class="fas fa-external-link-alt"></i
+      ></a></strong> နဲ့ တိုက်စစ်ကြည့်ချင်ရင် <strong>Download</strong> ရယူနိုင်ပါတယ်။ ကိုယ့် <strong>code</strong> နဲ့ တစ်ထပ်တည်း မကျရင်လည်း စိတ်မပူပါနဲ့၊ ဒါကို နောက်သင်ခန်းစာအတွက် အခြေခံအမှတ်အသားအနေနဲ့ သုံးလို့ရပါတယ်။</p>
   </section>
 </div>

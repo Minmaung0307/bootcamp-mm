@@ -1451,3 +1451,58 @@ body.dark-theme .article-content section:nth-of-type(even) {
     flex-wrap: wrap;
 }
 .split > div { flex: 1; min-width: 300px; }
+
+/* --- Legacy Lore Box Style --- */
+.legacy-lore-box {
+    position: relative; /* Label ကို နေရာချရန် အခြေခံ */
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 30px 25px 20px 25px; /* အပေါ်ဘက်တွင် Label အတွက် padding ပိုပေးထားသည် */
+    margin: 40px 0;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08); /* ပုံထဲကလို shadow အိအိလေး */
+}
+
+/* Floating Label (ဘောင်ပေါ်တင်ထားသော စာသားအကွက်) */
+.lore-badge {
+    position: absolute;
+    top: -15px;      /* အပေါ်ဘောင်ကို ဖြတ်တက်ရန် အနှုတ်တန်ဖိုးသုံးသည် */
+    left: 15px;      /* ဘယ်ဘက်မှ အနည်းငယ် ခွာရန် */
+    background-color: white; /* အရေးကြီးသည်: ဘောင်လိုင်းကို ဖုံးသွားစေရန် */
+    padding: 5px 15px;
+    color: #0073b1;  /* Columbia Blue နှင့် ဆင်တူသော အရောင် */
+    font-weight: bold;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.lore-text {
+    margin: 0;
+    line-height: 1.7;
+    color: #334155;
+    font-size: 1rem;
+}
+
+/* --- Inline Code Style (master, main စာသားလေးများအတွက်) --- */
+code {
+    background-color: #fdf2f2;
+    color: #c0392b;           /* အနီရောင်ရင့်ရင့် */
+    border: 1px solid #f5c6cb;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.9rem;
+}
+
+/* Dark Mode အတွက် ချိန်ညှိချက် */
+body.dark-theme .legacy-lore-box {
+    background-color: #1e293b;
+    border-color: #334155;
+}
+body.dark-theme .lore-badge {
+    background-color: #1e293b;
+    border-color: #334155;
+}
