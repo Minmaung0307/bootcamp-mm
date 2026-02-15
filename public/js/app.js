@@ -4623,26 +4623,13 @@ async function saveMultiCourseGrades(uid, courseId) {
   }
 }
 
-// --- Upgraded Hint Accordion ---
-function toggleAccordion(btn, id) {
-    const el = document.getElementById(id);
-    const span = btn.querySelector('span'); // ခလုတ်ထဲက စာသားကိုယူမည်
-
-    if (!el.style.maxHeight || el.style.maxHeight === "0px") {
-        // ပွင့်လာစေရန်
-        el.style.display = "block";
-        el.style.maxHeight = el.scrollHeight + "px";
-        el.style.padding = "20px";
-        span.innerText = "HIDE HINT"; // 🔥 စာသားပြောင်းမည်
-        btn.classList.add('active');
-    } else {
-        // ပိတ်သွားစေရန်
-        el.style.maxHeight = "0px";
-        el.style.padding = "0 20px";
-        span.innerText = "SHOW HINT"; // 🔥 စာသားမူလအတိုင်းပြန်ထားမည်
-        btn.classList.remove('active');
-        setTimeout(() => { if(el.style.maxHeight === "0px") el.style.display = "none"; }, 400);
-    }
+function toggleAccordion(id) {
+  var x = document.getElementById(id);
+  if (x.style.display === "none" || x.style.display === "") {
+    x.style.display = "block";
+  } else {
+    x.style.display = "none";
+  }
 }
 
 // အဖြေကို ပိတ်/ဖွင့် လုပ်ပေးမည့် function
@@ -4732,3 +4719,19 @@ function applyWeeklyTheme() {
 
 // ဤ function ကို window.onload ထဲတွင် ထည့်ခေါ်ပေးပါ
 // window.onload = () => { ... applyWeeklyTheme(); }
+
+function toggleHint(btn) {
+    const container = btn.closest('.hint-container');
+    const content = container.querySelector('.hint-content-box');
+    const textSpan = btn.querySelector('span');
+
+    if (content.style.display === "none" || content.style.display === "") {
+        content.style.display = "block";
+        textSpan.innerText = "HIDE HINT";
+        btn.classList.add('active'); // active ဖြစ်ရင် နေရာပြန်ညှိမည်
+    } else {
+        content.style.display = "none";
+        textSpan.innerText = "SHOW HINT";
+        btn.classList.remove('active');
+    }
+}

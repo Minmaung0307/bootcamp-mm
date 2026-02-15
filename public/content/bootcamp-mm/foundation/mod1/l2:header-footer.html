@@ -161,27 +161,19 @@
       <li>တခြား website တစ်ခုခု (ဥပမာ - Google)။</li>
     </ul>
 
-    <div class="connect-dots-container animate-up">
-        <!-- အပေါ်ထောင့်က အဝိုင်းလေး -->
-        <div class="floating-dot"></div>
-        
-        <h4>CONNECT THE DOTS</h4>
-        <p>HTML (Hypertext Markup Language) ရဲ့ "Hypertext" ဆိုတာ တခြားဆီကို ချိတ်ဆက်ပေးထားတဲ့ စာသားကို ပြောတာပါ။ ဒါကြောင့် <code>&lt;a&gt;</code> tag ဟာ HTML ရဲ့ အနှစ်သာရတစ်ခုလို့ ပြောလို့ရပါတယ်။</p>
+    <div style="background-color: #e8f4fd; padding: 15px; border-radius: 5px; border-left: 5px solid #2196f3; margin: 15px 0;">
+    <strong>Connect the Dots</strong>
+    <p>HTML (Hypertext Markup Language) ရဲ့ "Hypertext" ဆိုတာ တခြားဆီကို ချိတ်ဆက်ပေးထားတဲ့ စာသားကို ပြောတာပါ။ ဒါကြောင့် <code>&lt;a&gt;</code> tag ဟာ HTML ရဲ့ အနှစ်သာရတစ်ခုလို့ ပြောလို့ရပါတယ်။</p>
     </div>
 
     <p>အောက်က <strong>Code</strong> နမူနာကို ကြည့်ပါ -</p>
 
-    <div class="code-snippet-box animate-up">
-    <pre>
-    <span class="code-comment">&lt;!-- When you click "Go to Google," it will take you to Google --&gt;</span>
-    <span class="code-tag">&lt;a href=</span><span class="code-string">"https://google.com"</span><span class="code-tag">&gt;</span> Go to Google <span class="code-tag">&lt;/a&gt;</span>
-
-    <span class="code-comment">&lt;!-- This will take us to our own site's privacy policy HTML page --&gt;</span>
-    <span class="code-tag">&lt;a href=</span><span class="code-string">"./privacy-policy.html"</span><span class="code-tag">&gt;</span> View Our Privacy Policy <span class="code-tag">&lt;/a&gt;</span>
-
-    <span class="code-comment">&lt;!-- This does nothing at all --&gt;</span>
-    <span class="code-tag">&lt;a&gt;</span> This does nothing <span class="code-tag">&lt;/a&gt;</span></pre>
-    </div>
+    <pre style="background-color: #2d2d2d; color: #f8f8f2; padding: 15px; border-radius: 5px;">
+    &lt;!-- Google ကို သွားမယ့် link --&gt;
+    &lt;a href="https://google.com"&gt;Go to Google&lt;/a&gt;
+    <!-- ကိုယ့် website ထဲက တခြား page ကို သွားမယ့် link -->
+    <a href="./privacy-policy.html">View Our Privacy Policy</a>
+    </pre>
 
     <h3>Attributes (ဂုဏ်သတ္တိများ)</h3>
     <p>အပေါ်က code မှာ <code>href=</code> ဆိုတာကို သတိထားမိမှာပါ။ ဒါကို <strong>HTML Attribute</strong> လို့ ခေါ်ပါတယ်။ <strong>Attributes</strong> တွေဟာ HTML element တစ်ခုကို -</p>
@@ -294,14 +286,17 @@
 
     <p>ဒါဆိုရင် မင်းရဲ့ အလုပ်တွေဟာ အင်တာနက်ပေါ်မှာ လုံလုံခြုံခြုံ ရှိသွားပါပြီ!</p>
 
-    <div class="pro-tip-wrapper">
-        <!-- ခလုတ် (Pill shape) -->
-        <div class="lms-accordion animate-up" onclick="toggleAccordion(this, 'hint-1')">
-            <i class="fas fa-comment-dots"></i> <span>SHOW HINT</span>
+    <div class="hint-container">
+        <!-- နှိပ်ရမည့် ခလုတ် -->
+        <div class="hint-trigger animate-up" onclick="toggleHint(this)">
+            <div class="hint-badge-icon">
+                <i class="fas fa-comment-dots"></i>
+            </div>
+            <span>SHOW HINT</span>
         </div>
 
-        <!-- အဖြေအကွက် -->
-        <div id="hint-1" class="accordion-body">
+        <!-- ပွင့်လာမည့် အကွက် -->
+        <div class="hint-content-box">
             <p><strong>git add</strong> နဲ့ <strong>git commit</strong> command နှစ်ခုဟာ locally မှာ ကိုယ်ဘာတွေသိမ်းမယ်ဆိုတာနဲ့ ဘာကြောင့်သိမ်းတယ်ဆိုတာကို Git ကို အရင်ပြောပြတာပါ။ GitHub ပေါ် <strong>push</strong> မလုပ်ခင် ဒီအဆင့်နှစ်ခုကို (ဒီအတိုင်းအစဉ်လိုက်) အရင်ဆုံး လုပ်ရပါမယ်။</p>
         </div>
     </div>

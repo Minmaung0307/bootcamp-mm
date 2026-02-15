@@ -423,13 +423,13 @@
       <li><code>rm [နာမည်]</code>: File ကို ဖျက်ပါ။</li>
     </ul>
 
-    <div class="deep-dive-btn" onclick="toggleDeepDive(this)">
-      <p><strong>DEEP DIVE</strong></p>
-      <i class="fas fa-chevron-down"></i>
+    <div class="lms-box-btn animate-up" onclick="toggleLMSAccordion(this)">
+        <strong>DEEP DIVE</strong>
+        <i class="fas fa-chevron-down"></i>
     </div>
-    <div class="accordion-body">
-      <p><strong>DEEP DIVE</strong></p>
-      <p>
+    <div class="lms-accordion-body">
+        <div>
+            <p>
         အောက်မှာပေးထားတဲ့ တခြားအသုံးဝင်တဲ့ <strong>Commands</strong> တွေက
         ဘာတွေလုပ်ပေးနိုင်သလဲဆိုတာကို အင်တာနက်မှာ ရှာဖွေပြီး ထပ်မံလေ့လာကြည့်ပါ -
       </p>
@@ -459,6 +459,7 @@
           Folder ကြည့်တဲ့ Window) ထဲမှာ ဖွင့်ပေးမှာပါ။
         </li>
       </ul>
+        </div>
     </div>
 
     <p>
@@ -611,16 +612,13 @@
       <code>&lt;h6&gt;</code> အထိ သုံးနိုင်ပါတယ်။
     </p>
 
-    <div
-      class="deep-dive-btn"
-      onclick="toggleDeepDive(this)"
-      style="margin-top: 20px"
-    >
-      <p><strong>DEEP DIVE: MORE TOOLS</strong></p>
-      <i class="fas fa-chevron-down"></i>
+    <div class="lms-box-btn animate-up" onclick="toggleLMSAccordion(this)">
+        <strong>DEEP DIVE</strong>
+        <i class="fas fa-chevron-down"></i>
     </div>
-    <div class="accordion-body">
-      <p>
+    <div class="lms-accordion-body">
+        <div>
+            <p>
         To learn more, refer to the
         <a
           href="https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/Heading_Elements"
@@ -628,6 +626,7 @@
           >MDN Web Docs on HTML section heading elements</a
         >
       </p>
+        </div>
     </div>
 
     <p>
@@ -689,16 +688,13 @@
       <strong>HTML5</strong> ဖြစ်ကြောင်း ပြောပြတာပါ။
     </p>
 
-    <div
-      class="deep-dive-btn"
-      onclick="toggleDeepDive(this)"
-      style="margin-top: 20px"
-    >
-      <p><strong>DEEP DIVE</strong></p>
-      <i class="fas fa-chevron-down"></i>
+    <div class="lms-box-btn animate-up" onclick="toggleLMSAccordion(this)">
+        <strong>DEEP DIVE</strong>
+        <i class="fas fa-chevron-down"></i>
     </div>
-    <div class="accordion-body">
-      <p>
+    <div class="lms-accordion-body">
+        <div>
+            <p>
         To learn more, refer to the
         <a
           href="https://developer.mozilla.org/en-US/docs/Web/HTML/Guides/Quirks_mode_and_standards_mode"
@@ -706,6 +702,7 @@
           >MDN Web Docs on quirks mode and standards mode</a
         >
       </p>
+        </div>
     </div>
 
     <h3>HTML Structure: &lt;head&gt; နှင့် &lt;body&gt;</h3>
@@ -769,21 +766,19 @@
       </li>
     </ol>
 
-    <div
-      class="deep-dive-btn"
-      onclick="toggleDeepDive(this)"
-      style="margin-top: 20px"
-    >
-      <p><strong>DEEP DIVE</strong></p>
-      <i class="fas fa-chevron-down"></i>
+    <div class="lms-box-btn animate-up" onclick="toggleLMSAccordion(this)">
+        <strong>DEEP DIVE</strong>
+        <i class="fas fa-chevron-down"></i>
     </div>
-    <div class="accordion-body">
-      <p>
+    <div class="lms-accordion-body">
+        <div>
+            <p>
         To learn more, refer to this
         <a href="https://devhints.io/html-meta" target="_blank"
           >HTML meta tags cheat sheet</a
         >
       </p>
+        </div>
     </div>
 
     <p>
@@ -816,16 +811,13 @@
       </p>
     </div>
 
-    <div
-      class="deep-dive-btn"
-      onclick="toggleDeepDive(this)"
-      style="margin-top: 20px"
-    >
-      <p><strong>DEEP DIVE</strong></p>
-      <i class="fas fa-chevron-down"></i>
+    <div class="lms-box-btn animate-up" onclick="toggleLMSAccordion(this)">
+        <strong>DEEP DIVE</strong>
+        <i class="fas fa-chevron-down"></i>
     </div>
-    <div class="accordion-body">
-      <p>
+    <div class="lms-accordion-body">
+        <div>
+            <p>
         To learn more, refer to this
         <a
           href="https://www.w3.org/International/questions/qa-what-is-encoding"
@@ -833,6 +825,7 @@
           >W3C article on character encoding for beginners</a
         >
       </p>
+        </div>
     </div>
 
     <p>
@@ -928,12 +921,14 @@
       <li><strong>Git</strong> ကို သုံးပြီး <strong>codebase</strong> တစ်ခုတည်းကနေ ဗားရှင်းခွဲ (<strong>branches</strong>) တွေ ခွဲထုတ်ပြီး အလုပ်လုပ်လို့ ရပါတယ်။ အားလုံးပြီးလို့ ပြန်ပေါင်း (<strong>merge</strong>) တဲ့အခါ <strong>code</strong> တွေ ထပ်နေရင်လည်း <strong>Git</strong> က <strong>conflicts</strong> အနေနဲ့ သတိပေးမှာ ဖြစ်လို့ ပြန်ပြင်ဖို့ အခွင့်အရေး ရပါတယ်။</li>
     </ul>
 
-    <div class="deep-dive-btn" onclick="toggleDeepDive(this)" style="margin-top:20px;">
-        <p><strong>DEEP DIVE</strong></p>
+    <div class="lms-box-btn animate-up" onclick="toggleLMSAccordion(this)">
+        <strong>DEEP DIVE</strong>
         <i class="fas fa-chevron-down"></i>
     </div>
-    <div class="accordion-body">
-        <p>ပိုပြီး အသေးစိတ် သိချင်ရင် Git အဖွဲ့က ဖန်တီးထားတဲ့ <strong>Git Basics video</strong> ကို ကြည့်ရှုနိုင်ပါတယ်။</p>
+    <div class="lms-accordion-body">
+        <div>
+            <p>ပိုပြီး အသေးစိတ် သိချင်ရင် Git အဖွဲ့က ဖန်တီးထားတဲ့ <strong>Git Basics video</strong> ကို ကြည့်ရှုနိုင်ပါတယ်။</p>
+        </div>
     </div>
 
     <p>အမှန်အတိုင်း ပြောရရင် <strong>Git</strong> ကို စသင်ခါစမှာ ခက်တယ်လို့ ခံစားရနိုင်ပါတယ်။ အခုချက်ချင်း နားမလည်သေးရင်လည်း စိတ်မပူပါနဲ့ဦး။ နောက်အပတ်တွေမှာ <strong>Git</strong> ကို အများကြီး ထပ်လေ့ကျင့်ရမှာ ဖြစ်လို့ သင်တန်းပြီးတဲ့အခါ မင်းဟာ <strong>Git workflow</strong> ကို ကောင်းကောင်းကြီး ကျွမ်းကျင်သွားမှာပါ!</p>
@@ -1195,12 +1190,14 @@
     &lt;/body&gt;</pre>
     </div>
 
-    <div class="deep-dive-btn" onclick="toggleDeepDive(this)" style="margin-top:20px;">
-      <p><strong>DEEP DIVE</strong></p>
-      <i class="fas fa-chevron-down"></i>
+    <div class="lms-box-btn animate-up" onclick="toggleLMSAccordion(this)">
+        <strong>DEEP DIVE</strong>
+        <i class="fas fa-chevron-down"></i>
     </div>
-    <div class="accordion-body">
-        <p>ပိုပြီး အသေးစိတ်လေ့လာချင်ရင် <strong>HTML5</strong> နဲ့ ပတ်သက်တဲ့ <strong><a href="https://developer.mozilla.org/en-US/docs/Glossary/HTML5" target="_blank" rel="noopener noreferrer">MDN Web Docs on HTML5</a></strong> မှာ သွားရောက်ဖတ်ရှုနိုင်ပါတယ်။</p>
+    <div class="lms-accordion-body">
+        <div>
+            <p>ပိုပြီး အသေးစိတ်လေ့လာချင်ရင် <strong>HTML5</strong> နဲ့ ပတ်သက်တဲ့ <strong><a href="https://developer.mozilla.org/en-US/docs/Glossary/HTML5" target="_blank" rel="noopener noreferrer">MDN Web Docs on HTML5</a></strong> မှာ သွားရောက်ဖတ်ရှုနိုင်ပါတယ်။</p>
+        </div>
     </div>
 
     <p>ဒီ <strong>Code</strong> အပိုင်းအစက ဘာကို ဆိုလိုတာလဲဆိုတာ ဇဝေဇဝါ ဖြစ်စရာ လိုသေးလား? မလိုတော့ပါဘူး! ဒါဟာ Website ရဲ့ ထိပ်ပိုင်း (<strong>Header</strong>) ဖြစ်တယ်ဆိုတာ <code>&lt;header&gt;</code> <strong>element</strong> ကို ကြည့်တာနဲ့ တန်းသိနိုင်ပါတယ်။</p>
